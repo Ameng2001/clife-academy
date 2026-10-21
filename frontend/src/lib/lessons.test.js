@@ -10,7 +10,7 @@ describe('lessons: the course library', () => {
     expect(PATH_KEYS).toContain('obs')
     expect(levelOf('obs-0').type).toBe('practice'); expect(levelOf('obs-0').needsSubmission).toBe(true); expect(levelOf('obs-0').needsEvent).toBe(false)
     expect(levelOf('obs-1').type).toBe('seminar')
-    expect(levelCount('comm')).toBe(6); expect(levelCount('plan')).toBe(8); expect(levelCount('env')).toBe(6); expect(levelOf('plan-0').type).toBe('tool'); expect(levelOf('plan-0').needsEvent).toBe(false); expect(levelOf('plan-7').evidence.kinds).toContain('video'); expect(levelOf('env-4').evidence.min).toBe(2); expect(levelOf('comm-1').type).toBe('practice'); expect(levelOf('comm-3').type).toBe('seminar'); expect(levelOf('comm-3').rubric.length).toBe(4)
+    expect(levelCount('comm')).toBe(6); expect(levelCount('plan')).toBe(8); expect(levelCount('env')).toBe(6); expect(levelOf('plan-0').type).toBe('tool'); expect(levelOf('plan-0').needsEvent).toBe(false); expect(levelOf('plan-7').evidence.kinds).toContain('video'); expect(levelOf('env-4').evidence.min).toBe(2); expect(levelCount('play')).toBe(6); expect(levelCount('reflect')).toBe(6); expect(levelOf('play-5').type).toBe('practice'); expect(levelOf('reflect-2').type).toBe('practice'); expect(levelOf('comm-1').type).toBe('practice'); expect(levelOf('comm-3').type).toBe('seminar'); expect(levelOf('comm-3').rubric.length).toBe(4)
     expect(levelOf('nurse-0').type).toBe('tool')
     expect(levelCount('director')).toBe(6)
   })
