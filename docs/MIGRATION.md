@@ -245,3 +245,6 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
 - **2026-10-22（下午 3）** `scripts/build-coach-assets.mjs` 去掉动作库生成（源 `exercises-data.js` 已删），只生成 prompts.js；
   `library-data.js` 标为冻结快照，`build-coach-library.mjs` 别名删除。`--check` 通过。
   已知：`api/test/coach-limits.test.js` 有 2 项在此之前就失败（上游健身 coach 的排队与评审逻辑），与本次无关，coach 改业务时一并处理。
+- **2026-10-22（晚）** 写 `docs/ROADMAP.md`：11-20 之后的迭代方向，按「学、练、资源、评、看与运营」五层，
+  含资料库、园长大讲堂、能力地图与认证、情景练兵与答疑、三级看板、运营后台，以及数据集合、路由、依赖平台接口总表和 B–E 期排期。
+  文档仓库同步《迭代方向-教师发展平台.md》。`POST /api/events` 的调研已做完（34 个事件名由课程包生成），实现放到下一步。
