@@ -1,13 +1,13 @@
 {
-  "name": "opengym-mcp",
+  "name": "clife-academy-mcp",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "MCP (Model Context Protocol) bridge for openGym — lets an external LLM read your routines, workouts, body-weight log, estimated 1RMs and muscle balance from your self-hosted data. Read-only, stdio transport; no extra container.",
+  "description": "学前大课堂的 MCP 只读桥：园长、教育局用自己的 LLM 客户端查进度。stdio；拿只读接口令牌调学前大课堂的 GET 接口。",
   "license": "AGPL-3.0-or-later",
   "main": "src/index.js",
   "bin": {
-    "opengym-mcp": "src/index.js"
+    "clife-academy-mcp": "src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",

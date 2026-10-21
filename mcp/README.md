@@ -1,145 +1,67 @@
-# openGym MCP server
+# 学前大课堂 MCP 只读桥
 
-A [Model Context Protocol](https://modelcontextprotocol.io) bridge that lets an external LLM
-application (Claude Desktop, Cursor, Cline, Continue, etc.) read your openGym profile —
-routines, workouts, body-weight log, estimated 1RMs, and muscle balance — directly from your
-self-hosted `./data` directory.
+园长、教育局（区县管理员）用自己的 LLM 客户端（Claude Desktop、Cursor、Cline 等）问本园、本区的学习进度：「保健医路径这周过了几关」「待点评超期的有几件」「本区覆盖率中位数多少」。桥是一个本地 stdio 进程，客户端起它，它拿一枚**只读接口令牌**去调学前大课堂的 GET 接口。
 
-It is read-only, runs locally as a stdio process spawned by the LLM client, adds no new
-container, and requires no extra authentication. The LLM never sees passkeys, VAPID keys, or
-session secrets — it can only read the same `state-<uid>.json` files the openGym api already
-writes.
+- **只读**：令牌在服务端就只允许 GET，带它来的任何写请求一律 403。
+- **不放大权限**：能看什么由各接口按账号判，教师看自己、园长看本园、区县管理员看本区。
+- **不列个人、不排名**：园所与区县汇总只留岗位、人数、中位数这些行，桥把服务端给的名单再滤一道。
+- 课程目录直接读仓库里的 `frontend/src/lib/lessons.js`，与网页同一份。
 
-The numbers it answers with are computed by the **same pure functions the React UI uses**
-(`frontend/src/lib/*.js`) — `estimate1RM`, `loadOfWorkouts`, `effectiveRoutine`, etc. — so a
-"what's my bench 1RM?" answer matches the Stats screen exactly.
+## 接法
 
-> Phase 1 of a multi-phase plan. Read-only today; long-lived token auth + write tools are
-> planned but not shipped yet. See **Roadmap** below.
-
-## Quick start
-
-### 1. Install
+1. 在学前大课堂网页「设置 → 只读接口令牌」新建一枚，标签写客户端名。令牌只显示这一次，`cla_` 开头，复制走；最多 5 枚在用，点一枚可撤。
+2. 装依赖：
 
 ```bash
-cd mcp
-npm install
+cd mcp && npm install
 ```
 
-### 2. Point it at your data
-
-The MCP server reads the same `./data` directory `docker compose up` creates. Pick the profile
-to answer for — its user id is in `./data/db.json` under `users[].id`:
-
-```bash
-# single-user instance (the common self-hosted case) — auto-detected:
-node src/index.js
-
-# multi-user instance, or just to be explicit:
-OPENGYM_UID=<your-uid> OPENGYM_DATA=/path/to/openGym/data node src/index.js
-```
-
-### 3. Register with your LLM client
-
-Add the server to your LLM client's MCP config. For Claude Desktop, edit
-`claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`):
+3. 填进客户端的 MCP 配置。Claude Desktop 的是 `claude_desktop_config.json`（macOS：`~/Library/Application Support/Claude/claude_desktop_config.json`）：
 
 ```jsonc
 {
   "mcpServers": {
-    "opengym": {
+    "clife-academy": {
       "command": "node",
-      "args": ["/absolute/path/to/openGym/mcp/src/index.js"],
+      "args": ["/绝对路径/clife-academy/mcp/src/index.js"],
       "env": {
-        "OPENGYM_DATA": "/absolute/path/to/openGym/data",
-        "OPENGYM_UID": "<your-uid>"   // optional — auto-detected if you have one profile
+        "ACADEMY_URL": "https://academy.example.com",   // 学前大课堂地址；本地开发 http://127.0.0.1:3000
+        "ACADEMY_TOKEN": "cla_…"
       }
     }
   }
 }
 ```
 
-For Cursor and other MCP-compatible clients, see the client's MCP docs — the same `command` +
-`args` + `env` shape is what every stdio MCP server expects.
+重启客户端。桥起来会在 stderr 打一行「地址 · 账号 · 园所/区县」；令牌不对会直接说。
 
-Restart the client; you should see the openGym tools appear with "serving profile \<name\>" on
-the server's stderr.
+## 工具
 
-## Tools
+| 工具 | 答什么 | 谁能用 |
+|---|---|---|
+| `whoami` | 这枚令牌是谁：岗位、园所或区县 | 所有人 |
+| `list_paths` / `get_path` | 课程目录：15 条路径 100 关，每关标题、类型、场景、时长、目标 | 所有人（本地读） |
+| `my_progress` | 自己每条路径过了几关、最近过的关、学分 | 本人 |
+| `my_honors` | 自己的徽章、称号、证书与学时 | 本人 |
+| `org_summary` | 本园各岗位几人、平均过关、完成率、近 7 天过关 | 园长、管理员 |
+| `org_weekly` | 上周运营周报：过关、作品、点评、超期、每周一题、答疑、入库 | 园长（本园）、管理员（全平台＋各园一行） |
+| `org_review_stats` | 待点评、超期、最老一件、点评用时中位数 | 园长、管理员 |
+| `org_checkup` | 本园应用体检卡与推课建议 | 园长、管理员 |
+| `org_honors` | 园所集体荣誉 | 园长、管理员 |
+| `district_summary` | 区县看板：园所数、覆盖率中位数、认证人数（≥ 3 园才给中位数） | 区县管理员、管理员 |
+| `district_orgs` | 本区园所名单 | 区县管理员、管理员 |
+| `search_cases` | 案例库检索：关键词、领域、只看共同体 | 所有人 |
+| `list_resources` | 资源库：关键词、类别、领域 | 所有人 |
+| `upcoming` | 将开的讲堂、开着的每周一题、在用的公告 | 所有人 |
 
-Nine read-only tools in v1:
+没有写工具：预约、作答、交作品都回网页或小程序做。
 
-| Tool | What it answers |
-|---|---|
-| `list_routines` | What routines are saved in my profile? (names + exercise counts) |
-| `get_routine` | What does the Push Day routine prescribe? (sets/reps/weight and rest per exercise) |
-| `preview_session` | What will the app actually put on screen when I start this routine — after the progression policy and my history have overridden the plan? |
-| `get_week_plan` | What's planned when: the next seven days with their routines and how each was decided (coach week, a pinned session, an override, the weekday plan), the current coach week when one is running, and the weekday table. |
-| `list_workouts` | Recent sessions — newest first, with dates, sets done/planned, volume, duration, PRs. |
-| `get_workout` | Full set-by-set breakdown of one session, by `workout_id` or by date. On a day with two sessions the date alone returns both ids to pick from rather than guessing at one. |
-| `get_bodyweight` | Weigh-ins with the latest weight, the goal line, and deltas vs goal. |
-| `estimate_1rm` | All-time best 1RM for an exercise + the trend, or a PR table across all exercises. |
-| `muscle_balance` | Which muscles I've trained this week/month/all-time, ranked + which I've neglected. |
-
-`get_routine` and `preview_session` answer two different questions, and confusing them is the
-easiest way for a coach to give wrong advice. `get_routine` reports what the routine *stores*.
-`preview_session` reports what the athlete will actually *see*: a routine holding "squat 3×8 @
-60 kg" opens at 75 kg if the policy progressed or deloaded from that routine's last logged
-session. The routine's own weight is the last fallback the session builder consults, not the
-first; its reps hold unless a policy that moves reps moved them, or the profile starts planned
-sessions from the last session (`starts_from`). Ask `preview_session` before naming a weight.
-
-Each tool returns JSON the LLM can format as it likes; structured fields (sets, dates, levels)
-are pre-formatted into human-readable labels in `src/labels.js` so the LLM doesn't need to
-re-interpret them.
-
-## How it reuses the training logic
-
-The MCP server imports the training helpers under `frontend/src/lib/` directly as Node ESM
-and calls the same functions the React UI does (`history.js`, `onerm.js`, `muscles.js`,
-`exercises.js`). The numbers it returns match what the Stats screen shows, because they are
-the same code.
-
-The one lib file that wasn't Node-safe was `i18n.js` (Vite's `import.meta.glob` at module
-top level) — split into `i18n-core.js` (pure, Node-safe) + `i18n.js` (Vite/React bits,
-re-exports from core). `exercises.js` got a one-line `import.meta.env || {}` guard. No new
-dependencies landed in `frontend/`, no public exports changed.
-
-## Design constraints honoured
-
-- **One runtime dependency beyond the MCP SDK:** none. No database driver, no HTTP framework.
-- **No new container.** stdio transport is spawned by the LLM client; nothing to add to
-  `docker-compose.yml`.
-- **No new auth.** The filesystem is the boundary — same as `docker compose` running on the
-  user's box. No passkey material, VAPID keys, or session secrets ever cross it.
-- **No telemetry, no network.** Reads `./data/*.json` and exits when the LLM client
-  disconnects.
-
-## Tests
+## 开发
 
 ```bash
-cd mcp && npm test
+npm test                         # vitest：假 fetch 下每个工具发到哪条 GET、滤没滤个人名单
+npm run check:node-loadable      # 课程包在裸 node 下能不能 import（桥不走 Vite）
+ACADEMY_URL=http://127.0.0.1:3000 ACADEMY_TOKEN=cla_… node src/index.js   # 手起，stdin 喂 JSON-RPC
 ```
 
-58 cases seeding state from `frontend/src/lib/demoSeed.js` (the same deterministic fixture
-the public demo runs on). Pins JSON shape and the user-facing edge cases: rest-day override,
-missing routine, zero-workout history, no synced state, superset links, three 1RM formulas.
-"Today" is pinned via `vi.useFakeTimers({ now: ..., toFake: ['Date'] })` so date-dependent
-tools see consistent values regardless of when the suite runs. The pure lib functions have
-their own 92 tests in `frontend/src/lib/*.test.js`.
-
-## Roadmap
-
-- **Done (Phase 1):** read-only stdio, 8 tools, direct `./data` access.
-- **Done (Phase 1.5):** `preview_session` — the policy's next prescription, the opening set
-  rows it produces, and which of plan / confirmed weight / history each number came from.
-- **Phase 2:** read+write over stdio. Requires a long-lived token auth path minted from the
-  admin dashboard (new `./data/tokens.json`) and a write-lock against the web UI's read-modify-
-  write of `state-<uid>.json`. Tools: `log_workout`, `add_bodyweight`, `edit_routine`,
-  `assign_weekday`, `override_day`.
-- **Phase 3:** Streamable HTTP transport, opt-in 4th container in `docker-compose.yml`. Same
-  tool implementations, second transport — the MCP SDK supports both behind one tool registration.
-
-## License
-
-AGPL-3.0-or-later, same as openGym.
+令牌的服务端实现在 `api/academy/tokens.js`（`db.apiTokens` 只存 sha256，撤了即失效，账号停用一起失效）。

@@ -4263,6 +4263,28 @@ paths:
       description: '`{ id?, title(≥2), text(≥4), until?, remove? }`。不推送、不统计谁看过。'
       responses:
         '200': { description: '`{ notice }` 或 `{ ok }`' }
+  /api/me/tokens:
+    get:
+      tags: [academy]
+      operationId: academyMyTokens
+      summary: 我的只读接口令牌（MCP 桥用）：只有标签与时间，不含令牌本身
+      responses:
+        '200': { description: '`{ tokens:[{ id, label, at, lastUsedAt }], max }`' }
+    post:
+      tags: [academy]
+      operationId: academyNewToken
+      summary: 新建一枚只读令牌，令牌只在这次应答里给一次
+      description: '`{ label? }`。最多 5 枚在用。带这枚令牌的非 GET 请求一律 403；能看什么仍按账号判。'
+      responses:
+        '200': { description: '`{ token, item }`' }
+  /api/me/tokens/revoke:
+    post:
+      tags: [academy]
+      operationId: academyRevokeToken
+      summary: 撤一枚令牌
+      description: '`{ id }`'
+      responses:
+        '200': { description: '`{ ok }`' }
 components:
   securitySchemes:
     cookieAuth:

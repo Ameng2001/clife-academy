@@ -12,7 +12,7 @@
 ```
 api/        Node 原生 http 服务，无框架。session、GET/PUT /api/data 全量同步、字段级合并、Coach 流水线、提醒
 frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见平台仓库）。src/academy 视图与壳，store 同步引擎，lib 纯函数
-mcp/        只读 MCP 桥，园长、教育局用 LLM 客户端查进度（后置）
+mcp/        只读 MCP 桥：园长、教育局用自己的 LLM 客户端查进度，拿「设置」里建的只读令牌调 GET 接口（见 mcp/README.md）
 web/        nginx：托前端、反代 /api
 docs/       MIGRATION.md 迁移方案；upstream/ 上游原文档
 scripts/    import-lessons.py 从大课堂原型导入课程数据

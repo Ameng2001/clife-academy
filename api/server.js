@@ -45,6 +45,7 @@ import { shareDayRoutes } from './academy/sharedays.js';
 import { weeklyRoutes } from './academy/weekly.js';
 import { coachRoutes as academyCoachRoutes } from './academy/coach.js';
 import { adminRoutes as academyAdminRoutes } from './academy/admin.js';
+import { tokenRoutes as academyTokenRoutes, tokenUserOf, looksLikeToken } from './academy/tokens.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -625,6 +626,8 @@ function sessionOf(req) {
   const cookie = cookieToken(req);
   const tok = cookie || (auth.startsWith('Bearer ') ? auth.slice(7).trim() : null);
   if (!tok) return null;
+  // 只读接口令牌（academy/tokens.js）：MCP 桥带来的。不过期、不续签；非 GET 在分发处已被挡掉。
+  if (!cookie && looksLikeToken(tok)) { const u = tokenUserOf(db, tok); return u ? { user: u, exp: Infinity, bearer: true, readonly: true } : null; }
   const payload = verifySig(tok);
   if (!payload) return null;
   const [uid, exp, ver] = payload.split(':');
@@ -2655,6 +2658,7 @@ const routes = {
   ...WEEKLY.routes,
   ...academyCoachRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS }),
   ...academyAdminRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, auditRows: () => auditKeep(auditLines()) }),
+  ...academyTokenRoutes({ json, readBody, db, saveDb, readSession, audit }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 
@@ -2743,6 +2747,8 @@ const server = http.createServer(async (req, res) => {
   if (mm) { key = req.method + ' /api/media/{hash}'; req.mediaHash = mm[1]; }
   const handler = routes[key];
   if (!handler) return json(res, 404, { error: 'not found' });
+  // 只读接口令牌只能读：带着它的写请求在这里就回头，不进任何路由。
+  if (req.method !== 'GET' && req.method !== 'HEAD' && looksLikeToken((req.headers.authorization || '').replace(/^Bearer\s+/i, ''))) return json(res, 403, { error: 'read-only token', code: 'readonly' });
   if (!csrfOk(req, key)) {
     // Logged, not audited: this is reachable without a session, and an audit entry per attempt
     // would let anyone fill the log. An operator who has genuinely mis-set ORIGIN needs to see

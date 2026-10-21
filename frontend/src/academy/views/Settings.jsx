@@ -1,4 +1,5 @@
 // 设置：外观、账号、同步、关于。上游 1,500 行的 Settings.jsx（健身偏好、器材、导入导出、passkey）已删。
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
@@ -8,8 +9,29 @@ import { pathNameOf, pathOfRole } from '../../lib/lessons.js'
 import { confirmSheet } from '../sheets.jsx'
 import { connectionView, syncNowWithToast, showsConnection, useOnline } from '../components/SyncBanner.jsx'
 import { useS, update } from './common.jsx'
+import { api } from '../../lib/api.js'
 
 const THEMES = [{ value: 'auto', label: '跟随系统' }, { value: 'light', label: '浅色' }, { value: 'dark', label: '深色' }]
+
+// 只读接口令牌：给 mcp/ 里的桥用，园长、教育局拿自己的 LLM 客户端问进度。令牌只在新建那一次显示；只能读，能看什么仍按账号。
+function Tokens() {
+  const toast = useUI.getState().toast
+  const [d, setD] = useState(null), [fresh, setFresh] = useState(null), [busy, setBusy] = useState(false)
+  const load = () => api('/api/me/tokens').then(setD).catch(() => setD(null))
+  useEffect(() => { load() }, [])
+  const make = async () => {
+    const label = prompt('这枚令牌给哪个客户端用？（标签，便于日后撤）', 'Claude Desktop'); if (label === null) return
+    setBusy(true)
+    try { const r = await api('/api/me/tokens', { method: 'POST', body: JSON.stringify({ label }) }); setFresh(r.token); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+  }
+  const revoke = async t => { if (!confirm(`撤「${t.label}」？用它的客户端立刻失效。`)) return; try { await api('/api/me/tokens/revoke', { method: 'POST', body: JSON.stringify({ id: t.id }) }); load() } catch (e) { toast('没成') } }
+  const copy = async () => { try { await navigator.clipboard.writeText(fresh); toast('已复制') } catch { toast('复制失败，手动选中复制') } }
+  return <>
+    {fresh && <div className="card" style={{ background: 'color-mix(in srgb,var(--acc) 10%,transparent)' }}><div className="small muted">新令牌，只显示这一次，现在复制走</div><div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, wordBreak: 'break-all', margin: '6px 0' }}>{fresh}</div><div className="row" style={{ gap: 8 }}><Button size="sm" variant="primary" onClick={copy}>复制</Button><Button size="sm" onClick={() => setFresh(null)}>收起</Button></div></div>}
+    {(d?.tokens || []).map(t => <Row key={t.id} icon="key" title={t.label} subtitle={`建于 ${new Date(t.at).toLocaleDateString('zh-CN')}${t.lastUsedAt ? ' · 最近用 ' + new Date(t.lastUsedAt).toLocaleString('zh-CN', { hour12: false }) : ' · 还没用过'}`} accessory="chevron" onClick={() => revoke(t)} />)}
+    <Row icon="plus" title="新建一枚" subtitle={d ? `${d.tokens.length}/${d.max} 枚在用 · 填进 LLM 客户端的 ACADEMY_TOKEN` : ''} onClick={() => !busy && make()} accessory="chevron" />
+  </>
+}
 
 export default function Settings() {
   const nav = useNavigate(), S = useS()
@@ -56,6 +78,10 @@ export default function Settings() {
       {user && <Row icon="reset" title="立即同步" onClick={() => syncNowWithToast()} accessory="chevron" />}
       <Row icon="cloud" title="顶部显示连接状态"><Switch checked={showsConnection(S)} onChange={v => update(s => { s.connStatus = v })} aria-label="顶部显示连接状态" /></Row>
     </Section>
+
+    {user && <Section title="只读接口令牌" footer="给 mcp/ 里的桥用：在自己的 LLM 客户端（Claude Desktop、Cursor）里问本园、本区的进度。令牌只能读，能看什么仍按账号；点一枚可撤。接法见仓库 mcp/README.md。">
+      <Tokens />
+    </Section>}
 
     <Section title="关于" footer="基于 openGym（AGPL-3.0）改造，见仓库 NOTICE.md。">
       <Row icon="info" title="C-Life 学前大课堂" subtitle={'版本 ' + (typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev')} />

@@ -1,50 +1,32 @@
 #!/usr/bin/env node
-/* openGym MCP server — stdio transport. The LLM client (Claude Desktop, Cursor, …) spawns
-   this process locally, talks JSON-RPC over stdin/stdout, tears it down when the session ends.
-   No extra container, no new outbound network — your data stays in a folder you control. */
+/* 学前大课堂 MCP 只读桥 — stdio。LLM 客户端（Claude Desktop、Cursor 等）本地起这个进程，它拿只读接口令牌去调学前大课堂的 GET 接口。
+   只读：令牌在服务端就只允许 GET；能看什么按账号判。 */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { TOOLS } from './tools.js'
-import { init, getUser } from './state.js'
+import { checkConfig, get } from './http.js'
 
-const server = new McpServer({
-  name: 'opengym',
-  version: '0.1.0'
-})
+const server = new McpServer({ name: 'clife-academy', version: '0.1.0' })
 
-// Fail fast on bad config so a misnamed OPENGYM_DATA doesn't silently answer every call with
-// the no-state sentinel. Always register every tool so the LLM sees the full list at
-// handshake, even when state didn't resolve.
+// 配置不对先在 stderr 说清楚，但工具照样全部注册，客户端能看到清单，改好环境变量重启就行。
 try {
-  init()
-  const u = getUser()
-  console.error(`[opengym-mcp] serving profile ${u.name} (${u.id})`)
+  const { url } = checkConfig()
+  get('/api/me').then(r => console.error(`[clife-academy-mcp] ${url} · ${r.user.name}${r.user.academy?.org?.name ? ' · ' + r.user.academy.org.name : ''}${r.user.academy?.district?.name ? ' · ' + r.user.academy.district.name : ''}`))
+    .catch(e => console.error(`[clife-academy-mcp] ${e.message}`))
 } catch (e) {
-  console.error(`[opengym-mcp] ${e.message}`)
-  // Don't exit — keep the tool listings up so the user sees a useful error after fixing their
-  // env and restarting.
+  console.error(`[clife-academy-mcp] ${e.message}`)
 }
 
 for (const t of TOOLS) {
-  server.tool(
-    t.name,
-    t.description,
-    t.schema,
-    async (params) => {
-      try {
-        const result = t.handler(params || {})
-        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
-      } catch (err) {
-        const code = err.code || 'ERROR'
-        return {
-          isError: true,
-          content: [{ type: 'text', text: `${code}: ${err.message}` }]
-        }
-      }
+  server.tool(t.name, t.description, t.schema, async params => {
+    try {
+      const result = await t.handler(params || {})
+      return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] }
+    } catch (err) {
+      return { isError: true, content: [{ type: 'text', text: `${err.code || 'ERROR'}: ${err.message}` }] }
     }
-  )
+  })
 }
 
 const transport = new StdioServerTransport()
 await server.connect(transport)
-// Process stays alive serving JSON-RPC over stdio until the LLM client disconnects.

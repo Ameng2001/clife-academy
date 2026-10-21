@@ -29,7 +29,7 @@ openGym 表面是健身追踪器，骨子里是一个完整的 coach 闭环：
 | 漏练提醒 nudge（三种语气、三天后静默） | 漏学提醒，同样三天后静默 | 无，新增 |
 | AI Coach：create / review / debrief | 教师 Coach：开学排路径 / 周回顾调路径 / 单关复盘 | 无，新增 |
 | cohort：实例内匿名中位数对比 | 园所间匿名中位数（≥3 园才显示，不排名） | 无，新增 |
-| MCP 只读桥 | 园长、教育局用自己的 LLM 客户端问进度 | 无，后置 |
+| MCP 只读桥 | 园长、教育局用自己的 LLM 客户端问进度 | 改成 HTTP 客户端＋只读令牌（10-22 已做） |
 | Admin 面板 | 园长视角、区级视角 | vDirectorHome |
 
 它做了而我们不要的：动作库 5,600 条媒体、杠铃片换算、哑铃组合、心率、Apple Health 导入、进步照片、体测围度、Capacitor 原生壳。
@@ -349,3 +349,4 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   测试 `academy-batch.test.js`、`academy-coach.test.js`；小程序 `utils/growth.js`、`pages/growth/`，首页园长段多一行上周周报。
   没做的：一日生活与保育的「过渡环节」「进餐与午睡的组织」4 关（ROADMAP 说并入保健医、保育员路径，等内容组）；入职与骨干两个阶段的扩展路径。
 - **2026-10-22（夜 32）** 运营后台汇总页（ROADMAP 第九节「运营后台」，第十二节第 5 条定为「嵌管理端」，不另做独立后台）：`api/academy/admin.js`，`GET /api/admin/overview` 把管理员要管的事按六组给数字——用户与园所（在用用户、停用、园长、点评人、审核人、区县管理员、园所、共同体、配对中、未用邀请码）、研修期次（报名中期次与待定名单、认证期次、练习营、将开讲堂、展示、分享日）、资源与案例（资源、待审与入库案例、被用次数、工作室）、发题与点评（全平台开着的题、应战中与评审中的斗课、待点评与超期、开着与升级的问题、模型接没接）、公告、审计（24 小时条数与失败数、留存）。前端 `/admin`（首页管理员一块「运营后台」替掉原来两块），每组只给数字与入口，事在各自页面做；用户停用与恢复、邀请码新建与撤销、审计流水只看（复用上游 `/api/admin/*`）在这页直接做，因为它们没有别的页。删用户、清审计不放界面。新加的只有「公告」：`db.notices`，`GET /api/notices` 登录的都看在用的（没到期，最多 5 条），`POST /api/admin/notices` 发改撤；首页顶上一条，不推送、不统计谁看过。测试 `academy-admin.test.js`。小程序没动（公告与后台不进小程序）。
+- **2026-10-22（夜 33）** MCP 只读桥（ROADMAP 第十一节 E 期）：上游 `mcp/` 是本机直读 `./data` 的单用户版，不合园长、教育局远程用的场景，改成 HTTP 客户端——`mcp/src/http.js` 只发 GET，带只读接口令牌；`tools.js` 15 个工具（whoami、课程目录两个本地读、我的进度与荣誉、园所五个、区县两个、案例与资源检索、近期安排），园所与区县汇总把服务端给的个人名单再滤一道，只留岗位、人数、中位数；没有写工具。令牌在服务端：`api/academy/tokens.js`，`db.apiTokens` 只存 sha256，`cla_<id>.<secret>` 格式，`GET/POST /api/me/tokens`、`POST /api/me/tokens/revoke`，最多 5 枚在用；`server.js` 的 `sessionOf` 认它为 bearer 且不续签，分发处对带它的非 GET 一律 403（`code: readonly`），不进任何路由；账号停用、撤销即失效。网页「设置 → 只读接口令牌」新建（只显示一次）与撤。测试 `api/test/academy-tokens.test.js`、`mcp/test/tools.test.js`（假 fetch）、`mcp/scripts/check-node-loadable.mjs`；本地已用真令牌跑通 stdio 的 initialize / tools/list / tools/call。小程序没动。
