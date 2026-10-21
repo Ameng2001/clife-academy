@@ -18,13 +18,14 @@ const AGES = ['小班', '中班', '大班', '混龄']
 const EMPTY = { id: null, title: '', domain: 'obs', age: '', use: 'adapt', text: '', files: [] }
 const dname = k => DOMAINS.find(d => d.key === k)?.name || k
 
-function CaseCard({ c, uses, onOpen, open, actions }) {
+function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
+  const [useNote, setUseNote] = useState('')
   const [t, col] = STATUS[c.status] || [c.status, 'var(--label-2)']
   return <div className="card" style={{ marginTop: 10 }}>
     <div className="ac-row tap" onClick={onOpen} style={{ alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, lineHeight: 1.4 }}>{c.title}</div>
-        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}</div>
+        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.byTitles?.length ? '（' + c.byTitles.join('、') + '）' : ''}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}</div>
       </div>
       {c.status !== 'approved' || c.mine ? <span className="small" style={{ color: col, flex: 'none' }}>{t}</span> : <Icon name={open ? 'chevronUp' : 'chevronDown'} />}
     </div>
@@ -32,6 +33,10 @@ function CaseCard({ c, uses, onOpen, open, actions }) {
     {open && c.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{c.files.map(f => <a key={f.hash} href={`api/cases/file?id=${c.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/cases/file?id=${c.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {c.note && (c.status === 'rejected' || c.mine) && <div className="small" style={{ marginTop: 8, color: 'var(--label-2)' }}>审核意见：{c.note}</div>}
     {open && c.curated && <div className="small muted" style={{ marginTop: 6 }}>{c.curated.byName} 于 {fmtDay(c.curated.at)} 入库{c.consent ? ` · ${c.consent.byName} 同意` : ''}</div>}
+    {open && c.status === 'approved' && !c.mine && onUsed && <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      {c.usedByMe ? <span className="small" style={{ color: 'var(--green)' }}><Icon name="checkCircle" /> 你标过「用过，有效」</span> : <><TextField placeholder="怎么改的，一句话（可不填）" value={useNote} onChange={e => setUseNote(e.target.value)} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" icon="check" onClick={() => onUsed(c, useNote)}>用过，有效</Button></>}
+    </div>}
+    {open && c.used !== undefined && <div className="small muted" style={{ marginTop: 8 }}>被用过 {c.used} 次（只给你和园长看）{c.uses?.length > 0 && <>：{c.uses.slice(0, 5).map((u, i) => <span key={i}>{i ? '；' : ''}{u.name}{u.note ? '「' + u.note + '」' : ''}</span>)}</>}</div>}
     {actions && <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap' }}>{actions}</div>}
   </div>
 }
@@ -59,7 +64,7 @@ export default function Cases() {
   // 从点评页「推荐入案例库」带来的作品：预填表单
   useEffect(() => {
     const raw = sp.get('from'); if (!raw) return
-    try { const f = JSON.parse(raw); setForm({ ...EMPTY, submissionId: f.submissionId, title: f.title || '', domain: f.domain || 'obs', use: 'adapt', text: f.text || '' }) } catch { /* 无妨 */ }
+    try { const f = JSON.parse(raw); setForm({ ...EMPTY, submissionId: f.submissionId, answerId: f.answerId, title: f.title || '', domain: f.domain || 'obs', use: 'adapt', text: f.text || '' }) } catch { /* 无妨 */ }
     setParam('from', null)
   }, [])
   const uses = data?.uses || { direct: '可直接用', adapt: '需改编', idea: '只看思路' }
@@ -81,6 +86,9 @@ export default function Cases() {
     try { await api('/api/cases/decide', { method: 'POST', body: JSON.stringify({ id: c.id, action, note }) }); useUI.getState().toast(action === 'consent' ? '已同意，转审核' : action === 'approve' ? '已入库' : '已退回'); await load() }
     catch (e) { useUI.getState().toast('没办成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
+  }
+  const used = async (c, note) => {
+    try { await api('/api/cases/used', { method: 'POST', body: JSON.stringify({ id: c.id, note }) }); useUI.getState().toast('已记，分享者看得到'); await load() } catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
   }
   const del = async c => {
     if (!confirm(`删掉「${c.title}」？`)) return
@@ -133,7 +141,7 @@ export default function Cases() {
         {AGES.map(a => <button key={a} className={'chip' + (a === age ? ' on' : '')} onClick={() => setParam('age', a === age ? null : a)}>{a}</button>)}
       </div>
       {data && !data.cases.length && <div className="card small muted">还没有入库的案例。{data.total ? '换个筛选试试。' : '做过的好事值得写下来：点右上角「分享一个」。'}</div>}
-      {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} />)}
+      {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} />)}
     </>}
 
     {user && tab === 'mine' && <>

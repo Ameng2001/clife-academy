@@ -16,7 +16,9 @@ const toLocal = at => { const d = new Date(at); return `${d.getFullYear()}-${pad
 const EMPTY = { id: null, title: '', context: '', role: '', domain: 'comm', open: toLocal(Date.now()), close: toLocal(Date.now() + 7 * 86400000) }
 const dname = k => DOMAINS.find(d => d.key === k)?.name || k
 
+const toCase = (nav, d, a) => nav('/cases?from=' + encodeURIComponent(JSON.stringify({ answerId: a.id, title: d.title.slice(0, 40), domain: d.domain || 'comm', text: `题：${d.title}\n\n答：${a.text}` })))
 function Answers({ d, user }) {
+  const nav = useNavigate()
   const [data, setData] = useState(null), [notes, setNotes] = useState({}), [busy, setBusy] = useState(false)
   const load = () => api('/api/drills/answers?id=' + d.id).then(setData).catch(() => setData(null))
   useEffect(() => { load() }, [d.id, d.mine?.updatedAt])
@@ -35,19 +37,21 @@ function Answers({ d, user }) {
     <div className="small muted">同园老师的回答 · {others.length}{d.featured ? ` · 精选 ${d.featured}` : ''}</div>
     {!others.length && <div className="small muted" style={{ marginTop: 6 }}>还没有别人答。</div>}
     {others.map(a => <div key={a.id} className="card" style={{ marginTop: 8, padding: 12, ...(a.review?.featured ? { borderInlineStart: '3px solid var(--acc)' } : {}) }}>
-      <div className="ac-row"><span className="small muted">{a.name}{a.orgName && a.orgName !== user.academy?.org?.name ? ' · ' + a.orgName : ''} · {fmtDay(a.at)}</span>{a.review?.featured && <span className="tag" style={{ color: 'var(--acc)' }}>精选</span>}</div>
+      <div className="ac-row"><span className="small muted">{a.name}{a.titles?.length ? '（' + a.titles.join('、') + '）' : ''}{a.orgName && a.orgName !== user.academy?.org?.name ? ' · ' + a.orgName : ''} · {fmtDay(a.at)}</span>{a.review?.featured && <span className="tag" style={{ color: 'var(--acc)' }}>精选</span>}</div>
       <div style={{ marginTop: 4, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{a.text}</div>
       {a.review && <div className="small" style={{ marginTop: 6, color: 'var(--label-2)' }}>{a.review.byName}：{a.review.comment}</div>}
       {a.canReview && <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <TextField placeholder={a.review ? '改一句意见' : '一句意见'} value={notes[a.id] ?? ''} onChange={e => setNotes({ ...notes, [a.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} />
         <Button size="sm" disabled={busy} onClick={() => review(a, false)}>点评</Button>
         <Button size="sm" variant="tinted" icon="starFill" disabled={busy} onClick={() => review(a, true)}>精选</Button>
+        {a.review?.featured && (user.academy?.role === 'director' || user.admin) && <Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, a)}>推荐入案例库</Button>}
       </div>}
     </div>)}
   </div>
 }
 
 function Drill({ d, user, first, onChange, onEdit, onDelete }) {
+  const nav = useNavigate()
   const [text, setText] = useState(''), [editing, setEditing] = useState(false), [busy, setBusy] = useState(false), [open, setOpen] = useState(!!first)
   const canAnswer = d.phase !== 'upcoming' && (!d.mine || editing)
   const send = async () => {
@@ -71,7 +75,7 @@ function Drill({ d, user, first, onChange, onEdit, onDelete }) {
         <div className="ac-row"><span className="small muted">我的回答 · {fmtDay(d.mine.updatedAt)}</span>{d.mine.review?.featured && <span className="tag" style={{ color: 'var(--acc)' }}>精选</span>}</div>
         <div style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{d.mine.text}</div>
         {d.mine.review && <div className="small" style={{ marginTop: 8, paddingTop: 8, borderTop: 'var(--hair) solid var(--sep)', color: 'var(--label-2)' }}>{d.mine.review.byName} 的点评：{d.mine.review.comment}</div>}
-        <div style={{ marginTop: 8 }}><Button size="sm" onClick={() => { setText(d.mine.text); setEditing(true) }}>再写一版</Button></div>
+        <div className="row" style={{ gap: 8, marginTop: 8 }}><Button size="sm" onClick={() => { setText(d.mine.text); setEditing(true) }}>再写一版</Button><Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, d.mine)}>分享到案例库</Button></div>
       </div>}
       {canAnswer && <div style={{ marginTop: 12 }}>
         <TextArea rows={5} placeholder="先写你会怎么做或怎么说，再写为什么。50–150 字" value={text} onChange={e => setText(e.target.value)} />

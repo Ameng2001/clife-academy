@@ -13,10 +13,11 @@ const WD = ['日', '一', '二', '三', '四', '五', '六']
 export const fmtWhen = (at, minutes) => { const d = new Date(at), e = new Date(at + (minutes || 60) * 60000); return `${d.getMonth() + 1} 月 ${d.getDate()} 日 周${WD[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}—${pad(e.getHours())}:${pad(e.getMinutes())}` }
 const toLocal = at => { const d = new Date(at); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}` }
 const A = { display: 'inline-flex', width: 'auto' }
-const EMPTY = { id: null, title: '', desc: '', who: '园长', speaker: '', when: '', minutes: 60, liveUrl: '', replayUrl: '', slidesUrl: '', slidesFile: null, notes: '' }
+const EMPTY = { id: null, title: '', desc: '', who: '园长', speaker: '', when: '', minutes: 60, liveUrl: '', replayUrl: '', slidesUrl: '', slidesFile: null, notes: '', caseIds: [], titleIds: [] }
 
 function Card({ l, first, user, onBook, onEdit, onDelete }) {
   const toast = useUI.getState().toast
+  const nav = useNavigate()
   const tone = first ? { background: 'var(--acc)', color: '#fff' } : {}
   const sub = first ? { opacity: .85 } : { color: 'var(--label-2)' }
   return <div className="card" style={{ marginTop: 10, ...tone }}>
@@ -37,6 +38,8 @@ function Card({ l, first, user, onBook, onEdit, onDelete }) {
       {onEdit && <><Button size="sm" onClick={() => onEdit(l)}>改</Button><Button size="sm" onClick={() => onDelete(l)}>删</Button></>}
     </div>
     {l.notes && l.phase === 'done' && <div className="small" style={{ marginTop: 10, whiteSpace: 'pre-wrap', ...sub }}>{l.notes}</div>}
+    {l.showcase?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><Icon name="sparkles" /> 展示案例：{l.showcase.map(c => <span key={c.id} className="tap" style={{ textDecoration: 'underline', marginInlineEnd: 8 }} onClick={e => { e.stopPropagation(); nav('/cases?q=' + encodeURIComponent(c.title)) }}>《{c.title}》{c.byName}</span>)}</div>}
+    {l.honors?.length > 0 && <div className="small" style={{ marginTop: 6, ...sub }}><Icon name="crown" /> 颁发：{l.honors.map(h => `${h.name} · ${h.label}`).join('；')}</div>}
     {l.bookedBy?.length > 0 && <div className="small" style={{ marginTop: 8, ...sub }}>预约：{l.bookedBy.join('、')}</div>}
   </div>
 }
@@ -46,19 +49,23 @@ export default function Lectures() {
   const user = useStore(s => s.user)
   const [data, setData] = useState(null), [form, setForm] = useState(null), [busy, setBusy] = useState(false)
   const fileRef = useRef()
+  // 排场时可选：展示哪些入库案例、颁哪些称号（管理员才拿得到这两张表）
+  const [pool, setPool] = useState({ cases: [], titles: [] })
+  useEffect(() => { if (form && data?.canEdit && !pool.cases.length && !pool.titles.length) Promise.all([api('/api/cases').catch(() => ({ cases: [] })), api('/api/org/titles').catch(() => ({ titles: [] }))]).then(([c, t]) => setPool({ cases: c.cases || [], titles: t.titles || [] })) }, [form, data?.canEdit])
+  const toggleId = (k, id) => setForm(f => ({ ...f, [k]: f[k].includes(id) ? f[k].filter(x => x !== id) : [...f[k], id] }))
   const load = () => api('/api/lectures').then(setData).catch(() => useUI.getState().toast('没取到场次'))
   useEffect(() => { load() }, [user?.id])
   const book = async (l, on) => {
     try { const r = await api('/api/lectures/book', { method: 'POST', body: JSON.stringify({ id: l.id, on }) }); useUI.getState().toast(on ? (r.remind ? '已预约，开播前 30 分钟提醒' : '已预约，开播前提醒在小程序里打开') : '已取消预约'); load() }
     catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
   }
-  const edit = l => setForm({ id: l.id, title: l.title, desc: l.desc, who: l.who, speaker: l.speaker, when: toLocal(l.at), minutes: l.minutes, liveUrl: l.liveUrl || '', replayUrl: l.replayUrl || '', slidesUrl: l.slides?.url || '', slidesFile: l.slides?.file ? { ...l.slides.file, keep: true } : null, notes: l.notes || '' })
+  const edit = l => setForm({ id: l.id, title: l.title, desc: l.desc, who: l.who, speaker: l.speaker, when: toLocal(l.at), minutes: l.minutes, liveUrl: l.liveUrl || '', replayUrl: l.replayUrl || '', slidesUrl: l.slides?.url || '', slidesFile: l.slides?.file ? { ...l.slides.file, keep: true } : null, notes: l.notes || '', caseIds: (l.showcase || []).map(c => c.id), titleIds: (l.honors || []).map(h => h.id) })
   const del = async l => { if (!confirm(`删掉「${l.title}」？`)) return; try { await api('/api/lectures/delete', { method: 'POST', body: JSON.stringify({ id: l.id }) }); load() } catch (e) { useUI.getState().toast('没删成' + (e.message ? '：' + e.message : '')) } }
   const save = async () => {
     if (!form.title.trim()) return useUI.getState().toast('写个标题')
     const at = new Date(form.when).getTime()
     if (!at) return useUI.getState().toast('选开播时间')
-    const body = { id: form.id || undefined, title: form.title, desc: form.desc, who: form.who, speaker: form.speaker, at, minutes: Number(form.minutes) || 60, liveUrl: form.liveUrl, replayUrl: form.replayUrl, notes: form.notes }
+    const body = { id: form.id || undefined, title: form.title, desc: form.desc, who: form.who, speaker: form.speaker, at, minutes: Number(form.minutes) || 60, liveUrl: form.liveUrl, replayUrl: form.replayUrl, notes: form.notes, caseIds: form.caseIds, titleIds: form.titleIds }
     if (form.slidesUrl.trim()) body.slides = { url: form.slidesUrl.trim() }
     else if (form.slidesFile && !form.slidesFile.keep) body.slides = { file: { hash: form.slidesFile.hash, name: form.slidesFile.name, type: form.slidesFile.type, size: form.slidesFile.size } }
     else if (!form.slidesFile) body.slides = null
@@ -95,6 +102,8 @@ export default function Lectures() {
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={pick} />
       </div>
       <TextArea rows={3} style={{ marginTop: 8 }} placeholder="要点整理（直播后补，回放卡片上显示）" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+      {pool.cases.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">这场展示的案例（斗课入选、分享者案例）</div><div className="chips" style={{ marginTop: 4 }}>{pool.cases.slice(0, 40).map(c => <button key={c.id} className={'chip' + (form.caseIds.includes(c.id) ? ' on' : '')} onClick={() => toggleId('caseIds', c.id)}>{c.title.slice(0, 16)} · {c.byName}</button>)}</div></div>}
+      {pool.titles.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">这场颁发的称号</div><div className="chips" style={{ marginTop: 4 }}>{pool.titles.slice(0, 40).map(t => <button key={t.id} className={'chip' + (form.titleIds.includes(t.id) ? ' on' : '')} onClick={() => toggleId('titleIds', t.id)}>{t.name} · {t.label}</button>)}</div></div>}
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>存</Button></div></div>
     </div>}
 

@@ -713,7 +713,7 @@ paths:
       tags: [academy]
       operationId: academyCaseSave
       summary: 自荐一个案例、从已通过的实践关作品推荐，或改自己的
-      description: '`{ id?, title, domain, age?, use, text(≥50 字), files?, submissionId? }`。教师自荐进「待园长同意」；园长交的或园长推荐本园教师已通过的作品进「待审核」。退回的改后再交。'
+      description: '`{ id?, title, domain, age?, use, text(≥50 字), files?, submissionId?, answerId? }`。教师自荐进「待园长同意」；园长交的或园长推荐本园教师已通过的作品 / 被精选的研讨作答进「待审核」。退回的改后再交。入库给作者 +2 学分。'
       responses:
         '200': { description: '`{ case }`' }
         '400': { description: 缺标题 / 领域，正文不足 50 字，作品未通过点评 }
@@ -751,6 +751,88 @@ paths:
       responses:
         '200': { description: '`{ ok }`' }
         '403': { description: 没有权限 }
+  /api/cases/used:
+    post:
+      tags: [academy]
+      operationId: academyCaseUsed
+      summary: 「用过，有效」
+      description: '`{ id, note? }`。只对已入库、不是自己的案例；一人一条。数只给分享者本人、本园园长与管理员看，不排行。'
+      responses:
+        '200': { description: '`{ case }`' }
+        '403': { description: 自己的 }
+  /api/me/honors:
+    get:
+      tags: [academy]
+      operationId: academyMyHonors
+      summary: 本人的勋章、荣誉称号与关卡以外的学分
+      description: 勋章按记录算（路径完成、案例被采纳 1/5/20、精选 1/5、点评 20 次、带出一个人），不存；称号由园长或管理员授；学分台账记案例入库 +2、作答精选 +2。
+      responses:
+        '200': { description: '`{ badges, titles, credits, creditsTotal, titleNames }`' }
+  /api/me/points:
+    get:
+      tags: [academy]
+      operationId: academyMyPoints
+      summary: 本人的学分与积分
+      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。'
+      responses:
+        '200': { description: 余额与流水 }
+  /api/me/points/exchange:
+    post:
+      tags: [academy]
+      operationId: academyPointsExchange
+      summary: 学分兑积分（一次性、不可逆）
+      description: '`{ credits }`。按 `POINTS_PER_CREDIT`（默认 10）兑。'
+      responses:
+        '200': { description: 兑换后的余额 }
+        '400': { description: 不是正整数，或超过可兑的 }
+  /api/points/balance:
+    get:
+      tags: [academy]
+      operationId: academyPointsBalance
+      summary: 工具服务端查余额（TOOLS_API_KEY）
+      description: '`?uid=`。教研工坊、观察评价工具、贝果实验室的服务端带 `Authorization: Bearer <TOOLS_API_KEY>`。'
+      responses:
+        '200': { description: '`{ uid, name, orgName, points }`' }
+        '403': { description: 没带工具密钥 }
+  /api/points/spend:
+    post:
+      tags: [academy]
+      operationId: academyPointsSpend
+      summary: 工具服务端扣积分（TOOLS_API_KEY，幂等）
+      description: '`{ uid, tool: workshop|observe|bagel, n, ref, note? }`。同一 (tool, ref) 只扣一次。'
+      responses:
+        '200': { description: '`{ ok, duplicate, points }`' }
+        '409': { description: 余额不够 }
+  /api/points/of:
+    get:
+      tags: [academy]
+      operationId: academyPointsOf
+      summary: 管理员看一个人的积分流水
+      responses:
+        '200': { description: 余额与流水 }
+  /api/org/titles:
+    get:
+      tags: [academy]
+      operationId: academyOrgTitles
+      summary: 本园授过的称号（管理员看全部）
+      responses:
+        '200': { description: '`{ titles, titleNames }`' }
+    post:
+      tags: [academy]
+      operationId: academyTitleGrant
+      summary: 授荣誉称号（园长授本园的人，管理员授任何人）
+      description: '`{ uid, title: seed|sharer|contest|studio|custom, label?(custom 用), reason(≥5 字) }`。不能授自己。颁发在大讲堂或园内活动上，这里只是记录。'
+      responses:
+        '200': { description: '`{ title }`' }
+        '400': { description: 没选称号或没写理由 }
+        '403': { description: 不是本园，或授自己 }
+  /api/org/titles/revoke:
+    post:
+      tags: [academy]
+      operationId: academyTitleRevoke
+      summary: 撤回一个称号
+      responses:
+        '200': { description: '`{ ok }`' }
   /api/cases/curator:
     put:
       tags: [academy]
@@ -832,7 +914,7 @@ paths:
       tags: [academy]
       operationId: academyLectureSave
       summary: 排一场或改（管理员）
-      description: '`{ id?, title, desc?, who?, speaker?, at(毫秒时间戳), minutes?, liveUrl?, replayUrl?, slides?:{url}|{file:{hash,name,type,size}}|null, notes? }`。改了开播时间会重新提醒。'
+      description: '`{ id?, title, desc?, who?, speaker?, at(毫秒时间戳), minutes?, liveUrl?, replayUrl?, slides?:{url}|{file:{hash,name,type,size}}|null, notes?, caseIds?, titleIds? }`。caseIds 是这场展示的入库案例，titleIds 是这场颁发的称号。改了开播时间会重新提醒。'
       responses:
         '200': { description: '`{ lecture }`' }
         '400': { description: 缺标题 / 时间，链接格式不对，讲义文件未上传 }

@@ -8,7 +8,7 @@ import { useStore } from '../../store/useStore.js'
 import { api } from '../../lib/api.js'
 import { PROBES } from '../../lib/lessons.js'
 import Icon from '../../components/Icon.jsx'
-import { Button } from '../../components/ui.jsx'
+import { Button, TextField } from '../../components/ui.jsx'
 import { fmtDay } from './common.jsx'
 
 export default function Director() {
@@ -37,6 +37,17 @@ export default function Director() {
     finally { setBusy(false) }
   }
   useEffect(() => { if (user) { load(); loadPairs() } }, [user?.id])
+  const [titles, setTitles] = useState(null), [titleFor, setTitleFor] = useState(null), [titleKey, setTitleKey] = useState('seed'), [titleLabel, setTitleLabel] = useState(''), [reason, setReason] = useState('')
+  const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
+  useEffect(() => { if (user) loadTitles() }, [user?.id])
+  const grantTitle = async () => {
+    if (reason.trim().length < 5) return useUI.getState().toast('写授予理由，至少 5 字')
+    setBusy(true)
+    try { await api('/api/org/titles', { method: 'POST', body: JSON.stringify({ uid: titleFor.id, title: titleKey, label: titleLabel, reason }) }); useUI.getState().toast(`已记：${titleFor.name} · ${titleKey === 'custom' ? titleLabel : titles.titleNames[titleKey]}。颁发安排在大讲堂或园内活动上。`); setTitleFor(null); setReason(''); setTitleLabel(''); loadTitles() }
+    catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
+  const revokeTitle = async t => { if (!confirm(`撤回 ${t.name} 的「${t.label}」？`)) return; try { await api('/api/org/titles/revoke', { method: 'POST', body: JSON.stringify({ id: t.id }) }); loadTitles() } catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) } }
   const setReviewer = async m => {
     setBusy(true)
     try { await api('/api/org/reviewer', { method: 'PUT', body: JSON.stringify({ uid: m.id, reviewer: !m.reviewer }) }); useUI.getState().toast(m.reviewer ? `${m.name} 不再是点评人` : `${m.name} 已设为点评人`); await load() }
@@ -85,7 +96,21 @@ export default function Director() {
         <div style={{ flex: 1 }}><div className="lrow-t">{m.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{m.roleName}</span>{m.reviewer && <span className="tag" style={{ marginInlineStart: 8 }}>点评人</span>}</div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${m.total ? m.done / m.total * 100 : 0}%` }} /></div></div>
         <span className="small muted" style={{ marginInlineStart: 12, minWidth: 72, textAlign: 'end' }}>{m.done}/{m.total} 关<br />{m.lastAt ? fmtDay(m.lastAt) : '未开始'}</span>
         {m.id !== user.id && m.role !== 'director' && <button className={'chip' + (m.reviewer ? ' on' : '')} style={{ marginInlineStart: 10 }} disabled={busy} title={m.reviewer ? '取消点评人' : '设为点评人'} onClick={() => setReviewer(m)}>{m.reviewer ? '取消' : '设为点评人'}</button>}
+        {m.id !== user.id && <button className="chip" style={{ marginInlineStart: 6 }} disabled={busy} onClick={() => { setTitleFor(m); setReason('') }}>授称号</button>}
       </div>)}
+      {titleFor && <div className="lrow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+        <div className="small muted">给 {titleFor.name} 授荣誉称号 · 写清理由，颁发在大讲堂或园内活动上，这里只是记录</div>
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <select className="ac-sel" value={titleKey} onChange={e => setTitleKey(e.target.value)}>{Object.entries(titles?.titleNames || {}).map(([k, v]) => <option key={k} value={k}>{k === 'custom' ? '自定…' : v}</option>)}</select>
+          {titleKey === 'custom' && <TextField placeholder="称号名" value={titleLabel} onChange={e => setTitleLabel(e.target.value)} style={{ width: 140 }} />}
+          <TextField placeholder="授予理由" value={reason} onChange={e => setReason(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
+          <Button size="sm" onClick={() => setTitleFor(null)}>取消</Button><Button size="sm" variant="primary" disabled={busy} onClick={grantTitle}>记下</Button>
+        </div>
+      </div>}
+      {titles?.titles.length > 0 && <div className="lrow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 4 }}>
+        <div className="small muted">已授称号</div>
+        {titles.titles.map(t => <div key={t.id} className="ac-row small"><span><Icon name="crown" /> {t.name} · {t.label}<span className="muted"> · {t.byName} · {fmtDay(t.at)} · {t.reason}</span></span><button className="chip" onClick={() => revokeTitle(t)}>撤回</button></div>)}
+      </div>}
       <div className="lrow small muted">点评人能看本园的点评队列、按量表点评实践关的提交。一般是种子教师或教研主任；园长本来就能点评。</div>
     </div></div>
 

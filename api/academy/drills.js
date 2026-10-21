@@ -7,10 +7,11 @@
  * 谁能答：登录的人；一人一题一份，改了算最新（已点评的改了保留点评，点评人看得到改过）。
  * 谁能看别人的：同园、且自己已作答（先答再看，避免抄）；点评人与带教教师不用先答。
  * 点评：园长、点评人、管理员，或作答人的带教教师；只写一句意见，可标「精选」。评作品不评人：没有分数、没有排名、不公布人数以外的任何对比。
- * 作答被点评后给作答人一条订阅消息（review 模板）。不做「本周还没答」的催促。 */
+ * 作答被点评后给作答人一条订阅消息（review 模板）；被精选 +2 学分（honors.js 台账，一份作答只记一次）。不做「本周还没答」的催促。 */
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
 import { canReview } from './submissions.js';
+import { titlesOf } from './honors.js';
 
 const DOMAINS = ['env', 'life', 'play', 'plan', 'obs', 'comm', 'reflect'];
 const ROLES = ['director', 'nurse', 'teacher', 'care', 'it'];
@@ -18,7 +19,7 @@ const WEEK = 7 * 24 * 3600000;
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
 
-export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier = null, pairs = null }) {
+export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier = null, pairs = null, ledger = null }) {
   db.drills = db.drills || []; db.drillAnswers = db.drillAnswers || [];
   const now = () => Date.now();
   const newId = () => crypto.randomBytes(9).toString('base64url');
@@ -29,7 +30,7 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
   const answersOf = id => db.drillAnswers.filter(a => a.drillId === id);
   const myAnswer = (id, uid) => db.drillAnswers.find(a => a.drillId === id && a.uid === uid) || null;
   const mayReviewAnswer = (user, a) => (canReview(user, isAdmin) && (isAdmin(user) || a.org === orgKeyOf(user))) || !!(pairs && pairs.isMentorOf(user.id, a.uid));
-  const pubAnswer = (a, user) => ({ id: a.id, name: a.name, role: a.role, orgName: a.orgName, text: a.text, at: a.at, updatedAt: a.updatedAt, review: a.review, mine: a.uid === user.id, canReview: a.uid !== user.id && mayReviewAnswer(user, a) });
+  const pubAnswer = (a, user) => ({ id: a.id, uid: a.uid, name: a.name, titles: titlesOf(db, a.uid).map(t => t.label), role: a.role, orgName: a.orgName, text: a.text, at: a.at, updatedAt: a.updatedAt, review: a.review, mine: a.uid === user.id, canReview: a.uid !== user.id && mayReviewAnswer(user, a) });
   const pubDrill = (d, user) => {
     const org = orgKeyOf(user), t = now();
     const all = answersOf(d.id), mine = myAnswer(d.id, user.id);
@@ -138,6 +139,8 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
     const comment = str(body.comment, 1000);
     if (!comment) return json(res, 400, { error: 'write a comment', code: 'comment' });
     a.review = { by: user.id, byName: user.name, at: now(), comment, featured: body.featured === true };
+    const d0 = find(a.drillId);
+    if (a.review.featured && ledger) ledger.grant(a.uid, 'drill', a.id, 2, '研讨作答被精选：' + (d0 ? d0.title.slice(0, 30) : ''));
     saveDb();
     audit(req, 'drill.review', { user, msg: a.id });
     const d = find(a.drillId);

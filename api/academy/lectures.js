@@ -2,7 +2,8 @@
  * 直播在第三方（腾讯会议、视频号等），平台只做三件事：预约、回放列表、讲义。
  *
  * db.lectures: { id, title, desc, who, speaker, at(开播时间戳), minutes, liveUrl, replayUrl, slides:{url}|{file:{hash,name,type,size,owner}}|null,
- *                notes, by, byName, createdAt, updatedAt, bookings:[uid], reminded:[uid] }
+ *                notes, caseIds:[案例 id], titleIds:[称号记录 id], by, byName, createdAt, updatedAt, bookings:[uid], reminded:[uid] }
+ * caseIds 是这场展示的入库案例（斗课入选作品、分享者案例），titleIds 是这场颁发的荣誉称号；都只是记录，颁发在直播里。
  * 谁能排场：管理员（本地运营方）。谁能看：所有人（没登录也能看安排与回放，预约要登录）。
  * 预约提醒：开播前 30 分钟给预约且订阅过「lecture」模板的人发一条订阅消息（notify.js，WX_TMPL_LECTURE）；没配模板就只是记名。
  * 不催：只在本人预约的那一场开播前发，不发「今天有课」。 */
@@ -22,6 +23,8 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
     id: l.id, title: l.title, desc: l.desc, who: l.who, speaker: l.speaker, at: l.at, minutes: l.minutes, phase: phase(l),
     liveUrl: l.liveUrl || null, replayUrl: l.replayUrl || null, slides: l.slides ? (l.slides.url ? { url: l.slides.url } : { file: { name: l.slides.file.name, type: l.slides.file.type, size: l.slides.file.size } }) : null,
     notes: l.notes || '', booked: !!user && l.bookings.includes(user.id), bookings: l.bookings.length,
+    showcase: (l.caseIds || []).map(id => (db.cases || []).find(c => c.id === id && c.status === 'approved')).filter(Boolean).map(c => ({ id: c.id, title: c.title, byName: c.byName, orgName: c.orgName })),
+    honors: (l.titleIds || []).map(id => (db.titles || []).find(t => t.id === id)).filter(Boolean).map(t => ({ id: t.id, name: t.name, label: t.label })),
     ...(user && isAdmin(user) ? { bookedBy: l.bookings.map(id => db.users.find(u => u.id === id)?.name || id) } : {})
   });
   const find = id => db.lectures.find(l => l.id === id);
@@ -79,7 +82,9 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
       if (!MEDIA.file(owner, f.hash)) return json(res, 400, { error: 'upload the file first', code: 'file' });
       slides = { file: { hash: f.hash, name: str(f.name, 120), type: str(f.type, 60), size: Number(f.size) || 0, owner } };
     }
-    const fields = { title, desc: str(body.desc, 2000), who: str(body.who, 60), speaker: str(body.speaker, 60), at, minutes, liveUrl: liveUrl || null, replayUrl: replayUrl || null, slides, notes: str(body.notes, 4000), updatedAt: now() };
+    const ids = (k, pool) => (Array.isArray(body[k]) ? body[k] : (l ? l[k] : [])).map(x => str(String(x || ''), 40)).filter(id => pool.some(p => p.id === id)).slice(0, 20);
+    const fields = { title, desc: str(body.desc, 2000), who: str(body.who, 60), speaker: str(body.speaker, 60), at, minutes, liveUrl: liveUrl || null, replayUrl: replayUrl || null, slides, notes: str(body.notes, 4000),
+      caseIds: ids('caseIds', (db.cases || []).filter(c => c.status === 'approved')), titleIds: ids('titleIds', db.titles || []), updatedAt: now() };
     if (l) {
       // 改了开播时间就重新提醒
       if (l.at !== at) l.reminded = [];

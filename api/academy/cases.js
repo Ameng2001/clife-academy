@@ -1,6 +1,8 @@
 /* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
  *
- * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'own', submissionId?, levelId? },
+ * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'own', submissionId?, levelId?, answerId?, drillId? },
+ * db.caseUses: { caseId, uid, name, orgName, note, at }  「用过，有效」：别的教师用了这份案例标一次、留一句怎么改的；数只给分享者本人、本园园长与管理员看，不排行。
+ * 入库给分享者 +2 学分（honors.js 台账，一条案例只记一次）。
  *             by, byName, org, orgName, status, note, at, consent:{by,byName,at}|null, curated:{by,byName,at}|null }
  *   status  'consent'  待本园园长同意（教师自荐）
  *           'pending'  待审核（园长同意或园长直接推荐）
@@ -13,6 +15,7 @@
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
 import { LEVELS, LEVEL_TYPES } from './events-data.js';
+import { titlesOf } from './honors.js';
 
 const DOMAINS = ['env', 'life', 'play', 'plan', 'obs', 'comm', 'reflect'];
 const AGES = ['小班', '中班', '大班', '混龄'];
@@ -24,14 +27,18 @@ const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
 export const isCurator = (u, isAdmin) => !!u && (u.academy?.curator === true || isAdmin(u));
 const isDirector = (u, isAdmin) => !!u && (u.academy?.role === 'director' || isAdmin(u));
 
-export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }) {
-  db.cases = db.cases || [];
+export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger = null }) {
+  db.cases = db.cases || []; db.caseUses = db.caseUses || [];
+  const usesOf = id => db.caseUses.filter(u => u.caseId === id);
+  const seesUses = (user, c) => !!user && (c.by === user.id || isAdmin(user) || (isDirector(user, isAdmin) && c.org && c.org === orgKeyOf(user)));
   const pub = (c, user) => ({
     id: c.id, title: c.title, domain: c.domain, age: c.age, use: c.use, text: c.text, files: c.files.map(f => ({ hash: f.hash, name: f.name, type: f.type })),
     source: c.source, byName: c.byName, orgName: c.orgName, status: c.status, note: c.note || null, at: c.at,
     consent: c.consent ? { byName: c.consent.byName, at: c.consent.at } : null, curated: c.curated ? { byName: c.curated.byName, at: c.curated.at } : null,
-    mine: !!user && c.by === user.id,
-    canEdit: !!user && c.by === user.id && c.status !== 'approved'
+    mine: !!user && c.by === user.id, byTitles: titlesOf(db, c.by).map(t => t.label),
+    canEdit: !!user && c.by === user.id && c.status !== 'approved',
+    usedByMe: !!user && usesOf(c.id).some(u => u.uid === user.id),
+    ...(seesUses(user, c) ? { used: usesOf(c.id).length, uses: usesOf(c.id).sort((a, b) => b.at - a.at).map(u => ({ name: u.name, orgName: u.orgName, note: u.note, at: u.at })) } : {})
   });
   const canSee = (user, c) => c.status === 'approved' || (!!user && (c.by === user.id || isCurator(user, isAdmin) || (isDirector(user, isAdmin) && c.org && c.org === orgKeyOf(user))));
   const filesOf = (body, owner) => (Array.isArray(body.files) ? body.files : []).slice(0, 6)
@@ -100,8 +107,20 @@ export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isA
       source = { kind: 'submission', submissionId: s.id, levelId: s.levelId };
       files = s.files.map(f => ({ ...f, owner: s.uid }));
     }
+    // 从研讨作答推荐（本人的，或园长推荐本园被精选的）
+    const ansId = str(body.answerId, 40);
+    if (ansId && !subId) {
+      const a = (db.drillAnswers || []).find(x => x.id === ansId);
+      if (!a) return json(res, 404, { error: 'no such answer' });
+      if (a.uid !== user.id) {
+        if (!isDirector(user, isAdmin) || !a.org || a.org !== orgKeyOf(user)) return json(res, 403, { error: 'only your own answer, or your kindergarten\'s as the director', code: 'org' });
+        author = db.users.find(u => u.id === a.uid) || user;
+      }
+      source = { kind: 'drill', answerId: a.id, drillId: a.drillId };
+    }
     // 改的时候没带 files：附图不动
     files = (c && !subId && !Array.isArray(body.files)) ? c.files : files.concat(filesOf(body, user.id)).slice(0, 6);
+    if (c && ansId && !subId) c.source = source;
     const now = Date.now();
     if (c) {
       Object.assign(c, { title, domain: body.domain, age, use, text, files, updatedAt: now });
@@ -134,7 +153,7 @@ export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isA
       if (!isCurator(user, isAdmin) && !(body.action === 'reject' && c.status === 'consent' && isDirector(user, isAdmin) && c.org === orgKeyOf(user))) return json(res, 403, { error: 'curators only', code: 'curator' });
       if (c.status === 'approved') return json(res, 400, { error: 'already in the library', code: 'state' });
       if (body.action === 'reject' && !note) return json(res, 400, { error: 'say why', code: 'note' });
-      if (body.action === 'approve') { if (c.status === 'consent') c.consent = c.consent || { by: user.id, byName: user.name, at: now }; c.status = 'approved'; c.curated = { by: user.id, byName: user.name, at: now }; c.note = note || null; }
+      if (body.action === 'approve') { if (c.status === 'consent') c.consent = c.consent || { by: user.id, byName: user.name, at: now }; c.status = 'approved'; c.curated = { by: user.id, byName: user.name, at: now }; c.note = note || null; if (ledger) ledger.grant(c.by, 'case', c.id, 2, '案例入库：' + c.title); }
       else { c.status = 'rejected'; c.note = note; }
     } else return json(res, 400, { error: 'action must be consent, approve or reject', code: 'action' });
     saveDb();
@@ -151,6 +170,22 @@ export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     db.cases = db.cases.filter(x => x.id !== c.id); saveDb();
     audit(req, 'case.delete', { user, msg: c.id });
     json(res, 200, { ok: true });
+  },
+  // 「用过，有效」：{ id, note? }。只对已入库、不是自己的；一人一条，再标就是改一句。
+  'POST /api/cases/used': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const c = db.cases.find(x => x.id === str(body.id, 40));
+    if (!c || c.status !== 'approved') return json(res, 404, { error: 'no such case' });
+    if (c.by === user.id) return json(res, 403, { error: 'not your own', code: 'self' });
+    const note = str(body.note, 300);
+    let u = db.caseUses.find(x => x.caseId === c.id && x.uid === user.id);
+    if (u) { u.note = note; u.at = Date.now(); }
+    else { u = { caseId: c.id, uid: user.id, name: user.name, orgName: user.academy?.org?.name || null, note, at: Date.now() }; db.caseUses.push(u); }
+    saveDb();
+    audit(req, 'case.used', { user, msg: c.id });
+    json(res, 200, { case: pub(c, user) });
   },
   // 管理员标审核人：{ uid, curator: true|false }
   'PUT /api/cases/curator': async (req, res) => {
