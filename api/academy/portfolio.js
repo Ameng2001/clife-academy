@@ -40,6 +40,8 @@ export function hoursOf(uid, { from, to, rule, db, stateOf }) {
   const bb = (db.certificates || []).filter(c => c.uid === uid && c.kind === 'backbone' && inRange(c.at));
   if (bb.length && rule.backboneMinutes) lines.push({ kind: 'backbone', label: '骨干教师认证答辩通过', count: bb.length, minutes: bb.length * rule.backboneMinutes });
   if (rule.lectureCounts) { const ls = (db.lectures || []).filter(l => l.bookings?.includes(uid) && inRange(l.at) && l.at + (l.minutes || 60) * 60000 < Date.now()); if (ls.length) lines.push({ kind: 'lecture', label: '园长大讲堂（预约且已开播）', count: ls.length, minutes: ls.reduce((a, l) => a + (l.minutes || 60), 0) }); }
+  const pg = (db.programs || []).filter(p => p.hours > 0 && p.applicants.some(a => a.uid === uid && a.status === 'completed' && inRange(a.completedAt || p.closedAt || p.to)));
+  if (pg.length) lines.push({ kind: 'program', label: '研修项目（完成，按期次学时）', count: pg.length, minutes: Math.round(pg.reduce((a, p) => a + p.hours, 0) * rule.minutesPerHour) });
   const minutes = lines.reduce((a, l) => a + l.minutes, 0);
   const raw = minutes / rule.minutesPerHour, hours = Math.floor(raw / rule.roundTo) * rule.roundTo;
   return { from, to, lines, minutes, hours: Number(hours.toFixed(2)), rule };
@@ -68,12 +70,16 @@ export function portfolioRoutes({ json, readBody, db, saveDb, readSession, audit
     const studios = (db.studios || []).filter(s => s.members.some(m => m.uid === uid) || s.hostUid === uid).map(s => ({ name: s.name, role: s.hostUid === uid ? '主持人' : '成员', at: s.members.find(m => m.uid === uid)?.at || s.at }));
     const community = communities ? communities.ofOrg(orgKeyOf(user)) : null;
     const lectures = (db.lectures || []).filter(l => l.bookings?.includes(uid)).map(l => ({ title: l.title, speaker: l.speaker, at: l.at, minutes: l.minutes }));
+    const studyReplies = (db.studyTasks || []).filter(t => t.replies.some(r => r.uid === uid)).map(t => { const r = t.replies.find(x => x.uid === uid); return { title: t.title, text: r.text, at: r.updatedAt || r.at }; });
+    const programs = (db.programs || []).filter(p => p.applicants.some(a => a.uid === uid && (a.status === 'accepted' || a.status === 'completed'))).map(p => { const a = p.applicants.find(x => x.uid === uid); return { title: p.title, kind: p.kind, term: p.term, from: p.from, to: p.to, hours: p.hours, status: a.status, completedAt: a.completedAt || null }; });
+    const camps = (db.camps || []).filter(c => c.closedAt && (c.graduates || []).includes(uid)).map(c => ({ title: c.title, days: c.days.length, posts: c.posts.filter(p => p.uid === uid).length, closedAt: c.closedAt }));
+    const selfReviews = (db.selfReviews || []).filter(r => r.uid === uid).map(r => ({ term: r.term, levels: r.levels, focus: r.focus, reflection: r.reflection, at: r.updatedAt || r.at, comments: (db.peerReviews || []).filter(p => p.uid === uid && p.term === r.term).map(p => ({ role: p.role, byName: p.byName, text: p.text, at: p.updatedAt || p.at })) }));
     const answersAccepted = (db.questions || []).reduce((n, q) => n + q.answers.filter(a => a.by === uid && a.accepted).length, 0);
     const drillAnswers = (db.drillAnswers || []).filter(a => a.uid === uid).length;
     const sharers = (db.showcases || []).filter(s => s.sharers.some(x => x.uid === uid)).map(s => ({ title: s.title, year: s.year }));
     return { format: 'clife-academy-portfolio/1', exportedAt: now(), person: { name: user.name, orgName: user.academy?.org?.name || null, role: user.academy?.role || null, districtName: user.academy?.district?.name || null },
       summary: { levels: levels.length, minutes: levels.reduce((a, l) => a + l.minutes, 0), works: subs.filter(s => s.type === 'practice' && s.status === 'pass').length, seminars: subs.filter(s => s.type === 'seminar').length, cases: cases.filter(c => c.status === 'approved').length, certificates: certificates.length, badges: badges.length, titles: titles.length, creditsTotal: ledger ? ledger.total(uid) : 0, drillAnswers, answersAccepted },
-      paths, levels, submissions: subs, cases, contests: entries, showcases: sharers, certificates, progress: { tool: e.tool, domains: e.domains, seven: e.seven, backbone: e.backbone }, badges, titles, credits, studios, community: community ? { name: community.name } : null, lectures,
+      paths, levels, submissions: subs, cases, contests: entries, showcases: sharers, certificates, progress: { tool: e.tool, domains: e.domains, seven: e.seven, backbone: e.backbone }, badges, titles, credits, studios, community: community ? { name: community.name } : null, lectures, studyReplies, programs, camps, selfReviews,
       excluded: ['幼儿数据（平台不采集）', 'AI 中间判断（答疑助手草稿、Coach 建议）', '他人的测验分与点评'] };
   };
 

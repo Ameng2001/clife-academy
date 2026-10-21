@@ -17,6 +17,14 @@ import { canReview } from './submissions.js';
 import { isDistrictAdmin, districtKeyOf } from './district.js';
 
 export const RUBRIC = Object.freeze(['目标适切', '环节设计', '师幼互动', '材料运用', '反思']);
+/* 扩展形式（ROADMAP 第七节）：同一机制换对象。每种形式有自己的作品名、最少字数、量表与入库标签；片段只有同课异构要。 */
+export const FORMS = Object.freeze({
+  lesson: { name: '同课异构', entry: '活动设计', min: 100, media: '≤ 3 分钟实施片段（幼儿不露脸）', rubric: RUBRIC, hint: '同主题各写一份活动设计' },
+  env: { name: '环创擂台', entry: '一个区角的前后对比与说明', min: 100, media: '前后对比照（不拍幼儿）', rubric: Object.freeze(['空间与动线', '材料的层次', '幼儿怎么用', '调整的依据', '反思']), hint: '同一类区角，各改各的，比改的依据' },
+  obs: { name: '观察记录擂台', entry: '观察记录（同一段录像）', min: 150, media: null, rubric: Object.freeze(['事实与推断分开', '事实可观察可计数', '推断有依据', '没有评价标签', '去标识']), hint: '同一段公共录像，各写记录，比事实与推断分得清不清' },
+  comm: { name: '家长沟通情境擂台', entry: '回复稿', min: 50, media: null, rubric: Object.freeze(['先回应感受', '给事实不给结论', '不推责不防御', '给下一步', '语气'] ), hint: '同一情境，比第一条回复怎么写' }
+});
+const formOf = c => FORMS[c.form] || FORMS.lesson;
 const DOMAINS = ['env', 'life', 'play', 'plan', 'obs', 'comm', 'reflect'];
 const AGES = ['小班', '中班', '大班', '混龄'];
 const WEEK = 7 * 24 * 3600000;
@@ -61,7 +69,7 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     return {
       id: c.id, level: c.level || 'org', orgName: c.orgName, communityName: c.communityName || null, communityId: c.community || null, month: c.month, title: c.title, age: c.age, activity: c.activity, goal: c.goal, guide: c.guide, domain: c.domain,
       openAt: c.openAt, dueAt: c.dueAt, reviewAt: c.reviewAt, phase: ph, closedAt: c.closedAt || null, summary: c.summary || '', byName: c.byName,
-      entries: es.length, mine: mine ? pubEntry(mine, c, user) : null, selectedCount: c.selected.length, canHost: host, rubric: RUBRIC,
+      entries: es.length, mine: mine ? pubEntry(mine, c, user) : null, selectedCount: c.selected.length, canHost: host, rubric: formOf(c).rubric, form: c.form || 'lesson', formName: formOf(c).name, entryLabel: formOf(c).entry, entryMin: formOf(c).min, mediaLabel: formOf(c).media,
       // 能应战：应战期、本园在范围里、有园所；共同体赛的主持人（区县管理员）不应战
       canEnter: ph === 'open' && !!orgKeyOf(user) && inOrg(user, c) && !(isDistrictAdmin(user) && !isAdmin(user)),
       groups: c.groups.map(g => ({ n: g.n, entryIds: g.entryIds, review: g.review ? { byName: g.review.byName, text: g.review.text, at: g.review.at } : null })),
@@ -80,7 +88,7 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     const hostScope = isDistrictAdmin(user) && !isAdmin(user) ? 'community' : 'org';
     const mine = dk && communities ? db.communities.filter(x => x.district === dk).map(x => ({ id: x.id, name: x.name, orgs: x.orgs.map(o => o.name) })) : [];
     json(res, 200, { current: list.filter(c => c.phase !== 'done').sort((a, b) => b.openAt - a.openAt), past: list.filter(c => c.phase === 'done').sort((a, b) => b.closedAt - a.closedAt),
-      canHost: canHost(user) && (hostScope === 'community' ? mine.length > 0 : !!org || isAdmin(user)), hostScope, communities: mine, rubric: RUBRIC });
+      canHost: canHost(user) && (hostScope === 'community' ? mine.length > 0 : !!org || isAdmin(user)), hostScope, communities: mine, rubric: RUBRIC, forms: Object.fromEntries(Object.entries(FORMS).map(([k, f]) => [k, { name: f.name, entry: f.entry, min: f.min, media: f.media, rubric: f.rubric, hint: f.hint }])) });
   },
   'GET /api/contests/one': async (req, res) => {
     const user = readSession(req);
@@ -115,7 +123,7 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     // 截止时间可以改到现在之前：主持人用它提前收稿
     const dueAt = Number(body.dueAt) > 946684800000 ? Number(body.dueAt) : (c ? c.dueAt : openAt + 2 * WEEK);
     const reviewAt = Number(body.reviewAt) > dueAt ? Number(body.reviewAt) : (c && c.reviewAt > dueAt ? c.reviewAt : dueAt + WEEK);
-    const fields = { month, title, age: AGES.includes(body.age) ? body.age : (c ? c.age : '中班'), activity, goal, guide: str(body.guide, 1000), domain: DOMAINS.includes(body.domain) ? body.domain : (c ? c.domain : 'plan'), dueAt, reviewAt, updatedAt: now() };
+    const fields = { month, title, form: FORMS[body.form] ? body.form : (c ? c.form || 'lesson' : 'lesson'), age: AGES.includes(body.age) ? body.age : (c ? c.age : '中班'), activity, goal, guide: str(body.guide, 1000), domain: DOMAINS.includes(body.domain) ? body.domain : (c ? c.domain : 'plan'), dueAt, reviewAt, updatedAt: now() };
     if (c) Object.assign(c, fields);
     else { c = { id: newId(), level: comm ? 'community' : 'org', org: comm ? null : (org || 'admin'), orgName: comm ? null : (user.academy?.org?.name || null), community: comm ? comm.id : null, communityName: comm ? comm.name : null, district: comm ? comm.district : null, openAt, ...fields, groups: [], selected: [], closedAt: null, summary: '', by: user.id, byName: user.name, at: now() }; db.contests.push(c); }
     saveDb();
@@ -144,7 +152,7 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     if (phase(c) !== 'open') return json(res, 400, { error: 'entries are closed', code: 'closed' });
     if (!orgKeyOf(user)) return json(res, 403, { error: 'only kindergarten staff enter', code: 'org' });
     const design = str(body.design, 8000);
-    if (design.length < 100) return json(res, 400, { error: 'the design needs at least 100 characters', code: 'design' });
+    if (design.length < formOf(c).min) return json(res, 400, { error: `the ${formOf(c).entry} needs at least ${formOf(c).min} characters`, code: 'design' });
     let e = db.contestEntries.find(x => x.contestId === c.id && x.uid === user.id);
     let video = e ? e.video : null;
     if (body.video === null) video = null;
@@ -169,8 +177,8 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     if (phase(c) !== 'review') return json(res, 400, { error: 'rating is open after the deadline and before closing', code: 'phase' });
     if (e.uid === user.id) return json(res, 403, { error: 'not your own', code: 'self' });
     if (isDistrictAdmin(user) && !isAdmin(user)) return json(res, 403, { error: 'hosts of a community contest do not rate', code: 'host' });
-    const scores = (Array.isArray(body.scores) ? body.scores : []).slice(0, RUBRIC.length).map(n => { const k = Math.round(Number(n)); return k >= 1 && k <= 5 ? k : null; });
-    if (scores.length !== RUBRIC.length || scores.some(s => !s)) return json(res, 400, { error: 'score all five items 1–5', code: 'scores' });
+    const scores = (Array.isArray(body.scores) ? body.scores : []).slice(0, formOf(c).rubric.length).map(n => { const k = Math.round(Number(n)); return k >= 1 && k <= 5 ? k : null; });
+    if (scores.length !== formOf(c).rubric.length || scores.some(s => !s)) return json(res, 400, { error: 'score all five items 1–5', code: 'scores' });
     const comment = str(body.comment, 500);
     if (!comment) return json(res, 400, { error: 'one sentence about the work', code: 'comment' });
     e.ratings = e.ratings.filter(r => r.by !== user.id);
@@ -253,9 +261,9 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
       if (e.caseId) continue;
       const sel = c.selected.includes(e.id);
       const g = c.groups.find(x => x.entryIds.includes(e.id));
-      const tag = sel ? `${isCommunity(c) ? '共同体赛' : '同课异构'} · ${c.month} · ${c.age}` : '参赛作品';
+      const tag = sel ? `${isCommunity(c) ? '共同体赛' : formOf(c).name} · ${c.month} · ${c.age}` : '参赛作品';
       const author = db.users.find(u => u.id === e.uid) || { id: e.uid, name: e.name, academy: null };
-      const text = `【${tag}】${c.title}（${c.activity}）\n目标：${c.goal}${c.guide ? '\n《指南》：' + c.guide : ''}\n\n${e.design}${e.note ? '\n\n反思：' + e.note : ''}${g?.review ? '\n\n同课异构对照（' + g.review.byName + '）：' + g.review.text : ''}`;
+      const text = `【${tag}】${c.title}（${c.activity}）\n目标：${c.goal}${c.guide ? '\n《指南》：' + c.guide : ''}\n\n${e.design}${e.note ? '\n\n反思：' + e.note : ''}${g?.review ? `\n\n${formOf(c).name}对照（` + g.review.byName + '）：' + g.review.text : ''}`;
       const cs = { id: newId(), title: `${c.activity} · ${e.name}${sel ? '（入选）' : ''}`, domain: c.domain, age: c.age, use: sel ? 'adapt' : 'idea', text, files: e.video ? [{ hash: e.video.hash, name: e.video.name, type: e.video.type, owner: e.uid }] : [],
         source: { kind: 'contest', contestId: c.id, entryId: e.id, tag, selected: sel }, by: e.uid, byName: e.name, org: e.org, orgName: author.academy?.org?.name || c.orgName, status: 'approved', note: null, at: t, ...(isCommunity(c) ? { communityName: c.communityName } : {}),
         consent: { by: user.id, byName: user.name, at: t }, curated: { by: user.id, byName: user.name, at: t } };

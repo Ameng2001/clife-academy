@@ -37,6 +37,13 @@ import { questionRoutes } from './academy/questions.js';
 import { studioRoutes } from './academy/studios.js';
 import { portfolioRoutes } from './academy/portfolio.js';
 import { reviewStatRoutes } from './academy/reviewstats.js';
+import { selfReviewRoutes } from './academy/selfreview.js';
+import { campRoutes } from './academy/camps.js';
+import { studyGroupRoutes } from './academy/studygroups.js';
+import { programRoutes } from './academy/programs.js';
+import { shareDayRoutes } from './academy/sharedays.js';
+import { weeklyRoutes } from './academy/weekly.js';
+import { coachRoutes as academyCoachRoutes } from './academy/coach.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1792,6 +1799,8 @@ const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audi
 setInterval(() => { try { QUESTIONS.escalateDue(); } catch { /* 下一轮再试 */ } }, 10 * 60000).unref?.();
 // 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
 const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
+const WEEKLY = weeklyRoutes({ json, db, saveDb, readSession, isAdmin, readStateCached, notifier: NOTIFIER });
+setInterval(() => { WEEKLY.pushWeekly().catch(e => console.error('weekly report:', e.message)); }, 10 * 60000).unref?.();
 setInterval(() => { LECTURES.tick().catch(e => console.error('lecture reminder:', e.message)); }, 60000).unref();
 // Leftovers of uploads the previous process was receiving when it stopped.
 try { MEDIA.cleanTmp(); } catch (e) { console.error('media: boot cleanup failed', e.message); }
@@ -2637,6 +2646,13 @@ const routes = {
   ...studioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...portfolioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...reviewStatRoutes({ json, db, readSession, isAdmin, pairs: PAIRS }),
+  ...selfReviewRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS }),
+  ...campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
+  ...studyGroupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
+  ...programRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
+  ...shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
+  ...WEEKLY.routes,
+  ...academyCoachRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

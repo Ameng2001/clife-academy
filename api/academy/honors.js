@@ -44,6 +44,8 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
   const e = earnedOf(uid, { db, stateOf });
   if (e.tool) out.push({ key: 'cert-tool', kind: 'growth', name: KIND_LABEL.tool, desc: `完成${e.tool.name}路径，测验正确率 ≥ 80%`, on: e.tool.ok, at: e.tool.at, progress: e.tool.done, of: e.tool.total });
   for (const d of e.domains) out.push({ key: `cert-${d.path}`, kind: 'growth', name: `${d.name}研修证书`, desc: '走完这条领域路径，实践关作品全部通过点评', on: d.ok, at: d.at, progress: d.done + d.works, of: d.total + d.worksTotal });
+  // 练习营结营（camps.js）：结营时发过帖的营员；中途退出的没有任何记录
+  for (const c of (db.camps || [])) if (c.closedAt && (c.graduates || []).includes(uid)) out.push({ key: `camp-${c.id}`, kind: 'growth', name: `结营 · ${c.title}`, desc: '自愿练习营结营', on: true, at: c.closedAt });
   out.push({ key: 'seven', kind: 'growth', name: '七领域都有证据', desc: '七个专业领域各至少一条证据：通过的关、通过的作品或研讨作答', on: e.seven.ok, at: null, progress: e.seven.have, of: e.seven.of });
   out.push({ key: 'backbone', kind: 'growth', name: KIND_LABEL.backbone, desc: '三条领域研修证书 ＋ 一份园本案例 ＋ 线下答辩（按学期开班）', on: e.backbone.ok, at: e.backbone.at, progress: Math.min(e.backbone.domainCerts, 3) + Math.min(e.backbone.cases, 1), of: 4 });
   const cases = (db.cases || []).filter(c => c.by === uid && c.status === 'approved').map(c => c.curated?.at || c.at).sort((a, b) => a - b);
@@ -64,6 +66,25 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
 }
 function finishedFor(uid, path, stateOf) { const S = stateOf(uid) || {}, prog = S.progress || {}; const n = PATH_LEN[path] || 0; let d = 0; while (d < n && prog[`${path}-${d}`]?.passedAt) d++; return n > 0 && d >= n ? prog[`${path}-${n - 1}`].passedAt : null; }
 
+/** 园所集体荣誉（ROADMAP 第七节）：系统按园统计。全园该走这条路径的人都走完了（≥ 3 人才算）；本园案例被外园用过 ≥ 10 次。只给本园看，不跨园比。 */
+export const ORG_USES_MIN = 10;
+export function orgBadgesOf(orgKey, { db, stateOf, isAdmin, orgKeyOf }) {
+  const out = [];
+  const members = (db.users || []).filter(u => !u.disabled && orgKeyOf(u) === orgKey && !isAdmin(u));
+  for (const path of Object.keys(PATH_LEN)) {
+    const role = Object.values(ROLE_PATH).includes(path);
+    const who = role ? members.filter(u => ROLE_PATH[u.academy?.role] === path) : members;
+    if (who.length < 3) continue;
+    const ats = who.map(u => finishedFor(u.id, path, stateOf));
+    const done = ats.filter(Boolean).length;
+    out.push({ key: `org-path-${path}`, name: `全园走完「${PATH_NAMES[path] || path}」`, desc: role ? `本园该岗位的 ${who.length} 人都走完本岗位路径` : `本园 ${who.length} 人都走完这条领域路径`, on: done === who.length, at: done === who.length ? Math.max(...ats) : null, progress: done, of: who.length });
+  }
+  const ids = new Set((db.cases || []).filter(c => c.status === 'approved' && c.org === orgKey).map(c => c.id));
+  const uses = (db.caseUses || []).filter(u => ids.has(u.caseId)).filter(u => { const x = (db.users || []).find(y => y.id === u.uid); return x && orgKeyOf(x) !== orgKey; }).map(u => u.at).sort((a, b) => a - b);
+  out.push({ key: 'org-uses', name: `本园案例被外园用过 ${ORG_USES_MIN} 次`, desc: '外园教师标「用过，有效」的次数', on: uses.length >= ORG_USES_MIN, at: uses[ORG_USES_MIN - 1] || null, progress: Math.min(uses.length, ORG_USES_MIN), of: ORG_USES_MIN });
+  return out;
+}
+
 /** 一个人现有的称号（给署名旁用）。 */
 export const titlesOf = (db, uid) => (db.titles || []).filter(t => t.uid === uid).map(t => ({ id: t.id, title: t.title, label: t.label, at: t.at }));
 
@@ -72,6 +93,14 @@ export function honorRoutes({ json, readBody, db, saveDb, readSession, audit, is
   const isDirector = u => u.academy?.role === 'director';
   const pubTitle = t => ({ id: t.id, uid: t.uid, name: t.name, title: t.title, label: t.label, reason: t.reason, byName: t.byName, at: t.at });
   return {
+  // 本园集体荣誉：本园的人都能看；不跨园
+  'GET /api/org/honors': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const org = orgKeyOf(user);
+    if (!org) return json(res, 400, { error: 'your account has no kindergarten', code: 'org' });
+    json(res, 200, { orgName: user.academy?.org?.name || null, badges: orgBadgesOf(org, { db, stateOf: readStateCached, isAdmin, orgKeyOf }) });
+  },
   // 本人：勋章、称号、关卡以外的学分
   'GET /api/me/honors': async (req, res) => {
     const user = readSession(req);

@@ -60,7 +60,14 @@ test('every route the server registers is in openapi.yaml, and nothing else is',
     ...routeKeys(read(path.join(API, 'academy', 'questions.js'))),
     ...routeKeys(read(path.join(API, 'academy', 'studios.js'))),
     ...routeKeys(read(path.join(API, 'academy', 'portfolio.js'))),
-    ...routeKeys(read(path.join(API, 'academy', 'reviewstats.js')))
+    ...routeKeys(read(path.join(API, 'academy', 'reviewstats.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'selfreview.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'camps.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'studygroups.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'programs.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'sharedays.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'weekly.js'))),
+    ...routeKeys(read(path.join(API, 'academy', 'coach.js')))
   ]);
   const ops = new Set(specOperations(spec));
   assert.ok(routes.size > 40, `only found ${routes.size} routes — the route table moved`);

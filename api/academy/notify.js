@@ -20,11 +20,12 @@ import { orgKeyOf } from './org.js';
 const APPID = process.env.WX_APPID || '', SECRET = process.env.WX_SECRET || '';
 const BASE = (process.env.WX_API_BASE || 'https://api.weixin.qq.com').replace(/\/+$/, '');
 const MP_STATE = /^(developer|trial|formal)$/.test(process.env.WX_MP_STATE || '') ? process.env.WX_MP_STATE : 'formal';
-const KINDS = ['review', 'queue', 'lecture'];
+const KINDS = ['review', 'queue', 'lecture', 'weekly'];
 const DEFAULT_DATA = {
   review: { thing1: 'title', phrase2: 'verdict', time3: 'at', thing4: 'comment' },
   queue: { thing1: 'title', name2: 'who', time3: 'at' },
-  lecture: { thing1: 'title', time2: 'at', name3: 'who' }
+  lecture: { thing1: 'title', time2: 'at', name3: 'who' },
+  weekly: { thing1: 'title', thing2: 'text', time3: 'at' }
 };
 const GRANT_CAP = 50;
 

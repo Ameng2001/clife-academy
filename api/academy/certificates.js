@@ -56,6 +56,7 @@ export function earnedOf(uid, { db, stateOf, user }) {
   for (const id of Object.keys(prog)) if (prog[id]?.passedAt && LEVEL_DOMAIN[id]) evid.add(LEVEL_DOMAIN[id]);
   for (const s of subs) if (LEVEL_DOMAIN[s.levelId] && (s.status === 'pass' || LEVEL_TYPES[s.levelId] === 'seminar')) evid.add(LEVEL_DOMAIN[s.levelId]);
   for (const a of (db.drillAnswers || [])) if (a.uid === uid) { const d = (db.drills || []).find(x => x.id === a.drillId); if (d?.domain) evid.add(d.domain); }
+  if ((db.studyTasks || []).some(t => t.replies.some(r => r.uid === uid))) evid.add('reflect');   // 园内教研组的反思（studygroups.js）
   const seven = { have: evid.size, of: DOMAINS.length, ok: evid.size >= DOMAINS.length };
   // 骨干：三条领域证书 ＋ 一份入库案例 ＋ 答辩（期次里记）
   const domainCerts = domains.filter(d => d.ok).length;

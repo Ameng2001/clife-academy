@@ -3974,6 +3974,272 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /api/me/selfreview:
+    get:
+      tags: [academy]
+      operationId: academyMySelfReview
+      summary: 本学期自评问卷、我的自评、带教教师与园长给我的两段话
+      description: 七领域各一档（还没开始 / 在学 / 能独立做 / 能带别人）＋一件想练的事＋反思。平台只收集与并置，不合成总分。
+      responses:
+        '200': { description: '`{ term, items, scale, mine, comments, previous }`' }
+  /api/me/selfreview:
+    post:
+      tags: [academy]
+      operationId: academySaveSelfReview
+      summary: 交或改本学期自评
+      description: `{ levels:{key:0..3}, focus, reflection }`；一学期一份，再交就是改。
+      responses:
+        '200': { description: '`{ mine, term }`' }
+  /api/selfreview/others:
+    get:
+      tags: [academy]
+      operationId: academySelfReviewOthers
+      summary: 带教教师看所带教师、园长看本园：每人的自评与已有的评并置
+      description: 管理员不看个人。
+      responses:
+        '200': { description: '`{ term, items, scale, as, people, done }`' }
+  /api/selfreview/comment:
+    post:
+      tags: [academy]
+      operationId: academySelfReviewComment
+      summary: 给一个人写一段（带教教师看作品写，园长看参与与反思写）
+      description: `{ uid, text ≥ 20 }`；一人一段，再写就是改。
+      responses:
+        '200': { description: '`{ person }`' }
+  /api/org/honors:
+    get:
+      tags: [academy]
+      operationId: academyOrgHonors
+      summary: 本园集体荣誉：全园走完某条路径（≥ 3 人）、本园案例被外园用过 10 次
+      description: 只给本园看，不跨园比。
+      responses:
+        '200': { description: '`{ orgName, badges }`' }
+  /api/camps:
+    get:
+      tags: [academy]
+      operationId: academyCamps
+      summary: 自愿练习营列表（范围内的；帖子只有营员看）
+      description: 不做打卡：没发的那天不记、不提醒、不统计连续天数。
+      responses:
+        '200': { description: '`{ camps, canHost, maxDays }`' }
+  /api/camps:
+    post:
+      tags: [academy]
+      operationId: academySaveCamp
+      summary: 办一个练习营或改（管理员全平台或本园，园长本园）
+      description: `{ id?, title, intro?, days:[3–30 条任务], startAt, scope }`
+      responses:
+        '200': { description: '`{ camp }`' }
+  /api/camps/join:
+    post:
+      tags: [academy]
+      operationId: academyJoinCamp
+      summary: 报名
+      description: `{ id }`
+      responses:
+        '200': { description: '`{ camp }`' }
+  /api/camps/leave:
+    post:
+      tags: [academy]
+      operationId: academyLeaveCamp
+      summary: 退营：人和帖子一起删，不留记录
+      description: `{ id }`
+      responses:
+        '200': { description: '`{ camp }`' }
+  /api/camps/post:
+    post:
+      tags: [academy]
+      operationId: academyCampPost
+      summary: 发当天的小任务（一人一天一帖，再发就是改）
+      description: `{ id, day, text ≥ 20 }`；只能发到今天为止。
+      responses:
+        '200': { description: '`{ camp }`' }
+  /api/camps/close:
+    post:
+      tags: [academy]
+      operationId: academyCloseCamp
+      summary: 结营：讲师总评；发过帖的营员记为结营，成长勋章由荣誉页按此发
+      description: `{ id, summary ≥ 20 }`
+      responses:
+        '200': { description: '`{ camp }`' }
+  /api/studytasks:
+    get:
+      tags: [academy]
+      operationId: academyStudyTasks
+      summary: 园内教研组任务（本园）：先交再看别人的
+      description: 谁没交只有出题人看到，不推送催交。
+      responses:
+        '200': { description: '`{ tasks, canHost, minReply }`' }
+  /api/studytasks:
+    post:
+      tags: [academy]
+      operationId: academySaveStudyTask
+      summary: 教研主任（点评人）或园长发课例研讨任务，可挂一条入库案例
+      description: `{ id?, title, prompt, caseId?, dueAt? }`
+      responses:
+        '200': { description: '`{ task }`' }
+  /api/studytasks/reply:
+    post:
+      tags: [academy]
+      operationId: academyStudyReply
+      summary: 交反思（≥ 100 字，截止前可改）；记进「反思与发展」领域证据
+      description: `{ id, text }`
+      responses:
+        '200': { description: '`{ task }`' }
+  /api/studytasks/close:
+    post:
+      tags: [academy]
+      operationId: academyCloseStudyTask
+      summary: 收任务
+      description: `{ id }`
+      responses:
+        '200': { description: '`{ task }`' }
+  /api/programs:
+    get:
+      tags: [academy]
+      operationId: academyPrograms
+      summary: 研修项目期次（寒暑假研修、园长研修等）：报名状态；管理员看名单
+      description: 名单只给运营方与本人看。
+      responses:
+        '200': { description: '`{ programs, kinds, canHost }`' }
+  /api/programs:
+    post:
+      tags: [academy]
+      operationId: academySaveProgram
+      summary: 管理员建期次或改
+      description: `{ id?, title, kind, term, from, to, place?, hours, capacity?, note? }`
+      responses:
+        '200': { description: '`{ program }`' }
+  /api/programs/apply:
+    post:
+      tags: [academy]
+      operationId: academyApplyProgram
+      summary: 报名 / 撤回
+      description: `{ id, withdraw? }`
+      responses:
+        '200': { description: '`{ program }`' }
+  /api/programs/roster:
+    post:
+      tags: [academy]
+      operationId: academyProgramRoster
+      summary: 管理员定名单、记完成；完成的学时进发展档案与学时证明
+      description: `{ id, uid, status: accepted|declined|completed }`
+      responses:
+        '200': { description: '`{ program }`' }
+  /api/programs/close:
+    post:
+      tags: [academy]
+      operationId: academyCloseProgram
+      summary: 管理员收期次
+      description: `{ id }`
+      responses:
+        '200': { description: '`{ program }`' }
+  /api/sharedays:
+    get:
+      tags: [academy]
+      operationId: academyShareDays
+      summary: 园所分享日（共同体内）：各园的一页
+      description: 是展示，不是评比：不计票、不排名。
+      responses:
+        '200': { description: '`{ sharedays, communities, maxCases }`' }
+  /api/sharedays:
+    post:
+      tags: [academy]
+      operationId: academySaveShareDay
+      summary: 区县管理员为本区一个共同体办一场分享日
+      description: `{ id?, communityId, at, place?, theme? }`
+      responses:
+        '200': { description: '`{ shareday }`' }
+  /api/sharedays/page:
+    post:
+      tags: [academy]
+      operationId: academyShareDayPage
+      summary: 园长交本园的一页：≤ 8 条本园入库案例＋一段话
+      description: `{ id, caseIds, note }`；再交就是改。
+      responses:
+        '200': { description: '`{ shareday }`' }
+  /api/sharedays/close:
+    post:
+      tags: [academy]
+      operationId: academyCloseShareDay
+      summary: 收官
+      description: `{ id }`
+      responses:
+        '200': { description: '`{ shareday }`' }
+  /api/lectures/sharers:
+    get:
+      tags: [academy]
+      operationId: academyLectureSharers
+      summary: 管理员：分享者候选（案例被「用过，有效」≥ 3 次或入库 ≥ 3 条或入选）
+      description: 邀请用的工作名单，不公开、不排名。
+      responses:
+        '200': { description: '`{ candidates, usesMin, casesMin }`' }
+  /api/lectures/invite:
+    post:
+      tags: [academy]
+      operationId: academyLectureInvite
+      summary: 邀请分享者上讲堂：记为这场的分享者、案例进展示、授「年度分享者」称号
+      description: `{ id, uid, caseId? }`
+      responses:
+        '200': { description: '`{ lecture }`' }
+  /api/ops/weekly:
+    get:
+      tags: [academy]
+      operationId: academyWeekly
+      summary: 运营周报：上一周本园（园长）或全平台＋各园一行（管理员）
+      description: 过关、作品、点评、超期、每周一题、答疑、入库；不列个人、不排名。周一 09:00 后按订阅消息 weekly 推一次。
+      responses:
+        '200': { description: '`{ scope, week, members, active, passes, submitted, reviewed, pending, overdue, drillAnswers, questionsNew, questionsOpen, casesApproved, text, orgs? }`' }
+
+  /api/me/coach:
+    get:
+      tags: [academy]
+      operationId: academyCoach
+      summary: Coach（专业发展）：最近的卡片、采用中的学期计划、阶段
+      description: 证据只来自学习记录（进度、作品点评、每周一题、自评、带教）；不读幼儿数据。有模型只改措辞，结构由规则定。
+      responses:
+        '200': { description: '`{ cards, plan, model, evidence, stage }`' }
+  /api/me/coach/plan:
+    post:
+      tags: [academy]
+      operationId: academyCoachPlan
+      summary: 排一学期的路径（16 周，每周两关左右）：先接没走完的线，再补自评最弱的领域
+      description: 要本人「采用」才成为学期计划。
+      responses:
+        '200': { description: '`{ card }`' }
+  /api/me/coach/review:
+    post:
+      tags: [academy]
+      operationId: academyCoachReview
+      summary: 周回顾：哪条线停了、哪类实践关反复不过；变更只有 add-practice 与 pair 两类
+      description: pair 建议要园长自己在带教配对里配。
+      responses:
+        '200': { description: '`{ card }`' }
+  /api/me/coach/debrief:
+    post:
+      tags: [academy]
+      operationId: academyCoachDebrief
+      summary: 单关复盘
+      description: `{ levelId }`
+      responses:
+        '200': { description: '`{ card }`' }
+  /api/me/coach/accept:
+    post:
+      tags: [academy]
+      operationId: academyCoachAccept
+      summary: 采用 / 不采用一张卡
+      description: `{ id, on }`；采用的 plan 成为学期计划，首页出「本周待学」。
+      responses:
+        '200': { description: '`{ card, plan }`' }
+  /api/org/coach:
+    get:
+      tags: [academy]
+      operationId: academyOrgCoach
+      summary: 园长：本园成员采用了的 pair 建议（还没配对的）
+      description: 只是建议，配不配由园长定。
+      responses:
+        '200': { description: '`{ suggestions }`' }
+
 components:
   securitySchemes:
     cookieAuth:
