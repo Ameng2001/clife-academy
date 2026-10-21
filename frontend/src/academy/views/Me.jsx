@@ -48,6 +48,7 @@ export default function Me() {
         <span className="small muted">{fmtDay(r.passedAt)}</span>
       </div> })}
     </div></div>
+    {user && <div className="sect"><div className="sect-b"><div className="lrow tap" onClick={() => nav('/portfolio')}><div style={{ flex: 1 }}><div className="lrow-t"><Icon name="clipboard" /> 发展档案与学时证明</div><div className="small muted">全部记录随人走：打印、下载 JSON；按市里格式出具学时证明</div></div><Icon name="chevronRight" /></div></div></div>}
     <div className="card ac-note">初级认证：完成本岗位路径，测验正确率 80% 以上，线上完成。中级：初级通过，提交一份本园场景应用案例，线下答辩。</div>
   </div>
 }

@@ -35,7 +35,8 @@ for (const path of Object.keys(D.PATHS)) {
     LEVEL_TYPES[`${path}-${i}`] = lv.type;
     if (lv.rubric) RUBRICS[`${path}-${i}`] = lv.rubric;
     const dom = CAP.domainOf(lv); if (dom) LEVEL_DOMAIN[`${path}-${i}`] = dom;
-    LEVEL_INFO[`${path}-${i}`] = { scene: lv.scene || '', goal: lv.goal || '', steps: Array.isArray(lv.steps) ? lv.steps.map(String) : [], refs: Array.isArray(lv.refs) ? lv.refs : [], prompt: lv.prompt || '' };
+    const dm = /(\d+)\s*[′']\s*(\d+)?/.exec(String(lv.dur || '')); const minutes = dm ? Number(dm[1]) + (Number(dm[2] || 0) >= 30 ? 1 : 0) : 0;
+    LEVEL_INFO[`${path}-${i}`] = { scene: lv.scene || '', goal: lv.goal || '', minutes, steps: Array.isArray(lv.steps) ? lv.steps.map(String) : [], refs: Array.isArray(lv.refs) ? lv.refs : [], prompt: lv.prompt || '' };
   });
 }
 const ROLE_PATH = Object.fromEntries(Object.entries(D.ROLES).map(([r, v]) => [r, v.path]));

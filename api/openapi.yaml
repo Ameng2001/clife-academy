@@ -1152,6 +1152,62 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, summary: { type: string } } } } } }
       responses:
         '200': { description: '`{ showcase }`' }
+  /api/me/portfolio:
+    get:
+      tags: [academy]
+      operationId: academyPortfolio
+      summary: 发展档案（本人全部学习与作品记录，随人走；?download=1 下载 JSON）
+      description: 不含幼儿数据、不含 AI 中间判断、不含他人的测验分与点评。
+      parameters: [{ name: download, in: query, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ format, person, summary, paths, levels, submissions, cases, contests, certificates, badges, titles, credits, studios, lectures, excluded }`' }
+  /api/hours/rule:
+    get:
+      tags: [academy]
+      operationId: academyHoursRule
+      summary: 学时计时规则与证明格式（全员可读）
+      responses:
+        '200': { description: '`{ rule, canEdit, defaults }`' }
+    put:
+      tags: [academy]
+      operationId: academyHoursRuleSet
+      summary: 改学时规则与证明格式（管理员；按与市教育局谈定的口径）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { minutesPerHour: { type: number }, practiceExtra: { type: number }, seminarExtra: { type: number }, backboneMinutes: { type: number }, lectureCounts: { type: boolean }, roundTo: { type: number }, title: { type: string }, issuer: { type: string }, signer: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ rule }`' }
+  /api/me/hours:
+    get:
+      tags: [academy]
+      operationId: academyHours
+      summary: 本人学时预览（缺省本学年）与已出具的证明
+      parameters: [{ name: from, in: query, schema: { type: integer } }, { name: to, in: query, schema: { type: integer } }]
+      responses:
+        '200': { description: '`{ from, to, lines, minutes, hours, rule, schoolYear, certs }`' }
+  /api/me/hours/issue:
+    post:
+      tags: [academy]
+      operationId: academyHoursIssue
+      summary: 出具学时证明（同一区间只出一份；规则快照随证明保存）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { from: { type: integer }, to: { type: integer } } } } } }
+      responses:
+        '200': { description: '`{ cert }`' }
+        '400': { description: 区间内没有可计学时 }
+  /api/me/hours/one:
+    get:
+      tags: [academy]
+      operationId: academyHoursOne
+      summary: 一份学时证明（本人，打印用）
+      parameters: [{ name: id, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ cert }`' }
+  /api/hours/verify:
+    get:
+      tags: [academy]
+      operationId: academyHoursVerify
+      summary: 核验学时证明（公开，姓名脱敏）
+      parameters: [{ name: no, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ valid, no, name, orgName, from, to, hours, at, issuer }`' }
   /api/me/checkup:
     get:
       tags: [academy]

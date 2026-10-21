@@ -47,7 +47,7 @@ export default function Honors() {
       {h.titles.map(t => <div key={t.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t"><Icon name="crown" /> {t.label}</div><div className="small muted">{t.byName} 授 · {fmtDay(t.at)} · {t.reason}</div></div></div>)}
     </div></div>}
 
-    {h && <div className="sect"><div className="sect-t">成长勋章 <span className="tap small" style={{ color: 'var(--acc)', marginInlineStart: 8 }} onClick={() => nav('/certs')}>证书与认证 ›</span></div>
+    {h && <div className="sect"><div className="sect-t">成长勋章 <span className="tap small" style={{ color: 'var(--acc)', marginInlineStart: 8 }} onClick={() => nav('/certs')}>证书与认证 ›</span> <span className="tap small" style={{ color: 'var(--acc)', marginInlineStart: 8 }} onClick={() => nav('/portfolio')}>发展档案 ›</span></div>
       <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(96px,1fr))', gap: 8 }}>
         {growth.map(b => <div key={b.key} className={'ac-badge' + (b.on ? ' on' : '')} title={b.desc}><div className="b">{b.name[0]}</div><div className="small" style={{ fontSize: 12 }}>{b.name}</div><div className="small muted" style={{ fontSize: 11 }}>{b.on ? fmtDay(b.at) : '未获得'}</div></div>)}
       </div>
