@@ -19,6 +19,7 @@ import Paths from './views/Paths.jsx'
 import Level from './views/Level.jsx'
 import Me from './views/Me.jsx'
 import Director from './views/Director.jsx'
+import Library from './views/Library.jsx'
 import './academy.css'
 
 bindUI(useUI)
@@ -37,6 +38,7 @@ function Tabs() {
   return <nav id="tabbar">
     <Tab active={on('home')} icon="house" label="首页" onClick={() => nav('/home')} />
     <Tab active={on('paths')} icon="list" label="学习路径" onClick={() => nav('/paths')} />
+    <Tab active={on('library')} icon="magnifier" label="微课库" onClick={() => nav('/library')} />
     <Tab active={on('me')} icon="personCircle" label="我的" onClick={() => nav('/me')} />
   </nav>
 }
@@ -74,6 +76,7 @@ function Shell() {
           <Route path="/level/:id" element={<Level />} />
           <Route path="/me" element={<Me />} />
           <Route path="/org" element={<Director />} />
+          <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>}
