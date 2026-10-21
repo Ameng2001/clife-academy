@@ -1,8 +1,9 @@
 # CLAUDE.md
 
 clife-academy：幼儿园教职工岗位能力训练平台（C-Life 学前大课堂），以 openGym 为基底改造。
-上游的架构说明在 `docs/upstream/CLAUDE-openGym.md`，仍然准确描述 api/server.js、store、lib、coach 的结构；
-业务映射与改造清单在 `docs/MIGRATION.md`，动手前先读第二、三节。
+上游的架构说明在 `docs/upstream/CLAUDE-openGym.md`，对 `api/`（server.js、sync-stamps、coach）仍然准确；
+`frontend/src` 已换成大课堂自己的：`academy/` 视图与壳、`store/useStore.js` 精简同步引擎（与上游 GET/PUT /api/data 协议一致）、
+`lib/academy-merge.js` 合并规则、`lib/level-draft.js` 草稿。业务映射与改造清单在 `docs/MIGRATION.md`，动手前先读第二、三节。
 
 ## 硬约束（沿用上游）
 

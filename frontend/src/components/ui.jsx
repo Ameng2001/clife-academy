@@ -17,7 +17,6 @@ import { useRef, useState, useEffect, useCallback, forwardRef } from 'react'
 import Icon from './Icon.jsx'
 import { sheetKeyboardInsets } from '../lib/use-sheet-keyboard.js'
 import { NATIVE_KEYBOARD_EVENT } from '../lib/native-keyboard.js'
-import { t } from '../lib/i18n.js'
 
 /* ============================ text ============================ */
 
@@ -88,7 +87,7 @@ export const SearchField = forwardRef(function SearchField({ value, onChange, on
       <Icon name="magnifier" className="lead" />
       <input ref={ref} className="field" value={value} onChange={onChange} {...rest} />
       {!!value && (
-        <button className="clear" onClick={onClear} aria-label={t('Clear')}>
+        <button className="clear" onClick={onClear} aria-label="清除">
           <Icon name="xmark" />
         </button>
       )}
@@ -182,12 +181,12 @@ export function Stepper({ value, step = 1, min = 0, max = Infinity, onChange, de
   })
   const inner = (
     <div className={'stp ' + className}>
-      <button {...holdProps(-1)} aria-label={ariaLabel ? `Decrease ${ariaLabel}` : t('Decrease')} disabled={disabled}><Icon name="minus" /></button>
+      <button {...holdProps(-1)} aria-label={ariaLabel ? `Decrease ${ariaLabel}` : '减少'} disabled={disabled}><Icon name="minus" /></button>
       <span className="val" onBlur={() => { const v = +value || 0; if (clamp(v) !== v) onChange(clamp(v)) }}>
         <NumberField value={value} decimal={decimal} onChange={onChange} disabled={disabled} aria-invalid={invalid ? 'true' : undefined} />
         {unit && <i>{unit}</i>}
       </span>
-      <button {...holdProps(1)} aria-label={ariaLabel ? `Increase ${ariaLabel}` : t('Increase')} disabled={disabled}><Icon name="plus" /></button>
+      <button {...holdProps(1)} aria-label={ariaLabel ? `Increase ${ariaLabel}` : '增加'} disabled={disabled}><Icon name="plus" /></button>
     </div>
   )
   if (!label) return inner

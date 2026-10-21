@@ -1,11 +1,10 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest'
-import { ACCENTS } from './format.js'
+import { ACCENTS } from './accent.js'
 import {
   cleanHex, sanitizeAccent, accentKey, accentValue, contrast, inkOn, readableIn, adjustedIn,
   customAccentVars, accentPair, applyAccent, THEMES, isGrey, inkOnBoth, mix, GREY_TEXT, GREY_GAP,
 } from './accent.js'
-import { mergeStates, stampChange } from './sync-merge.js'
 
 describe('cleanHex', () => {
   it('takes #rrggbb only, in lowercase', () => {
@@ -176,66 +175,5 @@ describe('CSS for the own colour', () => {
     expect(el.style.getPropertyValue('--knob-ring')).toBe('')
     applyAccent(el, 'url(x)', 'dark')
     expect(el.dataset.accent).toBe('lime')
-  })
-})
-
-describe('the native countdown colours', () => {
-  it('takes a preset key or the own colour', () => {
-    expect(accentPair('sky')).toEqual({ accent: ACCENTS.sky, ink: '#ffffff' })
-    expect(accentPair('#ffd60a')).toEqual({ accent: '#ffd60a', ink: '#000000' })
-    expect(accentPair('nonsense')).toEqual({ accent: ACCENTS.lime, ink: '#000000' })
-    expect(accentPair(undefined)).toEqual({ accent: ACCENTS.lime, ink: '#000000' })
-  })
-})
-
-describe('sync with an app from before own colours', () => {
-  const base = { _ts: 1, unit: 'kg', workouts: [], routines: [], bodyweight: [] }
-  it('an older copy picking a preset keeps the own colour for later', () => {
-    const mine = { ...base, _ts: 10, accent: 'custom', accentCustom: '#ff00aa', edited: { accent: 10, accentCustom: 10 } }
-    // the old app knows nothing of accentCustom; its copy still carries it untouched
-    const old = { ...base, _ts: 20, accent: 'sky', accentCustom: '#ff00aa', edited: { accent: 20, accentCustom: 10 } }
-    const out = mergeStates(mine, old)
-    expect(out.accent).toBe('sky')
-    expect(out.accentCustom).toBe('#ff00aa')
-    expect(accentValue(out)).toBe('sky')
-  })
-  it('an older copy without the field does not lose it, and a newer one draws it', () => {
-    const mine = { ...base, _ts: 30, accent: 'custom', accentCustom: '#123456', edited: { accent: 30, accentCustom: 30 } }
-    const old = { ...base, _ts: 20, accent: 'lime' }
-    const out = mergeStates(old, mine)
-    expect(accentValue(out)).toBe('#123456')
-  })
-  it('what an old app makes of "custom": its own default, nothing broken', () => {
-    // App.jsx before own colours: ACCENTS[accent] ? accent : 'lime'
-    const S = { accent: 'custom', accentCustom: '#123456' }
-    expect(ACCENTS[S.accent] ? S.accent : 'lime').toBe('lime')
-  })
-  it('a malformed colour from the other copy is dropped by the merge', () => {
-    const mine = { ...base, _ts: 10, accent: 'red' }
-    const theirs = { ...base, _ts: 20, accent: 'custom', accentCustom: '#fff;}*{color:red' }
-    const out = mergeStates(mine, theirs)
-    expect('accentCustom' in out).toBe(false)
-    expect(accentValue(out)).toBe('lime')
-  })
-})
-
-describe('an own colour and a preset picked on two devices', () => {
-  // QA round 2 (2026-10-06): with the own colour already on, a new one changed only accentCustom,
-  // so a preset picked earlier on the other device kept `accent` and the newer choice was undone.
-  const T = 1_800_000_000_000
-  const base = { _ts: T, unit: 'kg', workouts: [], routines: [], bodyweight: [], accent: 'custom', accentCustom: '#ff0000' }
-  const change = (prev, wall, mut) => { const n = JSON.parse(JSON.stringify(prev)); mut(n); n._ts = stampChange(prev, n, wall); return n }
-  it('a new own colour picked later wins both fields, in either merge order', () => {
-    const B = change(base, T + 1000, s => { s.accent = 'sky' })
-    const A = change(base, T + 4000, s => { s.accent = 'custom'; s.accentCustom = '#00aa00' })
-    for (const out of [mergeStates(A, B), mergeStates(B, A)]) {
-      expect(out.accent).toBe('custom')
-      expect(out.accentCustom).toBe('#00aa00')
-    }
-  })
-  it('a preset picked later still wins over an own colour picked earlier', () => {
-    const A = change(base, T + 1000, s => { s.accent = 'custom'; s.accentCustom = '#00aa00' })
-    const B = change(base, T + 4000, s => { s.accent = 'sky' })
-    for (const out of [mergeStates(A, B), mergeStates(B, A)]) expect(out.accent).toBe('sky')
   })
 })

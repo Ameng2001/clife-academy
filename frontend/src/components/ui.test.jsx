@@ -120,7 +120,7 @@ describe('Stepper', () => {
   }
   const mountStepper = (value, onChange, step = 1) => {
     act(() => root.render(<Host initial={value} step={step} onChange={onChange} />))
-    return host.querySelector('button[aria-label="Increase"]')
+    return host.querySelector('button[aria-label="增加"]')
   }
 
   it('steps once for a short tap (pointerdown, pointerup, click)', () => {
@@ -162,7 +162,7 @@ describe('Stepper', () => {
       return <Stepper value={v} step={5} min={1} decimal={false} onChange={n => { setV(n); onChange(n) }} />
     }
     act(() => root.render(<MinHost />))
-    const minus = host.querySelector('button[aria-label="Decrease"]')
+    const minus = host.querySelector('button[aria-label="减少"]')
     const field = host.querySelector('input.num')
     act(() => minus.click())
     expect(onChange).toHaveBeenLastCalledWith(1)
@@ -198,7 +198,7 @@ describe('Stepper', () => {
     const onChange = vi.fn()
     act(() => root.render(<Host initial={61.3} step={2.5} onChange={onChange}
       onStep={(value, increment, direction) => value + increment * 10 + direction} />))
-    act(() => host.querySelector('button[aria-label="Increase"]').click())
+    act(() => host.querySelector('button[aria-label="增加"]').click())
     expect(onChange).toHaveBeenCalledWith(87.3)
   })
 

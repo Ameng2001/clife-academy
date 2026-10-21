@@ -1,6 +1,6 @@
-// 大课堂字段的合并规则，挂在 sync-merge.js 的 mergeStates 里。
+// 大课堂整份状态的合并规则（替代上游 sync-merge.js 的 mergeStates）。
 //
-// 上游对不认识的字段是「整块跟新的一方」：两台设备各通了一关，后写的会把先写的冲掉。这里给三个字段各自的规则：
+// 设置类字段（theme、role、connStatus…）整块跟 _ts 新的一方；三个进度字段各有规则：
 //   progress  按关卡 id 取并集；同一关两边都有时取 passedAt 最早的那条——通过是一次性事实，先到先算
 //   sessions  只追加：按 id 取并集（旧记录没有 id 的按 levelId＋end 兜底），按 end 排序
 //   credits   不合并，从合并后的 progress 重新算——存下来只是为了页面少算一遍，真相在 progress
@@ -62,4 +62,29 @@ export function mergeAcademy(out, n, o) {
 export function academyExtras(local, server) {
   const have = isMap(server?.progress) ? server.progress : {}
   return Object.entries(isMap(local?.progress) ? local.progress : {}).filter(([k, v]) => isMap(v) && v.passedAt && !(isMap(have[k]) && have[k].passedAt)).length
+}
+
+/** 整份状态 S 有没有值得保住的东西：通过过至少一关。 */
+export const hasProgress = S => Object.values(isMap(S?.progress) ? S.progress : {}).some(e => isMap(e) && e.passedAt)
+
+/**
+ * 两份状态合一份：prefer 指定哪边的设置为准（'a' | 'b'），不指定则 _ts 新的一方；
+ * progress / sessions / credits 走上面的并集规则。服务端的 _rev / _wid 簿记不带进结果。
+ */
+export function mergeStates(a0, b0, { prefer } = {}) {
+  if (!a0) return b0 ? clone(b0) : b0
+  if (!b0) return clone(a0)
+  const side = prefer === 'a' || prefer === 'b' ? prefer : (Number(b0._ts) || 0) > (Number(a0._ts) || 0) ? 'b' : 'a'
+  const n = side === 'a' ? a0 : b0, o = n === a0 ? b0 : a0
+  const out = clone(n)
+  mergeAcademy(out, n, o)
+  out._ts = Math.max(Number(a0._ts) || 0, Number(b0._ts) || 0)
+  for (const k of ['_rev', '_wid', '_wids']) delete out[k]
+  return out
+}
+
+/** 登录时问的那句话要用的数：本地比账号多通过了几关。没有就是空对象。 */
+export function localExtras(local, server) {
+  const levels = academyExtras(local, server)
+  return levels ? { levels } : {}
 }

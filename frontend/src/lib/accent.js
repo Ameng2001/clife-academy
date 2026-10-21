@@ -14,7 +14,9 @@
 // so for each theme it is checked against that theme's backgrounds and, when it would vanish into
 // them (navy on black, pale yellow on white), made lighter or darker just far enough to be read.
 // A grey goes further, so it never looks like a switched-off button (THEMES below, accent.test.js).
-import { ACCENTS, ACCENT_INK } from './format.js'
+// 预设强调色与压在它上面的文字色，和 index.css 的 --acc / --on-acc 一致。
+export const ACCENTS = { lime: '#30d158', sky: '#0a84ff', orange: '#ff9f0a', violet: '#bf5af2', pink: '#ff375f', red: '#ff453a', teal: '#40c8e0', gold: '#ffd60a' }
+export const ACCENT_INK = { lime: '#000000', sky: '#ffffff', orange: '#000000', violet: '#ffffff', pink: '#ffffff', red: '#ffffff', teal: '#000000', gold: '#000000' }
 
 export const DEFAULT_ACCENT = 'lime'
 export const CUSTOM = 'custom'

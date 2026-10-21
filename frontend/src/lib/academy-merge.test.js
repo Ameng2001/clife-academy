@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mergeProgress, mergeSessions, creditsOf, mergeAcademy, academyExtras } from './academy-merge.js'
-import { mergeStates, localExtras } from './sync-merge.js'
+import { mergeProgress, mergeSessions, creditsOf, mergeAcademy, academyExtras, mergeStates, localExtras, hasProgress } from './academy-merge.js'
 
 describe('academy-merge', () => {
   it('progress is a union, and a level both sides passed keeps the earlier pass', () => {

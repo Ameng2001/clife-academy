@@ -215,3 +215,13 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   浏览器验证：访客横幅中文、点「登录」到登录页；开发桩登录后设置页显示姓名、岗位、园所、同步时间；退出登录回登录页，服务端会话已清。
   **还留着的上游件**：`store/useStore.js`（1,990 行，同步引擎，连着 media、health、remote、rotation 等 lib）和 `lib/exercises.js`＋动作数据（store 的 `registerCustom` 还引着，
   打包出 1 MB 的 exercises chunk）。下一步是给 store 做减法：去掉健身字段与 media/health 分支，`exercises` 随之可删。
+- **2026-10-21（夜 2）** store 减法，exercises 随之删除。`store/useStore.js` 重写为 400 行：一份 S 存 localStorage，
+  推（PUT，baseRev/baseWid 条件写，409 合并再推）、拉（修订号移动才取整份）、每 30 秒查修订、登录接管三条路（账号为空直接推；同一账号重登当两台设备合并；
+  换账号问「本地关卡记到账号里？」）、退出时欠着的改动按账号留在本地。去掉多标签页接力、手机文件镜像、媒体、健康、旧版抬升。
+  `lib/academy-merge.js` 接管 `mergeStates` / `localExtras`（设置跟 _ts 新的一方，进度三字段走并集）；`lib/api.js`、`store/useUI.js`、`ErrorBoundary.jsx`、`main.jsx` 重写成只剩需要的；
+  `accent.js` 不再依赖 format.js；ui.jsx 去掉 i18n。再删一轮不可达文件：exercises 数据、sync-merge、media、health、remote、i18n、locales 等 100 个。
+  `src/` 45 个文件；构建 337 kB（之前 1 MB 的 exercises chunk 没了）。测试：`store/useStore.test.js` 对着内存假服务端跑 9 项（推、拉、409、三条接管路、过期重登、强制退出留存）；
+  `api/test/academy-state.test.js` 证实没有 workouts/routines 的文档也能走 /api/data，409 带回现文档。前端 14 个文件 125 项、api 14 项全绿。
+  浏览器验证：访客通过 nurse-0、留草稿 → 登录已有 director-0 的账号 → 弹层 → 两端并集、学分各 1、草稿仍在；设置页退出 → 登录页，localStorage 只剩空状态与草稿。
+  localStorage 键名改为 `academy_*`。
+  **还留着的**：`package.json` 里 capacitor、jsqr、lean-qr 等依赖没用了，等有网时 `npm uninstall` 顺手更新锁文件；public/sw.js 没再注册。

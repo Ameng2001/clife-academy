@@ -27,7 +27,7 @@ export default function Login({ relogin = false } = {}) {
     setUser(u, { adopt: true })
     await adoptProfile(askAddDeviceData)
     // 岗位以服务端为准（平台登录每次刷新；微信登录默认教师，园长可改）
-    if (u.academy?.role) useStore.getState().update(s => { s.role = u.academy.role }, false)
+    if (u.academy?.role) useStore.getState().update(s => { s.role = u.academy.role })
     useUI.getState().toast(`欢迎，${u.name}`)
   }
   const login = async (path, body, fail) => {

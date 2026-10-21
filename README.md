@@ -11,7 +11,7 @@
 
 ```
 api/        Node 原生 http 服务，无框架。session、GET/PUT /api/data 全量同步、字段级合并、Coach 流水线、提醒
-frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见平台仓库）
+frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见平台仓库）。src/academy 视图与壳，store 同步引擎，lib 纯函数
 mcp/        只读 MCP 桥，园长、教育局用 LLM 客户端查进度（后置）
 web/        nginx：托前端、反代 /api
 docs/       MIGRATION.md 迁移方案；upstream/ 上游原文档
@@ -29,5 +29,5 @@ cd frontend && npm ci && npm test && npm run dev
 
 ## 状态
 
-改造进行中，第 1 周。能跑：`sh scripts/dev.sh` 起 api（:3000）＋前端（:5173），开发桩登录（姓名＋岗位）或访客进入后，保健医路径第 1 关可讲看做测到通关。登录三条入口见 `docs/AUTH.md`。
+改造进行中，第 1 周。能跑：`sh scripts/dev.sh` 起 api（:3000）＋前端（:5173），开发桩登录（姓名＋岗位）或访客进入后，保健医路径第 1 关可讲看做测到通关；进度随账号同步，访客通过的关卡登录时可并入账号。上游健身视图、lib、动作库已全部移除。登录三条入口见 `docs/AUTH.md`。
 进度与待办见 `docs/MIGRATION.md` 第八节。
