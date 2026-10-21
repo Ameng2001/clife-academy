@@ -24,6 +24,7 @@ import { createNotifier, notifyRoutes, notifyConfigured } from './academy/notify
 import { createPairs, pairRoutes } from './academy/pairs.js';
 import { resourceRoutes } from './academy/resources.js';
 import { caseRoutes } from './academy/cases.js';
+import { lectureRoutes } from './academy/lectures.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1772,6 +1773,9 @@ const MEDIA = createMediaStore({ dir: path.join(DATA, 'uploads'), limits: MEDIA_
 // 订阅消息发送器：没配模板时 send() 直接答 no-template，提交与点评照常。
 const NOTIFIER = createNotifier({ db, saveDb });
 const PAIRS = createPairs(db);
+// 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
+const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
+setInterval(() => { LECTURES.tick().catch(e => console.error('lecture reminder:', e.message)); }, 60000).unref();
 // Leftovers of uploads the previous process was receiving when it stopped.
 try { MEDIA.cleanTmp(); } catch (e) { console.error('media: boot cleanup failed', e.message); }
 // Per profile, not per address: every upload is signed in, and behind a proxy one address can be
@@ -2603,6 +2607,7 @@ const routes = {
   ...resourceRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   // 案例库（academy/cases.js）
   ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
+  ...LECTURES.routes,
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

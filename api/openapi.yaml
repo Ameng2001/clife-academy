@@ -769,6 +769,48 @@ paths:
       responses:
         '200': { description: 文件 }
         '404': { description: 没有 }
+  /api/lectures:
+    get:
+      tags: [academy]
+      operationId: academyLectures
+      summary: 园长大讲堂：待播（含正在直播）与回放
+      description: 没登录也能看。`{ upcoming, done, canEdit, remindBefore }`，每场带 `phase`（upcoming / live / done）、`booked`、`bookings`；管理员另见 `bookedBy`。
+      responses:
+        '200': { description: 场次 }
+    post:
+      tags: [academy]
+      operationId: academyLectureSave
+      summary: 排一场或改（管理员）
+      description: '`{ id?, title, desc?, who?, speaker?, at(毫秒时间戳), minutes?, liveUrl?, replayUrl?, slides?:{url}|{file:{hash,name,type,size}}|null, notes? }`。改了开播时间会重新提醒。'
+      responses:
+        '200': { description: '`{ lecture }`' }
+        '400': { description: 缺标题 / 时间，链接格式不对，讲义文件未上传 }
+        '403': { description: 不是管理员 }
+  /api/lectures/delete:
+    post:
+      tags: [academy]
+      operationId: academyLectureDelete
+      summary: 删一场（管理员）
+      responses:
+        '200': { description: '`{ ok }`' }
+  /api/lectures/book:
+    post:
+      tags: [academy]
+      operationId: academyLectureBook
+      summary: 预约或取消预约
+      description: '`{ id, on }`。已结束的场次不能预约。答 `remind` 表示本人订阅过 lecture 模板、开播前 30 分钟会收到一条。'
+      responses:
+        '200': { description: '`{ lecture, remind }`' }
+        '400': { description: 已结束 }
+        '401': { description: 未登录 }
+  /api/lectures/file:
+    get:
+      tags: [academy]
+      operationId: academyLectureFile
+      summary: 讲义文件
+      responses:
+        '200': { description: 文件 }
+        '404': { description: 没有 }
   /api/resources:
     get:
       tags: [academy]

@@ -8,6 +8,8 @@ import { canReview } from './Review.jsx'
 import { drafts } from '../../lib/level-draft.js'
 import { useS, myPath, RoleSelect } from './common.jsx'
 import { useStore } from '../../store/useStore.js'
+import { useUI } from '../../store/useUI.js'
+import { fmtWhen } from './Lectures.jsx'
 
 export default function Home() {
   const nav = useNavigate(), S = useS()
@@ -21,6 +23,13 @@ export default function Home() {
   const orgName = user?.academy?.org?.name || ORG
   const d = new Date()
   const [pair, setPair] = useState(null)
+  const [lecture, setLecture] = useState(null)
+  useEffect(() => { api('/api/lectures').then(r => setLecture(r.upcoming[0] || null)).catch(() => setLecture(null)) }, [user?.id])
+  const bookLecture = async () => {
+    if (!user) return useUI.getState().toast('登录后才能预约')
+    try { const r = await api('/api/lectures/book', { method: 'POST', body: JSON.stringify({ id: lecture.id, on: !lecture.booked }) }); setLecture(r.lecture); useUI.getState().toast(r.lecture.booked ? '已预约，开播前提醒' : '已取消预约') }
+    catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
+  }
   useEffect(() => { if (user) api('/api/me/pair').then(setPair).catch(() => setPair(null)); else setPair(null) }, [user?.id])
   return <div className="narrow">
     <div className="hdr">
@@ -67,6 +76,13 @@ export default function Home() {
           <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
         </div> })}
       </div>
+    </div>}
+    {lecture && <div className="card tappable" style={{ background: 'var(--acc)', color: '#fff', marginTop: 14 }} onClick={() => nav('/lectures')}>
+      <div className="small" style={{ opacity: .85 }}>园长大讲堂 · 每月一场</div>
+      <div className="small" style={{ opacity: .85, marginTop: 2 }}>{fmtWhen(lecture.at, lecture.minutes)}{lecture.phase === 'live' ? ' · 正在直播' : ''}</div>
+      <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0' }}>{lecture.title}</div>
+      {lecture.desc && <div className="small" style={{ opacity: .9 }}>{lecture.desc}</div>}
+      <div style={{ marginTop: 10 }}><Button size="sm" style={{ background: '#fff', color: 'var(--acc)' }} icon={lecture.booked ? 'bellSlash' : 'bell'} onClick={e => { e.stopPropagation(); bookLecture() }}>{lecture.booked ? '已预约 · 开播前提醒' : '预约直播'}</Button></div>
     </div>}
     {(pair?.mentor || pair?.mentees?.length > 0) && <div className="sect"><div className="sect-t">带教</div><div className="sect-b">
       {pair.mentor && <div className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">带教教师：{pair.mentor.name}</div><div className="small muted">你的实践关作品由 {pair.mentor.name} 点评</div></div></div>}

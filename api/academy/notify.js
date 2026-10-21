@@ -3,13 +3,14 @@
  * 只做事件触发的两类，没有定时的「今日一关」：
  *   review  实践关被点评了 → 通知提交的教师（通过 / 需修改、一句意见）
  *   queue   本园有新的实践关提交 → 通知园长与点评人
+ *   lecture 本人预约的园长大讲堂开播前 30 分钟 → 通知预约的人（academy/lectures.js）
  *
  * 订阅消息是一次性的：小程序里用户每点一次「允许」，服务端记一次额度（db.subscriptions），
  * 发一条用掉一条；用户点「拒绝」额度清零；微信答 43101（用户拒收）也清零。
  * 模板 ID 与字段映射走环境变量（模板从公共模板库选，字段名因模板而异）：
  *   WX_TMPL_REVIEW=xxx   WX_TMPL_REVIEW_DATA='{"thing1":"title","phrase2":"verdict","time3":"at","thing4":"comment"}'
  *   WX_TMPL_QUEUE=yyy    WX_TMPL_QUEUE_DATA='{"thing1":"title","name2":"who","time3":"at"}'
- * 逻辑字段：review → title verdict at comment by；queue → title who at note。
+ * 逻辑字段：review → title verdict at comment by；queue → title who at note；lecture → title at who url。
  * 值按微信的字段规则截断：thing ≤ 20 字、name ≤ 10、phrase ≤ 5、character_string ≤ 32、time 为「年月日 时:分」。
  * 发送要 openid：微信登录的账号自带；平台账号在小程序里订阅时带 wx.login() 的 code，服务端换 openid 绑到该账号（只用于推送）。
  * 发送失败只记日志，绝不影响提交与点评本身。 */
@@ -19,10 +20,11 @@ import { orgKeyOf } from './org.js';
 const APPID = process.env.WX_APPID || '', SECRET = process.env.WX_SECRET || '';
 const BASE = (process.env.WX_API_BASE || 'https://api.weixin.qq.com').replace(/\/+$/, '');
 const MP_STATE = /^(developer|trial|formal)$/.test(process.env.WX_MP_STATE || '') ? process.env.WX_MP_STATE : 'formal';
-const KINDS = ['review', 'queue'];
+const KINDS = ['review', 'queue', 'lecture'];
 const DEFAULT_DATA = {
   review: { thing1: 'title', phrase2: 'verdict', time3: 'at', thing4: 'comment' },
-  queue: { thing1: 'title', name2: 'who', time3: 'at' }
+  queue: { thing1: 'title', name2: 'who', time3: 'at' },
+  lecture: { thing1: 'title', time2: 'at', name3: 'who' }
 };
 const GRANT_CAP = 50;
 

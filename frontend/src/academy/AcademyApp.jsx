@@ -23,6 +23,7 @@ import Review from './views/Review.jsx'
 import CapabilityMap from './views/CapabilityMap.jsx'
 import Resources from './views/Resources.jsx'
 import Cases from './views/Cases.jsx'
+import Lectures from './views/Lectures.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -84,6 +85,7 @@ function Shell() {
           <Route path="/map" element={<CapabilityMap />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/cases" element={<Cases />} />
+          <Route path="/lectures" element={<Lectures />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
