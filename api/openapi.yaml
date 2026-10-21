@@ -700,6 +700,18 @@ paths:
       responses:
         '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
         '401': { description: 未登录 }
+  /api/org/summary:
+    get:
+      tags: [academy]
+      operationId: academyOrgSummary
+      summary: 园长看板：本园各岗位学习情况
+      description: |
+        园长（`academy.role === 'director'`）或管理员。本园（`academy.org` 的 id，没有 id 用 name）全部成员按岗位汇总：
+        人数、完成人数、平均通过关数、完成率、本周通关数、卡在最多的关；成员列表只有通过关数与最近学习日期，没有测验分。不跨园、不排名。
+      responses:
+        '200': { description: '`{ org, at, roles: [{ role, name, path, total, members, finished, started, avgDone, rate, passes7d, next }], members: [{ id, name, role, roleName, done, total, lastAt }], passes7d, members_total }`' }
+        '401': { description: 未登录 }
+        '403': { description: 不是园长（director） }
   /api/me/academy:
     put:
       tags: [academy]

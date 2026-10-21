@@ -254,3 +254,8 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   网页：`lib/events.js` 纯函数（按事件名对照关卡）、`store/useEvents.js`（按账号缓存，换账号清空），`Level.jsx` 的「做」由事件判通、停在「做」时每 10 秒拉一次，结算记 `ev:<id>`。
   小程序：`utils/events.js`，`store.zuoDone()`，关卡页 `watchEvents()` 轮询并自动通关。契约 `docs/PLATFORM-EVENTS.md`（文档仓库同步《平台实操事件回传契约.md》）。
   测试：api 3 项（20 项全过）、前端 +3（123）、小程序 harness +5；浏览器验证：平台账号登录 → 第 1 关「等待平台回传」→ curl 平台密钥回传 → 10 秒内变「平台已回传」。
+- **2026-10-22（夜 2）** 园长看板（ROADMAP B 期第一项，大课堂自身数据）。`api/academy/org.js`：`GET /api/org/summary`，园长或管理员，按 `academy.org`（id，缺则 name）圈本园成员，
+  `summarize()` 纯函数按岗位给人数、完成、在学、平均关数、完成率、本周通关、卡人最多的关（补训建议）；人员列表只有关数与最近学习日，无测验分。
+  课程索引（`PATH_LEN/ROLE_PATH/PATH_NAMES/LEVELS`）并入 `build-academy-events.mjs` 的产物。网页 `views/Director.jsx`（`/org`），首页园长看到「园长看板」瓦片；
+  小程序首页园长块登录后改取真实汇总，未登录仍是演示数。测试：api +2（22 全过）、harness +2。浏览器验证：三个同园账号加一个外园账号，看板只计本园 3 人。
+  探针体检卡仍占位，等平台数据接口。

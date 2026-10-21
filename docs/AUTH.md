@@ -28,6 +28,10 @@
 
 关卡「做」的判通：平台 `POST /api/events`（服务端密钥）回传事件，网页端与小程序每 10 秒问 `GET /api/events`。契约在 `docs/PLATFORM-EVENTS.md`，实现在 `api/academy/events.js`，事件清单由 `scripts/build-academy-events.mjs` 从课程包生成。`DEV_LOGIN=1` 时本人可给自己回传（演示按钮）。
 
+## 园长看板
+
+`GET /api/org/summary`（`api/academy/org.js`）：园长或管理员看本园各岗位汇总与补训建议，按 `academy.org` 圈人，不跨园；人员列表无测验分。网页 `/org`，小程序首页园长块。
+
 ## 小程序侧
 
 小程序工程在文档仓库 `deals/06 柳州-徐明/本地运营/学前大课堂/app/miniprogram/`，接口层三个文件：

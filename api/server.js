@@ -18,6 +18,7 @@ import * as coachJobs from './coach/jobs.js';
 import { coachRoutes } from './coach/routes.js';
 import { authRoutes, authConfig, academyOf, DEV_LOGIN } from './auth/routes.js';
 import { academyEventRoutes, eventsConfig } from './academy/events.js';
+import { orgRoutes } from './academy/org.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2584,6 +2585,8 @@ const routes = {
   ...authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }),
   // 平台实操事件回传（academy/events.js）。
   ...academyEventRoutes({ json, readBody, db, saveDb, readSession, audit, DEV_LOGIN }),
+  // 园长看板（academy/org.js）。
+  ...orgRoutes({ json, readSession, db, readStateCached, isAdmin }),
 
   /* ---------- photos & videos ---------- */
   // Absent, not refusing, when MEDIA_UPLOADS=0: a 404 is what a server from before the feature

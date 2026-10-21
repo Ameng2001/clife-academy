@@ -14,7 +14,8 @@ export default function Home() {
   const today = sum.finished ? null : levelOf(levelId(path, cur))
   const credits = Object.values(S.credits || {}).reduce((a, b) => a + b, 0)
   // 登录了就显示平台给的园所名，没登录（演示）用样例园名
-  const orgName = useStore(s => s.user?.academy?.org?.name) || ORG
+  const user = useStore(s => s.user)
+  const orgName = user?.academy?.org?.name || ORG
   const d = new Date()
   return <div className="narrow">
     <div className="hdr">
@@ -38,7 +39,9 @@ export default function Home() {
 
     <div className="tiles">
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
-      <div className="tile"><div className="l"><Icon name="gauge" />本园体检</div><div className="v">{PROBES.length} 项</div><div className="small muted">探针接平台后显示</div></div>
+      {user?.academy?.role === 'director' || user?.admin
+        ? <div className="tile tappable" onClick={() => nav('/org')}><div className="l"><Icon name="gauge" />园长看板</div><div className="v">本园</div><div className="small muted">各岗位完成情况与补训建议</div></div>
+        : <div className="tile"><div className="l"><Icon name="gauge" />本园体检</div><div className="v">{PROBES.length} 项</div><div className="small muted">探针接平台后显示</div></div>}
     </div>
 
     <div className="sect">

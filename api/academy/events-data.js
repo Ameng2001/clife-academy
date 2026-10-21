@@ -105,3 +105,8 @@ export const EVENTS = Object.freeze({
     "director-5"
   ]
 });
+/** 路径 → 关数；岗位 → 路径；关卡 id → 标题；路径名。 */
+export const PATH_LEN = Object.freeze({"nurse":12,"teacher":10,"care":4,"it":2,"director":6});
+export const ROLE_PATH = Object.freeze({"nurse":"nurse","teacher":"teacher","care":"care","it":"it","director":"director"});
+export const PATH_NAMES = Object.freeze({"nurse":"保健医","teacher":"班级教师","care":"保育员","it":"信息接口人","director":"园长"});
+export const LEVELS = Object.freeze({"nurse-0":"三端登录","nurse-1":"班级与幼儿信息","nurse-2":"出勤调整","nurse-3":"请假登记","nurse-4":"AI 语音晨检","nurse-5":"全日观察与疾病登记","nurse-6":"缺勤预警","nurse-7":"疾病到复课","nurse-8":"健康档案","nurse-9":"体弱儿专案","nurse-10":"体检数据","nurse-11":"带量食谱","teacher-0":"班级工作台","teacher-1":"出勤与晨检配合","teacher-2":"教研工坊 · 共创","teacher-3":"教研工坊 · 归档","teacher-4":"一体机排课","teacher-5":"高拍仪作品","teacher-6":"观察记录审定","teacher-7":"国体测评","teacher-8":"薄弱项课案","teacher-9":"边学边带练","care-0":"睡眠垫铺设","care-1":"电池与收纳","care-2":"睡眠数据","care-3":"出勤配合","it-0":"设备在线检查","it-1":"报修与巡检","director-0":"工作台总览","director-1":"风险与待办处置","director-2":"全园指标","director-3":"回执与复盘","director-4":"读体检卡","director-5":"数据与家长沟通"});
