@@ -269,3 +269,6 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   证据照片走上游 media 存储（`PUT /api/media/{hash}` 存在提交者名下），本园点评人经 `/api/submissions/file` 读。`build-academy-events.mjs` 改走 `lessons.js`，另生成 `LEVEL_TYPES`、`RUBRICS`。
   前端：`store/useSubmissions.js`、`views/SubmissionBox.jsx`（关卡页「做」的实践 / 研讨分支：文字＋照片、状态卡、点评、同园作答）、`views/Review.jsx`（`/review` 点评队列，量表 1–5 分＋意见；园长看板与首页有入口）、`lib/upload.js`（sha256 ＋ PUT）。
   测试：api 4 项新增（`academy-submissions.test.js`）、前端 128 全过。小程序：`utils/extra.js` 同源的领域路径由 `gen_mp_data.py` 合进 `data.js`（`ROLE_PATHS`、`PATH_META`），`utils/submissions.js`，关卡页「做」按类型分支（先交文字，照片在网页端），harness 25 项。
+- **2026-10-22（夜 5）** 「沟通与合作」领域路径（ROADMAP 第三节「家长工作六件事」）。`lessons-extra.js` 加 `comm` 六关：接园时的一句话反馈（研讨）、家长会的前十分钟（实践，交开场稿）、
+  一次个别约谈（研讨）、群里公开质疑（研讨）、孩子可能需要专业帮助时（研讨，教师不诊断）、一次家园活动的设计（实践，交方案）。场景 → 技能块加 `EXTRA_SKMAP`（family），`lessons.js` 合并。
+  措辞守 2026 年口径：不点名、不分档、不比较；群里只收不辩；特殊需要只说事实与频率，评估的决定留给家长。全部 42 关，前端 128 项全过；小程序 `extra.js` 同步，harness 25 项。

@@ -3,10 +3,10 @@
 // 关卡 id 是 `<pathKey>-<index>`（nurse-5）。index 从 0 起，是该路径数组里的位置；
 // 路径顺序就是推进顺序（上游 rotation 的「下一个没做的就是今天的」）。
 import D0 from './lessons-data.js'
-import { EXTRA_PATHS, EXTRA_PATHN, EXTRA_META } from './lessons-extra.js'
+import { EXTRA_PATHS, EXTRA_PATHN, EXTRA_META, EXTRA_SKMAP } from './lessons-extra.js'
 
 // 工具线（生成物）＋ 领域路径（手写）合成一份
-const D = { ...D0, PATHS: { ...D0.PATHS, ...EXTRA_PATHS }, PATHN: { ...D0.PATHN, ...EXTRA_PATHN } }
+const D = { ...D0, PATHS: { ...D0.PATHS, ...EXTRA_PATHS }, PATHN: { ...D0.PATHN, ...EXTRA_PATHN }, SKMAP: { ...D0.SKMAP, ...EXTRA_SKMAP } }
 export const PATH_KEYS = Object.freeze(Object.keys(D.PATHS))
 export const ROLE_PATH_KEYS = Object.freeze(Object.keys(D0.PATHS))
 export const PATH_META = EXTRA_META
