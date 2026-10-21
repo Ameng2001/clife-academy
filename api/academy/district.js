@@ -8,6 +8,7 @@
 import { orgKeyOf, summarize } from './org.js';
 import { PATH_LEN, PATH_KIND, LEVEL_DOMAIN, DOMAINS } from './events-data.js';
 import { buildCard } from './checkup.js';
+import { earnedOf } from './certificates.js';
 
 export const MIN_ORGS = 3;
 export const districtKeyOf = u => { const d = u?.academy?.district; return d ? (d.id ? 'id:' + d.id : d.name ? 'name:' + d.name : null) : null; };
@@ -28,20 +29,25 @@ export function summarizeDistrict(orgs, stateOf, extra = {}) {
     const roleRate = s.roles.filter(r => r.members > 0);
     const finished = roleRate.reduce((a, r) => a + r.finished, 0);
     const certified = prog.reduce((a, p) => a + DOMAIN_PATHS.filter(path => { let i = 0; while (i < PATH_LEN[path] && p[`${path}-${i}`]?.passedAt) i++; return PATH_LEN[path] > 0 && i >= PATH_LEN[path]; }).length, 0);
-    return { n, cover, finished, certified, passes7d: s.passes7d, rate: n ? roleRate.reduce((a, r) => a + r.rate * r.members, 0) / n : 0 };
+    // 证书三级计数（按条件算，不依赖是否已发证）
+    const certs = { tool: 0, domain: 0, backbone: 0 };
+    if (extra.db) for (const u of o.members) for (const x of earnedOf(u.id, { db: extra.db, stateOf, user: u }).earned) certs[x.kind]++;
+    return { n, cover, finished, certified, certs, passes7d: s.passes7d, rate: n ? roleRate.reduce((a, r) => a + r.rate * r.members, 0) / n : 0 };
   });
   const enough = orgs.length >= MIN_ORGS;
   const pct = v => (v == null ? null : Math.round(v * 100));
+  const { db: _db, ...rest } = extra; void _db;
   return {
     orgs: orgs.map(o => ({ key: o.key, name: o.name })).sort((a, b) => a.name.localeCompare(b.name, 'zh')),
     orgCount: orgs.length, minOrgs: MIN_ORGS, medians: enough,
     members_total: per.reduce((a, p) => a + p.n, 0),
     finished: per.reduce((a, p) => a + p.finished, 0),            // 走完岗位路径的人数（全区合计）
     certified: per.reduce((a, p) => a + p.certified, 0),          // 走完领域路径的人次（一人多领域记多次）
+    certificates: { tool: per.reduce((a, p) => a + p.certs.tool, 0), domain: per.reduce((a, p) => a + p.certs.domain, 0), backbone: per.reduce((a, p) => a + p.certs.backbone, 0) },
     passes7d: per.reduce((a, p) => a + p.passes7d, 0),
     domains: DOMAINS.map(d => ({ key: d.key, name: d.name, median: enough ? pct(median(per.map(p => p.cover[d.key]))) : null })),
     rateMedian: enough ? Math.round(median(per.map(p => p.rate))) : null,
-    ...extra
+    ...rest
   };
 }
 
@@ -98,7 +104,7 @@ export function districtRoutes({ json, readBody, db, saveDb, readSession, audit,
     if (!dk) return json(res, 200, { district: null, at: Date.now(), ...summarizeDistrict([], () => null, { checkup: { pushed: 0, warn: 0 }, activity: null }) });
     const orgs = orgsOf(dk);
     json(res, 200, { district: user.academy?.district || { id: null, name: dk.replace(/^(id|name):/, '') }, at: Date.now(),
-      ...summarizeDistrict(orgs, uid => readStateCached(uid), { checkup: checkupOf(orgs), activity: activityOf(orgs) }) });
+      ...summarizeDistrict(orgs, uid => readStateCached(uid), { db, checkup: checkupOf(orgs), activity: activityOf(orgs) }) });
   },
   // 本区园所名单（含挂接方式），区县管理员与管理员
   'GET /api/district/orgs': async (req, res) => {

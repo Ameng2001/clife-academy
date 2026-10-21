@@ -933,6 +933,69 @@ paths:
       summary: 我的园所在的共同体（任何成员）
       responses:
         '200': { description: '`{ community:{ id, name, orgs, lead, leadName, cases, drills } | null }`' }
+  /api/me/certificates:
+    get:
+      tags: [academy]
+      operationId: academyMyCertificates
+      summary: 我的证书与三级认证的进度、开着的认证期次
+      description: '`{ certificates:[{ id, no, label, kind, ref, at }], tool, domains, seven, backbone, cohorts, kinds }`。岗位数智应用认证与领域研修证书按记录自动判定、此时发证给编号；骨干教师认证看期次答辩结果。没有分数。'
+      responses:
+        '200': { description: 证书与进度 }
+  /api/certificates/verify:
+    get:
+      tags: [academy]
+      operationId: academyCertificateVerify
+      summary: 核验证书编号（公开；只回证书名、脱敏姓名、园所、日期）
+      parameters: [{ name: no, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ valid:true, no, label, name, orgName, at }`' }
+        '404': { description: '`{ valid:false }`' }
+  /api/org/certificates:
+    get:
+      tags: [academy]
+      operationId: academyOrgCertificates
+      summary: 本园证书（园长、管理员）：人名、级别、日期；无分数
+      responses:
+        '200': { description: '`{ org, counts:{ tool, domain, backbone }, certificates }`' }
+  /api/cohorts:
+    get:
+      tags: [academy]
+      operationId: academyCohorts
+      summary: 认证期次（骨干教师认证按学期开班）
+      responses:
+        '200': { description: '`{ cohorts:[{ id, name, term, applyFrom, applyTo, defenseAt, place, phase, applicants, passed, mine, list? }], canHost }`' }
+    post:
+      tags: [academy]
+      operationId: academyCohortSave
+      summary: 开班或改（管理员）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name, term], properties: { id: { type: string }, name: { type: string }, term: { type: string }, applyFrom: { type: number }, applyTo: { type: number }, defenseAt: { type: number }, place: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ cohort }`' }
+  /api/cohorts/apply:
+    post:
+      tags: [academy]
+      operationId: academyCohortApply
+      summary: 报名（报名窗口内；要三条领域研修证书 ＋ 一份入库案例）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ cohort }`' }
+        '400': { description: 不在窗口或条件不够 }
+  /api/cohorts/result:
+    post:
+      tags: [academy]
+      operationId: academyCohortResult
+      summary: 记答辩结果（管理员）；通过即发骨干教师认证
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, uid, result], properties: { id: { type: string }, uid: { type: string }, result: { type: string, enum: [pass, fail, absent] }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ cohort }`' }
+  /api/cohorts/close:
+    post:
+      tags: [academy]
+      operationId: academyCohortClose
+      summary: 结班（管理员）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ cohort }`' }
   /api/me/checkup:
     get:
       tags: [academy]

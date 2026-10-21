@@ -29,6 +29,7 @@ import Honors from './views/Honors.jsx'
 import Contests from './views/Contests.jsx'
 import Checkup from './views/Checkup.jsx'
 import District from './views/District.jsx'
+import Certificates from './views/Certificates.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -96,6 +97,8 @@ function Shell() {
           <Route path="/contests" element={<Contests />} />
           <Route path="/checkup" element={<Checkup />} />
           <Route path="/district" element={<District />} />
+          <Route path="/certs" element={<Certificates />} />
+          <Route path="/certs/:id" element={<Certificates />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />

@@ -31,3 +31,5 @@
 .ac-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .ac-note{font-size:13px;color:var(--label-2);line-height:1.45}
 select.ac-sel{font:inherit;font-size:14px;background:var(--surface);color:var(--label);border:var(--hair) solid var(--sep);border-radius:9px;padding:6px 10px}
+
+@media print{.no-print,.ac-tabs,nav{display:none !important}body{background:#fff}}

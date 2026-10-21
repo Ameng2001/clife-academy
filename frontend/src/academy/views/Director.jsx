@@ -41,6 +41,8 @@ export default function Director() {
   useEffect(() => { if (user) api('/api/org/checkup').then(setCheckup).catch(() => setCheckup(null)) }, [user?.id])
   const [titles, setTitles] = useState(null), [titleFor, setTitleFor] = useState(null), [titleKey, setTitleKey] = useState('seed'), [titleLabel, setTitleLabel] = useState(''), [reason, setReason] = useState('')
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
+  const [certs, setCerts] = useState(null)
+  useEffect(() => { if (user) api('/api/org/certificates').then(setCerts).catch(() => setCerts(null)) }, [user?.id])
   useEffect(() => { if (user) loadTitles() }, [user?.id])
   const grantTitle = async () => {
     if (reason.trim().length < 5) return useUI.getState().toast('写授予理由，至少 5 字')
@@ -115,6 +117,12 @@ export default function Director() {
       </div>}
       <div className="lrow small muted">点评人能看本园的点评队列、按量表点评实践关的提交。一般是种子教师或教研主任；园长本来就能点评。</div>
     </div></div>
+
+    {certs && <div className="sect"><div className="sect-t">本园证书 <span className="small muted">岗位认证 {certs.counts.tool} · 领域研修 {certs.counts.domain} · 骨干 {certs.counts.backbone}</span></div><div className="sect-b">
+      {!certs.certificates.length && <div className="lrow small muted">还没有人拿到证书。岗位数智应用认证走完本岗位路径自动发；领域研修证书要作品全部通过点评。</div>}
+      {certs.certificates.slice(0, 20).map(c => <div key={c.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t"><Icon name="checkCircle" /> {c.name} · {c.label}</div><div className="small muted">{fmtDay(c.at)} · 编号 {c.no}</div></div></div>)}
+      <div className="lrow small muted">只记级别与日期，没有分数；不跨园比较，不作考核依据。</div>
+    </div></div>}
 
     <div className="sect"><div className="sect-t">带教配对</div><div className="sect-b">
       {!pairs.length && <div className="lrow small muted">还没有配对。带教教师能看到、能点评所带教师的实践关作品。</div>}

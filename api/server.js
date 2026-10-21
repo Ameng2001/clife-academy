@@ -32,6 +32,7 @@ import { contestRoutes } from './academy/contests.js';
 import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
 import { communityRoutes, createCommunities } from './academy/communities.js';
+import { certificateRoutes } from './academy/certificates.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2625,6 +2626,7 @@ const routes = {
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...communityRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
+  ...certificateRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

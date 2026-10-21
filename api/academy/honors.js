@@ -10,6 +10,7 @@
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
 import { ROLE_PATH, PATH_LEN, PATH_NAMES } from './events-data.js';
+import { earnedOf, KIND_LABEL } from './certificates.js';
 
 export const TITLES = Object.freeze({ seed: '种子教师', sharer: '年度分享者', contest: '同课异构入选', studio: '名师工作室成员', custom: '' });
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
@@ -38,6 +39,12 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
     const role = Object.values(ROLE_PATH).includes(path);
     out.push({ key: `path-${path}`, kind: 'growth', name: `${PATH_NAMES[path] || path}路径`, desc: role ? '完成本岗位路径全部关卡' : '完成这条领域路径全部关卡', on: !!at, at });
   }
+  // 证书类成长勋章：岗位数智应用认证、各领域研修证书、七领域都有证据、骨干教师认证（条件在 certificates.js）
+  const e = earnedOf(uid, { db, stateOf });
+  if (e.tool) out.push({ key: 'cert-tool', kind: 'growth', name: KIND_LABEL.tool, desc: `完成${e.tool.name}路径，测验正确率 ≥ 80%`, on: e.tool.ok, at: e.tool.at, progress: e.tool.done, of: e.tool.total });
+  for (const d of e.domains) out.push({ key: `cert-${d.path}`, kind: 'growth', name: `${d.name}研修证书`, desc: '走完这条领域路径，实践关作品全部通过点评', on: d.ok, at: d.at, progress: d.done + d.works, of: d.total + d.worksTotal });
+  out.push({ key: 'seven', kind: 'growth', name: '七领域都有证据', desc: '七个专业领域各至少一条证据：通过的关、通过的作品或研讨作答', on: e.seven.ok, at: null, progress: e.seven.have, of: e.seven.of });
+  out.push({ key: 'backbone', kind: 'growth', name: KIND_LABEL.backbone, desc: '三条领域研修证书 ＋ 一份园本案例 ＋ 线下答辩（按学期开班）', on: e.backbone.ok, at: e.backbone.at, progress: Math.min(e.backbone.domainCerts, 3) + Math.min(e.backbone.cases, 1), of: 4 });
   const cases = (db.cases || []).filter(c => c.by === uid && c.status === 'approved').map(c => c.curated?.at || c.at).sort((a, b) => a - b);
   for (const n of THRESHOLDS.cases) out.push({ key: `cases-${n}`, kind: 'contribution', name: n === 1 ? '第一条案例' : `案例 ${n} 条`, desc: `案例被采纳 ${n} 条`, on: cases.length >= n, at: cases[n - 1] || null, progress: Math.min(cases.length, n), of: n });
   const feat = (db.drillAnswers || []).filter(a => a.uid === uid && a.review?.featured).map(a => a.review.at).sort((a, b) => a - b);
