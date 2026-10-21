@@ -237,6 +237,11 @@ export const DEF = {
   // cleared) replaces that role's curated exercise-id whitelist with a single user-chosen
   // exercise id; the stamp is what lets a sync keep the choice made last (lib/sync-merge.js).
   balanceTemplate: DEFAULT_TEMPLATE_ID, balanceOverrides: {},
+  // ── 大课堂（clife-academy）──
+  // role: 本人岗位（lib/lessons.js ROLES）；progress: { [levelId]: { passedAt, credits, quiz } }，只增不改；
+  // sessions: 每次学习一条，只追加（lib/finish-level.js）；credits: 按路径累计学分；
+  // lvDraft: 关卡进行中的草稿 { [levelId]: { seg, zuoDone, events, answers } }，通关后清掉。
+  role: 'nurse', progress: {}, sessions: [], credits: {}, lvDraft: {},
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 

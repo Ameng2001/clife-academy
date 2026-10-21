@@ -1,0 +1,33 @@
+/* 大课堂视图的补充样式，颠在上游 index.css 的 token 之上 */
+.ac-tabs{display:flex;gap:6px;background:var(--surface-3);border-radius:var(--r);padding:3px;margin:12px 0}
+.ac-tabs button{flex:1;border:0;background:transparent;color:var(--label-2);font:inherit;font-size:14px;font-weight:600;padding:8px 0;border-radius:9px}
+.ac-tabs button.on{background:var(--surface);color:var(--label);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.ac-tabs button.done::after{content:' ✓';color:var(--green)}
+.ac-steps{counter-reset:s;margin:10px 0 0;padding:0;list-style:none}
+.ac-steps li{display:flex;gap:10px;padding:9px 0;border-top:var(--hair) solid var(--sep-op);font-size:15px;line-height:1.45}
+.ac-steps li:first-child{border-top:0}
+.ac-steps li::before{counter-increment:s;content:counter(s);flex:none;width:22px;height:22px;border-radius:50%;background:var(--acc-soft);color:var(--acc);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.ac-menu{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.ac-menu .chip{pointer-events:none}
+.ac-menu .arr{color:var(--label-3);font-size:12px}
+.ac-opt{display:block;width:100%;text-align:start;border:var(--hair) solid var(--sep);background:var(--surface);color:var(--label);font:inherit;font-size:15px;padding:12px 14px;border-radius:var(--r);margin-top:8px;line-height:1.4}
+.ac-opt.right{border-color:var(--green);background:color-mix(in srgb,var(--green) 12%,transparent)}
+.ac-opt.wrong{border-color:var(--red);background:color-mix(in srgb,var(--red) 10%,transparent)}
+.ac-opt:disabled{opacity:1}
+.ac-fb{margin-top:10px;padding:10px 12px;border-radius:var(--r);background:var(--surface-2);font-size:14px;line-height:1.45;color:var(--label-2)}
+.ac-video{width:100%;border-radius:var(--r-card);background:#000;aspect-ratio:16/9}
+.ac-lv{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.ac-lv .n{flex:none;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:var(--surface-3);color:var(--label-2)}
+.ac-lv.done .n{background:var(--green);color:#fff}
+.ac-lv.current .n{background:var(--acc);color:var(--on-acc)}
+.ac-lv.locked{opacity:.55}
+.ac-lv .t{font-size:15px;font-weight:600}
+.ac-lv .s{font-size:13px;color:var(--label-2);margin-top:2px}
+.ac-bar{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin-top:8px}
+.ac-bar>i{display:block;height:100%;background:var(--acc)}
+.ac-badge{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.ac-badge .b{width:48px;height:48px;border-radius:50%;background:var(--surface-3);color:var(--label-3);font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+.ac-badge.on .b{background:var(--acc);color:var(--on-acc)}
+.ac-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ac-note{font-size:13px;color:var(--label-2);line-height:1.45}
+select.ac-sel{font:inherit;font-size:14px;background:var(--surface);color:var(--label);border:var(--hair) solid var(--sep);border-radius:9px;padding:6px 10px}

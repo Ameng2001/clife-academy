@@ -184,3 +184,14 @@ S = {
 ## 七、许可证（记一行，不作障碍）
 
 AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的源码。基于它改出来的教师 Coach 属于衍生作品，无论改动多少。两条路：接受开源（教育局项目通常不排斥，还可作为「开放协作」卖点）；或只搬架构与概念、代码重写（第二至四节的设计不依赖任何一行它的代码）。11 月上线前定一次即可。
+
+## 八、进度记录
+
+- **2026-10-21** 开仓。基底 openGym v1.4.1（e348fc1）。剥离移动壳、动作库工具、CI；上游文档移 `docs/upstream/`。
+  导入 34 关课程数据；`lib/lessons.js`、`lib/finish-level.js` 带测试。
+  新壳 `src/academy/AcademyApp.jsx`＋首页、路径、关卡、我的四个视图，接在上游 store、登录、同步之上；
+  `S` 增 `role / progress / sessions / credits / lvDraft`，随 `PUT /api/data` 整体同步，`mergeStates` 已验证保留这些字段。
+  浏览器走通：访客进入 → 第 1 关讲看做测 → 通关 → 游标推进 → 我的页出记录与学分。
+  `scripts/dev.sh` 一键起 api＋vite。
+  **待办（第 1 周内）**：微信与平台登录适配器替换上游 Login；`progress`/`sessions` 需要自己的合并规则（只追加、按 levelId 取 passedAt 最早），
+  现在跟整块状态走「新的赢」；上游健身视图与 lib 逐步删除；`lvDraft` 不该推服务器（`update(…, false)` 只是不触发推送，草稿仍在 S 里）。

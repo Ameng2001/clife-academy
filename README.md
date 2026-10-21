@@ -29,4 +29,5 @@ cd frontend && npm ci && npm test && npm run dev
 
 ## 状态
 
-改造进行中。当前阶段见 `docs/MIGRATION.md` 第五节「MVP 排期」，第 1 周。
+改造进行中，第 1 周。能跑：`sh scripts/dev.sh` 起 api（:3000）＋前端（:5173），访客进入后保健医路径第 1 关可讲看做测到通关。
+进度与待办见 `docs/MIGRATION.md` 第八节。
