@@ -248,3 +248,9 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
 - **2026-10-22（晚）** 写 `docs/ROADMAP.md`（第二稿）：平台重定为面向教师专业发展的能力培养平台，以《幼儿园教师专业标准》七个能力领域 × 四个发展阶段为课程地图，
   现有 34 关工具线归入领域；关卡「做」分工具关（平台事件）、实践关（证据提交＋点评）、研讨关（情景题）三型；
   含资源、评估（三方评、三级认证）、教研共同体、四级看板、运营、数据与接口变化、B–E 期排期。文档仓库同步《迭代方向-教师发展平台.md》。`POST /api/events` 的调研已做完（34 个事件名由课程包生成），实现放到下一步。
+- **2026-10-22（夜）** `POST /api/events` 平台实操事件回传。`scripts/build-academy-events.mjs` 从课程包生成闭合清单 `api/academy/events-data.js`（34 项，`--check`）；
+  `api/academy/events.js`：平台密钥（`PLATFORM_EVENTS_KEY`，timingSafeEqual）单条或批量 ≤100，按 `platform.uid` 找人，幂等按 `id` 或 `(event, ref)`，每人最多 2000 条；
+  `DEV_LOGIN=1` 时本人可自回传（演示按钮）；`GET /api/events?since=`；`/api/config.events = { platform?, demo? }`。
+  网页：`lib/events.js` 纯函数（按事件名对照关卡）、`store/useEvents.js`（按账号缓存，换账号清空），`Level.jsx` 的「做」由事件判通、停在「做」时每 10 秒拉一次，结算记 `ev:<id>`。
+  小程序：`utils/events.js`，`store.zuoDone()`，关卡页 `watchEvents()` 轮询并自动通关。契约 `docs/PLATFORM-EVENTS.md`（文档仓库同步《平台实操事件回传契约.md》）。
+  测试：api 3 项（20 项全过）、前端 +3（123）、小程序 harness +5；浏览器验证：平台账号登录 → 第 1 关「等待平台回传」→ curl 平台密钥回传 → 10 秒内变「平台已回传」。

@@ -24,6 +24,10 @@
 - `GET /api/config` 的 `auth` 多两个字段：`platform_mode`、`platform_login_url`（oauth2 时已拼好 client_id 与 redirect_uri，前端只加 `state`）。
 - 票据或授权码无效 401 `rejected`；平台没答、答复缺 uid 502 `upstream`；未配置 404。
 
+## 实操事件回传
+
+关卡「做」的判通：平台 `POST /api/events`（服务端密钥）回传事件，网页端与小程序每 10 秒问 `GET /api/events`。契约在 `docs/PLATFORM-EVENTS.md`，实现在 `api/academy/events.js`，事件清单由 `scripts/build-academy-events.mjs` 从课程包生成。`DEV_LOGIN=1` 时本人可给自己回传（演示按钮）。
+
 ## 小程序侧
 
 小程序工程在文档仓库 `deals/06 柳州-徐明/本地运营/学前大课堂/app/miniprogram/`，接口层三个文件：
@@ -32,6 +36,7 @@
 |---|---|
 | `utils/api.js` | `wx.request` 封装：`API_BASE`（`utils/config.js`）＋ `Authorization: Bearer`；非 2xx reject 带 `{ status, data, code }`；401 清本地 token |
 | `utils/auth.js` | `login(name)`：`wx.login()` 的 code → `POST /api/login/wechat` → 存 token 与 user；`me()`：`GET /api/me`，带回新 token 就替换；`logout()`；`setRole()` → `PUT /api/me/academy` |
+| `utils/events.js` | 本人收到的平台事件：`load()`、`has(event)`、`demo(event)`；按账号缓存，退出清空 |
 | `utils/sync.js` | 进度文档与网页端同一结构，`PUT /api/data` 条件写、409 并集再推、回前台查 `/api/data/rev`；登录接管：演示进度（`demo:true`）丢掉，本机真通过的关问一句再并入 |
 
 `app.js` 启动时先看启动参数有没有平台票据（`referrerInfo.extraData.ticket` 或二维码 `query.ticket`）：有就 `auth.loginPlatform(ticket)` 换会话并接管本机进度，没有才 `auth.me()` → `sync.pull()`；`onShow` 查修订号；「我的」页有微信登录与退出。岗位：微信登录默认 `teacher`，本人在顶栏切换即 `PUT /api/me/academy`；平台账号 403，以平台为准。

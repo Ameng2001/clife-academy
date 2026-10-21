@@ -662,6 +662,44 @@ paths:
         '200': { description: 已登录 }
         '400': { description: 缺 name }
         '404': { description: 入口未开启 }
+  /api/events:
+    post:
+      tags: [academy]
+      operationId: academyPostEvents
+      summary: 平台实操事件回传
+      description: |
+        平台（服务端到服务端，`Authorization: Bearer PLATFORM_EVENTS_KEY`）回传「某平台用户做了某件事」。事件名是闭合清单
+        （`api/academy/events-data.js`，由课程包生成），不在清单上的拒收。单条 `{ uid, event, at?, ref?, id? }` 或批量 `{ events: [...] }`（≤100）。
+        幂等：同用户同 `id` 只收一次；没 `id` 的按 `(event, ref)` 去重。契约见 docs/PLATFORM-EVENTS.md。
+        `DEV_LOGIN=1` 时本人也能带会话给自己回传 `{ event }`（演示按钮），生产不开。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uid: { type: string, description: 平台用户标识（平台调用时必填） }
+                event: { type: string }
+                at: { type: string, description: ISO 时间或毫秒，缺省为收到时间 }
+                ref: { type: string, description: 平台侧记录 id }
+                id: { type: string, description: 幂等键 }
+                events: { type: array, items: { type: object } }
+      responses:
+        '200': { description: '`{ accepted, duplicates, rejected: [{ i, code }] }`；演示调用另带本人 `events`' }
+        '400': { description: 事件名不在清单（unknown-event）、缺事件名、时间不合法、批量超限 }
+        '401': { description: 既没有平台密钥也没有会话 }
+        '403': { description: 有会话但 DEV_LOGIN 未开（platform-only） }
+        '404': { description: 平台 uid 没有对应用户（no-user） }
+    get:
+      tags: [academy]
+      operationId: academyListEvents
+      summary: 本人收到的实操事件
+      description: '`?since=<ms>` 只要收到时间在其后的，按收到时间升序，最多 500 条。每条带 `levels`：用到这个事件的关卡 id。'
+      responses:
+        '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
+        '401': { description: 未登录 }
   /api/me/academy:
     put:
       tags: [academy]

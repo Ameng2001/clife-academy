@@ -16,7 +16,8 @@ import webpush from 'web-push';
 import * as coachConfig from './coach/config.js';
 import * as coachJobs from './coach/jobs.js';
 import { coachRoutes } from './coach/routes.js';
-import { authRoutes, authConfig, academyOf } from './auth/routes.js';
+import { authRoutes, authConfig, academyOf, DEV_LOGIN } from './auth/routes.js';
+import { academyEventRoutes, eventsConfig } from './academy/events.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1938,6 +1939,7 @@ const routes = {
     json(res, 200, {
       invite_only: INVITE_ONLY, allow_guest: ALLOW_GUEST,
       ...authConfig(),
+      ...eventsConfig(DEV_LOGIN),
       // Only when on, so an instance without passwords answers exactly as it did before (#118).
       ...(PASSWORD_LOGIN ? { password_login: true } : {}),
       // Public: the sign-in screen is the first thing that reads it.
@@ -2580,6 +2582,8 @@ const routes = {
   ...coachRoutes({ json, readBody, readSession, requireAdmin }),
   // 大课堂登录：微信小程序、平台账号、开发桩（auth/routes.js）。
   ...authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }),
+  // 平台实操事件回传（academy/events.js）。
+  ...academyEventRoutes({ json, readBody, db, saveDb, readSession, audit, DEV_LOGIN }),
 
   /* ---------- photos & videos ---------- */
   // Absent, not refusing, when MEDIA_UPLOADS=0: a 404 is what a server from before the feature

@@ -1,4 +1,5 @@
 // 一关：讲 → 看 → 做 → 测。草稿只留本机（lib/level-draft.js），通关走 finish-level.js。
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
@@ -7,6 +8,8 @@ import { Button } from '../../components/ui.jsx'
 import { levelOf, statusOf } from '../../lib/lessons.js'
 import { finishLevel, canPass } from '../../lib/finish-level.js'
 import { drafts, useDraft } from '../../lib/level-draft.js'
+import { levelDone, eventRefs } from '../../lib/events.js'
+import { useEvents } from '../../store/useEvents.js'
 import { useS, update } from './common.jsx'
 
 const SEGS = [['jiang', '讲'], ['kan', '看'], ['zuo', '做'], ['ce', '测']]
@@ -19,13 +22,32 @@ export default function Level() {
   if (!lv) return <div className="narrow"><div className="empty">没有这一关。</div></div>
   const st = statusOf(S.progress, id)
   const d = useDraft(id)
+  const user = useStore(s => s.user), config = useStore(s => s.config)
+  const events = useEvents(s => s.events)
+  // 「做」：平台回传了这关的事件就算完成；没登录（演示）时用本地草稿里的模拟回传
+  const fromPlatform = levelDone(events, lv)
+  const zuoDone = fromPlatform || d.zuoDone
+  const canDemo = !!config?.events?.demo && !!user
+  // 等回传时每 10 秒问一次服务端；登录了才问
+  useEffect(() => {
+    if (!user || !lv.needsEvent || zuoDone || st !== 'current') return
+    useEvents.getState().load()
+    const t = setInterval(() => { if (d.seg === 'zuo') useEvents.getState().load() }, 10000)
+    return () => clearInterval(t)
+  }, [user?.id, id, zuoDone, st, d.seg])
   const answered = lv.qs.filter((_, i) => d.answers[i] != null).length
   const right = lv.qs.filter((q, i) => d.answers[i] != null && q.o[d.answers[i]][1] === 1).length
-  const gate = canPass(lv, { zuoDone: d.zuoDone, right, of: lv.qs.length })
-  const segDone = { jiang: true, kan: true, zuo: !lv.needsEvent || d.zuoDone, ce: answered === lv.qs.length && gate.ok }
+  const gate = canPass(lv, { zuoDone, right, of: lv.qs.length })
+  const segDone = { jiang: true, kan: true, zuo: !lv.needsEvent || zuoDone, ce: answered === lv.qs.length && gate.ok }
 
+  const simulate = async () => {
+    if (canDemo) {
+      try { await useEvents.getState().demo(lv.event) }
+      catch (e) { useUI.getState().toast(e.status === 403 ? '服务端没开演示回传' : '回传失败' + (e.message ? '：' + e.message : '')) }
+    } else setDraft(id, x => { x.zuoDone = true; x.events = [...x.events, 'demo:' + lv.event] })
+  }
   const pass = () => {
-    const r = finishLevel(S, id, { zuoDone: d.zuoDone, right, of: lv.qs.length, events: d.events })
+    const r = finishLevel(S, id, { zuoDone, right, of: lv.qs.length, events: fromPlatform ? eventRefs(events, lv) : d.events })
     if (!r.passed) { useUI.getState().toast(r.why === 'quiz' ? '测验还没全对，改一改再提交。' : r.why === 'zuo' ? '「做」这一步还没完成。' : '这一关现在不能结算。'); return }
     update(s => { s.progress = r.S.progress; s.sessions = r.S.sessions; s.credits = r.S.credits })
     drafts.clear(id)
@@ -62,8 +84,8 @@ export default function Level() {
         <div className="small muted">平台实操</div><div style={{ fontSize: 17, fontWeight: 600, marginTop: 4 }}>{lv.event}</div>
         <div className="ac-note" style={{ marginTop: 8 }}>在平台上完成后，平台会把这一步回传到大课堂，这里自动打勾。不需要截图，也不需要手工登记。</div>
         <div className="ac-row" style={{ marginTop: 14 }}>
-          <span className={'tag' + (d.zuoDone ? '' : '')} style={d.zuoDone ? { color: 'var(--green)', background: 'color-mix(in srgb,var(--green) 16%,transparent)' } : undefined}>{d.zuoDone ? '平台已回传' : '等待平台回传'}</span>
-          {!d.zuoDone && <Button size="sm" variant="tinted" onClick={() => setDraft(id, x => { x.zuoDone = true; x.events = [...x.events, 'demo:' + lv.event] })}>模拟回传（演示）</Button>}
+          <span className="tag" style={zuoDone ? { color: 'var(--green)', background: 'color-mix(in srgb,var(--green) 16%,transparent)' } : undefined}>{zuoDone ? '平台已回传' : user ? '等待平台回传' : '登录后由平台回传'}</span>
+          {!zuoDone && (canDemo || !user) && <Button size="sm" variant="tinted" onClick={simulate}>模拟回传（演示）</Button>}
         </div>
       </> : <div className="ac-note">这一关没有平台实操，直接进入测验。</div>}
       <div style={{ marginTop: 14 }}><Button variant="primary" disabled={!segDone.zuo} onClick={() => setDraft(id, x => { x.seg = 'ce' })}>下一步：测一测</Button></div>
