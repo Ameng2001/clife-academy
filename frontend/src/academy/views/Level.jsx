@@ -75,6 +75,8 @@ export default function Level() {
       {lv.menu?.length > 0 && <><div className="small muted" style={{ marginTop: 14 }}>平台入口</div>
         <div className="ac-menu">{lv.menu.map((m, i) => <span key={i} style={{ display: 'contents' }}>{i > 0 && <span className="arr">›</span>}<span className="chip">{m}</span></span>)}{lv.btn && <><span className="arr">›</span><span className="chip" style={{ background: 'var(--acc-soft)', color: 'var(--acc)' }}>{lv.btn}</span></>}</div></>}
       {lv.steps?.length > 0 && <><div className="small muted" style={{ marginTop: 14 }}>操作步骤</div><ol className="ac-steps">{lv.steps.map((s, i) => <li key={i}>{s}</li>)}</ol></>}
+      {lv.refs?.length > 0 && <><div className="small muted" style={{ marginTop: 14 }}>依据的条文</div>
+        <div className="row" style={{ gap: 6, marginTop: 4, flexWrap: 'wrap' }}>{lv.refs.map((r, i) => { const m = /《[^》]+》/.exec(r); return <button key={i} className="chip" style={{ textAlign: 'start', whiteSpace: 'normal' }} onClick={() => nav('/resources?q=' + encodeURIComponent(m ? m[0] : r))}><Icon name="folder" /> {r}</button> })}</div></>}
       <div style={{ marginTop: 14 }}><Button variant="primary" onClick={() => setDraft(id, x => { x.seg = 'kan' })}>下一步：看微课</Button></div>
     </div>}
 

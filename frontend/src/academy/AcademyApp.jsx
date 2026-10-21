@@ -21,6 +21,7 @@ import Me from './views/Me.jsx'
 import Director from './views/Director.jsx'
 import Review from './views/Review.jsx'
 import CapabilityMap from './views/CapabilityMap.jsx'
+import Resources from './views/Resources.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -80,6 +81,7 @@ function Shell() {
           <Route path="/org" element={<Director />} />
           <Route path="/review" element={<Review />} />
           <Route path="/map" element={<CapabilityMap />} />
+          <Route path="/resources" element={<Resources />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />

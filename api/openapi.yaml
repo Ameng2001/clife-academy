@@ -700,6 +700,41 @@ paths:
       responses:
         '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
         '401': { description: 未登录 }
+  /api/resources:
+    get:
+      tags: [academy]
+      operationId: academyResources
+      summary: 资源库：文献与政策、模板与工具
+      description: '`?q=&kind=policy|template|case|other&domain=`。内置的教育部文件（`seed: true`）加本园与公开的上传；没登录只看公开的。'
+      responses:
+        '200': { description: '`{ resources, kinds, canAdd }`' }
+    post:
+      tags: [academy]
+      operationId: academyResourceSave
+      summary: 加或改一条资源
+      description: '`{ id?, kind, title, domain?, desc?, url? | file?: { hash, name, type, size }, scope: org | public }`。加：管理员、园长、点评人；改：本人、本园园长、管理员。公开范围只有园长与管理员能设。文件先 `PUT /api/media/{hash}`（只收图片与短视频），文档贴链接。'
+      responses:
+        '200': { description: '`{ resource }`' }
+        '400': { description: 没有标题、既无链接也无文件、链接不是 http(s) }
+        '403': { description: 没有权限 }
+  /api/resources/delete:
+    post:
+      tags: [academy]
+      operationId: academyResourceDelete
+      summary: 删一条资源
+      responses:
+        '200': { description: '`{ ok }`' }
+        '403': { description: 没有权限 }
+        '404': { description: 没有这条 }
+  /api/resources/file:
+    get:
+      tags: [academy]
+      operationId: academyResourceFile
+      summary: 资源文件
+      description: '`?id=`。能看到这条资源的人都能读。'
+      responses:
+        '200': { description: 文件 }
+        '404': { description: 没有这条或没有文件 }
   /api/me/pair:
     get:
       tags: [academy]

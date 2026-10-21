@@ -22,6 +22,7 @@ import { orgRoutes } from './academy/org.js';
 import { submissionRoutes } from './academy/submissions.js';
 import { createNotifier, notifyRoutes, notifyConfigured } from './academy/notify.js';
 import { createPairs, pairRoutes } from './academy/pairs.js';
+import { resourceRoutes } from './academy/resources.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2597,6 +2598,8 @@ const routes = {
   ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER, pairs: PAIRS }),
   // 带教配对（academy/pairs.js）
   ...pairRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS }),
+  // 资源库（academy/resources.js）
+  ...resourceRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 
