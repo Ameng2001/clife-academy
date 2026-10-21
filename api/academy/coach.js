@@ -34,7 +34,7 @@ export function evidenceOf(uid, { db, stateOf, pairs = null, now = Date.now() })
   const term = termOf(now), sr = (db.selfReviews || []).find(r => r.uid === uid && r.term === term.key) || null;
   const certs = (db.certificates || []).filter(c => c.uid === uid);
   const domainCerts = certs.filter(c => c.kind === 'domain').length;
-  const stage = certs.some(c => c.kind === 'backbone') ? '骨干' : domainCerts >= 3 ? '骨干' : (domainCerts >= 1 || paths.some(p => p.kind === 'role' && p.done === p.total)) ? '成长' : '入职';
+  const stage = user.academy?.role === 'director' ? '管理' : certs.some(c => c.kind === 'backbone') ? '骨干' : domainCerts >= 3 ? '骨干' : (domainCerts >= 1 || paths.some(p => p.kind === 'role' && p.done === p.total)) ? '成长' : '入职';
   const mentor = pairs ? pairs.mentorOf(uid) : null;
   return { uid, name: user.name, role: user.academy?.role || null, stage, paths, practice, drills, selfReview: sr ? { levels: sr.levels, focus: sr.focus } : null, mentor: mentor ? (db.users.find(u => u.id === mentor)?.name || true) : null, now };
 }
@@ -53,6 +53,7 @@ export function draftPlan(ev) {
     for (const k of weak) for (const p of pathsForDomain(k)) { const x = ev.paths.find(y => y.path === p); if (x && x.done < x.total && !queue.some(q => q.path === p)) queue.push({ path: p, why: `自评里「${DOMAIN_NAME[k]}」最弱` }); }
   }
   if (ev.stage === '入职' && PATH_LEN.onboard && !queue.some(q => q.path === 'onboard')) { const x = ev.paths.find(y => y.path === 'onboard'); if (x && x.done < x.total) queue.push({ path: 'onboard', why: '入职阶段先把新教师入职路径走完' }); }
+  if (ev.stage === '管理' && PATH_LEN.manage && !queue.some(q => q.path === 'manage')) { const x = ev.paths.find(y => y.path === 'manage'); if (x && x.done < x.total) queue.push({ path: 'manage', why: '管理阶段：园所管理路径' }); }
   if (ev.stage === '骨干' && PATH_LEN.backbone && !queue.some(q => q.path === 'backbone')) { const x = ev.paths.find(y => y.path === 'backbone'); if (x && x.done < x.total) queue.push({ path: 'backbone', why: '骨干阶段：主题与项目课程' }); }
   for (const p of ev.paths.filter(p => p.kind === 'domain' && p.done < p.total && !queue.some(q => q.path === p.path))) queue.push({ path: p.path, why: '还没开始的领域路径' });
   const cursor = Object.fromEntries(ev.paths.map(p => [p.path, p.done]));
