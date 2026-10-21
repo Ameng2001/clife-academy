@@ -2,7 +2,7 @@
 # 本地启停：api（:3000，数据在 ./data）与前端 vite（:5173）后台跑，日志在 .local/。
 #   sh scripts/local.sh start|stop|restart|status|log [api|web]
 # 不带第二个参数就两个一起。端口被别处占着时 start 会跳过，stop 会连那个一起停（按端口找）。
-# 环境变量可覆盖：PORT_API、PORT_WEB、ADMIN_UIDS、ASSISTANT_*（答疑与 Coach 的模型，见 .env.example）。
+# 环境变量可覆盖：PORT_API、PORT_WEB、ADMIN_UIDS（默认本地两个管理员：赵园长、赵美丽）、ASSISTANT_*（答疑与 Coach 的模型，见 .env.example）。
 cd "$(dirname "$0")/.." || exit 1
 mkdir -p data .local
 PORT_API="${PORT_API:-3000}"; PORT_WEB="${PORT_WEB:-5173}"
@@ -14,7 +14,7 @@ pid_on() { lsof -nP -iTCP:"$1" -sTCP:LISTEN -t 2>/dev/null | head -1; }
 start_api() {
   if [ -n "$(pid_on "$PORT_API")" ]; then echo "api 已在 :$PORT_API（pid $(pid_on "$PORT_API")）"; return; fi
   ( cd api && DATA_DIR=../data PORT="$PORT_API" ALLOW_GUEST=1 DEV_LOGIN=1 \
-      ADMIN_UIDS="${ADMIN_UIDS:-gliDMcqPN7VJCG8e}" POINTS_PER_CREDIT="${POINTS_PER_CREDIT:-10}" \
+      ADMIN_UIDS="${ADMIN_UIDS:-gliDMcqPN7VJCG8e,7bigZEQBTw-Sk7Rz}" POINTS_PER_CREDIT="${POINTS_PER_CREDIT:-10}" \
       TOOLS_API_KEY="${TOOLS_API_KEY:-dev-tools-key}" PLATFORM_EVENTS_KEY="${PLATFORM_EVENTS_KEY:-dev-platform-key}" \
       nohup node server.js >"../$LOG_API" 2>&1 & )
   i=0; while [ $i -lt 30 ] && [ -z "$(pid_on "$PORT_API")" ]; do sleep 0.2; i=$((i+1)); done
