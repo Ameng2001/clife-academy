@@ -16,7 +16,7 @@ const AGES = ['小班', '中班', '大班', '混龄']
 const PHASE = { open: '应战中', review: '互评与点评', done: '已收官' }
 const pad = n => String(n).padStart(2, '0')
 const toLocal = at => { const d = new Date(at); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` }
-const EMPTY = () => ({ id: null, month: new Date().toISOString().slice(0, 7), title: '', age: '中班', activity: '', goal: '', guide: '', domain: 'plan', due: toLocal(Date.now() + 14 * 86400000), review: toLocal(Date.now() + 21 * 86400000) })
+const EMPTY = () => ({ id: null, form: 'lesson', month: new Date().toISOString().slice(0, 7), title: '', age: '中班', activity: '', goal: '', guide: '', domain: 'plan', due: toLocal(Date.now() + 14 * 86400000), review: toLocal(Date.now() + 21 * 86400000) })
 
 function Stars({ v, onChange }) { return <span style={{ display: 'inline-flex', gap: 2 }}>{[1, 2, 3, 4, 5].map(n => <span key={n} className="tap" style={{ color: n <= (v || 0) ? 'var(--orange)' : 'var(--label-3)', fontSize: 18 }} onClick={() => onChange?.(n)}>★</span>)}</span> }
 
@@ -55,7 +55,7 @@ function Contest({ c, user, onChange }) {
   const fileRef = useRef()
   const dname = DOMAINS.find(d => d.key === c.domain)?.name || c.domain
   const enter = async () => {
-    if (design.trim().length < 100) return toast('活动设计至少 100 字：目标、环节、材料')
+    if (design.trim().length < (c.entryMin || 100)) return toast(`${c.entryLabel || '活动设计'}至少 ${c.entryMin || 100} 字`)
     setBusy(true)
     try { await api('/api/contests/enter', { method: 'POST', body: JSON.stringify({ id: c.id, design, note, video: video ? { hash: video.hash, name: video.name, type: video.type } : undefined }) }); toast(c.mine ? '已改' : '已应战'); setEditing(false); setVideo(null); onChange() }
     catch (e) { toast('没交成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
@@ -65,7 +65,7 @@ function Contest({ c, user, onChange }) {
   const toggleSelect = e => host('/api/contests/select', { entryIds: e.selected ? c.list.filter(x => x.selected && x.id !== e.id).map(x => x.id) : [...c.list.filter(x => x.selected).map(x => x.id), e.id] }, e.selected ? '已取消' : '已定为入选')
   const groups = c.groups.length ? c.groups : (c.list?.length ? [{ n: 0, entryIds: c.list.map(e => e.id), review: null }] : [])
   return <div className="card" style={{ marginTop: 12 }}>
-    <div className="small muted">{c.level === 'community' ? '共同体赛 · ' + (c.communityName || '') + ' · ' : ''}{c.month} · {dname} · {c.age} · {PHASE[c.phase]} · {c.phase === 'open' ? `${fmtDay(c.dueAt)} 截止` : c.phase === 'review' ? `${fmtDay(c.reviewAt)} 前互评` : fmtDay(c.closedAt)} · {c.entries} 人应战{c.selectedCount ? ` · 入选 ${c.selectedCount}` : ''}</div>
+    <div className="small muted">{c.formName && c.form !== 'lesson' ? c.formName + ' · ' : ''}{c.level === 'community' ? '共同体赛 · ' + (c.communityName || '') + ' · ' : ''}{c.month} · {dname} · {c.age} · {PHASE[c.phase]} · {c.phase === 'open' ? `${fmtDay(c.dueAt)} 截止` : c.phase === 'review' ? `${fmtDay(c.reviewAt)} 前互评` : fmtDay(c.closedAt)} · {c.entries} 人应战{c.selectedCount ? ` · 入选 ${c.selectedCount}` : ''}</div>
     <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0', lineHeight: 1.35 }}>{c.title}</div>
     <div style={{ fontSize: 15, lineHeight: 1.5 }}>活动：{c.activity}<br />目标：{c.goal}</div>
     {c.guide && <div className="small" style={{ marginTop: 4, color: 'var(--label-2)' }}>《指南》：{c.guide}</div>}
@@ -77,12 +77,12 @@ function Contest({ c, user, onChange }) {
         <div className="ac-row"><span className="small muted">我的作品 · {fmtDay(c.mine.updatedAt)}{c.mine.video ? ' · 有片段' : ''}</span><Button size="sm" onClick={() => setEditing(true)}>改</Button></div>
         <div style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{c.mine.design}</div>
       </div> : <>
-        <div className="small muted">应战：一份活动设计（目标、环节、材料、≥100 字）＋ 一段 ≤ 3 分钟实施片段（幼儿不露脸，拍教师与材料）。截止前别人看不到你的设计。</div>
-        <TextArea rows={8} style={{ marginTop: 8 }} placeholder="活动设计" value={design} onChange={e => setDesign(e.target.value)} />
+        <div className="small muted">应战：{c.entryLabel || '一份活动设计'}（≥{c.entryMin || 100} 字）{c.mediaLabel ? ' ＋ ' + c.mediaLabel : ''}。截止前别人看不到你的作品。</div>
+        <TextArea rows={8} style={{ marginTop: 8 }} placeholder={c.entryLabel || '活动设计'} value={design} onChange={e => setDesign(e.target.value)} />
         <TextField style={{ marginTop: 8 }} placeholder="一句反思（可不填）" value={note} onChange={e => setNote(e.target.value)} />
         <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          {video ? <span className="chip" onClick={() => setVideo(null)}><Icon name="play" /> {video.name || '片段'} ×</span> : <Button size="sm" icon="camera" disabled={busy} onClick={() => fileRef.current?.click()}>{c.mine?.video ? '换片段' : '传片段'}</Button>}
-          <input ref={fileRef} type="file" accept="video/*" hidden onChange={pick} />
+          {c.mediaLabel ? (video ? <span className="chip" onClick={() => setVideo(null)}><Icon name="play" /> {video.name || '片段'} ×</span> : <Button size="sm" icon="camera" disabled={busy} onClick={() => fileRef.current?.click()}>{c.mine?.video ? '换' : '传'}{c.form === 'env' ? '对比照' : '片段'}</Button>) : null}
+          <input ref={fileRef} type="file" accept={c.form === 'env' ? 'image/*' : 'video/*'} hidden onChange={pick} />
           <span style={{ flex: 1 }} /><span className="small muted">{design.trim().length} 字</span>
           {editing && <Button size="sm" onClick={() => setEditing(false)}>取消</Button>}<Button variant="primary" disabled={busy} onClick={enter}>{c.mine ? '保存' : '应战'}</Button>
         </div>
@@ -124,7 +124,7 @@ export default function Contests() {
     if (!form.title.trim() || !form.activity.trim() || !form.goal.trim()) return toast('主题、活动名、目标都要写')
     if (data?.hostScope === 'community' && !communityId) return toast('选一个共同体')
     setBusy(true)
-    try { await api('/api/contests', { method: 'POST', body: JSON.stringify({ month: form.month, title: form.title, age: form.age, activity: form.activity, goal: form.goal, guide: form.guide, domain: form.domain, dueAt: new Date(form.due + 'T23:59').getTime(), reviewAt: new Date(form.review + 'T23:59').getTime(), communityId: communityId || undefined }) }); toast(data?.hostScope === 'community' ? '已发布，共同体各园老师能看到' : '已发布，本园老师能看到了'); setForm(null); load() }
+    try { await api('/api/contests', { method: 'POST', body: JSON.stringify({ form: form.form, month: form.month, title: form.title, age: form.age, activity: form.activity, goal: form.goal, guide: form.guide, domain: form.domain, dueAt: new Date(form.due + 'T23:59').getTime(), reviewAt: new Date(form.review + 'T23:59').getTime(), communityId: communityId || undefined }) }); toast(data?.hostScope === 'community' ? '已发布，共同体各园老师能看到' : '已发布，本园老师能看到了'); setForm(null); load() }
     catch (e) { toast('没存成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   const all = data ? [...data.current, ...data.past] : []
@@ -135,7 +135,9 @@ export default function Contests() {
     {form && <div className="card" style={{ marginBottom: 14 }}>
       <div className="small muted" style={{ marginBottom: 8 }}>出题 · {data?.hostScope === 'community' ? '共同体赛：面向本区一个共同体，各园教师应战，截止后跨园编组互评 · ' : ''}每月一个主题，按年龄班给定活动名与目标，附《指南》条目 · 第 1 周发布、第 3 周截止、第 4 周互评与点评</div>
       {data?.hostScope === 'community' && <select className="ac-sel" value={communityId} onChange={e => setCommunityId(e.target.value)} style={{ marginBottom: 8, width: '100%' }}><option value="">选共同体</option>{(data.communities || []).map(x => <option key={x.id} value={x.id}>{x.name} · {x.orgs.join('、')}</option>)}</select>}
-      <TextField placeholder="主题，如「中班科学：影子从哪来」" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
+      {data?.forms && <div className="chips" style={{ marginBottom: 8 }}>{Object.entries(data.forms).map(([k, f]) => <button key={k} className={'chip' + (form.form === k ? ' on' : '')} title={f.hint} onClick={() => setForm({ ...form, form: k })}>{f.name}</button>)}</div>}
+      {data?.forms?.[form.form] && <div className="small muted" style={{ marginBottom: 6 }}>{data.forms[form.form].hint} · 作品：{data.forms[form.form].entry} · 量表：{data.forms[form.form].rubric.join('、')}</div>}
+      <TextField placeholder={form.form === 'lesson' ? '主题，如「中班科学：影子从哪来」' : form.form === 'env' ? '主题，如「建构区的材料」' : form.form === 'obs' ? '主题，如「沙水区 3 分钟公共录像」' : '情境，如「家长在群里质疑午睡安排」'} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
       <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <TextField placeholder="活动名" value={form.activity} onChange={e => setForm({ ...form, activity: e.target.value })} style={{ flex: 2, minWidth: 140 }} />
         <select className="ac-sel" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })}>{AGES.map(a => <option key={a}>{a}</option>)}</select>

@@ -37,6 +37,7 @@ function Card({ l, first, user, onBook, onEdit, onDelete }) {
       {l.slides?.file && <a className="btn btn-sm" style={A} href={`api/lectures/file?id=${l.id}`} target="_blank" rel="noreferrer"><Icon name="clipboard" /> 讲义</a>}
       {onEdit && <><Button size="sm" onClick={() => onEdit(l)}>改</Button><Button size="sm" onClick={() => onDelete(l)}>删</Button></>}
     </div>
+    {l.sharers?.length > 0 && <div className="small" style={{ marginTop: 8, ...sub }}>分享者：{l.sharers.map(s => s.name + (s.orgName ? '（' + s.orgName + '）' : '') + (s.caseTitle ? '《' + s.caseTitle + '》' : '')).join('、')} · 各 10 分钟</div>}
     {l.notes && l.phase === 'done' && <div className="small" style={{ marginTop: 10, whiteSpace: 'pre-wrap', ...sub }}>{l.notes}</div>}
     {l.showcase?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><Icon name="sparkles" /> 展示案例：{l.showcase.map(c => <span key={c.id} className="tap" style={{ textDecoration: 'underline', marginInlineEnd: 8 }} onClick={e => { e.stopPropagation(); nav('/cases?q=' + encodeURIComponent(c.title)) }}>《{c.title}》{c.byName}</span>)}</div>}
     {l.honors?.length > 0 && <div className="small" style={{ marginTop: 6, ...sub }}><Icon name="crown" /> 颁发：{l.honors.map(h => `${h.name} · ${h.label}`).join('；')}</div>}
@@ -55,6 +56,9 @@ export default function Lectures() {
   const toggleId = (k, id) => setForm(f => ({ ...f, [k]: f[k].includes(id) ? f[k].filter(x => x !== id) : [...f[k], id] }))
   const load = () => api('/api/lectures').then(setData).catch(() => useUI.getState().toast('没取到场次'))
   useEffect(() => { load() }, [user?.id])
+  const [sharers, setSharers] = useState(null), [inviteTo, setInviteTo] = useState('')
+  useEffect(() => { if (user?.admin) api('/api/lectures/sharers').then(setSharers).catch(() => setSharers(null)) }, [user?.id])
+  const invite = async (s, caseId) => { const id = inviteTo || data?.upcoming[0]?.id; if (!id) return useUI.getState().toast('先排一场'); try { await api('/api/lectures/invite', { method: 'POST', body: JSON.stringify({ id, uid: s.uid, caseId: caseId || undefined }) }); useUI.getState().toast(`已邀 ${s.name} 上讲堂，授「年度分享者」`); load(); api('/api/lectures/sharers').then(setSharers) } catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) } }
   const book = async (l, on) => {
     try { const r = await api('/api/lectures/book', { method: 'POST', body: JSON.stringify({ id: l.id, on }) }); useUI.getState().toast(on ? (r.remind ? '已预约，开播前 30 分钟提醒' : '已预约，开播前提醒在小程序里打开') : '已取消预约'); load() }
     catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
@@ -112,6 +116,12 @@ export default function Lectures() {
     {data?.done.length > 0 && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">回放 · {data.done.length}</div>
       {data.done.map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} />)}
     </div>}
+    {sharers && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">分享者候选 <span className="small muted">被「用过，有效」≥ {sharers.usesMin} 次或入库 ≥ {sharers.casesMin} 条或入选 · 邀请用的名单，不公开</span></div>
+      {data?.upcoming.length > 1 && <div className="row" style={{ gap: 8, marginBottom: 6, alignItems: 'center' }}><span className="small muted">邀到哪一场</span><select className="ac-sel" value={inviteTo} onChange={e => setInviteTo(e.target.value)}>{data.upcoming.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></div>}
+      <div className="sect-b">
+        {!sharers.candidates.length && <div className="lrow small muted">还没有达到条件的分享者。</div>}
+        {sharers.candidates.map(s => <div key={s.uid} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{s.name}{s.orgName ? ' · ' + s.orgName : ''}{s.sharer ? <span className="tag" style={{ marginInlineStart: 6 }}>年度分享者</span> : null}</div><div className="small muted">入库 {s.cases} 条 · 被用 {s.uses} 次{s.selected ? ` · 入选 ${s.selected}` : ''}{s.invited.length ? ` · 已邀：${s.invited.join('、')}` : ''}</div><div className="chips" style={{ marginTop: 4 }}>{s.caseList.map(c => <button key={c.id} className="chip" onClick={() => invite(s, c.id)}>邀讲《{c.title.slice(0, 14)}》· 被用 {c.uses}</button>)}</div></div><Button size="sm" onClick={() => invite(s)}>邀上讲堂</Button></div>)}
+      </div></div>}
     <div className="small muted" style={{ marginTop: 16 }}>提醒只在你预约的那一场开播前 30 分钟发一条，在小程序里打开订阅。</div>
   </div>
 }

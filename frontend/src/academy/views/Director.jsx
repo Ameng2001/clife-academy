@@ -43,8 +43,8 @@ export default function Director() {
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
   const [certs, setCerts] = useState(null)
   useEffect(() => { if (user) api('/api/org/certificates').then(setCerts).catch(() => setCerts(null)) }, [user?.id])
-  const [stats, setStats] = useState(null)
-  useEffect(() => { if (user) api('/api/review/stats').then(setStats).catch(() => setStats(null)) }, [user?.id])
+  const [stats, setStats] = useState(null), [coach, setCoach] = useState(null), [weekly, setWeekly] = useState(null), [sr, setSr] = useState(null)
+  useEffect(() => { if (user) { api('/api/review/stats').then(setStats).catch(() => setStats(null)); api('/api/org/coach').then(setCoach).catch(() => setCoach(null)); api('/api/ops/weekly').then(setWeekly).catch(() => setWeekly(null)); api('/api/selfreview/others').then(setSr).catch(() => setSr(null)) } }, [user?.id])
   useEffect(() => { if (user) loadTitles() }, [user?.id])
   const grantTitle = async () => {
     if (reason.trim().length < 5) return useUI.getState().toast('写授予理由，至少 5 字')
@@ -139,6 +139,17 @@ export default function Director() {
         <Button size="sm" variant="tinted" disabled={busy || !mentor || !mentee} onClick={addPair}>配对</Button>
       </div>}
     </div></div>
+
+    {coach?.suggestions.length > 0 && <div className="sect"><div className="sect-t">Coach 的配对建议 <span className="small muted">本人采用了才到这里；配不配你定</span></div><div className="sect-b">
+      {coach.suggestions.map(s => <div key={s.uid} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{s.name}</div><div className="small muted">{s.why} · {fmtDay(s.at)}</div></div></div>)}
+    </div></div>}
+    <div className="sect"><div className="sect-t">教师发展</div>
+      <div className="lrow tap" onClick={() => nav('/selfreview?tab=others')}><div style={{ flex: 1 }}><div className="lrow-t">自评与三方评{sr ? ` · 已自评 ${sr.done}/${sr.people.length}` : ''}</div><div className="small muted">每学期一次；你看参与与反思写一段，不合成总分。</div></div><Icon name="chevronRight" /></div>
+      <div className="lrow tap" onClick={() => nav('/groups')}><div style={{ flex: 1 }}><div className="lrow-t">园内教研组</div><div className="small muted">教研主任（点评人）发课例研讨任务，组员交反思。</div></div><Icon name="chevronRight" /></div>
+      <div className="lrow tap" onClick={() => nav('/camps')}><div style={{ flex: 1 }}><div className="lrow-t">练习营</div><div className="small muted">本园办一个自愿短期练习营，营末你写总评。</div></div><Icon name="chevronRight" /></div>
+      <div className="lrow tap" onClick={() => nav('/sharedays')}><div style={{ flex: 1 }}><div className="lrow-t">园所分享日</div><div className="small muted">共同体分享日上交本园的一页。</div></div><Icon name="chevronRight" /></div>
+      {weekly && <div className="lrow tap" onClick={() => nav('/ops')}><div style={{ flex: 1 }}><div className="lrow-t">运营周报 · {weekly.week.label}</div><div className="small muted">{weekly.text}</div></div><Icon name="chevronRight" /></div>}
+    </div>
 
     <div className="sect"><div className="sect-t">点评</div>
       <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">实践关待点评</div><div className="small muted">本园老师交的观察记录等证据，按量表给意见。</div></div><Icon name="chevronRight" /></div>

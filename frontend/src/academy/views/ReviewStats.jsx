@@ -19,8 +19,8 @@ function Tiles({ d }) {
 export default function ReviewStats() {
   const nav = useNavigate()
   const user = useStore(s => s.user)
-  const [d, setD] = useState(null), [err, setErr] = useState(null)
-  useEffect(() => { if (!user) return; api('/api/review/stats').then(setD).catch(e => setErr(e.code === 'director' ? '园长与管理员看。' : '没取到。')) }, [user?.id])
+  const [d, setD] = useState(null), [err, setErr] = useState(null), [w, setW] = useState(null)
+  useEffect(() => { if (!user) return; api('/api/review/stats').then(setD).catch(e => setErr(e.code === 'director' ? '园长与管理员看。' : '没取到。')); api('/api/ops/weekly').then(setW).catch(() => setW(null)) }, [user?.id])
   return <div className="narrow">
     <div className="hdr"><div><h1>点评时效</h1><div className="sub">{d?.scope === 'all' ? '全平台' : d?.orgName || '本园'} · 每周看一次 · 队列与时效，不排名</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {err && <div className="card small muted">{err}</div>}
@@ -35,6 +35,10 @@ export default function ReviewStats() {
       {d.scope === 'all' && <div className="sect"><div className="sect-t">各园 <span className="small muted">超期多的在前，是工作队列不是名次</span></div><div className="sect-b">
         {!d.orgs.length && <div className="lrow small muted">还没有园所。</div>}
         {d.orgs.map(o => <div key={o.key} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{o.name}{o.overdue ? <span className="tag" style={{ marginInlineStart: 6, color: 'var(--orange)' }}>超期 {o.overdue}</span> : null}</div><div className="small muted">待点评 {o.pending} · 近 30 天 {o.done30} 次{o.medianHours != null ? ` · 中位 ${o.medianHours} 小时` : ''} · 点评队伍 {o.reviewers}/{o.members} · 答疑开放 {o.questions.open}{o.questions.escalated ? `（转讲师 ${o.questions.escalated}）` : ''}</div></div></div>)}
+      </div></div>}
+      {w && <div className="sect"><div className="sect-t">运营周报 · {w.week.label} <span className="small muted">周一 09:00 后推一次</span></div><div className="sect-b">
+        <div className="lrow"><div style={{ flex: 1, fontSize: 15, lineHeight: 1.55 }}>{w.text}</div></div>
+        {w.scope === 'all' && w.orgs.map(o => <div key={o.key} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{o.name}{o.overdue ? <span className="tag" style={{ marginInlineStart: 6, color: 'var(--orange)' }}>超期 {o.overdue}</span> : null}</div><div className="small muted">{o.text}</div></div></div>)}
       </div></div>}
       <div className="small muted" style={{ marginTop: 10 }}>超期口径同答疑：两个工作日，跳过周末。点评人各自点了多少只有本人在荣誉页看，这里不列。</div>
     </>}

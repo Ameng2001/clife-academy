@@ -12,8 +12,8 @@ import { useS, fmtDay } from './common.jsx'
 export default function Honors() {
   const nav = useNavigate(), S = useS()
   const user = useStore(s => s.user)
-  const [h, setH] = useState(null), [p, setP] = useState(null), [n, setN] = useState(''), [busy, setBusy] = useState(false)
-  const load = () => { if (!user) return; api('/api/me/honors').then(setH).catch(() => setH(null)); api('/api/me/points').then(setP).catch(() => setP(null)) }
+  const [h, setH] = useState(null), [p, setP] = useState(null), [n, setN] = useState(''), [busy, setBusy] = useState(false), [org, setOrg] = useState(null)
+  const load = () => { if (!user) return; api('/api/me/honors').then(setH).catch(() => setH(null)); api('/api/me/points').then(setP).catch(() => setP(null)); api('/api/org/honors').then(setOrg).catch(() => setOrg(null)) }
   useEffect(() => { load() }, [user?.id])
   const levelCredits = Object.values(S.credits || {}).reduce((a, b) => a + b, 0)
   const exchange = async () => {
@@ -59,6 +59,12 @@ export default function Honors() {
       <div className="small muted" style={{ marginTop: 8 }}>条件公开：案例被采纳、作答被精选、给同事写意见、带出一个人。不按在线时长、登录天数发任何东西。</div>
     </div>}
 
+    {org && <div className="sect"><div className="sect-t">园所集体荣誉 <span className="small muted">{org.orgName || '本园'} · 系统按园统计 · 只给本园看</span></div>
+      <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(120px,1fr))', gap: 8 }}>
+        {!org.badges.length && <div className="small muted">本园同岗位满 3 人后才会出现。</div>}
+        {org.badges.map(b => <div key={b.key} className={'ac-badge' + (b.on ? ' on' : '')} title={b.desc}><div className="b"><Icon name={b.on ? 'trophy' : 'dot'} /></div><div className="small" style={{ fontSize: 12 }}>{b.name}</div><div className="small muted" style={{ fontSize: 11 }}>{b.on ? fmtDay(b.at) : `${b.progress}/${b.of}`}</div></div>)}
+      </div>
+    </div>}
     {h?.credits.length > 0 && <div className="sect"><div className="sect-t">关卡以外的学分</div><div className="sect-b">
       {h.credits.map((c, i) => <div key={i} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{c.note}</div><div className="small muted">{fmtDay(c.at)}</div></div><span style={{ color: 'var(--green)' }}>+{c.n}</span></div>)}
     </div></div>}

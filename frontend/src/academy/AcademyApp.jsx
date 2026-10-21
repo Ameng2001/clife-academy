@@ -35,6 +35,12 @@ import Studios from './views/Studios.jsx'
 import Portfolio from './views/Portfolio.jsx'
 import ReviewStats from './views/ReviewStats.jsx'
 import Library from './views/Library.jsx'
+import SelfReview from './views/SelfReview.jsx'
+import Camps from './views/Camps.jsx'
+import StudyGroups from './views/StudyGroups.jsx'
+import Programs from './views/Programs.jsx'
+import ShareDays from './views/ShareDays.jsx'
+import Coach from './views/Coach.jsx'
 import './academy.css'
 
 bindUI(useUI)
@@ -109,6 +115,12 @@ function Shell() {
           <Route path="/portfolio/hours/:id" element={<Portfolio />} />
           <Route path="/certs/:id" element={<Certificates />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/selfreview" element={<SelfReview />} />
+          <Route path="/camps" element={<Camps />} />
+          <Route path="/groups" element={<StudyGroups />} />
+          <Route path="/programs" element={<Programs />} />
+          <Route path="/sharedays" element={<ShareDays />} />
+          <Route path="/coach" element={<Coach />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>}

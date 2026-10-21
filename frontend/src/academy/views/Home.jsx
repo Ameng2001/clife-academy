@@ -43,6 +43,8 @@ export default function Home() {
     catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
   }
   useEffect(() => { if (user) api('/api/me/pair').then(setPair).catch(() => setPair(null)); else setPair(null) }, [user?.id])
+  const [plan, setPlan] = useState(null)
+  useEffect(() => { if (user) api('/api/me/coach').then(r => setPlan(r.plan)).catch(() => setPlan(null)); else setPlan(null) }, [user?.id])
   return <div className="narrow">
     <div className="hdr">
       <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
@@ -61,10 +63,12 @@ export default function Home() {
       </> : <div className="big" style={{ marginTop: 4 }}>本路径已全部通过 🎉</div>}
       <div className="ac-bar"><i style={{ width: `${sum.total ? sum.done / sum.total * 100 : 0}%` }} /></div>
       <div className="small muted" style={{ marginTop: 6 }}>{sum.done} / {sum.total} 关 · {credits} 学分</div>
+      {plan && plan.levels.length > 0 && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={() => nav('/coach')}>本周待学（Coach 学期计划第 {plan.week} 周）：{plan.levels.map(l => (l.passed ? '✓ ' : '') + l.title).join('、')} ›</div>}
     </div>
 
     <div className="tiles">
-      {user?.admin && user.academy?.role !== 'director' && <div className="tile tappable" onClick={() => nav('/ops')}><div className="l"><Icon name="gauge" />点评时效</div><div className="v">全平台</div><div className="small muted">待点评、超期、各园一行</div></div>}
+      {user?.admin && user.academy?.role !== 'director' && <div className="tile tappable" onClick={() => nav('/ops')}><div className="l"><Icon name="gauge" />点评时效与周报</div><div className="v">全平台</div><div className="small muted">待点评、超期、各园一行、上周的账</div></div>}
+      {user?.admin && <div className="tile tappable" onClick={() => nav('/programs')}><div className="l"><Icon name="calendar" />研修项目</div><div className="v">期次</div><div className="small muted">报名、名单、学时；分享者在大讲堂里邀</div></div>}
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
       {user?.academy?.role === 'district'
         ? <div className="tile tappable" onClick={() => nav('/district')}><div className="l"><Icon name="gauge" />区县看板</div><div className="v">{user.academy.district?.name || '本区'}</div><div className="small muted">园所数、覆盖率中位数、认证人数</div></div>
