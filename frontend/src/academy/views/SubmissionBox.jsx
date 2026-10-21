@@ -68,14 +68,14 @@ export default function SubmissionBox({ lv, status, onDone }) {
     </div>}
 
     {canSubmit && <div style={{ marginTop: 12 }}>
-      <TextArea rows={practice ? 7 : 5} placeholder={practice ? '事实一段、推断一段，200–400 字' : '先写你会说的话，再写为什么这样说，50–150 字'} value={text} onChange={e => setText(e.target.value)} />
-      {practice && lv.evidence?.kinds?.includes('photo') && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 8, flexWrap: 'wrap' }}>
-        {files.map(f => <span key={f.hash} className="chip" onClick={() => setFiles(fs => fs.filter(x => x.hash !== f.hash))} title="点一下移除"><Icon name="image" /> {f.name || '照片'} ×</span>)}
-        {files.length < 6 && <Button size="sm" icon="camera" disabled={busy} onClick={() => fileRef.current?.click()}>加照片</Button>}
-        <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={pick} />
+      <TextArea rows={practice ? 7 : 5} placeholder={practice ? (lv.evidence?.note ? '按上面的要求写' : '事实一段、推断一段，200–400 字') : '先写你会说的话，再写为什么这样说，50–150 字'} value={text} onChange={e => setText(e.target.value)} />
+      {practice && (lv.evidence?.kinds?.includes('photo') || lv.evidence?.kinds?.includes('video')) && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 8, flexWrap: 'wrap' }}>
+        {files.map(f => <span key={f.hash} className="chip" onClick={() => setFiles(fs => fs.filter(x => x.hash !== f.hash))} title="点一下移除"><Icon name={f.type?.startsWith('video/') ? 'play' : 'image'} /> {f.name || (f.type?.startsWith('video/') ? '片段' : '照片')} ×</span>)}
+        {files.length < 6 && <Button size="sm" icon="camera" disabled={busy} onClick={() => fileRef.current?.click()}>{lv.evidence.kinds.includes('video') ? '加照片或片段' : '加照片'}</Button>}
+        <input ref={fileRef} type="file" accept={lv.evidence.kinds.includes('video') ? 'image/*,video/mp4,video/quicktime,video/webm' : 'image/*'} multiple hidden onChange={pick} />
       </div>}
       <div className="ac-row" style={{ marginTop: 10 }}>
-        <span className="small muted">{text.trim().length} 字{files.length ? ` · ${files.length} 张照片` : ''}</span>
+        <span className="small muted">{text.trim().length} 字{files.length ? ` · ${files.length} 个附件` : ''}</span>
         <div className="row" style={{ gap: 8 }}>{editing && <Button size="sm" onClick={() => setEditing(false)}>取消</Button>}<Button variant="primary" disabled={busy} onClick={send}>提交</Button></div>
       </div>
     </div>}
