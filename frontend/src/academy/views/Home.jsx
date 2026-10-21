@@ -6,7 +6,7 @@ import { Button } from '../../components/ui.jsx'
 import { ORG, PROBES, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
 import { canReview } from './Review.jsx'
 import { drafts } from '../../lib/level-draft.js'
-import { useS, myPath, RoleSelect } from './common.jsx'
+import { useS, myPath, RoleSelect, fmtDay } from './common.jsx'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { fmtWhen } from './Lectures.jsx'
@@ -25,6 +25,8 @@ export default function Home() {
   const [pair, setPair] = useState(null)
   const [lecture, setLecture] = useState(null)
   const [drill, setDrill] = useState(null)
+  const [contest, setContest] = useState(null)
+  useEffect(() => { if (user) api('/api/contests').then(r => setContest(r.current[0] || null)).catch(() => setContest(null)); else setContest(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/drills').then(r => setDrill(r.current[0] || null)).catch(() => setDrill(null)); else setDrill(null) }, [user?.id])
   useEffect(() => { api('/api/lectures').then(r => setLecture(r.upcoming[0] || null)).catch(() => setLecture(null)) }, [user?.id])
   const bookLecture = async () => {
@@ -90,6 +92,11 @@ export default function Home() {
       <div className="ac-row"><span className="small muted">每周一题{drill.scope === 'org' ? ' · 本园' : ''}</span><span className="small muted">{drill.answered} 人答</span></div>
       <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{drill.title}</div>
       <div className="small" style={{ color: drill.mine ? 'var(--green)' : 'var(--acc)' }}>{drill.mine ? (drill.mine.review ? '已答 · ' + drill.mine.review.byName + ' 点评了' : '已答 · 看同园老师怎么答') : '去作答'} <Icon name="chevronRight" /></div>
+    </div>}
+    {contest && <div className="card tappable" style={{ marginTop: 14 }} onClick={() => nav('/contests?id=' + contest.id)}>
+      <div className="ac-row"><span className="small muted"><Icon name="trophy" /> 斗课 · {contest.phase === 'open' ? '应战中，' + fmtDay(contest.dueAt) + ' 截止' : '互评与点评'}</span><span className="small muted">{contest.entries} 人应战</span></div>
+      <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{contest.title}</div>
+      <div className="small" style={{ color: contest.mine ? 'var(--green)' : 'var(--acc)' }}>{contest.phase === 'open' ? (contest.mine ? '已应战 · 改作品' : '自愿应战，交一份活动设计') : '看同事的设计、互评'} <Icon name="chevronRight" /></div>
     </div>}
     {(pair?.mentor || pair?.mentees?.length > 0) && <div className="sect"><div className="sect-t">带教</div><div className="sect-b">
       {pair.mentor && <div className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">带教教师：{pair.mentor.name}</div><div className="small muted">你的实践关作品由 {pair.mentor.name} 点评</div></div></div>}

@@ -851,6 +851,93 @@ paths:
       responses:
         '200': { description: 文件 }
         '404': { description: 没有 }
+  /api/contests:
+    get:
+      tags: [academy]
+      operationId: academyContests
+      summary: 斗课（同课异构擂台）园内赛：进行中与已收官
+      description: '`{ current, past, canHost, rubric }`。每场带 `phase`（open 应战 / review 互评与点评 / done 收官）、本人作品 `mine`、报名数。'
+      responses:
+        '200': { description: 擂台 }
+    post:
+      tags: [academy]
+      operationId: academyContestSave
+      summary: 出题或改（园长、点评人、管理员）
+      description: '`{ id?, month, title, age, activity, goal, guide?, domain, dueAt?, reviewAt? }`。默认两周后截止、再一周互评。'
+      responses:
+        '200': { description: '`{ contest }`' }
+        '403': { description: 不是主持人 }
+  /api/contests/one:
+    get:
+      tags: [academy]
+      operationId: academyContestOne
+      summary: 一场的详情与作品
+      description: '`?id=`。应战期间别人的设计不给看；截止后同园都能看。分数只有作者看自己的、主持人看平均分；别人看不到。'
+      responses:
+        '200': { description: '`{ contest }`' }
+  /api/contests/delete:
+    post:
+      tags: [academy]
+      operationId: academyContestDelete
+      summary: 删一场（没收官的）
+      responses:
+        '200': { description: '`{ ok }`' }
+  /api/contests/enter:
+    post:
+      tags: [academy]
+      operationId: academyContestEnter
+      summary: 应战或改自己的作品（应战期）
+      description: '`{ id, design(≥100 字), video?:{hash,name,type}|null, note? }`。片段 ≤ 3 分钟、幼儿不露脸。'
+      responses:
+        '200': { description: '`{ contest }`' }
+        '400': { description: 已截止，或设计太短 }
+  /api/contests/rate:
+    post:
+      tags: [academy]
+      operationId: academyContestRate
+      summary: 互评（互评期、同园、不评自己）
+      description: '`{ entryId, scores:[1..5 ×5], comment }`。量表：目标适切、环节设计、师幼互动、材料运用、反思。实名，一人一份。'
+      responses:
+        '200': { description: '`{ entry }`' }
+  /api/contests/group:
+    post:
+      tags: [academy]
+      operationId: academyContestGroup
+      summary: 编组（主持人，截止后）
+      description: '`{ id, groups?:[[entryId]] }`。不带 groups 按报名顺序每 3–4 人一组。'
+      responses:
+        '200': { description: '`{ contest }`' }
+  /api/contests/review:
+    post:
+      tags: [academy]
+      operationId: academyContestReview
+      summary: 一组的「同课异构」对照点评（主持人）
+      description: '`{ id, group, text(≥50 字) }`。'
+      responses:
+        '200': { description: '`{ contest }`' }
+  /api/contests/select:
+    post:
+      tags: [academy]
+      operationId: academyContestSelect
+      summary: 定入选（主持人）
+      description: '`{ id, entryIds }`。'
+      responses:
+        '200': { description: '`{ contest }`' }
+  /api/contests/close:
+    post:
+      tags: [academy]
+      operationId: academyContestClose
+      summary: 收官：全部作品进案例库（主持人）
+      description: '`{ id, summary? }`。入选的标「同课异构 · 月 · 年龄班」，其余标「参赛作品」；每份 +2 学分。'
+      responses:
+        '200': { description: '`{ contest }`' }
+  /api/contests/file:
+    get:
+      tags: [academy]
+      operationId: academyContestFile
+      summary: 实施片段（同园、截止后；本人随时）
+      responses:
+        '200': { description: 文件 }
   /api/drills:
     get:
       tags: [academy]

@@ -1,6 +1,6 @@
 /* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
  *
- * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'own', submissionId?, levelId?, answerId?, drillId? },
+ * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'contest'|'own', submissionId?, levelId?, answerId?, drillId?, contestId?, entryId?, tag?, selected? },
  * db.caseUses: { caseId, uid, name, orgName, note, at }  「用过，有效」：别的教师用了这份案例标一次、留一句怎么改的；数只给分享者本人、本园园长与管理员看，不排行。
  * 入库给分享者 +2 学分（honors.js 台账，一条案例只记一次）。
  *             by, byName, org, orgName, status, note, at, consent:{by,byName,at}|null, curated:{by,byName,at}|null }

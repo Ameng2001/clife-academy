@@ -25,7 +25,7 @@ function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
     <div className="ac-row tap" onClick={onOpen} style={{ alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, lineHeight: 1.4 }}>{c.title}</div>
-        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.byTitles?.length ? '（' + c.byTitles.join('、') + '）' : ''}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}</div>
+        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.byTitles?.length ? '（' + c.byTitles.join('、') + '）' : ''}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}{c.source?.tag ? ' · ' + c.source.tag : ''}</div>
       </div>
       {c.status !== 'approved' || c.mine ? <span className="small" style={{ color: col, flex: 'none' }}>{t}</span> : <Icon name={open ? 'chevronUp' : 'chevronDown'} />}
     </div>
