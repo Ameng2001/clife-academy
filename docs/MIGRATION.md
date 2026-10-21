@@ -224,7 +224,7 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   `api/test/academy-state.test.js` 证实没有 workouts/routines 的文档也能走 /api/data，409 带回现文档。前端 14 个文件 125 项、api 14 项全绿。
   浏览器验证：访客通过 nurse-0、留草稿 → 登录已有 director-0 的账号 → 弹层 → 两端并集、学分各 1、草稿仍在；设置页退出 → 登录页，localStorage 只剩空状态与草稿。
   localStorage 键名改为 `academy_*`。
-  **还留着的**：`package.json` 里 capacitor、jsqr、lean-qr 等依赖没用了，等有网时 `npm uninstall` 顺手更新锁文件；public/sw.js 没再注册。
+  **还留着的**：public/sw.js 没再注册。（capacitor、jsqr、lean-qr 依赖已于 10-22 卸掉。）
 - **2026-10-22** 小程序接登录与同步（工程在文档仓库 `…/学前大课堂/app/miniprogram/`）。`utils/api.js` 带 Bearer 的 `wx.request` 封装；
   `utils/auth.js` 微信登录（code → `/api/login/wechat`）、`/api/me` 换新 token、退出、改岗位；`utils/sync.js` 与网页端同一份进度文档、同一套合并规则，
   PUT 条件写、409 并集、回前台查修订；登录接管时演示进度丢掉、本机真通过的关问一句。`utils/store.js` 改为从文档现算游标与学分，四段草稿只留本机；
@@ -239,3 +239,6 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   `Login.jsx` 认 `?ticket=` 与 `?code=&state=` 两种回跳（路径式 `/login/platform` 与 hash 式都认），state 存 sessionStorage 校验。
   小程序 `auth.loginPlatform/ticketFrom`，`app.js` 启动与回前台读 `extraData.ticket` / `query.ticket` 换会话。`api/test/auth.test.js` 加外包业务码与 oauth2 两项，17 项全过。
   **待办**：拿到平台答复后填契约第 7 节、按第 6 节配参数、用测试账号跑一遍；平台注销联动与学习记录回传另立接口。
+- **2026-10-22（下午 2）** 卸掉前端无用依赖：capacitor 全家（core/app/filesystem/share/local-notifications、mlkit 扫码、secure-storage、android/ios/cli/assets）、
+  jsqr、lean-qr，锁文件同步。`web/Dockerfile` 去掉拷 `api/coach/core/` 的一步与 capacitor postinstall 的说明，只拷 frontend/。
+  构建与 120 项测试照常。注意 `scripts/build-coach-assets.mjs` 还引用已删除的 `frontend/src/lib/exercises-data.js`，归属 api 侧 coach 改造，到时一并处理。
