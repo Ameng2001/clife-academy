@@ -80,3 +80,49 @@ test('communities: build from district orgs, one org per group, shared drills an
   assert.equal((await call('GET', '/api/drills', null, b)).json.current.length, 0);
   assert.equal((await call('GET', '/api/me/community', null, a2)).json.community, null);
 });
+
+test('community contest: district admin hosts for one community, members of its orgs enter, grouping mixes orgs, closing tags 共同体赛', async t => {
+  const { call, login } = await startServer(t);
+  const d = await login('区县小李', 'district', '', '柳北区');
+  const a1 = await login('甲一', 'teacher', '甲园', '柳北区'), a2 = await login('甲二', 'teacher', '甲园', '柳北区');
+  const b1 = await login('乙一', 'teacher', '乙园', '柳北区'), b2 = await login('乙二', 'teacher', '乙园', '柳北区');
+  const c1 = await login('丙一', 'teacher', '丙园', '柳北区');
+  const comm = (await call('POST', '/api/district/communities', { name: '一组', orgs: ['name:甲园', 'name:乙园'] }, d)).json.community;
+  let r = (await call('GET', '/api/contests', null, d)).json;
+  assert.equal(r.hostScope, 'community'); assert.equal(r.canHost, true); assert.equal(r.communities[0].name, '一组');
+  const base = { month: '2026-12', title: '中班科学：影子从哪来', age: '中班', activity: '影子从哪来', goal: '感知光与影子的关系', domain: 'play' };
+  assert.equal((await call('POST', '/api/contests', base, d)).json.code, 'community');
+  r = await call('POST', '/api/contests', { ...base, communityId: comm.id }, d);
+  assert.equal(r.status, 200); const id = r.json.contest.id; assert.equal(r.json.contest.level, 'community'); assert.equal(r.json.contest.communityName, '一组'); assert.equal(r.json.contest.canHost, true);
+  // 组内两园看得到，丙园看不到；区县管理员不能应战
+  assert.equal((await call('GET', '/api/contests', null, a1)).json.current.length, 1);
+  assert.equal((await call('GET', '/api/contests', null, c1)).json.current.length, 0);
+  assert.equal((await call('GET', '/api/contests', null, c1)).json.canHost, false);
+  const design = '活动目标：感知光与影子的关系。环节：一、找影子；二、变影子；三、画影子。材料：手电、白布、各种小物件。幼儿分组探索，教师记录幼儿的发现并追问。延伸：户外找影子。'.repeat(2);
+  assert.equal((await call('POST', '/api/contests/enter', { id, design }, d)).status, 403);
+  for (const h of [a1, a2, b1, b2]) assert.equal((await call('POST', '/api/contests/enter', { id, design }, h)).status, 200);
+  assert.equal((await call('POST', '/api/contests/enter', { id, design }, c1)).status, 404);
+  // 提前截止 → 自动跨园编组：4 人一组 → 1 组，里面两园都有；作品带园名
+  await call('POST', '/api/contests', { ...base, id, dueAt: Date.now() - 1 }, d);
+  r = (await call('POST', '/api/contests/group', { id }, d)).json.contest;
+  assert.equal(r.groups.length, 1); assert.equal(r.groups[0].entryIds.length, 4);
+  const orgs = new Set(r.list.map(e => e.orgName)); assert.deepEqual([...orgs].sort(), ['乙园', '甲园']);
+  // 6 份时分两组，每组两园都有
+  const c2 = await login('甲三', 'teacher', '甲园', '柳北区'), c3 = await login('乙三', 'teacher', '乙园', '柳北区');
+  await call('POST', '/api/contests', { ...base, id, dueAt: Date.now() + 60000 }, d);
+  for (const h of [c2, c3]) assert.equal((await call('POST', '/api/contests/enter', { id, design }, h)).status, 200);
+  await call('POST', '/api/contests', { ...base, id, dueAt: Date.now() - 1 }, d);
+  r = (await call('POST', '/api/contests/group', { id }, d)).json.contest;
+  assert.equal(r.groups.length, 2);
+  for (const g of r.groups) assert.equal(new Set(g.entryIds.map(x => r.list.find(e => e.id === x).orgName)).size, 2);
+  // 跨园互评可以；区县管理员不打分
+  const other = r.list.find(e => e.orgName === '乙园');
+  assert.equal((await call('POST', '/api/contests/rate', { entryId: other.id, scores: [4, 4, 4, 4, 4], comment: '环节清楚' }, a1)).status, 200);
+  assert.equal((await call('POST', '/api/contests/rate', { entryId: other.id, scores: [4, 4, 4, 4, 4], comment: '环节清楚' }, d)).status, 403);
+  // 入选、收官：标共同体赛；案例在共同体案例库里
+  await call('POST', '/api/contests/select', { id, entryIds: [other.id] }, d);
+  r = (await call('POST', '/api/contests/close', { id }, d)).json.contest;
+  assert.equal(r.phase, 'done');
+  const cases = (await call('GET', '/api/cases?community=1', null, a1)).json.cases;
+  assert.equal(cases.length, 6); assert.ok(cases.some(x => x.source?.tag === '共同体赛 · 2026-12 · 中班'));
+});

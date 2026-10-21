@@ -951,8 +951,8 @@ paths:
     get:
       tags: [academy]
       operationId: academyContests
-      summary: 斗课（同课异构擂台）园内赛：进行中与已收官
-      description: '`{ current, past, canHost, rubric }`。每场带 `phase`（open 应战 / review 互评与点评 / done 收官）、本人作品 `mine`、报名数。'
+      summary: 斗课（同课异构擂台）园内赛与共同体赛：进行中与已收官
+      description: '`{ current, past, canHost, hostScope, communities, rubric }`。园内赛同园可见；共同体赛（`level: community`）本园在组里就可见，由区县管理员出题（`communityId`）、跨园编组，作品带 `orgName`。每场带 `phase`（open 应战 / review 互评与点评 / done 收官）、本人作品 `mine`、报名数。'
       responses:
         '200': { description: 擂台 }
     post:

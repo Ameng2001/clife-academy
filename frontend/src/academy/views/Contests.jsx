@@ -1,4 +1,4 @@
-// 斗课——同课异构擂台，园内赛首期。主持人（园长、点评人）出题；教师自愿应战交活动设计＋≤3 分钟片段；截止后同园互评（量表五项＋一句话，实名）；
+// 斗课——同课异构擂台：园内赛与共同体赛（区县管理员面向一个跨园共同体出题，跨园编组互评）。主持人（园长、点评人）出题；教师自愿应战交活动设计＋≤3 分钟片段；截止后同园互评（量表五项＋一句话，实名）；
 // 主持人编组、写对照点评、定入选、收官——全部作品进案例库。分数不公开：作者看自己的，主持人看平均分，别人看不到。
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -30,14 +30,14 @@ function Entry({ e, c, onRated, onToggleSelect }) {
   }
   return <div className="card" style={{ marginTop: 8, padding: 12, ...(e.selected ? { borderInlineStart: '3px solid var(--acc)' } : {}) }}>
     <div className="ac-row tap" onClick={() => setOpen(!open)}>
-      <div><span style={{ fontWeight: 600 }}>{e.name}</span>{e.mine && <span className="small muted"> · 我的</span>}{e.group && <span className="small muted"> · 第 {e.group} 组</span>}{e.selected && <span className="tag" style={{ marginInlineStart: 6, color: 'var(--acc)' }}>入选</span>}{c.phase === 'done' && e.caseId && <span className="small muted"> · 已进案例库</span>}</div>
+      <div><span style={{ fontWeight: 600 }}>{e.name}</span>{e.orgName && <span className="small muted"> · {e.orgName}</span>}{e.mine && <span className="small muted"> · 我的</span>}{e.group && <span className="small muted"> · 第 {e.group} 组</span>}{e.selected && <span className="tag" style={{ marginInlineStart: 6, color: 'var(--acc)' }}>入选</span>}{c.phase === 'done' && e.caseId && <span className="small muted"> · 已进案例库</span>}</div>
       <span className="small muted">{e.ratingsCount ? `${e.ratingsCount} 人评 · ` : ''}{e.avg != null ? `均 ${e.avg} · ` : ''}{fmtDay(e.updatedAt)} <Icon name={open ? 'chevronUp' : 'chevronDown'} /></span>
     </div>
     {open && e.design && <div style={{ marginTop: 8, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{e.design}</div>}
     {open && e.note && <div className="small" style={{ marginTop: 6, color: 'var(--label-2)' }}>反思：{e.note}</div>}
     {open && e.video && <div style={{ marginTop: 8 }}><video controls preload="metadata" src={`api/contests/file?id=${e.id}`} style={{ width: '100%', maxHeight: 280, borderRadius: 8, background: '#000' }} /></div>}
     {open && e.mine && e.ratings?.length > 0 && <div style={{ marginTop: 10, paddingTop: 8, borderTop: 'var(--hair) solid var(--sep)' }}>
-      <div className="small muted">同事的评价（只有你看得到）</div>
+      <div className="small muted">{c.level === 'community' ? '共同体同行' : '同事'}的评价（只有你看得到）</div>
       {e.ratings.map((r, i) => <div key={i} className="small" style={{ marginTop: 4 }}>{r.byName}：{c.rubric.map((k, j) => `${k} ${r.scores[j]}`).join(' · ')}<br /><span style={{ color: 'var(--label-2)' }}>{r.comment}</span></div>)}
     </div>}
     {open && e.canRate && <div style={{ marginTop: 10, paddingTop: 8, borderTop: 'var(--hair) solid var(--sep)' }}>
@@ -65,13 +65,14 @@ function Contest({ c, user, onChange }) {
   const toggleSelect = e => host('/api/contests/select', { entryIds: e.selected ? c.list.filter(x => x.selected && x.id !== e.id).map(x => x.id) : [...c.list.filter(x => x.selected).map(x => x.id), e.id] }, e.selected ? '已取消' : '已定为入选')
   const groups = c.groups.length ? c.groups : (c.list?.length ? [{ n: 0, entryIds: c.list.map(e => e.id), review: null }] : [])
   return <div className="card" style={{ marginTop: 12 }}>
-    <div className="small muted">{c.month} · {dname} · {c.age} · {PHASE[c.phase]} · {c.phase === 'open' ? `${fmtDay(c.dueAt)} 截止` : c.phase === 'review' ? `${fmtDay(c.reviewAt)} 前互评` : fmtDay(c.closedAt)} · {c.entries} 人应战{c.selectedCount ? ` · 入选 ${c.selectedCount}` : ''}</div>
+    <div className="small muted">{c.level === 'community' ? '共同体赛 · ' + (c.communityName || '') + ' · ' : ''}{c.month} · {dname} · {c.age} · {PHASE[c.phase]} · {c.phase === 'open' ? `${fmtDay(c.dueAt)} 截止` : c.phase === 'review' ? `${fmtDay(c.reviewAt)} 前互评` : fmtDay(c.closedAt)} · {c.entries} 人应战{c.selectedCount ? ` · 入选 ${c.selectedCount}` : ''}</div>
     <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0', lineHeight: 1.35 }}>{c.title}</div>
     <div style={{ fontSize: 15, lineHeight: 1.5 }}>活动：{c.activity}<br />目标：{c.goal}</div>
     {c.guide && <div className="small" style={{ marginTop: 4, color: 'var(--label-2)' }}>《指南》：{c.guide}</div>}
     <div className="small muted" style={{ marginTop: 6 }}>{c.byName} 出题 · 自愿参加 · 评作品不评人 · 票数与分数不公开，只公布入选作品与点评 · 不与考核挂钩</div>
 
-    {c.phase === 'open' && <div style={{ marginTop: 12 }}>
+    {c.phase === 'open' && c.canEnter === false && !c.mine && <div className="small muted" style={{ marginTop: 10 }}>{c.level === 'community' ? '主持人不应战；共同体各园老师在这里交作品。' : '这场不面向你的园。'}</div>}
+    {c.phase === 'open' && c.canEnter !== false && <div style={{ marginTop: 12 }}>
       {c.mine && !editing ? <div className="card" style={{ padding: 12 }}>
         <div className="ac-row"><span className="small muted">我的作品 · {fmtDay(c.mine.updatedAt)}{c.mine.video ? ' · 有片段' : ''}</span><Button size="sm" onClick={() => setEditing(true)}>改</Button></div>
         <div style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{c.mine.design}</div>
@@ -102,7 +103,7 @@ function Contest({ c, user, onChange }) {
       <div className="small muted">主持人</div>
       <div className="row" style={{ gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
         {c.phase === 'open' && <Button size="sm" disabled={busy} onClick={() => confirm('现在截止应战？之后进入互评。') && host('/api/contests', { month: c.month, title: c.title, age: c.age, activity: c.activity, goal: c.goal, guide: c.guide, domain: c.domain, dueAt: Date.now() - 1 }, '已截止')}>提前截止</Button>}
-        {c.phase === 'review' && <Button size="sm" disabled={busy} onClick={() => host('/api/contests/group', {}, '已按报名顺序编组，每组 3–4 人')}>{c.groups.length ? '重新编组' : '编组'}</Button>}
+        {c.phase === 'review' && <Button size="sm" disabled={busy} onClick={() => host('/api/contests/group', {}, c.level === 'community' ? '已跨园编组，每组 3–4 人、不同园搭配' : '已按报名顺序编组，每组 3–4 人')}>{c.groups.length ? '重新编组' : c.level === 'community' ? '跨园编组' : '编组'}</Button>}
         {c.phase === 'review' && <><TextField placeholder="收官一句话（可不填）" value={summary} onChange={e => setSummary(e.target.value)} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" variant="primary" icon="trophy" disabled={busy} onClick={() => confirm(`收官？${c.entries} 份作品全部进案例库（入选 ${c.selectedCount}），每份 +2 学分。`) && host('/api/contests/close', { summary }, '已收官，作品都在案例库了')}>收官</Button></>}
         {c.phase === 'open' && <Button size="sm" disabled={busy} onClick={() => confirm('删掉这场？报名的作品也一起删。') && host('/api/contests/delete', {}, '已删')}>删</Button>}
       </div>
@@ -115,22 +116,25 @@ export default function Contests() {
   const user = useStore(s => s.user)
   const [sp] = useSearchParams()
   const [data, setData] = useState(null), [form, setForm] = useState(null), [busy, setBusy] = useState(false), [openId, setOpenId] = useState(sp.get('id'))
+  const [communityId, setCommunityId] = useState('')
   const [detail, setDetail] = useState({})
   const load = async () => { if (!user) return setData(null); try { const d = await api('/api/contests'); setData(d); const ids = [...d.current, ...d.past].map(c => c.id); const got = {}; for (const id of ids) got[id] = (await api('/api/contests/one?id=' + id)).contest; setDetail(got) } catch { setData(null) } }
   useEffect(() => { load() }, [user?.id])
   const save = async () => {
     if (!form.title.trim() || !form.activity.trim() || !form.goal.trim()) return toast('主题、活动名、目标都要写')
+    if (data?.hostScope === 'community' && !communityId) return toast('选一个共同体')
     setBusy(true)
-    try { await api('/api/contests', { method: 'POST', body: JSON.stringify({ month: form.month, title: form.title, age: form.age, activity: form.activity, goal: form.goal, guide: form.guide, domain: form.domain, dueAt: new Date(form.due + 'T23:59').getTime(), reviewAt: new Date(form.review + 'T23:59').getTime() }) }); toast('已发布，本园老师能看到了'); setForm(null); load() }
+    try { await api('/api/contests', { method: 'POST', body: JSON.stringify({ month: form.month, title: form.title, age: form.age, activity: form.activity, goal: form.goal, guide: form.guide, domain: form.domain, dueAt: new Date(form.due + 'T23:59').getTime(), reviewAt: new Date(form.review + 'T23:59').getTime(), communityId: communityId || undefined }) }); toast(data?.hostScope === 'community' ? '已发布，共同体各园老师能看到' : '已发布，本园老师能看到了'); setForm(null); load() }
     catch (e) { toast('没存成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   const all = data ? [...data.current, ...data.past] : []
   return <div className="narrow">
-    <div className="hdr"><div><h1>斗课</h1><div className="sub">同课异构擂台 · 园内赛 · 自愿参加，评作品不评人</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm(EMPTY())}>出题</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    <div className="hdr"><div><h1>斗课</h1><div className="sub">同课异构擂台 · {data?.hostScope === 'community' ? '共同体赛' : '园内赛与共同体赛'} · 自愿参加，评作品不评人</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm(EMPTY())}>出题</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后参加。园内可见。</div>}
 
     {form && <div className="card" style={{ marginBottom: 14 }}>
-      <div className="small muted" style={{ marginBottom: 8 }}>出题 · 每月一个主题，按年龄班给定活动名与目标，附《指南》条目 · 第 1 周发布、第 3 周截止、第 4 周互评与点评</div>
+      <div className="small muted" style={{ marginBottom: 8 }}>出题 · {data?.hostScope === 'community' ? '共同体赛：面向本区一个共同体，各园教师应战，截止后跨园编组互评 · ' : ''}每月一个主题，按年龄班给定活动名与目标，附《指南》条目 · 第 1 周发布、第 3 周截止、第 4 周互评与点评</div>
+      {data?.hostScope === 'community' && <select className="ac-sel" value={communityId} onChange={e => setCommunityId(e.target.value)} style={{ marginBottom: 8, width: '100%' }}><option value="">选共同体</option>{(data.communities || []).map(x => <option key={x.id} value={x.id}>{x.name} · {x.orgs.join('、')}</option>)}</select>}
       <TextField placeholder="主题，如「中班科学：影子从哪来」" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
       <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <TextField placeholder="活动名" value={form.activity} onChange={e => setForm({ ...form, activity: e.target.value })} style={{ flex: 2, minWidth: 140 }} />
@@ -147,7 +151,7 @@ export default function Contests() {
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>发布</Button></div></div>
     </div>}
 
-    {data && !all.length && <div className="card small muted">本园还没办过斗课。{data.canHost ? '点右上角「出题」。' : '园长或教研主任出题后在这里应战。'}</div>}
+    {data && !all.length && <div className="card small muted">{data.hostScope === 'community' ? '本区还没办过共同体赛。' : '本园还没办过斗课。'}{data.canHost ? '点右上角「出题」。' : data.hostScope === 'community' ? '先在区县看板建共同体。' : '园长或教研主任出题后在这里应战。'}</div>}
     {all.map(c => { const d = detail[c.id] || c; return <div key={c.id}>
       {openId === c.id || all.length === 1 ? <Contest c={d} user={user} onChange={load} /> : <div className="card tap" style={{ marginTop: 12 }} onClick={() => setOpenId(c.id)}><div className="ac-row"><div><div className="small muted">{c.month} · {PHASE[c.phase]} · {c.entries} 人应战{c.selectedCount ? ` · 入选 ${c.selectedCount}` : ''}</div><div style={{ fontWeight: 600, marginTop: 2 }}>{c.title}</div></div><Icon name="chevronRight" /></div></div>}
     </div> })}

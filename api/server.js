@@ -2621,7 +2621,7 @@ const routes = {
   ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
   ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER }),
-  ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER }),
+  ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...communityRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
