@@ -901,6 +901,38 @@ paths:
       responses:
         '200': { description: ok }
         '404': { description: 不是手工挂的 }
+  /api/district/communities:
+    get:
+      tags: [academy]
+      operationId: academyCommunities
+      summary: 本区跨园共同体（区县管理员、管理员）
+      description: '`{ district, communities:[{ id, name, orgs:[{ key, name }], lead, leadName, note }], free:[未编组的园], min, max }`。只有名单，没有任何一园的数。'
+      responses:
+        '200': { description: 共同体名单 }
+        '403': { description: 不是区县管理员 }
+    post:
+      tags: [academy]
+      operationId: academyCommunitySave
+      summary: 建组或改组（2–6 所本区园，一园只在一个组；可指定组长园）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name, orgs], properties: { id: { type: string }, name: { type: string }, orgs: { type: array, items: { type: string } }, lead: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ community }`' }
+        '409': { description: 有园已在别的组 }
+  /api/district/communities/delete:
+    post:
+      tags: [academy]
+      operationId: academyCommunityDelete
+      summary: 解散共同体（面向它的联合研讨题一并删）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string } } } } } }
+      responses:
+        '200': { description: ok }
+  /api/me/community:
+    get:
+      tags: [academy]
+      operationId: academyMyCommunity
+      summary: 我的园所在的共同体（任何成员）
+      responses:
+        '200': { description: '`{ community:{ id, name, orgs, lead, leadName, cases, drills } | null }`' }
   /api/me/checkup:
     get:
       tags: [academy]

@@ -34,7 +34,7 @@ function Answers({ d, user }) {
   if (data.locked) return <div className="small muted" style={{ marginTop: 12 }}>答了才能看同园老师怎么答。</div>
   const others = data.answers.filter(a => !a.mine)
   return <div style={{ marginTop: 14 }}>
-    <div className="small muted">同园老师的回答 · {others.length}{d.featured ? ` · 精选 ${d.featured}` : ''}</div>
+    <div className="small muted">{d.scope === 'community' ? '共同体各园' : '同园'}老师的回答 · {others.length}{d.featured ? ` · 精选 ${d.featured}` : ''}</div>
     {!others.length && <div className="small muted" style={{ marginTop: 6 }}>还没有别人答。</div>}
     {others.map(a => <div key={a.id} className="card" style={{ marginTop: 8, padding: 12, ...(a.review?.featured ? { borderInlineStart: '3px solid var(--acc)' } : {}) }}>
       <div className="ac-row"><span className="small muted">{a.name}{a.titles?.length ? '（' + a.titles.join('、') + '）' : ''}{a.orgName && a.orgName !== user.academy?.org?.name ? ' · ' + a.orgName : ''} · {fmtDay(a.at)}</span>{a.review?.featured && <span className="tag" style={{ color: 'var(--acc)' }}>精选</span>}</div>
@@ -64,7 +64,7 @@ function Drill({ d, user, first, onChange, onEdit, onDelete }) {
   return <div className="card" style={{ marginTop: 10 }}>
     <div className="ac-row tap" onClick={() => setOpen(!open)} style={{ alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="small muted">{first ? '本周一题 · ' : ''}{d.phase === 'closed' ? '已收题 · ' : ''}{fmtDay(d.openAt)} 开放{d.phase === 'open' ? ` · ${fmtDay(d.closeAt)} 收` : ''} · {dname(d.domain)}{d.role ? ' · ' + (ROLES[d.role]?.label || d.role) : ''}{d.scope === 'org' ? ' · 本园' : ''}</div>
+        <div className="small muted">{first ? '本周一题 · ' : ''}{d.phase === 'closed' ? '已收题 · ' : ''}{fmtDay(d.openAt)} 开放{d.phase === 'open' ? ` · ${fmtDay(d.closeAt)} 收` : ''} · {dname(d.domain)}{d.role ? ' · ' + (ROLES[d.role]?.label || d.role) : ''}{d.scope === 'org' ? ' · 本园' : d.scope === 'community' ? ' · 共同体 ' + (d.communityName || '') : ''}</div>
         <div style={{ fontWeight: 600, fontSize: first ? 17 : 15, lineHeight: 1.45, marginTop: 4 }}>{d.title}</div>
       </div>
       <span className="small muted" style={{ flex: 'none', marginInlineStart: 8 }}>{d.answered} 人答</span>
@@ -92,15 +92,18 @@ export default function Drills() {
   const user = useStore(s => s.user)
   const [sp] = useSearchParams()
   const [data, setData] = useState(null), [form, setForm] = useState(null), [busy, setBusy] = useState(false), [showPast, setShowPast] = useState(!!sp.get('past'))
+  const [communities, setCommunities] = useState(null)
   const load = () => { if (user) api('/api/drills').then(setData).catch(() => setData(null)); else setData(null) }
   useEffect(() => { load() }, [user?.id])
+  useEffect(() => { if (data?.postScope === 'community') api('/api/district/communities').then(r => setCommunities(r.communities)).catch(() => setCommunities([])) }, [data?.postScope])
   const edit = d => setForm({ id: d.id, title: d.title, context: d.context, role: d.role, domain: d.domain, open: toLocal(d.openAt), close: toLocal(d.closeAt) })
   const del = async d => { if (!confirm('删掉这题？大家的作答也一起删。')) return; try { await api('/api/drills/delete', { method: 'POST', body: JSON.stringify({ id: d.id }) }); load() } catch (e) { useUI.getState().toast('没删成' + (e.message ? '：' + e.message : '')) } }
   const save = async () => {
     if (form.title.trim().length < 10) return useUI.getState().toast('题干至少 10 字')
+    if (data?.postScope === 'community' && !form.id && !form.communityId) return useUI.getState().toast('选一个共同体')
     const openAt = new Date(form.open + 'T00:00').getTime(), closeAt = new Date(form.close + 'T23:59').getTime()
     setBusy(true)
-    try { await api('/api/drills', { method: 'POST', body: JSON.stringify({ id: form.id || undefined, title: form.title, context: form.context, role: form.role, domain: form.domain, openAt, closeAt }) }); useUI.getState().toast(form.id ? '已改' : '已出题'); setForm(null); load() }
+    try { await api('/api/drills', { method: 'POST', body: JSON.stringify({ id: form.id || undefined, title: form.title, context: form.context, role: form.role, domain: form.domain, openAt, closeAt, communityId: form.communityId || undefined }) }); useUI.getState().toast(form.id ? '已改' : '已出题'); setForm(null); load() }
     catch (e) { useUI.getState().toast('没存成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
   }
@@ -109,7 +112,8 @@ export default function Drills() {
     {!user && <div className="card small muted">登录后作答。同园可见，不做公共广场。</div>}
 
     {form && <div className="card" style={{ marginBottom: 14 }}>
-      <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改题' : '出一题'} · {data?.postScope === 'all' ? '面向全平台' : '只面向本园'} · 真实情境改编，不出现幼儿姓名</div>
+      <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改题' : '出一题'} · {data?.postScope === 'all' ? '面向全平台' : data?.postScope === 'community' ? '面向本区一个共同体（联合研讨题，组内各园互相看得到作答）' : '只面向本园'} · 真实情境改编，不出现幼儿姓名</div>
+      {data?.postScope === 'community' && !form.id && <select className="ac-sel" value={form.communityId || ''} onChange={e => setForm({ ...form, communityId: e.target.value })} style={{ marginBottom: 8, width: '100%' }}><option value="">选共同体</option>{(communities || []).map(c => <option key={c.id} value={c.id}>{c.name} · {c.orgs.map(o => o.name).join('、')}</option>)}</select>}
       <TextArea rows={3} placeholder="题干：一个具体情境，问「你第一句话 / 第一步会怎么做」" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
       <TextArea rows={2} style={{ marginTop: 8 }} placeholder="背景（可不填）：班级、时间、前因" value={form.context} onChange={e => setForm({ ...form, context: e.target.value })} />
       <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>

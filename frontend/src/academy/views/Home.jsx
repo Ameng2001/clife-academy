@@ -23,6 +23,8 @@ export default function Home() {
   const orgName = user?.academy?.org?.name || user?.academy?.district?.name || ORG
   const d = new Date()
   const [pair, setPair] = useState(null)
+  const [community, setCommunity] = useState(null)
+  useEffect(() => { if (user) api('/api/me/community').then(r => setCommunity(r.community)).catch(() => setCommunity(null)); else setCommunity(null) }, [user?.id])
   const [lecture, setLecture] = useState(null)
   const [drill, setDrill] = useState(null)
   const [contest, setContest] = useState(null)
@@ -105,6 +107,9 @@ export default function Home() {
       <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{contest.title}</div>
       <div className="small" style={{ color: contest.mine ? 'var(--green)' : 'var(--acc)' }}>{contest.phase === 'open' ? (contest.mine ? '已应战 · 改作品' : '自愿应战，交一份活动设计') : '看同事的设计、互评'} <Icon name="chevronRight" /></div>
     </div>}
+    {community && <div className="sect"><div className="sect-t">跨园共同体</div><div className="sect-b">
+      <div className="lrow tap" onClick={() => nav('/cases?community=1')}><div style={{ flex: 1 }}><div className="lrow-t">{community.name}</div><div className="small muted">{community.orgs.map(o => o.name + (o.key === community.lead ? '（组长园）' : '')).join('、')} · 共同体案例 {community.cases} 条{community.drills ? ` · 联合研讨题 ${community.drills}` : ''}</div></div><Icon name="chevronRight" /></div>
+    </div></div>}
     {(pair?.mentor || pair?.mentees?.length > 0) && <div className="sect"><div className="sect-t">带教</div><div className="sect-b">
       {pair.mentor && <div className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">带教教师：{pair.mentor.name}</div><div className="small muted">你的实践关作品由 {pair.mentor.name} 点评</div></div></div>}
       {pair.mentees?.length > 0 && <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">带着 {pair.mentees.map(m => m.name).join('、')}</div><div className="small muted">看他们的实践关作品并点评</div></div><Icon name="chevronRight" /></div>}

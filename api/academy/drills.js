@@ -1,9 +1,9 @@
 /* 研讨关「每周一题」（docs/ROADMAP.md 第六节：同园可见，作答、看他人作答、点评）。
  *
- * db.drills:       { id, title(题干), context(背景), role(面向岗位|''), domain, scope:'all'|<org key>, orgName, openAt, closeAt, by, byName, at, updatedAt }
+ * db.drills:       { id, title(题干), context(背景), role(面向岗位|''), domain, scope:'all'|<org key>|'community:<id>', orgName, communityName, openAt, closeAt, by, byName, at, updatedAt }
  * db.drillAnswers: { id, drillId, uid, name, role, org, orgName, text, at, updatedAt, review:{ by, byName, at, comment, featured } | null }
  *
- * 谁出题：管理员（本地运营方，面向全平台）、园长（只面向本园）。每周一题是运营节奏，不是系统限制：题可以多出，也可以晚答。
+ * 谁出题：管理员（本地运营方，面向全平台）、园长（只面向本园）、区县管理员（面向本区一个共同体：联合研讨关，组内各园互相看得到作答）。每周一题是运营节奏，不是系统限制：题可以多出，也可以晚答。
  * 谁能答：登录的人；一人一题一份，改了算最新（已点评的改了保留点评，点评人看得到改过）。
  * 谁能看别人的：同园、且自己已作答（先答再看，避免抄）；点评人与带教教师不用先答。
  * 点评：园长、点评人、管理员，或作答人的带教教师；只写一句意见，可标「精选」。评作品不评人：没有分数、没有排名、不公布人数以外的任何对比。
@@ -12,6 +12,7 @@ import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
 import { canReview } from './submissions.js';
 import { titlesOf } from './honors.js';
+import { isDistrictAdmin, districtKeyOf } from './district.js';
 
 const DOMAINS = ['env', 'life', 'play', 'plan', 'obs', 'comm', 'reflect'];
 const ROLES = ['director', 'nurse', 'teacher', 'care', 'it'];
@@ -19,27 +20,33 @@ const WEEK = 7 * 24 * 3600000;
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
 
-export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier = null, pairs = null, ledger = null }) {
+export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier = null, pairs = null, ledger = null, communities = null }) {
   db.drills = db.drills || []; db.drillAnswers = db.drillAnswers || [];
   const now = () => Date.now();
   const newId = () => crypto.randomBytes(9).toString('base64url');
   const isDirector = u => u.academy?.role === 'director';
-  const visibleTo = (d, user) => d.scope === 'all' || d.scope === orgKeyOf(user);
-  const mayPost = user => isAdmin(user) || (isDirector(user) && !!orgKeyOf(user));
-  const mayEdit = (user, d) => isAdmin(user) || (d.by === user.id) || (isDirector(user) && d.scope === orgKeyOf(user));
+  const communityIdOf = d => (String(d.scope || '').startsWith('community:') ? d.scope.slice(10) : null);
+  const communityOf = d => { const id = communityIdOf(d); return id && communities ? communities.byId(id) : null; };
+  // 共同体题：本园在该组里就看得到；区县管理员看本区的组的题
+  const visibleTo = (d, user) => d.scope === 'all' || d.scope === orgKeyOf(user) || (!!communityIdOf(d) && ((communities && communities.ofOrg(orgKeyOf(user))?.id === communityIdOf(d)) || (isDistrictAdmin(user) && communityOf(d)?.district === districtKeyOf(user))));
+  const mayPost = user => isAdmin(user) || (isDirector(user) && !!orgKeyOf(user)) || (isDistrictAdmin(user) && !!communities && !!districtKeyOf(user));
+  const mayEdit = (user, d) => isAdmin(user) || (d.by === user.id) || (isDirector(user) && d.scope === orgKeyOf(user)) || (isDistrictAdmin(user) && !!communityIdOf(d) && communityOf(d)?.district === districtKeyOf(user));
+  // 同组：共同体题里，作答按组圈；其他题按园圈
+  const peersOf = (d, user) => { const org = orgKeyOf(user); const id = communityIdOf(d); return id && communities ? new Set(communities.orgKeysOf(id)) : new Set(org ? [org] : []); };
   const answersOf = id => db.drillAnswers.filter(a => a.drillId === id);
   const myAnswer = (id, uid) => db.drillAnswers.find(a => a.drillId === id && a.uid === uid) || null;
+  // 点评仍按园：共同体题里也只有本园的园长 / 点评人、作答人的带教教师能点评（评作品不评人，不跨园给意见）
   const mayReviewAnswer = (user, a) => (canReview(user, isAdmin) && (isAdmin(user) || a.org === orgKeyOf(user))) || !!(pairs && pairs.isMentorOf(user.id, a.uid));
   const pubAnswer = (a, user) => ({ id: a.id, uid: a.uid, name: a.name, titles: titlesOf(db, a.uid).map(t => t.label), role: a.role, orgName: a.orgName, text: a.text, at: a.at, updatedAt: a.updatedAt, review: a.review, mine: a.uid === user.id, canReview: a.uid !== user.id && mayReviewAnswer(user, a) });
   const pubDrill = (d, user) => {
-    const org = orgKeyOf(user), t = now();
+    const t = now(), peers = peersOf(d, user);
     const all = answersOf(d.id), mine = myAnswer(d.id, user.id);
     return {
-      id: d.id, title: d.title, context: d.context, role: d.role, domain: d.domain, scope: d.scope === 'all' ? 'all' : 'org', orgName: d.orgName, openAt: d.openAt, closeAt: d.closeAt, byName: d.byName,
+      id: d.id, title: d.title, context: d.context, role: d.role, domain: d.domain, scope: d.scope === 'all' ? 'all' : communityIdOf(d) ? 'community' : 'org', orgName: d.orgName, communityName: d.communityName || null, communityId: communityIdOf(d), openAt: d.openAt, closeAt: d.closeAt, byName: d.byName,
       phase: t < d.openAt ? 'upcoming' : t < d.closeAt ? 'open' : 'closed',
       mine: mine ? pubAnswer(mine, user) : null,
       // 人数只给本园的（同园可见）；管理员看全部
-      answered: isAdmin(user) ? all.length : all.filter(a => a.org === org).length,
+      answered: isAdmin(user) ? all.length : all.filter(a => peers.has(a.org)).length,
       featured: all.filter(a => a.review?.featured).length,
       canEdit: mayEdit(user, d)
     };
@@ -58,7 +65,7 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
     const current = rows.filter(d => d.phase === 'open').sort((a, b) => b.openAt - a.openAt);
     const past = rows.filter(d => d.phase === 'closed').sort((a, b) => b.closeAt - a.closeAt);
     const upcoming = mayPost(user) ? db.drills.filter(d => visibleTo(d, user) && d.openAt > now()).map(d => pubDrill(d, user)).sort((a, b) => a.openAt - b.openAt) : [];
-    json(res, 200, { current, past, upcoming, canPost: mayPost(user), postScope: isAdmin(user) ? 'all' : 'org' });
+    json(res, 200, { current, past, upcoming, canPost: mayPost(user), postScope: isAdmin(user) ? 'all' : isDistrictAdmin(user) ? 'community' : 'org' });
   },
   // 出题或改：{ id?, title, context?, role?, domain?, openAt?, closeAt? }。管理员面向全平台，园长只面向本园。默认今天开放、七天后收。
   'POST /api/drills': async (req, res) => {
@@ -77,8 +84,13 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
     const fields = { title, context: str(body.context, 2000), role: ROLES.includes(body.role) ? body.role : '', domain: DOMAINS.includes(body.domain) ? body.domain : (d ? d.domain : 'comm'), openAt, closeAt, updatedAt: now() };
     if (d) Object.assign(d, fields);
     else {
-      const scope = isAdmin(user) && body.scope !== 'org' ? 'all' : orgKeyOf(user);
-      d = { id: newId(), ...fields, scope, orgName: scope === 'all' ? null : (user.academy?.org?.name || null), by: user.id, byName: user.name, at: now() };
+      let scope, communityName = null;
+      if (isDistrictAdmin(user) && !isAdmin(user)) {
+        const c = communities.byId(str(body.communityId, 40));
+        if (!c || c.district !== districtKeyOf(user)) return json(res, 400, { error: 'pick a community of your district', code: 'community' });
+        scope = 'community:' + c.id; communityName = c.name;
+      } else scope = isAdmin(user) && body.scope !== 'org' ? 'all' : orgKeyOf(user);
+      d = { id: newId(), ...fields, scope, orgName: scope === 'all' || communityName ? null : (user.academy?.org?.name || null), communityName, by: user.id, byName: user.name, at: now() };
       db.drills.push(d);
     }
     saveDb();
@@ -119,11 +131,13 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
     if (!user) return json(res, 401, { error: 'not signed in' });
     const d = find(new URL(req.url, 'http://x').searchParams.get('id') || '');
     if (!d || !visibleTo(d, user)) return json(res, 404, { error: 'no such drill' });
-    const org = orgKeyOf(user), mine = myAnswer(d.id, user.id);
+    const peers = peersOf(d, user), mine = myAnswer(d.id, user.id);
     const reviewer = canReview(user, isAdmin), mentees = pairs ? pairs.menteesOf(user.id) : [];
-    if (!mine && !reviewer && !mentees.length) return json(res, 200, { drill: pubDrill(d, user), answers: [], locked: true });
-    let list = answersOf(d.id).filter(a => isAdmin(user) || a.org === org || mentees.includes(a.uid));
-    if (!mine && !reviewer) list = list.filter(a => mentees.includes(a.uid));
+    // 区县管理员看本区共同体题的作答（出题人要看题答得怎么样），不用先答
+    const host = isDistrictAdmin(user) && !!communityIdOf(d) && communityOf(d)?.district === districtKeyOf(user);
+    if (!mine && !reviewer && !mentees.length && !host) return json(res, 200, { drill: pubDrill(d, user), answers: [], locked: true });
+    let list = answersOf(d.id).filter(a => isAdmin(user) || host || peers.has(a.org) || mentees.includes(a.uid));
+    if (!mine && !reviewer && !host) list = list.filter(a => mentees.includes(a.uid));
     list.sort((a, b) => (b.review?.featured ? 1 : 0) - (a.review?.featured ? 1 : 0) || b.at - a.at);
     json(res, 200, { drill: pubDrill(d, user), answers: list.slice(0, 200).map(a => pubAnswer(a, user)), locked: false });
   },

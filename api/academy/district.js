@@ -45,21 +45,23 @@ export function summarizeDistrict(orgs, stateOf, extra = {}) {
   };
 }
 
+export const isDistrictAdmin = u => u?.academy?.role === 'district';
+/** 一个区的园：成员带 district 的 ＋ 手工挂的（db.orgDistricts）；名称取成员的园名或挂接时写的名。communities.js 也用。 */
+export function districtOrgsOf(db, dk) {
+  const byKey = new Map();
+  for (const u of db.users) { if (u.disabled) continue; const ok = orgKeyOf(u); if (!ok) continue; if (districtKeyOf(u) === dk) byKey.set(ok, { key: ok, name: u.academy.org.name || ok, members: [], via: 'members' }); }
+  for (const m of db.orgDistricts || []) if (m.district === dk && !byKey.has(m.org)) byKey.set(m.org, { key: m.org, name: m.name || m.org, members: [], via: 'manual' });
+  for (const u of db.users) { if (u.disabled) continue; const ok = orgKeyOf(u); const o = ok && byKey.get(ok); if (o) { o.members.push(u); if (!o.name || o.name === ok) o.name = u.academy.org.name || o.name; } }
+  return [...byKey.values()];
+}
+/** 区县管理员看自己的区；管理员可 ?district=。 */
+export const districtOf = (user, req, isAdmin) => { const q = new URL(req.url, 'http://x').searchParams.get('district'); return (isAdmin(user) && q) || districtKeyOf(user); };
+
 export function districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }) {
   db.orgDistricts = db.orgDistricts || [];
-  const isDistrict = u => u?.academy?.role === 'district';
-  const myDistrict = (user, req) => {
-    const q = new URL(req.url, 'http://x').searchParams.get('district');
-    return (isAdmin(user) && q) || districtKeyOf(user);
-  };
-  /** 一个区的园：成员带 district 的 ＋ 手工挂的；名称取成员的园名或挂接时写的名。 */
-  const orgsOf = dk => {
-    const byKey = new Map();
-    for (const u of db.users) { if (u.disabled) continue; const ok = orgKeyOf(u); if (!ok) continue; if (districtKeyOf(u) === dk) byKey.set(ok, { key: ok, name: u.academy.org.name || ok, members: [], via: 'members' }); }
-    for (const m of db.orgDistricts) if (m.district === dk && !byKey.has(m.org)) byKey.set(m.org, { key: m.org, name: m.name || m.org, members: [], via: 'manual' });
-    for (const u of db.users) { if (u.disabled) continue; const ok = orgKeyOf(u); const o = ok && byKey.get(ok); if (o) { o.members.push(u); if (!o.name || o.name === ok) o.name = u.academy.org.name || o.name; } }
-    return [...byKey.values()];
-  };
+  const isDistrict = isDistrictAdmin;
+  const myDistrict = (user, req) => districtOf(user, req, isAdmin);
+  const orgsOf = dk => districtOrgsOf(db, dk);
   const checkupOf = orgs => {
     const rows = db.checkups || [], first = db.checkupOrgs || [];
     let pushed = 0, warn = 0;

@@ -13,10 +13,25 @@ export default function District() {
   const user = useStore(s => s.user)
   const [d, setD] = useState(null), [err, setErr] = useState(null), [orgs, setOrgs] = useState(null)
   const [name, setName] = useState(''), [busy, setBusy] = useState(false), [manage, setManage] = useState(false)
+  const [cm, setCm] = useState(null), [cform, setCform] = useState(null)
   const load = async () => {
     try { setD(await api('/api/district/summary')); setErr(null) } catch (e) { setErr(e.code === 'district' ? '区县管理员才能看区县看板。' : '没取到区县汇总。') }
     try { setOrgs((await api('/api/district/orgs')).orgs) } catch { setOrgs(null) }
+    try { setCm(await api('/api/district/communities')) } catch { setCm(null) }
   }
+  const saveCommunity = async () => {
+    const f = cform; if (!f.name.trim() || f.orgs.length < (cm?.min || 2)) return useUI.getState().toast(`写组名，选 ${cm?.min || 2}–${cm?.max || 6} 所园`)
+    setBusy(true)
+    try { await api('/api/district/communities', { method: 'POST', body: JSON.stringify({ id: f.id || undefined, name: f.name.trim(), orgs: f.orgs, lead: f.lead || undefined, note: f.note }) }); useUI.getState().toast(f.id ? '已改组' : '已建组'); setCform(null); await load() }
+    catch (e) { useUI.getState().toast('没成' + (e.code === 'taken' ? '：有园已在别的组' : e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
+  const deleteCommunity = async c => {
+    if (!confirm(`解散「${c.name}」？面向它的联合研讨题一并删除。`)) return
+    try { await api('/api/district/communities/delete', { method: 'POST', body: JSON.stringify({ id: c.id }) }); useUI.getState().toast('已解散'); await load() }
+    catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
+  }
+  const toggleOrg = k => setCform(f => ({ ...f, orgs: f.orgs.includes(k) ? f.orgs.filter(x => x !== k) : f.orgs.length >= (cm?.max || 6) ? f.orgs : [...f.orgs, k], lead: f.lead === k && f.orgs.includes(k) ? '' : f.lead }))
   useEffect(() => { if (user) load() }, [user?.id])
   const attach = async () => {
     const n = name.trim(); if (!n) return
@@ -65,6 +80,26 @@ export default function District() {
           <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">入库案例</div><span className="small muted">{d.activity.cases} 条</span></div>
           <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">大讲堂预约</div><span className="small muted">{d.activity.lectureBookings} 人次</span></div>
           <div className="lrow small muted">跨园共同体与共同体赛分期开；先在下面登记本区园所名单。</div>
+        </div>
+      </div>}
+
+      {cm && <div className="sect">
+        <div className="sect-t">跨园共同体 <span className="small muted">{cm.communities.length} 组 · 组内共享案例库与联合研讨题</span></div>
+        <div className="sect-b">
+          {cm.communities.map(c => <div key={c.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{c.name}</div><div className="small muted">{c.orgs.map(o => o.name + (o.key === c.lead ? '（组长园）' : '')).join('、')}{c.note ? ' · ' + c.note : ''}</div></div>
+            <div className="row" style={{ gap: 6 }}><Button size="sm" variant="ghost" onClick={() => setCform({ id: c.id, name: c.name, orgs: c.orgs.map(o => o.key), lead: c.lead || '', note: c.note || '', known: c.orgs })}>改</Button><Button size="sm" variant="ghost" onClick={() => deleteCommunity(c)}>解散</Button></div></div>)}
+          {!cm.communities.length && <div className="lrow small muted">还没有共同体。按萧山模式三到五所园一组，强弱搭配。</div>}
+          {cform ? <div className="lrow" style={{ display: 'block' }}>
+            <TextField placeholder="组名（如 柳北一组）" value={cform.name} onChange={e => setCform({ ...cform, name: e.target.value })} />
+            <div className="small muted" style={{ marginTop: 8 }}>选园（{cm.min}–{cm.max} 所；只列本区没编组的园）</div>
+            <div className="chips" style={{ marginTop: 6 }}>{[...(cform.known || []), ...cm.free.filter(o => !(cform.known || []).some(k => k.key === o.key))].map(o => <button key={o.key} className={'chip' + (cform.orgs.includes(o.key) ? ' on' : '')} onClick={() => toggleOrg(o.key)}>{o.name}</button>)}</div>
+            <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span className="small muted">组长园</span><select className="ac-sel" value={cform.lead} onChange={e => setCform({ ...cform, lead: e.target.value })}><option value="">不设</option>{cform.orgs.map(k => { const o = [...(cform.known || []), ...cm.free].find(x => x.key === k); return <option key={k} value={k}>{o?.name || k}</option> })}</select>
+              <TextField placeholder="备注（可空）" value={cform.note} onChange={e => setCform({ ...cform, note: e.target.value })} style={{ flex: 1, minWidth: 140 }} />
+            </div>
+            <div className="row" style={{ gap: 8, marginTop: 10, justifyContent: 'flex-end' }}><Button size="sm" onClick={() => setCform(null)}>取消</Button><Button size="sm" variant="primary" disabled={busy} onClick={saveCommunity}>{cform.id ? '存' : '建组'}</Button></div>
+          </div> : <div className="lrow"><Button size="sm" variant="ghost" onClick={() => setCform({ name: '', orgs: [], lead: '', note: '' })}>建一组</Button><span className="small muted" style={{ marginInlineStart: 8 }}>没编组的园 {cm.free.length} 所</span></div>}
+          <div className="lrow small muted">组内共享的是教研产出：案例库、联合研讨题的作答。不共享任何一园的进度、体检卡、人员表。联合研讨题在「每周一题」里出。</div>
         </div>
       </div>}
 

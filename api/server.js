@@ -31,6 +31,7 @@ import { pointsRoutes } from './academy/points.js';
 import { contestRoutes } from './academy/contests.js';
 import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
+import { communityRoutes, createCommunities } from './academy/communities.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1781,6 +1782,7 @@ const NOTIFIER = createNotifier({ db, saveDb });
 const PAIRS = createPairs(db);
 // 关卡以外的学分台账（案例入库、作答精选）；勋章按记录算，称号人授。
 const LEDGER = createLedger(db);
+const COMMUNITIES = createCommunities(db);
 // 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
 const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
 setInterval(() => { LECTURES.tick().catch(e => console.error('lecture reminder:', e.message)); }, 60000).unref();
@@ -2614,14 +2616,15 @@ const routes = {
   // 资源库（academy/resources.js）
   ...resourceRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   // 案例库（academy/cases.js）
-  ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER }),
+  ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   ...LECTURES.routes,
-  ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER }),
+  ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
   ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER }),
   ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER }),
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
+  ...communityRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

@@ -27,7 +27,7 @@ const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
 export const isCurator = (u, isAdmin) => !!u && (u.academy?.curator === true || isAdmin(u));
 const isDirector = (u, isAdmin) => !!u && (u.academy?.role === 'director' || isAdmin(u));
 
-export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger = null }) {
+export function caseRoutes({ communities = null, json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger = null }) {
   db.cases = db.cases || []; db.caseUses = db.caseUses || [];
   const usesOf = id => db.caseUses.filter(u => u.caseId === id);
   const seesUses = (user, c) => !!user && (c.by === user.id || isAdmin(user) || (isDirector(user, isAdmin) && c.org && c.org === orgKeyOf(user)));
@@ -51,13 +51,16 @@ export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     if (!user) return json(res, 401, { error: 'not signed in' });
     const sp = new URL(req.url, 'http://x').searchParams;
     const q = norm(sp.get('q')), domain = sp.get('domain') || '', age = sp.get('age') || '', use = sp.get('use') || '';
+    // ?community=1：只看本园所在共同体各园入库的案例（ROADMAP 第六节：共同体内共享案例库）
+    const community = communities ? communities.ofOrg(orgKeyOf(user)) : null;
     let list = db.cases.filter(c => c.status === 'approved');
+    if (sp.get('community') === '1' && community) { const keys = new Set(community.orgs.map(o => o.key)); list = list.filter(c => keys.has(c.org)); }
     if (domain) list = list.filter(c => c.domain === domain);
     if (age) list = list.filter(c => c.age === age);
     if (use) list = list.filter(c => c.use === use);
     if (q) list = list.filter(c => norm([c.title, c.text, c.byName, c.orgName, LEVELS[c.source?.levelId] || ''].join(' ')).includes(q));
     list.sort((a, b) => (b.curated?.at || b.at) - (a.curated?.at || a.at));
-    json(res, 200, { cases: list.map(c => pub(c, user)), uses: USES, ages: AGES, total: db.cases.filter(c => c.status === 'approved').length });
+    json(res, 200, { cases: list.map(c => pub(c, user)), uses: USES, ages: AGES, total: db.cases.filter(c => c.status === 'approved').length, community: community ? { id: community.id, name: community.name } : null });
   },
   // 本人的（含待同意、待审核、退回的）
   'GET /api/cases/mine': async (req, res) => {
