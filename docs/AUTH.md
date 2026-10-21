@@ -69,6 +69,10 @@
 
 `selfreview.js`：自评只有本人写；给人写一段要是其带教教师（`pairs.isMentorOf`）或同园园长；`/api/selfreview/others` 园长看本园、带教教师看所带，其他人 403；管理员不看个人。`studygroups.js`：发任务要 `canReview`（点评人、园长、管理员）且有园所；回复与看本园；别人的反思交了自己的才给。`camps.js`：办营是管理员或园长；范围外的营看不到；帖子只有营员与主持人看；退营删人删帖。`programs.js`：建期次、名单、收期次只有管理员；名单只给管理员，本人只看自己的状态。`sharedays.js`：办与收官是区县管理员（本区）或管理员；交页是共同体内园长，案例只收本园入库的；看是共同体内、区县管理员、管理员。`weekly.js`：园长看本园、管理员看全平台＋各园一行，其他人 403；推送只给园长与管理员。`coach.js`：卡片只有本人；`GET /api/org/coach` 园长或管理员，只列本园采用了的 pair 建议；Coach 读 `readStateCached`、submissions、drillAnswers、selfReviews、pairs，不读 cases 正文与任何幼儿数据。`lectures.js` 分享者候选与邀请只有管理员。
 
+## 运营后台与公告
+
+`api/academy/admin.js`：`/api/admin/overview` 与 `/api/admin/notices` 只给管理员（非管理员 403 并记 `admin.denied`）；汇总只有数字，不带个人成绩。`/api/notices` 登录了就能读，只给没到期的。`/admin` 页里的停用、邀请码、审计流水复用上游 `/api/admin/users`、`/api/admin/user/disable`、`/api/admin/invites*`、`/api/admin/audit`，权限不变（管理员不能被停用）。公告发改撤记审计 `academy.notice.save` / `academy.notice.remove`。
+
 ## 订阅消息
 
 小程序订阅消息（`api/academy/notify.js`），只做三类、都是事件触发：实践关被点评了通知教师（`review`），本园有新的实践关提交通知园长与点评人（`queue`），本人预约的园长大讲堂开播前 30 分钟（`lecture`，`api/academy/lectures.js` 每分钟查一次，每人每场只发一条）。没有定时的「今日一关」提醒，守 ROADMAP 第九节「不催、不计在线时长」。

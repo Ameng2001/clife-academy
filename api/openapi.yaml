@@ -4240,6 +4240,29 @@ paths:
       responses:
         '200': { description: '`{ suggestions }`' }
 
+  /api/admin/overview:
+    get:
+      tags: [academy]
+      operationId: academyAdminOverview
+      summary: 运营后台汇总：六组数字（用户与园所、研修期次、资源与案例、发题与点评、公告、审计）＋全部公告
+      description: 管理员。只给数字与入口，事情在各自页面做；不列个人、不排名。
+      responses:
+        '200': { description: '`{ overview:{ people, programs, content, review, notices, audit }, notices, now }`' }
+  /api/notices:
+    get:
+      tags: [academy]
+      operationId: academyNotices
+      summary: 在用的平台公告（没到期的，最多 5 条）
+      responses:
+        '200': { description: '`{ notices:[{ id, title, text, until, byName, at }] }`' }
+  /api/admin/notices:
+    post:
+      tags: [academy]
+      operationId: academySaveNotice
+      summary: 管理员发、改、撤一条公告
+      description: '`{ id?, title(≥2), text(≥4), until?, remove? }`。不推送、不统计谁看过。'
+      responses:
+        '200': { description: '`{ notice }` 或 `{ ok }`' }
 components:
   securitySchemes:
     cookieAuth:

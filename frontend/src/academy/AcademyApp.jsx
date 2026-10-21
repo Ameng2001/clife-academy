@@ -41,6 +41,7 @@ import StudyGroups from './views/StudyGroups.jsx'
 import Programs from './views/Programs.jsx'
 import ShareDays from './views/ShareDays.jsx'
 import Coach from './views/Coach.jsx'
+import Admin from './views/Admin.jsx'
 import './academy.css'
 
 bindUI(useUI)
@@ -121,6 +122,7 @@ function Shell() {
           <Route path="/programs" element={<Programs />} />
           <Route path="/sharedays" element={<ShareDays />} />
           <Route path="/coach" element={<Coach />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>}

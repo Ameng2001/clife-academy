@@ -44,12 +44,15 @@ export default function Home() {
   }
   useEffect(() => { if (user) api('/api/me/pair').then(setPair).catch(() => setPair(null)); else setPair(null) }, [user?.id])
   const [plan, setPlan] = useState(null)
+  const [notices, setNotices] = useState([])
+  useEffect(() => { if (user) api('/api/notices').then(r => setNotices(r.notices)).catch(() => setNotices([])); else setNotices([]) }, [user?.id])
   useEffect(() => { if (user) api('/api/me/coach').then(r => setPlan(r.plan)).catch(() => setPlan(null)); else setPlan(null) }, [user?.id])
   return <div className="narrow">
     <div className="hdr">
       <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
       <div className="hdr-actions"><RoleSelect S={S} /><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     </div>
+    {notices.map(n => <div key={n.id} className="card" style={{ marginBottom: 10, padding: 12, background: 'color-mix(in srgb,var(--acc) 8%,transparent)' }}><div style={{ fontWeight: 600 }}><Icon name="speaker" /> {n.title}</div><div className="small" style={{ marginTop: 2, whiteSpace: 'pre-wrap' }}>{n.text}</div><div className="small muted" style={{ marginTop: 2 }}>平台公告 · {fmtDay(n.at)}{n.until ? ' · 至 ' + fmtDay(n.until) : ''}</div></div>)}
 
     <div className="card">
       <div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>今天这一关 · {pathNameOf(path)}路径</div>
@@ -67,8 +70,7 @@ export default function Home() {
     </div>
 
     <div className="tiles">
-      {user?.admin && user.academy?.role !== 'director' && <div className="tile tappable" onClick={() => nav('/ops')}><div className="l"><Icon name="gauge" />点评时效与周报</div><div className="v">全平台</div><div className="small muted">待点评、超期、各园一行、上周的账</div></div>}
-      {user?.admin && <div className="tile tappable" onClick={() => nav('/programs')}><div className="l"><Icon name="calendar" />研修项目</div><div className="v">期次</div><div className="small muted">报名、名单、学时；分享者在大讲堂里邀</div></div>}
+      {user?.admin && <div className="tile tappable" onClick={() => nav('/admin')}><div className="l"><Icon name="gear" />运营后台</div><div className="v">六组事</div><div className="small muted">用户与园所、研修期次、资源与案例、发题与点评、公告、审计</div></div>}
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
       {user?.academy?.role === 'district'
         ? <div className="tile tappable" onClick={() => nav('/district')}><div className="l"><Icon name="gauge" />区县看板</div><div className="v">{user.academy.district?.name || '本区'}</div><div className="small muted">园所数、覆盖率中位数、认证人数</div></div>
