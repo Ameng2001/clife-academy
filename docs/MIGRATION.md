@@ -208,3 +208,10 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
 - **2026-10-21（晚 2）** SyncBanner 的「登录」指到大课堂登录页。`components/SyncBanner.jsx` 加 `signIn` 属性，宿主替换登录动作（不传仍走上游 passkey / Settings）。
   `AcademyApp.jsx`：访客点它 → 退出访客态 → Login；已登录但服务端不认这个浏览器（`sync.status === 'auth'`）→ 临时让页面给 Login，登上去自动回应用。
   Login 收 `relogin`：出「登录已过期」提示、藏「先看看」。浏览器验证两条：访客点横幅 → 登录页；重启 api 清掉会话后刷新 → 登录页带过期提示 → 重新登录 → 回首页、横幅消失。
+- **2026-10-21（夜）** 删上游健身视图与 lib。先从 `main.jsx` 做静态 import 可达分析，删掉不可达的 412 个文件（`views/`、`App.jsx`、
+  动作名与说明的语言包、健身弹层测试等）；再把三个拖着整套健身 lib 的枢纽换成大课堂自己的：`academy/sheets.jsx`（确认框＋登录时那一问）、
+  `academy/components/SyncBanner.jsx`（中文状态条，`signIn` 由壳指定）、`academy/views/Settings.jsx`（外观、账号、同步、关于，退出登录带「还有改动没同步」确认），
+  随后再删一轮不可达的 92 个文件。`src/` 从 668 个文件减到 148 个；`vite build` 通过，前端 52 个测试文件 943 项全绿，api 契约测试 13 项通过。
+  浏览器验证：访客横幅中文、点「登录」到登录页；开发桩登录后设置页显示姓名、岗位、园所、同步时间；退出登录回登录页，服务端会话已清。
+  **还留着的上游件**：`store/useStore.js`（1,990 行，同步引擎，连着 media、health、remote、rotation 等 lib）和 `lib/exercises.js`＋动作数据（store 的 `registerCustom` 还引着，
+  打包出 1 MB 的 exercises chunk）。下一步是给 store 做减法：去掉健身字段与 media/health 分支，`exercises` 随之可删。

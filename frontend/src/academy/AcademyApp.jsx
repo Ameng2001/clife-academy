@@ -1,5 +1,5 @@
 // 大课堂的应用壳：沿用上游的 store（状态、同步、登录）、主题、Toast、Modals、SyncBanner，
-// 路由与底栏换成大课堂的。上游 App.jsx 留作对照，等视图替换完再删。
+// 路由、底栏、设置、同步状态条都是大课堂自己的；上游健身视图已删。
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
@@ -11,9 +11,9 @@ import Icon from '../components/Icon.jsx'
 import ErrorBoundary from '../components/ErrorBoundary.jsx'
 import Modals from '../components/Modals.jsx'
 import Toast from '../components/Toast.jsx'
-import SyncBanner from '../components/SyncBanner.jsx'
+import SyncBanner from './components/SyncBanner.jsx'
 import Login from './views/Login.jsx'
-import { SettingsRoute } from '../views/Settings.jsx'
+import Settings from './views/Settings.jsx'
 import Home from './views/Home.jsx'
 import Paths from './views/Paths.jsx'
 import Level from './views/Level.jsx'
@@ -72,8 +72,7 @@ function Shell() {
           <Route path="/paths/:path" element={<Paths />} />
           <Route path="/level/:id" element={<Level />} />
           <Route path="/me" element={<Me />} />
-          <Route path="/settings" element={<SettingsRoute />} />
-          <Route path="/settings/:page" element={<SettingsRoute />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>}
       </ErrorBoundary>

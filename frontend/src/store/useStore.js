@@ -1745,7 +1745,7 @@ export const useStore = create((set, get) => {
       if (!m) { if (adoptHold && !adopting) releaseAdopt(); return null }
       if (adopting) return adopting
       try {
-        if (typeof ask !== 'function') ask = (await import('../sheets.jsx')).askAddDeviceData
+        if (typeof ask !== 'function') ask = (await import('../academy/sheets.jsx')).askAddDeviceData
         const r = await get().adoptProfile(ask, { alwaysAsk: !!m.alwaysAsk })
         // A phone whose pairing ended here: what connectToServer does after its own adoption.
         if (MOBILE) { await nativePersist(true); if (get().needsMobileOnboarding) set({ needsMobileOnboarding: false }) }
