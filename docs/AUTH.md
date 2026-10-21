@@ -30,8 +30,16 @@ Authorization: Bearer {PLATFORM_AUTH_KEY}
 
 ## 小程序侧
 
-小程序 `wx.login()` 拿 code，`POST /api/login/wechat`，把返回的 `token` 存起来，之后每个请求带 `Authorization: Bearer`。
-`GET /api/me` 在 token 过半有效期时会带回新 token，收到就替换。小程序工程现在还在文档仓库的原型里，接口接入是第 1 周待办。
+小程序工程在文档仓库 `deals/06 柳州-徐明/本地运营/学前大课堂/app/miniprogram/`，接口层三个文件：
+
+| 文件 | 做什么 |
+|---|---|
+| `utils/api.js` | `wx.request` 封装：`API_BASE`（`utils/config.js`）＋ `Authorization: Bearer`；非 2xx reject 带 `{ status, data, code }`；401 清本地 token |
+| `utils/auth.js` | `login(name)`：`wx.login()` 的 code → `POST /api/login/wechat` → 存 token 与 user；`me()`：`GET /api/me`，带回新 token 就替换；`logout()`；`setRole()` → `PUT /api/me/academy` |
+| `utils/sync.js` | 进度文档与网页端同一结构，`PUT /api/data` 条件写、409 并集再推、回前台查 `/api/data/rev`；登录接管：演示进度（`demo:true`）丢掉，本机真通过的关问一句再并入 |
+
+`app.js` 启动时 `auth.me()` → `sync.pull()`，`onShow` 查修订号；「我的」页有微信登录与退出。岗位：微信登录默认 `teacher`，本人在顶栏切换即 `PUT /api/me/academy`；平台账号 403，以平台为准。
+服务端要设 `WX_APPID` / `WX_SECRET`，开发者工具勾掉「校验合法域名」。
 
 ## 同一个人两条路
 
@@ -40,4 +48,4 @@ Authorization: Bearer {PLATFORM_AUTH_KEY}
 
 ## 测试
 
-`api/test/auth.test.js`：真 server.js 子进程，微信与平台用本地桩顶替，6 项。
+`api/test/auth.test.js`：真 server.js 子进程，微信与平台用本地桩顶替，7 项（含 `PUT /api/me/academy`）。

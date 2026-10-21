@@ -23,7 +23,7 @@ export const academyOf = u => (u?.academy && typeof u.academy === 'object'
   ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, source: u.academy.source || null }
   : null);
 
-export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin }) {
+export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }) {
   const newId = () => crypto.randomBytes(12).toString('base64url');
   const answer = (req, res, user, ev) => {
     audit(req, ev, { user });
@@ -112,7 +112,23 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
   }
   };
 
+  // 自己改自己的岗位：微信登录默认 teacher，园长在小程序里改成 director；平台登录的账号岗位以平台为准，不给改。
+  const account = {
+  'PUT /api/me/academy': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (user.academy?.source === 'platform') return json(res, 403, { error: 'role is set by the platform', code: 'platform' });
+    const body = await readBody(req);
+    if (!ROLES.includes(body.role)) return json(res, 400, { error: 'unknown role', code: 'role' });
+    user.academy = { ...(user.academy || { org: null, source: null, linkedAt: new Date().toISOString() }), role: body.role };
+    saveDb();
+    audit(req, 'academy.role', { user, msg: body.role });
+    json(res, 200, { academy: academyOf(user) });
+  }
+  };
+
   return {
+    ...account,
     ...(wechatConfigured() ? wechat : {}),
     ...(platformConfigured() ? platform : {}),
     ...(DEV_LOGIN ? dev : {})

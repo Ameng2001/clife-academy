@@ -660,6 +660,28 @@ paths:
         '200': { description: 已登录 }
         '400': { description: 缺 name }
         '404': { description: 入口未开启 }
+  /api/me/academy:
+    put:
+      tags: [academy]
+      operationId: academySetRole
+      summary: 改自己的岗位
+      description: |
+        微信登录的账号默认 `teacher`，本人在小程序或网页里改成自己的岗位（nurse / teacher / care / it / director）。
+        平台登录的账号岗位以平台为准，这里是 403。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [nurse, teacher, care, it, director] }
+      responses:
+        '200': { description: '`{ academy: { role, org, source } }`' }
+        '400': { description: 不认识的岗位 }
+        '401': { description: 未登录 }
+        '403': { description: 平台账号不能自改岗位 }
   /api/pair/redeem:
     post:
       tags: [pairing]

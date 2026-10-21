@@ -154,3 +154,21 @@ test('an entrance that is not configured is a plain 404 and absent from config',
   assert.equal((await call('POST', '/api/login/platform', { ticket: 'tk-nurse' })).status, 404);
   assert.equal((await call('POST', '/api/login/dev', { name: 'x' })).status, 404);
 });
+
+test('PUT /api/me/academy lets a wechat or dev account set its own role, refuses a platform account and an unknown role', async t => {
+  const stub = await startStub(); t.after(() => stub.srv.close());
+  const { call } = await startServer(t, stub.base);
+  const w = await call('POST', '/api/login/wechat', { code: 'good-code-1', name: '小赵' });
+  const auth = { Authorization: 'Bearer ' + w.json.token };
+  assert.equal(w.json.user.academy.role, 'teacher');
+  const r = await call('PUT', '/api/me/academy', { role: 'director' }, auth);
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  assert.equal(r.json.academy.role, 'director');
+  assert.equal((await call('GET', '/api/me', null, auth)).json.user.academy.role, 'director');
+  assert.equal((await call('PUT', '/api/me/academy', { role: 'boss' }, auth)).status, 400);
+  assert.equal((await call('PUT', '/api/me/academy', { role: 'nurse' })).status, 401);
+  const p = await call('POST', '/api/login/platform', { ticket: 'tk-nurse' });
+  const bad = await call('PUT', '/api/me/academy', { role: 'director' }, { Authorization: 'Bearer ' + p.json.token });
+  assert.equal(bad.status, 403);
+  assert.equal(bad.json.code, 'platform');
+});

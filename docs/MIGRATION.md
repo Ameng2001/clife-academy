@@ -225,3 +225,9 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   浏览器验证：访客通过 nurse-0、留草稿 → 登录已有 director-0 的账号 → 弹层 → 两端并集、学分各 1、草稿仍在；设置页退出 → 登录页，localStorage 只剩空状态与草稿。
   localStorage 键名改为 `academy_*`。
   **还留着的**：`package.json` 里 capacitor、jsqr、lean-qr 等依赖没用了，等有网时 `npm uninstall` 顺手更新锁文件；public/sw.js 没再注册。
+- **2026-10-22** 小程序接登录与同步（工程在文档仓库 `…/学前大课堂/app/miniprogram/`）。`utils/api.js` 带 Bearer 的 `wx.request` 封装；
+  `utils/auth.js` 微信登录（code → `/api/login/wechat`）、`/api/me` 换新 token、退出、改岗位；`utils/sync.js` 与网页端同一份进度文档、同一套合并规则，
+  PUT 条件写、409 并集、回前台查修订；登录接管时演示进度丢掉、本机真通过的关问一句。`utils/store.js` 改为从文档现算游标与学分，四段草稿只留本机；
+  「我的」页登录/退出，顶栏显示「岗位 · 姓名」。api 新增 `PUT /api/me/academy`（自己改岗位；平台账号 403），`auth.test.js` 7 项。
+  用 Node 顶替 `wx` 对着真 api 跑了一遍接口层：访客通关 → 微信登录只问真通过的那关 → 改岗位 → 网页端写入 → 回前台拉取 → 再通关 409 并集 → 退出回演示态。
+  未做：微信开发者工具里的真机联调（需要 WX_APPID/WX_SECRET 与合法域名）；平台登录态在小程序内的接法等平台契约。
