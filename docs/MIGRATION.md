@@ -278,3 +278,8 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   小程序 `utils/notify.js`：实践关提交后问一次 `review`，首页园长块按钮订阅 `queue`。api 4 项新测试（微信桩含 token 过期与拒收），harness 27 项。待真机：在公共模板库选模板、填 ID 与字段映射。
 - **2026-10-22（夜 7）** 点评人指定界面。`PUT /api/org/reviewer`（`api/academy/org.js`）：园长或管理员给本园成员标 / 去 `academy.reviewer`，不能标自己、不能跨园；
   `academyOf` 把 reviewer 带给客户端，`/api/org/summary` 的人员行带 `reviewer`。网页 `/org` 本园人员每行一个「设为点评人 / 取消」。org 测试加 1 项。小程序首页园长块只有岗位汇总没有人员行，指定仍在网页端做。
+- **2026-10-22（夜 8）** 能力地图（ROADMAP 第五节，C 期第一项）。`lib/capability.js` 纯函数：《专业标准》七个领域各一个状态（有证据 / 在做 / 还空着），
+  证据三类：工具关通过、实践关作品通过点评、研讨关作答；工具关按内容归入领域（health/food/sleep/sport → 一日生活，teach → 教育活动计划，场景「观察记录」→ 观察评价，family → 沟通与合作），
+  账号、设备、工作台这类平台操作不属于专业领域、单列「平台工具」；领域路径走完标「领域研修证书可申领」。没有分数条、不和他人比。
+  `views/CapabilityMap.jsx`（`/map`），「我的」页顶一行七个领域的状态入口；`useSubmissions.loadAll()` 取本人全部提交。4 项测试（前端 132 全过）。
+  小程序 `utils/capability.js` 同一规则，「我的」页加能力地图段；harness 29 项。环创、游戏、反思三领域还没有内容，显示「内容建设中」。

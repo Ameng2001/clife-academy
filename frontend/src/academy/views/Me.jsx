@@ -1,8 +1,11 @@
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
 import { useStore } from '../../store/useStore.js'
 import { PATH_KEYS, pathSummary, titleOf, parseLevelId } from '../../lib/lessons.js'
 import { useS, myPath, fmtDay } from './common.jsx'
+import { useSubmissions } from '../../store/useSubmissions.js'
+import { capabilityMap } from '../../lib/capability.js'
 
 export default function Me() {
   const nav = useNavigate(), S = useS()
@@ -11,6 +14,9 @@ export default function Me() {
   const credits = Object.values(S.credits || {}).reduce((a, b) => a + b, 0)
   const badges = PATH_KEYS.map(p => pathSummary(S.progress, p))
   const recs = Object.entries(S.progress || {}).sort((a, b) => b[1].passedAt - a[1].passedAt)
+  const subs = useSubmissions(s => s.all)
+  useEffect(() => { if (user) useSubmissions.getState().loadAll() }, [user?.id])
+  const cap = useMemo(() => capabilityMap(S.progress, subs || []), [S.progress, subs])
   return <div className="narrow">
     <div className="hdr"><div><h1>我的</h1><div className="sub">{user ? user.name : '演示账号'} · {sum.name}</div></div><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     <div className="tiles">
@@ -19,6 +25,13 @@ export default function Me() {
       <div className="tile"><div className="l">岗位徽章</div><div className="v">{badges.filter(b => b.finished).length}</div></div>
       <div className="tile"><div className="l">初级岗位认证</div><div className="v" style={{ fontSize: 18 }}>{sum.finished ? '可报名' : '未达到'}</div></div>
     </div>
+    <div className="sect"><div className="sect-t">能力地图</div><div className="sect-b">
+      <div className="lrow tap" onClick={() => nav('/map')}>
+        <div style={{ flex: 1 }}><div className="lrow-t">七个领域 · {cap.evidenced} 个有证据</div>
+          <div className="row" style={{ gap: 6, marginTop: 6, flexWrap: 'wrap' }}>{cap.domains.map(d => <span key={d.key} className="small" style={{ padding: '2px 8px', borderRadius: 999, background: d.status === 'evidenced' ? 'color-mix(in srgb,var(--green) 16%,transparent)' : d.status === 'started' ? 'color-mix(in srgb,var(--orange) 16%,transparent)' : 'var(--surface-3)', color: d.status === 'evidenced' ? 'var(--green)' : d.status === 'started' ? 'var(--orange)' : 'var(--label-3)' }}>{d.name.replace(/、/g, '').slice(0, 4)}</span>)}</div>
+        </div><Icon name="chevronRight" />
+      </div>
+    </div></div>
     <div className="sect"><div className="sect-t">岗位徽章</div>
       <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8 }}>
         {badges.map(b => <div key={b.path} className={'ac-badge' + (b.finished ? ' on' : '')}><div className="b">{b.name[0]}</div><div className="small" style={{ fontSize: 12 }}>{b.name}</div><div className="small muted" style={{ fontSize: 11 }}>{b.finished ? '已获得' : `${b.done}/${b.total}`}</div></div>)}

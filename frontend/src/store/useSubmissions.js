@@ -30,7 +30,14 @@ export const useSubmissions = create((set, get) => ({
     await get().load(levelId)
     return r.submission
   },
-  clear() { set({ byLevel: {}, loading: {} }) }
+  // 本人全部提交（能力地图用）。没登录为空。
+  all: null,
+  async loadAll() {
+    if (!useStore.getState().user) { set({ all: null }); return [] }
+    try { const r = await api('/api/submissions'); set({ all: r.submissions || [] }); return r.submissions || [] }
+    catch (e) { if (e.status === 401) set({ all: null }); return get().all || [] }
+  },
+  clear() { set({ byLevel: {}, loading: {}, all: null }) }
 }))
 
 useStore.subscribe((s, prev) => { if ((prev.user?.id || null) !== (s.user?.id || null)) useSubmissions.getState().clear() })
