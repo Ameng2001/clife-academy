@@ -21,7 +21,7 @@ export const authConfig = () => ({
 });
 
 export const academyOf = u => (u?.academy && typeof u.academy === 'object'
-  ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, source: u.academy.source || null }
+  ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, source: u.academy.source || null, ...(u.academy.reviewer === true ? { reviewer: true } : {}) }
   : null);
 
 export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }) {

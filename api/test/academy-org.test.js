@@ -54,7 +54,7 @@ test('summarize: per-role counts, completion, the level most people are stuck on
   assert.equal(s.roles.find(r => r.role === 'teacher').members, 1);
   assert.equal(s.passes7d, 2);
   const li = s.members.find(m => m.id === 'a');
-  assert.deepEqual(Object.keys(li).sort(), ['done', 'id', 'lastAt', 'name', 'role', 'roleName', 'total']);
+  assert.deepEqual(Object.keys(li).sort(), ['done', 'id', 'lastAt', 'name', 'reviewer', 'role', 'roleName', 'total']);
   assert.equal(li.done, 2); assert.equal(li.lastAt, now - 3600000);
   assert.equal(s.members.find(m => m.id === 'c').lastAt, null);
 });
@@ -74,4 +74,23 @@ test('GET /api/org/summary: directors see their own org only; others get 403', a
   assert.equal(r.json.roles.find(x => x.role === 'nurse').avgDone, 1, 'the other kindergarten is not counted');
   assert.equal((await call('GET', '/api/org/summary', null, nurse)).status, 403);
   assert.equal((await call('GET', '/api/org/summary')).status, 401);
+});
+
+test('PUT /api/org/reviewer: a director marks a colleague, who then sees the queue; other orgs, self and teachers are refused', async t => {
+  const { call, login } = await startServer(t);
+  const zhao = await login('赵', 'director', '甲园'), wang = await login('王', 'teacher', '甲园'), chen = await login('陈', 'care', '甲园'), qian = await login('钱', 'director', '乙园');
+  const me = async auth => (await call('GET', '/api/me', null, auth)).json.user;
+  const wangId = (await me(wang)).id;
+  assert.equal((await call('GET', '/api/review/queue', null, wang)).status, 403);
+  assert.equal((await call('PUT', '/api/org/reviewer', { uid: wangId, reviewer: true }, chen)).status, 403);
+  assert.equal((await call('PUT', '/api/org/reviewer', { uid: wangId, reviewer: true }, qian)).json.code, 'org');
+  assert.equal((await call('PUT', '/api/org/reviewer', { uid: (await me(zhao)).id, reviewer: true }, zhao)).json.code, 'self');
+  assert.equal((await call('PUT', '/api/org/reviewer', { uid: 'nope', reviewer: true }, zhao)).status, 404);
+  assert.deepEqual((await call('PUT', '/api/org/reviewer', { uid: wangId, reviewer: true }, zhao)).json, { id: wangId, reviewer: true });
+  assert.equal((await call('GET', '/api/review/queue', null, wang)).status, 200);
+  assert.equal((await call('GET', '/api/org/summary', null, zhao)).json.members.find(m => m.id === wangId).reviewer, true);
+  assert.equal((await me(wang)).academy.reviewer, true, 'the flag reaches the client');
+  await call('PUT', '/api/org/reviewer', { uid: wangId, reviewer: false }, zhao);
+  assert.equal((await call('GET', '/api/review/queue', null, wang)).status, 403);
+  assert.equal((await me(wang)).academy.reviewer, undefined);
 });

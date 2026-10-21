@@ -2,6 +2,7 @@
 // 只按岗位汇总与补训建议；人员列表只有通过关数与最近学习日期，没有测验分；不跨园、不排名（docs/ROADMAP.md 第八节）。
 // 探针体检卡要接平台数据，这里先占位。
 import { useEffect, useState } from 'react'
+import { useUI } from '../../store/useUI.js'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { api } from '../../lib/api.js'
@@ -21,6 +22,11 @@ export default function Director() {
     finally { setBusy(false) }
   }
   useEffect(() => { if (user) load() }, [user?.id])
+  const setReviewer = async m => {
+    setBusy(true)
+    try { await api('/api/org/reviewer', { method: 'PUT', body: JSON.stringify({ uid: m.id, reviewer: !m.reviewer }) }); useUI.getState().toast(m.reviewer ? `${m.name} 不再是点评人` : `${m.name} 已设为点评人`); await load() }
+    catch (e) { useUI.getState().toast('没改成' + (e.message ? '：' + e.message : '')); setBusy(false) }
+  }
 
   const head = <div className="hdr">
     <div><h1>园长看板</h1><div className="sub">{data?.org?.name || user?.academy?.org?.name || '本园'}{data ? ` · ${fmtDay(data.at)}` : ''}</div></div>
@@ -61,9 +67,11 @@ export default function Director() {
 
     <div className="sect"><div className="sect-t">本园人员</div><div className="sect-b">
       {data.members.map(m => <div key={m.id} className="lrow">
-        <div style={{ flex: 1 }}><div className="lrow-t">{m.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{m.roleName}</span></div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${m.total ? m.done / m.total * 100 : 0}%` }} /></div></div>
+        <div style={{ flex: 1 }}><div className="lrow-t">{m.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{m.roleName}</span>{m.reviewer && <span className="tag" style={{ marginInlineStart: 8 }}>点评人</span>}</div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${m.total ? m.done / m.total * 100 : 0}%` }} /></div></div>
         <span className="small muted" style={{ marginInlineStart: 12, minWidth: 72, textAlign: 'end' }}>{m.done}/{m.total} 关<br />{m.lastAt ? fmtDay(m.lastAt) : '未开始'}</span>
+        {m.id !== user.id && m.role !== 'director' && <button className={'chip' + (m.reviewer ? ' on' : '')} style={{ marginInlineStart: 10 }} disabled={busy} title={m.reviewer ? '取消点评人' : '设为点评人'} onClick={() => setReviewer(m)}>{m.reviewer ? '取消' : '设为点评人'}</button>}
       </div>)}
+      <div className="lrow small muted">点评人能看本园的点评队列、按量表点评实践关的提交。一般是种子教师或教研主任；园长本来就能点评。</div>
     </div></div>
 
     <div className="sect"><div className="sect-t">点评</div>

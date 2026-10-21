@@ -2590,7 +2590,7 @@ const routes = {
   // 平台实操事件回传（academy/events.js）。
   ...academyEventRoutes({ json, readBody, db, saveDb, readSession, audit, DEV_LOGIN }),
   // 园长看板（academy/org.js）。
-  ...orgRoutes({ json, readSession, db, readStateCached, isAdmin }),
+  ...orgRoutes({ json, readBody, saveDb, audit, readSession, db, readStateCached, isAdmin }),
   // 实践关证据提交与点评（academy/submissions.js）。
   ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。

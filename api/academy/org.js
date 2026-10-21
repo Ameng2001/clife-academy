@@ -28,7 +28,7 @@ export function summarize(members, stateOf, now = Date.now()) {
     g.members++; g.doneSum += done; passes7d += recent; g.passes7d += recent;
     if (done >= g.total && g.total) g.finished++; else if (done > 0) g.started++;
     if (done < g.total) { const id = `${path}-${done}`; g.stuck[id] = (g.stuck[id] || 0) + 1; }
-    people.push({ id: u.id, name: u.name, role: r, roleName: g.name, done, total: g.total, lastAt });
+    people.push({ id: u.id, name: u.name, role: r, roleName: g.name, done, total: g.total, lastAt, reviewer: u.academy?.reviewer === true });
   }
   const out = Object.values(roles).map(g => {
     const top = Object.entries(g.stuck).sort((a, b) => b[1] - a[1])[0];
@@ -41,8 +41,25 @@ export function summarize(members, stateOf, now = Date.now()) {
   return { roles: out, members: people, passes7d, members_total: people.length };
 }
 
-export function orgRoutes({ json, readSession, db, readStateCached, isAdmin }) {
+export function orgRoutes({ json, readBody, saveDb, audit, readSession, db, readStateCached, isAdmin }) {
   return {
+  // 指定 / 取消本园的点评人（academy.reviewer）：园长或管理员；园长只能指定本园的人；园长本来就有点评权，不用也不能标自己。
+  'PUT /api/org/reviewer': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (user.academy?.role !== 'director' && !isAdmin(user)) return json(res, 403, { error: 'directors only', code: 'director' });
+    const body = await readBody(req);
+    const target = db.users.find(u => u.id === String(body.uid || ''));
+    if (!target || target.disabled) return json(res, 404, { error: 'no such member' });
+    if (target.id === user.id) return json(res, 400, { error: 'directors already review', code: 'self' });
+    if (!isAdmin(user) && (!orgKeyOf(user) || orgKeyOf(target) !== orgKeyOf(user))) return json(res, 403, { error: 'not in your kindergarten', code: 'org' });
+    const on = body.reviewer === true;
+    target.academy = { ...(target.academy || { role: 'teacher', org: null, source: null }), reviewer: on };
+    if (!on) delete target.academy.reviewer;
+    saveDb();
+    audit(req, 'org.reviewer', { user, msg: `${target.id} ${on ? 'on' : 'off'}` });
+    json(res, 200, { id: target.id, reviewer: on });
+  },
   'GET /api/org/summary': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });

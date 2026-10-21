@@ -276,3 +276,5 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   一次性额度记在 `db.subscriptions`，`GET /api/notify`、`POST /api/notify/subscribe`（可带 wx.login code 给平台账号绑 openid）；access_token 缓存、过期重取一次、43101 清零；
   字段按微信规则截断，映射走 `WX_TMPL_*_DATA`。`submissions.js` 在实践关提交后与点评后调 `notifier.send`，失败只记日志。没配模板时路由不存在。
   小程序 `utils/notify.js`：实践关提交后问一次 `review`，首页园长块按钮订阅 `queue`。api 4 项新测试（微信桩含 token 过期与拒收），harness 27 项。待真机：在公共模板库选模板、填 ID 与字段映射。
+- **2026-10-22（夜 7）** 点评人指定界面。`PUT /api/org/reviewer`（`api/academy/org.js`）：园长或管理员给本园成员标 / 去 `academy.reviewer`，不能标自己、不能跨园；
+  `academyOf` 把 reviewer 带给客户端，`/api/org/summary` 的人员行带 `reviewer`。网页 `/org` 本园人员每行一个「设为点评人 / 取消」。org 测试加 1 项。小程序首页园长块只有岗位汇总没有人员行，指定仍在网页端做。

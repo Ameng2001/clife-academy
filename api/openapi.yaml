@@ -700,6 +700,17 @@ paths:
       responses:
         '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
         '401': { description: 未登录 }
+  /api/org/reviewer:
+    put:
+      tags: [academy]
+      operationId: academyOrgReviewer
+      summary: 指定 / 取消本园点评人
+      description: '`{ uid, reviewer: true | false }`。园长或管理员；园长只能标本园的人，不能标自己（园长本来就有点评权）。点评人能看本园点评队列、点评实践关提交。'
+      responses:
+        '200': { description: '`{ id, reviewer }`' }
+        '400': { description: 标自己 }
+        '403': { description: 不是园长，或不在本园 }
+        '404': { description: 没有这个人 }
   /api/org/summary:
     get:
       tags: [academy]
