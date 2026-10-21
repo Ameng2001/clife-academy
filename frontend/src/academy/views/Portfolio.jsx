@@ -1,6 +1,6 @@
 // 发展档案与学时证明（GET /api/me/portfolio、/api/me/hours）。档案是本人全部学习与作品记录，随人走：这页可打印成 PDF，也可下载 JSON。
 // 学时证明按本地运营方与市教育局谈定的规则与格式出具（管理员在这里改规则），有编号可核验；出具时规则快照随证明保存。
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
 import { Button, TextField, TextArea } from '../../components/ui.jsx'
@@ -65,6 +65,17 @@ export default function Portfolio() {
   }
   const verify = async () => { try { setVerified(await api('/api/hours/verify?no=' + encodeURIComponent(verifyNo.trim()))) } catch { setVerified({ valid: false }) } }
   // 带登录态的下载：取一份最新的档案，浏览器端生成文件（服务端 ?download=1 给的是同一份，供脚本用）
+  // 迁移包：带签名的整份档案；迁入：选一个别处发的包文件
+  const fileRef = useRef(null)
+  const [importing, setImporting] = useState(false)
+  const pack = async () => { try { const pkg = await api('/api/me/portfolio/package'); const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `迁移包-${pkg.person.name}-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href); toast('迁移包已下载，带签名，换城市时在那边「迁入」') } catch { toast('没成') } }
+  const importFile = async e => {
+    const f = e.target.files?.[0]; e.target.value = ''; if (!f) return
+    setImporting(true)
+    try { const pkg = JSON.parse(await f.text()); const r = await api('/api/me/portfolio/import', { method: 'POST', body: JSON.stringify({ package: pkg }) }); toast(r.item.verified === true ? '已迁入，核验通过' : r.item.verified === false ? '已迁入，但发包方核验不通过，档案里会标出' : '已迁入，发包方联不上，记为未核验'); setP(await api('/api/me/portfolio')) }
+    catch (err) { toast(err.code === 'dup' ? '这份已经迁入过' : err.code === 'format' || err.code === 'shape' ? '不是迁移包文件' : '没成' + (err.message ? '：' + err.message : '')) } finally { setImporting(false) }
+  }
+  const removeImport = async i => { if (!confirm(`删掉迁入的「${i.person.orgName || i.issuer.name}」这份？`)) return; try { await api('/api/me/portfolio/imports/remove', { method: 'POST', body: JSON.stringify({ id: i.id }) }); setP(await api('/api/me/portfolio')) } catch { toast('没成') } }
   const download = async () => { try { const fresh = await api('/api/me/portfolio?download=1'); const blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `发展档案-${fresh.person.name}-${toLocal(fresh.exportedAt)}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000) } catch (e) { toast('没下成' + (e.message ? '：' + e.message : '')) } }
   return <div className="narrow">
     <div className="hdr"><div><h1>发展档案</h1><div className="sub">本人全部学习与作品记录 · 随人走 · 不含幼儿数据与 AI 中间判断</div></div><div className="hdr-actions no-print"><Button size="sm" icon="clipboard" onClick={() => window.print()}>打印 / 存 PDF</Button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
@@ -73,6 +84,11 @@ export default function Portfolio() {
       <div className="card"><div style={{ fontWeight: 600, fontSize: 17 }}>{p.person.name}</div><div className="small muted">{[p.person.orgName, p.person.districtName, p.person.role].filter(Boolean).join(' · ')} · 导出于 {fmtDay(p.exportedAt)}</div>
         <div className="row" style={{ gap: 14, marginTop: 10, flexWrap: 'wrap' }} >{[['通过的关', p.summary.levels], ['学习分钟', p.summary.minutes], ['通过的作品', p.summary.works], ['研讨作答', p.summary.seminars + p.summary.drillAnswers], ['入库案例', p.summary.cases], ['证书', p.summary.certificates], ['勋章', p.summary.badges], ['称号', p.summary.titles], ['学分', p.summary.creditsTotal], ['答疑被采纳', p.summary.answersAccepted]].map(([k, v]) => <div key={k}><div style={{ fontSize: 20, fontWeight: 700 }}>{v}</div><div className="small muted">{k}</div></div>)}</div>
         <div className="row no-print" style={{ gap: 8, marginTop: 10 }}><Button size="sm" variant="tinted" icon="download" onClick={download}>下载 JSON</Button><span className="small muted">换平台、换园时带走；格式 {p.format}</span></div></div>
+      <div className="sect"><div className="sect-t">随人走 <span className="small muted">换园留痕 · 换城市带包</span></div><div className="sect-b">
+        {p.history.map((h, i) => <div key={'h' + i} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{h.orgName || '（园所未记）'}<span className="small muted" style={{ marginInlineStart: 8 }}>{h.role || ''}</span></div><div className="small muted">{h.from ? fmtDay(h.from) : '？'} 至 {h.to ? fmtDay(h.to) : '？'} · 同一账号，记录连续</div></div></div>)}
+        {p.imports.map(i => <div key={i.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">迁入 · {i.person.orgName || i.issuer.name}{i.person.role ? ' · ' + i.person.role : ''}<span className="tag" style={{ marginInlineStart: 8 }}>{i.verified === true ? '核验通过' : i.verified === false ? '核验不通过' : '未核验'}</span></div><div className="small muted">{i.issuer.name} 发于 {fmtDay(i.issuedAt)} · 过关 {i.summary.levels ?? 0} · 作品 {i.summary.works ?? 0} · 证书 {i.summary.certificates ?? 0} · 只作档案，不并进进度</div></div><button className="chip no-print" onClick={() => removeImport(i)}>删</button></div>)}
+        <div className="row no-print" style={{ gap: 8, padding: '8px 0', flexWrap: 'wrap', alignItems: 'center' }}><Button size="sm" variant="tinted" icon="download" onClick={pack}>导出迁移包</Button><Button size="sm" disabled={importing} onClick={() => fileRef.current?.click()}>迁入一份</Button><input ref={fileRef} type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={importFile} /><span className="small muted">迁移包带本平台签名，到了别处可核验；同一城市换园不用包，登录就连着。</span></div>
+      </div></div>
       {p.paths.length > 0 && <div className="sect"><div className="sect-t">路径</div><div className="sect-b">{p.paths.map(x => <div key={x.path} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{x.name}</div><div className="small muted">已过 {x.done} / {x.total} 关{x.finishedAt ? ' · 走完于 ' + fmtDay(x.finishedAt) : ''}</div></div></div>)}</div></div>}
       {p.certificates.length > 0 && <div className="sect"><div className="sect-t">证书</div><div className="sect-b">{p.certificates.map(c => <div key={c.no} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{c.label}</div><div className="small muted">{fmtDay(c.at)} · 编号 {c.no}{c.byName ? ' · ' + c.byName + ' 签发' : ''}</div></div></div>)}</div></div>}
       {(p.titles.length > 0 || p.badges.length > 0) && <div className="sect"><div className="sect-t">荣誉</div><div className="sect-b">{p.titles.map((t, i) => <div key={'t' + i} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{t.label}</div><div className="small muted">{t.byName} 授 · {fmtDay(t.at)} · {t.reason}</div></div></div>)}{p.badges.map(b => <div key={b.key} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{b.name}</div><div className="small muted">{b.kind === 'growth' ? '成长勋章' : '贡献勋章'}{b.at ? ' · ' + fmtDay(b.at) : ''}</div></div></div>)}</div></div>}

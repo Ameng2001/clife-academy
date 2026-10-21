@@ -73,6 +73,10 @@
 
 `api/academy/admin.js`：`/api/admin/overview` 与 `/api/admin/notices` 只给管理员（非管理员 403 并记 `admin.denied`）；汇总只有数字，不带个人成绩。`/api/notices` 登录了就能读，只给没到期的。`/admin` 页里的停用、邀请码、审计流水复用上游 `/api/admin/users`、`/api/admin/user/disable`、`/api/admin/invites*`、`/api/admin/audit`，权限不变（管理员不能被停用）。公告发改撤记审计 `academy.notice.save` / `academy.notice.remove`。
 
+## 发展档案随人迁移
+
+`api/academy/transfer.js`：迁移包与迁入都只对本人（`/api/me/...`）；核验接口 `/api/portfolio/verify` 公开但只答有效与否、脱敏姓名、发包时间，不给档案内容。迁入时服务端只信两种核验：本实例发的按 `db.transfers` 的哈希与 HMAC 签名核，别的实例联网问它的 verify；都不成就标「未核验」，界面原样标出，不当真。迁入的档案不进进度、勋章、学时。发包、迁入、删除记审计 `portfolio.package` / `portfolio.import` / `portfolio.import.remove`。
+
 ## 园所间匿名中位数
 
 `api/academy/cohort.js`：`/api/org/cohort` 只给园长与管理员（管理员 `?org=`）；应答里只有本园的数与其他园的中位数，其他园不足 3 所时中位数为 null；任何一所别的园的名字和数都不出现。

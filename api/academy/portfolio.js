@@ -47,13 +47,9 @@ export function hoursOf(uid, { from, to, rule, db, stateOf }) {
   return { from, to, lines, minutes, hours: Number(hours.toFixed(2)), rule };
 }
 
-export function portfolioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs = null, ledger = null, communities = null }) {
-  db.hoursCerts = db.hoursCerts || [];
+/** 档案的组装，portfolioRoutes 与 transfer.js（迁移包）共用。 */
+export function createPortfolioOf({ db, readStateCached, pairs = null, ledger = null, communities = null }) {
   const now = () => Date.now();
-  const newId = () => crypto.randomBytes(9).toString('base64url');
-  const ruleNow = () => sanitizeRule({ ...DEFAULT_RULE, ...(db.hoursRule || {}) });
-  const nextNo = () => { const y = new Date().getFullYear(); const n = db.hoursCerts.filter(c => c.no.startsWith(`XS-${y}-`)).length + 1; return `XS-${y}-${String(n).padStart(5, '0')}`; };
-  const pubCert = c => ({ id: c.id, no: c.no, name: c.name, orgName: c.orgName, from: c.from, to: c.to, hours: c.hours, minutes: c.minutes, lines: c.lines, rule: c.rule, at: c.at });
 
   const portfolioOf = user => {
     const uid = user.id, S = readStateCached(uid) || {}, prog = S.progress || {};
@@ -80,8 +76,21 @@ export function portfolioRoutes({ json, readBody, db, saveDb, readSession, audit
     return { format: 'clife-academy-portfolio/1', exportedAt: now(), person: { name: user.name, orgName: user.academy?.org?.name || null, role: user.academy?.role || null, districtName: user.academy?.district?.name || null },
       summary: { levels: levels.length, minutes: levels.reduce((a, l) => a + l.minutes, 0), works: subs.filter(s => s.type === 'practice' && s.status === 'pass').length, seminars: subs.filter(s => s.type === 'seminar').length, cases: cases.filter(c => c.status === 'approved').length, certificates: certificates.length, badges: badges.length, titles: titles.length, creditsTotal: ledger ? ledger.total(uid) : 0, drillAnswers, answersAccepted },
       paths, levels, submissions: subs, cases, contests: entries, showcases: sharers, certificates, progress: { tool: e.tool, domains: e.domains, seven: e.seven, backbone: e.backbone }, badges, titles, credits, studios, community: community ? { name: community.name } : null, lectures, studyReplies, programs, camps, selfReviews,
+      history: (user.academy?.history || []).map(h => ({ orgName: h.orgName, role: h.role, from: h.from, to: h.to })),
+      imports: (db.imports || []).filter(i => i.uid === uid).map(i => ({ id: i.id, issuer: i.issuer, issuedAt: i.issuedAt, person: i.person, summary: i.summary, verified: i.verified, at: i.at })),
       excluded: ['幼儿数据（平台不采集）', 'AI 中间判断（答疑助手草稿、Coach 建议）', '他人的测验分与点评'] };
   };
+  return portfolioOf;
+}
+
+export function portfolioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs = null, ledger = null, communities = null }) {
+  db.hoursCerts = db.hoursCerts || [];
+  const now = () => Date.now();
+  const portfolioOf = createPortfolioOf({ db, readStateCached, pairs, ledger, communities });
+  const newId = () => crypto.randomBytes(9).toString('base64url');
+  const ruleNow = () => sanitizeRule({ ...DEFAULT_RULE, ...(db.hoursRule || {}) });
+  const nextNo = () => { const y = new Date().getFullYear(); const n = db.hoursCerts.filter(c => c.no.startsWith(`XS-${y}-`)).length + 1; return `XS-${y}-${String(n).padStart(5, '0')}`; };
+  const pubCert = c => ({ id: c.id, no: c.no, name: c.name, orgName: c.orgName, from: c.from, to: c.to, hours: c.hours, minutes: c.minutes, lines: c.lines, rule: c.rule, at: c.at });
 
   return {
   // 发展档案：?download=1 作为文件下载

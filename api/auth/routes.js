@@ -25,6 +25,18 @@ export const academyOf = u => (u?.academy && typeof u.academy === 'object'
   ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, ...(u.academy.district ? { district: u.academy.district } : {}), source: u.academy.source || null, ...(u.academy.reviewer === true ? { reviewer: true } : {}), ...(u.academy.curator === true ? { curator: true } : {}) }
   : null);
 
+/** 换园留痕（发展档案随人走）：园所变了，把旧园、旧岗位、起止时间推进 academy.history，档案里「经历」一节读它。 */
+function noteOrgChange(user, next) {
+  const a = user.academy || {};
+  const keyOf = o => (o ? (o.id ? 'id:' + o.id : o.name ? 'name:' + o.name : null) : null);
+  if (keyOf(a.org) && keyOf(a.org) !== keyOf(next.org)) {
+    const history = Array.isArray(a.history) ? a.history : [];
+    history.push({ orgName: a.org.name || null, orgId: a.org.id || null, role: a.role || null, from: a.linkedAt || user.created || null, to: new Date().toISOString() });
+    return { history: history.slice(-20), linkedAt: new Date().toISOString() };
+  }
+  return {};
+}
+
 export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }) {
   const newId = () => crypto.randomBytes(12).toString('base64url');
   const answer = (req, res, user, ev) => {
@@ -86,7 +98,7 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
     } else {
       // 平台是岗位与园所的权威来源：每次登录以平台为准，园长在大课堂里改的岗位不保留。
       user.name = p.name;
-      user.academy = { ...(user.academy || {}), role: p.role, org: p.org, district: p.district || null, source: 'platform' };
+      user.academy = { ...(user.academy || {}), ...noteOrgChange(user, p), role: p.role, org: p.org, district: p.district || null, source: 'platform' };
     }
     saveDb();
     answer(req, res, user, 'auth.platform.ok');
@@ -111,7 +123,7 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
       claimFirstAdmin(req, user);
       db.users.push(user);
     } else {
-      user.academy = { ...(user.academy || {}), role, org, district, source: 'dev' };
+      user.academy = { ...(user.academy || {}), ...noteOrgChange(user, { org }), role, org, district, source: 'dev' };
     }
     saveDb();
     answer(req, res, user, 'auth.dev.ok');

@@ -35,7 +35,7 @@ import { communityRoutes, createCommunities } from './academy/communities.js';
 import { certificateRoutes } from './academy/certificates.js';
 import { questionRoutes } from './academy/questions.js';
 import { studioRoutes } from './academy/studios.js';
-import { portfolioRoutes } from './academy/portfolio.js';
+import { portfolioRoutes, createPortfolioOf } from './academy/portfolio.js';
 import { reviewStatRoutes } from './academy/reviewstats.js';
 import { selfReviewRoutes } from './academy/selfreview.js';
 import { campRoutes } from './academy/camps.js';
@@ -47,6 +47,7 @@ import { coachRoutes as academyCoachRoutes } from './academy/coach.js';
 import { adminRoutes as academyAdminRoutes } from './academy/admin.js';
 import { tokenRoutes as academyTokenRoutes, tokenUserOf, looksLikeToken } from './academy/tokens.js';
 import { cohortRoutes as academyCohortRoutes } from './academy/cohort.js';
+import { transferRoutes as academyTransferRoutes } from './academy/transfer.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2661,6 +2662,7 @@ const routes = {
   ...academyAdminRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, auditRows: () => auditKeep(auditLines()) }),
   ...academyTokenRoutes({ json, readBody, db, saveDb, readSession, audit }),
   ...academyCohortRoutes({ json, db, readSession, isAdmin, readStateCached }),
+  ...academyTransferRoutes({ json, readBody, db, saveDb, readSession, audit, ORIGIN, RP_NAME, SECRET, portfolioOf: createPortfolioOf({ db, readStateCached, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }) }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

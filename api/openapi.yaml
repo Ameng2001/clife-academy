@@ -4293,6 +4293,46 @@ paths:
       description: 园长、管理员（`?org=`）。其他园 ≥ 3 所才给中位数；只给中位数，不给任何一所别的园的数，不排名、不点名。
       responses:
         '200': { description: '`{ org, at, city:{ others, enough, rate, active30, roles, domains }, district|null }`' }
+  /api/me/portfolio/package:
+    get:
+      tags: [academy]
+      operationId: academyPortfolioPackage
+      summary: 迁移包：带本实例签名的整份发展档案，文件下载；发包记 db.transfers
+      responses:
+        '200': { description: '`{ format, id, issuer:{url,name}, issuedAt, person, portfolio, sig }`' }
+  /api/portfolio/verify:
+    get:
+      tags: [academy]
+      operationId: academyPortfolioVerify
+      summary: 核验一枚迁移包是不是本实例发的（公开，姓名脱敏）
+      description: '`?id=&hash=`，hash 是包除 sig 外按键排序后 JSON 的 sha256。'
+      responses:
+        '200': { description: '`{ valid, id, name, issuedAt, issuer }`' }
+        '404': { description: '`{ valid:false }`' }
+  /api/me/portfolio/import:
+    post:
+      tags: [academy]
+      operationId: academyPortfolioImport
+      summary: 把别的实例（或本实例旧账号）发的迁移包挂到当前账号名下
+      description: '`{ package }`。能联网核验就核（verified true/false），核不上记 null。只是档案：不并进进度、不发勋章、不算本实例学时证明。'
+      responses:
+        '200': { description: '`{ item }`' }
+        '409': { description: '已迁入过' }
+  /api/me/portfolio/imports:
+    get:
+      tags: [academy]
+      operationId: academyPortfolioImports
+      summary: 我迁入的档案与换园经历
+      responses:
+        '200': { description: '`{ imports, history }`' }
+  /api/me/portfolio/imports/remove:
+    post:
+      tags: [academy]
+      operationId: academyPortfolioImportRemove
+      summary: 删掉一份迁入的档案
+      description: '`{ id }`'
+      responses:
+        '200': { description: '`{ ok }`' }
 components:
   securitySchemes:
     cookieAuth:
