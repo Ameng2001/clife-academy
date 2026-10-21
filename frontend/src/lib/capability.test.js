@@ -11,7 +11,7 @@ describe('能力地图', () => {
     const teacherObs = levelsOf('teacher').find(l => l.scene === '观察记录')
     expect(domainOf(levelOf(teacherObs.id))).toBe('obs')
     const all = PATH_KEYS.flatMap(p => levelsOf(p)).map(l => domainOf(levelOf(l.id)))
-    expect(all.filter(Boolean).length + all.filter(x => !x).length).toBe(82)
+    expect(all.filter(Boolean).length + all.filter(x => !x).length).toBe(94)
     expect(new Set(all.filter(Boolean)).size).toBeGreaterThanOrEqual(4)
   })
   it('empty progress is seven empty domains, all seven now have content', () => {

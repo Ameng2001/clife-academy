@@ -57,8 +57,8 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
   const acc = (db.questions || []).flatMap(q => q.answers.filter(a => a.by === uid && a.accepted).map(a => a.acceptedAt || a.at)).sort((a, b) => a - b);
   for (const n of THRESHOLDS.answers) out.push({ key: `answers-${n}`, kind: 'contribution', name: `答疑被采纳 ${n} 次`, desc: `回答同事的提问，被提问人采纳 ${n} 次`, on: acc.length >= n, at: acc[n - 1] || null, progress: Math.min(acc.length, n), of: n });
   if (pairs) {
-    const mentees = pairs.menteesOf(uid), done = mentees.map(m => { const u = (db.users || []).find(x => x.id === m); const path = u && ROLE_PATH[u.academy?.role]; return path ? finishedFor(m, path, stateOf) : null; }).filter(Boolean);
-    out.push({ key: 'mentor', kind: 'contribution', name: '带出一个人', desc: '带教的新教师完成了本岗位路径', on: done.length > 0, at: done.length ? Math.min(...done) : null, progress: done.length ? 1 : 0, of: 1 });
+    const mentees = pairs.menteesOf(uid), done = mentees.map(m => { const u = (db.users || []).find(x => x.id === m); const path = u && ROLE_PATH[u.academy?.role]; const ats = [path ? finishedFor(m, path, stateOf) : null, PATH_LEN.onboard ? finishedFor(m, 'onboard', stateOf) : null].filter(Boolean); return ats.length ? Math.min(...ats) : null; }).filter(Boolean);
+    out.push({ key: 'mentor', kind: 'contribution', name: '带出一个人', desc: '带教的新教师完成了入职路径或本岗位路径', on: done.length > 0, at: done.length ? Math.min(...done) : null, progress: done.length ? 1 : 0, of: 1 });
   }
   return out;
 }

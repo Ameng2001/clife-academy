@@ -86,8 +86,17 @@ export default function Home() {
     {PATH_KEYS.length > ROLE_PATH_KEYS.length && <div className="sect">
       <div className="sect-t">领域路径</div>
       <div className="sect-b">
-        {PATH_KEYS.filter(p => !ROLE_PATH_KEYS.includes(p)).map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
+        {PATH_KEYS.filter(p => !ROLE_PATH_KEYS.includes(p) && PATH_META[p]?.kind !== 'stage').map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
           <div style={{ flex: 1 }}><div className="lrow-t">{s.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{PATH_META[p]?.domain}</span></div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${s.total ? s.done / s.total * 100 : 0}%` }} /></div></div>
+          <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
+        </div> })}
+      </div>
+    </div>}
+    {PATH_KEYS.some(p => PATH_META[p]?.kind === 'stage') && <div className="sect">
+      <div className="sect-t">阶段路径</div>
+      <div className="sect-b">
+        {PATH_KEYS.filter(p => PATH_META[p]?.kind === 'stage').map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
+          <div style={{ flex: 1 }}><div className="lrow-t">{s.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{PATH_META[p]?.stage}阶段</span></div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${s.total ? s.done / s.total * 100 : 0}%` }} /></div></div>
           <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
         </div> })}
       </div>
