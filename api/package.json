@@ -1,6 +1,6 @@
 {
-  "name": "gym-api",
-  "version": "1.4.1",
+  "name": "clife-academy-api",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "main": "server.js",

@@ -1,0 +1,47 @@
+import { describe, it, expect } from 'vitest'
+import {
+  PATH_KEYS, levelId, parseLevelId, levelsOf, levelOf, cursorOf, statusOf, pathSummary, levelCount, pathOfRole
+} from './lessons.js'
+
+describe('lessons: the course library', () => {
+  it('has the five role paths with the counts the plan states', () => {
+    expect(PATH_KEYS).toEqual(['nurse', 'teacher', 'care', 'it', 'director'])
+    expect(PATH_KEYS.reduce((n, p) => n + levelCount(p), 0)).toBe(34)
+    expect(levelCount('director')).toBe(6)
+  })
+  it('round-trips level ids and refuses ones outside the path', () => {
+    expect(parseLevelId(levelId('nurse', 5))).toEqual({ path: 'nurse', i: 5 })
+    expect(parseLevelId('nurse-99')).toBeNull()
+    expect(parseLevelId('gym-1')).toBeNull()
+    expect(parseLevelId('')).toBeNull()
+  })
+  it('every level has a title, a scene, a skill block, and quiz options with exactly one right answer', () => {
+    for (const p of PATH_KEYS) for (const l of levelsOf(p)) {
+      const lv = levelOf(l.id)
+      expect(lv.title, l.id).toBeTruthy()
+      expect(lv.skill, `${l.id} scene ${lv.scene}`).toBeTruthy()
+      for (const q of lv.qs) expect(q.o.filter(o => o[1] === 1).length, `${l.id} ${q.t}`).toBe(1)
+    }
+  })
+  it('swaps the featured observation level for its OBS content', () => {
+    const lv = levelOf('nurse-5')
+    expect(lv.title).toBe('全日观察与疾病登记')
+    expect(lv.steps.length).toBeGreaterThan(0)
+    expect(lv.qs.length).toBeGreaterThan(0)
+    expect(lv.needsEvent).toBe(true)
+  })
+  it('derives the cursor and statuses from the progress table alone', () => {
+    const prog = { 'nurse-0': { passedAt: 1 }, 'nurse-1': { passedAt: 1 }, 'nurse-3': { passedAt: 1 } }
+    expect(cursorOf(prog, 'nurse')).toBe(2)       // nurse-3 ahead of the gap does not move the cursor
+    expect(statusOf(prog, 'nurse-1')).toBe('done')
+    expect(statusOf(prog, 'nurse-2')).toBe('current')
+    expect(statusOf(prog, 'nurse-4')).toBe('locked')
+    expect(statusOf(prog, 'nurse-3')).toBe('done')
+    expect(pathSummary(prog, 'nurse')).toMatchObject({ total: 12, done: 2, finished: false })
+    expect(pathSummary({}, 'it').finished).toBe(false)
+  })
+  it('maps a role to its path', () => {
+    expect(pathOfRole('director')).toBe('director')
+    expect(pathOfRole('nobody')).toBeNull()
+  })
+})

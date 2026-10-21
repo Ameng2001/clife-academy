@@ -1,0 +1,186 @@
+# 从 openGym 到「教师 Coach」：大课堂 MVP 迁移方案
+
+2026-10-21。蓝本：https://github.com/DuarteSantos8/openGym（v1.4.1，AGPL-3.0，Node 22 ＋ React 19，调研时 14,163 stars）。本文件是代码迁移的工作底稿，对应方案正文「实施排期」一节。
+
+## 一、为什么它就是教师 Coach
+
+openGym 表面是健身追踪器，骨子里是一个完整的 coach 闭环：
+
+```
+计划（每周练什么）→ 引导执行（今天这一节，一步步做）→ 记录（每组做了没做、做到什么程度）
+→ 从记录读回（进步了还是卡住了，哪块肌肉该休息）→ 修订计划（AI 提议，人确认）→ 提醒（该练了、漏练了）
+```
+
+大课堂做的是同一个闭环，只是对象从「肌肉」换成「岗位能力」：
+
+| openGym | 教师 Coach | 我们已有的对应物 |
+|---|---|---|
+| 每周训练计划 week / routines | 本岗位学习路径与每周关卡安排 | PATHS 五条路径 34 关 |
+| 一次 workout（引导式，带休息计时） | 一关（讲、看、做、测四段） | vLevel 四段页 |
+| 一组 set：done / reps / weight | 一个实操事件：平台回传「做了」，测验正确率 | tryPass、event 字段 |
+| 进阶策略 progression（linear / double / triple） | 推进节奏：每周几关、测验门槛、补练规则 | 现在固定线性解锁 |
+| 疲劳与恢复模型 recovery（半衰期、READY / RECOVERING / FATIGUED） | 技能保持曲线：多久没用会生疏，到期提醒复练 | 无，新增 |
+| 1RM 估算 onerm | 岗位能力估值（按已通关卡与测验正确率） | 学分 credits |
+| 肌群地图 muscles / BodyMap | 能力地图：账号、健康、膳食、教研、设备、工作台 | SKMAP 六大块 |
+| 体重记录 bodyweight | 本园应用体检 12 项探针 | PROBES |
+| 起步计划 starter（PPL / 5×5） | 岗位起步路径（保健医、园长先上） | ROLES → path |
+| 轮转 rotation（A→B→C 不绑定星期） | 路径按顺序推进，哪天学都行 | prog 指针 |
+| PR 检测、徽章 | 岗位徽章、认证资格 | vMe 徽章 |
+| 漏练提醒 nudge（三种语气、三天后静默） | 漏学提醒，同样三天后静默 | 无，新增 |
+| AI Coach：create / review / debrief | 教师 Coach：开学排路径 / 周回顾调路径 / 单关复盘 | 无，新增 |
+| cohort：实例内匿名中位数对比 | 园所间匿名中位数（≥3 园才显示，不排名） | 无，新增 |
+| MCP 只读桥 | 园长、教育局用自己的 LLM 客户端问进度 | 无，后置 |
+| Admin 面板 | 园长视角、区级视角 | vDirectorHome |
+
+它做了而我们不要的：动作库 5,600 条媒体、杠铃片换算、哑铃组合、心率、Apple Health 导入、进步照片、体测围度、Capacitor 原生壳。
+
+## 二、模块级移植清单
+
+### api/（Node 原生 http，无框架）
+
+| 文件 | 处置 | 说明 |
+|---|---|---|
+| `server.js`（2,709 行） | **保留骨架，删业务** | `routes['METHOD /path']` 分发、session cookie（HMAC，`DATA_DIR/secret`）、`GET/PUT /api/data` 全量状态同步、`/api/data/rev`、admin 路由、audit.log。删 passkey 注册与登录、media 上传 |
+| `durable.js` `rate-limit.js` `queue.js` `verify-error.js` | 原样保留 | 原子写、限流、队列 |
+| `sync-stamps.js` | 原样保留 | 字段级合并。小程序与 PC 网页双端离线编辑后合并靠它 |
+| `passkeys-store.js` `password.js` | 删 | 换成下面两个适配器 |
+| **新增 `auth/wechat.js`** | 新写 | 小程序 `wx.login` code → `code2session` → openid → 用户。按 `device-link.js` 的一次性 code ＋ Bearer token 模式发 token |
+| **新增 `auth/platform.js`** | 新写 | 柳州数智幼教平台账号换登录态，取园所、岗位、权限 |
+| `device-link.js` | 保留改名 | PC 网页扫小程序码登录，正好是它的「手机配对电脑」反过来用 |
+| `nudge.js` `nudge-copy.js` `push-messages.js` | 保留，改规则与文案 | 窗口从 20:00 改为工作日 16:30 离园后；三天静默规则不变；文案三种语气改成「同事、园长、教研员」口吻；推送渠道 Web Push 换为小程序订阅消息 |
+| `coach/` 整目录 | **保留流水线，换业务** | 见第三节 |
+| `openapi.yaml` | 重写 | 对平台团队的接口契约 |
+
+### frontend/src/lib/（纯函数，每个带同目录测试）
+
+| 文件 | 处置 | 教师版含义 |
+|---|---|---|
+| `progression.js` | 重写策略体 | 策略：`linear`（通一关解一关）、`paced`（每周 N 关，到周末自动开放）、`gated`（测验 ≥80% 才解锁）、`off`。接口与它一致：纯函数读历史，不存计数器 |
+| `recovery.js` | 重写参数，保留模型 | 指数半衰期按技能块设定：晨午检类 14 天、月报类 45 天、年度体检类 180 天。三档：熟练 / 需复习 / 已生疏。生疏触发复练关 |
+| `onerm.js` | 重写 | 能力估值 = Σ(关卡权重 × 测验正确率 × 保持度)；首期只做展示，不排名 |
+| `finish-workout.js` | 重写为 `finish-level.js` | 一关结算：记 passedAt、学分、徽章、是否触发下一关或复练；日志只追加 |
+| `rotation.js` `queue.js` | 保留 | 路径顺序推进 |
+| `starter.js` | 用我们的 PATHS 替换 | 五条岗位路径就是 starter plans |
+| `exercises.js` 及 `exercises-data.js`、`exercise-muscle-*` | 删，换 `lessons.js` | 微课库：34 关 ＋ 场景微课 ＋ 本地专区，字段沿用 L()/Q() |
+| `muscles.js` `body-paths.js` | 改为 `skills.js` | SKMAP 六块能力地图 |
+| `bodyweight.js` `measurements.js` | 改为 `checkup.js` | 12 项探针，园级聚合数 |
+| `nudge.js` `coach*.js` `sync-*.js` `api.js` `i18n*.js` `format.js` | 保留 | 其中 coach 的 payload 分类改名见下 |
+| `plates.js` `dumbbells.js` `bar.js` `incline.js` `speed.js` `health-*.js` `import-*.js` `fit-export.js` `scan*.js` `qr.js` | 删 | 健身专用 |
+
+### frontend/src/views/
+
+| openGym 视图 | 大课堂视图 | 现有原型对应 |
+|---|---|---|
+| Home | 首页：今天这一关、本周进度、体检一眼看 | vHome |
+| Plan / RoutineEdit | 学习路径与关卡安排 | vPaths、pathPanel |
+| Workout | 关卡页（讲看做测） | vLevel、stage |
+| Stats / History | 我的：学分、徽章、学习记录 | vMe |
+| Library | 场景微课 ＋ 资料库 | vLessons、vLibrary |
+| Muscles | 能力地图 | SK / SKMAP |
+| Measurements / bodyweight 卡 | 本园体检 | vCheckup |
+| CoachChat / CoachIntake / CoachSetup | 教师 Coach 对话、入学问卷、园长配置 | 新增 |
+| Admin / AdminCoach | 园长视角、区级视角 | vDirectorHome |
+| StructuralBalance | 园所岗位均衡：五个岗位进度是否偏科 | 新增，园长视角 |
+| CheckIn、ProgressPhotos | 删 | |
+| Login | 微信登录 / 平台账号登录 | 新增 |
+
+另有 vLive（园长大讲堂）、vDrill（情景练兵）、vLocal（本地专区）三个视图 openGym 没有对应物，照现有原型直接做。
+
+### mcp/（后置）
+
+保留整个只读桥，工具换成 `list_paths`、`get_progress`、`get_checkup`、`skill_balance`、`list_levels`。园长或教育局在自己的 LLM 客户端里直接问「全区保健医路径通关率」。
+
+## 三、教师 Coach：三个任务、一张闭合变更清单
+
+openGym 的 Coach 流水线（`api/coach/core/pipeline.js`）照用：**payload 白名单 → 系统提示词字节不变（缓存前缀）→ 结构化输出 JSON schema → 校验器是唯一边界 → 一次修复机会 → 客户端应用、可一键回滚**。只换四样东西。
+
+### 1. payload 分类（`categories.js`）
+
+```
+plan      路径、关卡安排、推进策略
+learning  实操事件、测验结果、通关记录、每关用时（窗口 12 周或 60 关）
+checkup   本园 12 项探针的园级数值（无任何幼儿数据）
+profile   入学问卷：岗位、入职年限、每周可用时长、带班数、顾虑
+cohort    可选：其他园的匿名中位数（≥3 园）
+prefs     语言、提醒时间
+```
+
+永久排除：姓名与用户 id、登录凭证、幼儿任何字段、班级名册、其他教师的任何数据。消费前的「数据同意页」从这同一个数组渲染，页面与 payload 不会漂移。
+
+### 2. 变更类型闭合清单（`validate.js` 的 CHANGE_TYPES）
+
+| type | target | after |
+|---|---|---|
+| `add-level` | pathId | `{ levelId, position? }`：插入复练或补充关 |
+| `skip-level` | pathId, levelId | `null`：已在平台实操验证过的关直接记通过 |
+| `reorder` | pathId | 全部 levelId 的新顺序 |
+| `pace` | pathId | 每周关数 1–5 |
+| `policy` | pathId | `linear` / `paced` / `gated` |
+| `schedule` | weekday | pathId 或 `null`：建议固定学习日 |
+| `review-due` | levelId | ISO 日期：到期复练 |
+| `add-drill` | — | 情景练兵 id：建议参加 |
+| `watch-probe` | probeId | `{ reason }`：提醒园长关注某项探针 |
+
+每条变更必须带 `why` 且引用 payload 里的证据（哪关测验两次没过、哪项实操两周没做、哪个探针连续下滑），没有证据的拒收。Coach 只能动路径与安排，不能改学习记录、不能改体检数、不能写任何对幼儿的评价。
+
+### 3. 三个任务的提示词（`prompts/*.md`）
+
+- **create（开学排路径）**：从 profile 排一条首学期路径；每周时长约束；已有平台操作记录的关标记跳过。
+- **review（周回顾）**：读 learning 窗口与 checkup，判断路径是否要调。一关不是趋势；少于三关记录只允许 `review-due` 和 `watch-probe`。没有证据就 `nochange`。
+- **debrief（单关复盘）**：只读不改。一关的分数（1–10）、做得好的、要注意的、下一关怎么做。不评价人，只评价这一关的学习。
+
+### 4. 模型提供方
+
+它已支持 Anthropic / OpenAI / Gemini / **任意 OpenAI 兼容端点**。柳州要求数据不出境，走兼容端点接通义千问（DashScope 兼容模式）或 DeepSeek，或者本地 vLLM。系统提示词字节不变 ＋ 启动预热缓存这套做法，对本地小模型特别有用。
+
+### 5. 合规对照（见记忆「2026 幼儿园数字产品政策底线」）
+
+- Coach 的输入输出都不含幼儿数据，payload 在代码层面按名复制，不可能夹带。
+- cohort 只给中位数，不排名、不点名；三园以下不显示。
+- debrief 评的是「这一关的学习」，不是教师考核；提示词与校验器两层禁止评价人。
+- 体检探针是园级运行指标，不是对幼儿或教师的评价。
+
+## 四、数据模型（S 的教师版）
+
+```js
+S = {
+  // 身份与偏好（prefs）
+  lang:'zh', remind:{ day:[1,3], time:'16:30', nudge:true, tone:'colleague' },
+  // 计划（plan）
+  role:'nurse', paths:{ nurse:{ policy:'paced', pace:2, order:[...levelIds] } }, week:{},
+  // 学习记录（learning，只追加）
+  sessions:[ { d:'2026-11-03', levelId:'nurse-6', start, end, segs:{jiang,kan,zuo,ce}, quiz:{right:3,of:3}, events:['obs.saved'] } ],
+  progress:{ 'nurse-6':{ passedAt, credits:1, reviewDue:'2026-11-17' } },
+  // 园所（checkup，园级）
+  checkup:[ { d:'2026-11-01', probes:{ attendance:0.98, morning:1, ... } } ],
+  // Coach
+  coachProfile:{ years:2, hoursPerWeek:1, classes:1, concerns:'...' }, coach:{ history:[...], declined:[...] },
+  // 其他
+  tickets:[], drills:{}, live:{}
+}
+```
+
+与 openGym 一样：客户端单一状态，localStorage 持久化，签到后 debounce 推 `PUT /api/data`，`sync-stamps` 字段级合并。小程序侧 `wx.setStorageSync` 等价。
+
+## 五、MVP 排期（11-20 上线）
+
+| 周 | 日期 | 做什么 | 验收 |
+|---|---|---|---|
+| 1 | 10-22 → 10-31 | fork，剥离健身业务；`api` 保留骨架；微信登录与平台登录两个适配器；`GET/PUT /api/data` 跑通；把 `academy.body.html` 数据块变成 `lessons.js`；小程序 10 页改走接口 | 保健医、园长两条路径在小程序登录后能看、能通关、换手机进度不丢 |
+| 2 | 11-01 → 11-12 | `POST /api/events` 平台实操回传（闭合事件清单）；`finish-level.js` 结算；体检探针定时拉数；nudge 改小程序订阅消息；PC 网页扫码登录 | 第 6 关「全日观察已保存」由平台事件自动判通；漏学提醒按规则发 |
+| 3 | 11-13 → 11-19 | Coach：payload 改分类、变更清单、三份提示词、校验器；接通义千问兼容端点；入学问卷；园长配置卡；内测 | 周回顾对三周内测数据给出 ≤6 条有证据的建议，无证据时 `nochange` |
+| 上线 | 11-20 | 保健医、园长路径；Coach 对园长先开 | |
+| 后置 | 12 月起 | recovery 复练模型、cohort 园所对比、MCP、认证报名、其余三条路径 | |
+
+人力：后端 1 人、前端（网页 ＋ 小程序）1 人、内容 1 人，与方案正文三人团队一致。
+
+## 六、工程约定
+
+- 独立代码仓库（建议名 `clife-academy`），不放本文档仓库；本目录只留方案、原型与样片。
+- 沿用它的硬约束：前端只有 React ＋ Router ＋ Zustand；api 依赖个位数；任何「决定下一关是什么」或「读回一次学习记录」的逻辑都是 lib 纯函数，旁边带测试。
+- 保留它的 parity 测试模式：`modeOf` 之类前后端各一份时用表驱动测试钉住。
+- Node 22、Docker 两容器（api ＋ nginx），`./data` 即备份。
+
+## 七、许可证（记一行，不作障碍）
+
+AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的源码。基于它改出来的教师 Coach 属于衍生作品，无论改动多少。两条路：接受开源（教育局项目通常不排斥，还可作为「开放协作」卖点）；或只搬架构与概念、代码重写（第二至四节的设计不依赖任何一行它的代码）。11 月上线前定一次即可。
