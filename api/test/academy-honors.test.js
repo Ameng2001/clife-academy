@@ -73,13 +73,13 @@ test('honors: case approval and featured answer credit the author once; titles n
 
 test('honors: badges are computed from progress and records; the ledger records a (kind, ref) once', () => {
   const db = { users: [{ id: 'm', academy: { role: 'nurse' } }], cases: [], drillAnswers: [], submissions: [] };
-  const prog = {}; for (let i = 0; i < 12; i++) prog[`nurse-${i}`] = { passedAt: 1000 + i };
+  const prog = {}; for (let i = 0; i < 16; i++) prog[`nurse-${i}`] = { passedAt: 1000 + i };
   const stateOf = uid => (uid === 'm' ? { progress: prog } : { progress: {} });
   const pairs = { menteesOf: uid => (uid === 'u' ? ['m'] : []) };
   const b = badgesOf('u', { db, stateOf, pairs });
   assert.equal(b.find(x => x.key === 'path-nurse').on, false);
   assert.equal(b.find(x => x.key === 'mentor').on, true);
-  assert.equal(badgesOf('m', { db, stateOf, pairs }).find(x => x.key === 'path-nurse').at, 1011);
+  assert.equal(badgesOf('m', { db, stateOf, pairs }).find(x => x.key === 'path-nurse').at, 1015);
   const L = createLedger(db);
   assert.equal(L.grant('u', 'case', 'c1', 2, 'x'), true); assert.equal(L.grant('u', 'case', 'c1', 2, 'x'), false); assert.equal(L.total('u'), 2);
 });

@@ -46,7 +46,7 @@ test('summarize: per-role counts, completion, the level most people are stuck on
   const s = summarize(members, id => states[id], now);
   const nurse = s.roles.find(r => r.role === 'nurse');
   assert.equal(nurse.members, 3); assert.equal(nurse.started, 3); assert.equal(nurse.finished, 0);
-  assert.equal(nurse.avgDone, 1.3); assert.equal(nurse.total, 12); assert.equal(nurse.rate, 11);
+  assert.equal(nurse.avgDone, 1.3); assert.equal(nurse.total, 16); assert.equal(nurse.rate, 8);
   assert.equal(nurse.passes7d, 2);
   // 两人卡在 nurse-1、一人卡在 nurse-2：补训建议指向 nurse-1
   assert.equal(nurse.next.levelId, 'nurse-1'); assert.equal(nurse.next.count, 2); assert.ok(nurse.next.title);

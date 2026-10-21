@@ -3,10 +3,10 @@
 // 关卡 id 是 `<pathKey>-<index>`（nurse-5）。index 从 0 起，是该路径数组里的位置；
 // 路径顺序就是推进顺序（上游 rotation 的「下一个没做的就是今天的」）。
 import D0 from './lessons-data.js'
-import { EXTRA_PATHS, EXTRA_PATHN, EXTRA_META, EXTRA_SKMAP, EXTRA_ROLES } from './lessons-extra.js'
+import { EXTRA_PATHS, EXTRA_PATHN, EXTRA_META, EXTRA_SKMAP, EXTRA_ROLES, EXTRA_APPEND } from './lessons-extra.js'
 
-// 工具线（生成物）＋ 领域路径（手写）合成一份
-const D = { ...D0, ROLES: { ...D0.ROLES, ...EXTRA_ROLES }, PATHS: { ...D0.PATHS, ...EXTRA_PATHS }, PATHN: { ...D0.PATHN, ...EXTRA_PATHN }, SKMAP: { ...D0.SKMAP, ...EXTRA_SKMAP } }
+// 工具线（生成物）＋ 领域路径（手写）合成一份；EXTRA_APPEND 把一日生活 4 关接到保健医、保育员路径末尾
+const D = { ...D0, ROLES: { ...D0.ROLES, ...EXTRA_ROLES }, PATHS: Object.fromEntries(Object.entries({ ...D0.PATHS, ...EXTRA_PATHS }).map(([k, v]) => [k, EXTRA_APPEND[k] ? [...v, ...EXTRA_APPEND[k]] : v])), PATHN: { ...D0.PATHN, ...EXTRA_PATHN }, SKMAP: { ...D0.SKMAP, ...EXTRA_SKMAP } }
 export const PATH_KEYS = Object.freeze(Object.keys(D.PATHS))
 // 岗位路径：工具线五条 ＋ 管理阶段路径（kind:'admin'，如区县管理员）；领域路径不在其中
 export const ROLE_PATH_KEYS = Object.freeze([...Object.keys(D0.PATHS), ...Object.keys(EXTRA_PATHS).filter(p => EXTRA_META[p]?.kind === 'admin')])
