@@ -700,6 +700,75 @@ paths:
       responses:
         '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
         '401': { description: 未登录 }
+  /api/cases:
+    get:
+      tags: [academy]
+      operationId: academyCases
+      summary: 案例库（已入库，登录可见）
+      description: '`?q=&domain=&age=&use=direct|adapt|idea`。实名、全平台共享。'
+      responses:
+        '200': { description: '`{ cases, uses, ages, total }`' }
+        '401': { description: 未登录 }
+    post:
+      tags: [academy]
+      operationId: academyCaseSave
+      summary: 自荐一个案例、从已通过的实践关作品推荐，或改自己的
+      description: '`{ id?, title, domain, age?, use, text(≥50 字), files?, submissionId? }`。教师自荐进「待园长同意」；园长交的或园长推荐本园教师已通过的作品进「待审核」。退回的改后再交。'
+      responses:
+        '200': { description: '`{ case }`' }
+        '400': { description: 缺标题 / 领域，正文不足 50 字，作品未通过点评 }
+        '403': { description: 不是自己的，或已入库；推荐别人的作品但不是本园园长 }
+  /api/cases/mine:
+    get:
+      tags: [academy]
+      operationId: academyCasesMine
+      summary: 本人交的案例（含待同意、待审核、退回）
+      responses:
+        '200': { description: '`{ cases }`' }
+  /api/cases/queue:
+    get:
+      tags: [academy]
+      operationId: academyCasesQueue
+      summary: 待办：园长看本园待同意的，审核人看待审核的
+      responses:
+        '200': { description: '`{ consent, pending, director, curator }`' }
+        '403': { description: 既不是园长也不是审核人 }
+  /api/cases/decide:
+    post:
+      tags: [academy]
+      operationId: academyCaseDecide
+      summary: 园长同意 / 审核人入库或退回
+      description: '`{ id, action: consent | approve | reject, note? }`。退回必须写原因。审核人＝管理员或 `academy.curator`。'
+      responses:
+        '200': { description: '`{ case }`' }
+        '400': { description: 状态不对、退回没写原因 }
+        '403': { description: 没有权限 }
+  /api/cases/delete:
+    post:
+      tags: [academy]
+      operationId: academyCaseDelete
+      summary: 删自己未入库的案例；审核人可删任何
+      responses:
+        '200': { description: '`{ ok }`' }
+        '403': { description: 没有权限 }
+  /api/cases/curator:
+    put:
+      tags: [academy]
+      operationId: academyCaseCurator
+      summary: 管理员指定 / 取消案例库审核人
+      description: '`{ uid, curator }`。审核人由本地运营方指定。'
+      responses:
+        '200': { description: '`{ id, curator }`' }
+        '403': { description: 不是管理员 }
+  /api/cases/file:
+    get:
+      tags: [academy]
+      operationId: academyCaseFile
+      summary: 案例附图
+      description: '`?id=&hash=`。能看到这个案例的人可读。'
+      responses:
+        '200': { description: 文件 }
+        '404': { description: 没有 }
   /api/resources:
     get:
       tags: [academy]

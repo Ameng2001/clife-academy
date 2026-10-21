@@ -19,7 +19,7 @@ export default function Library() {
   const rows = useMemo(() => searchLessons(q, { path, scene }), [q, path, scene])
 
   return <div className="narrow">
-    <div className="hdr"><div><h1>微课库</h1><div className="sub">全部 {searchLessons('').length} 关按岗位与场景查，不受解锁限制</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/resources')}><Icon name="folder" /> 资源库</button></div></div>
+    <div className="hdr"><div><h1>微课库</h1><div className="sub">全部 {searchLessons('').length} 关按岗位与场景查，不受解锁限制</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/resources')}><Icon name="folder" /> 资源库</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 案例库</button></div></div>
     <div style={{ position: 'relative', marginBottom: 12 }}>
       <TextField placeholder="搜标题、操作步骤、平台菜单，如「批量管理」" value={q} onChange={e => setQ(e.target.value)} style={{ paddingInlineStart: 36 }} />
       <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--label-3)', display: 'flex' }}><Icon name="magnifier" /></span>

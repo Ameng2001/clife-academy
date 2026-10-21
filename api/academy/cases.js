@@ -1,0 +1,183 @@
+/* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
+ *
+ * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'own', submissionId?, levelId? },
+ *             by, byName, org, orgName, status, note, at, consent:{by,byName,at}|null, curated:{by,byName,at}|null }
+ *   status  'consent'  待本园园长同意（教师自荐）
+ *           'pending'  待审核（园长同意或园长直接推荐）
+ *           'approved' 已入库，所有登录用户可见
+ *           'rejected' 退回（note 里写原因，本人可改后再交）
+ *   use     'direct' 可直接用 | 'adapt' 需改编 | 'idea' 只看思路
+ *   age     '小班' | '中班' | '大班' | '混龄' | null
+ * 审核人：管理员，或 academy.curator === true（由管理员标，本地运营方指定）。
+ * 实名、全平台可见；素材规则同实践关（不出现幼儿姓名与正脸）。 */
+import crypto from 'node:crypto';
+import { orgKeyOf } from './org.js';
+import { LEVELS, LEVEL_TYPES } from './events-data.js';
+
+const DOMAINS = ['env', 'life', 'play', 'plan', 'obs', 'comm', 'reflect'];
+const AGES = ['小班', '中班', '大班', '混龄'];
+export const USES = Object.freeze({ direct: '可直接用', adapt: '需改编', idea: '只看思路' });
+const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
+const HASH = /^[0-9a-f]{64}$/;
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+
+export const isCurator = (u, isAdmin) => !!u && (u.academy?.curator === true || isAdmin(u));
+const isDirector = (u, isAdmin) => !!u && (u.academy?.role === 'director' || isAdmin(u));
+
+export function caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }) {
+  db.cases = db.cases || [];
+  const pub = (c, user) => ({
+    id: c.id, title: c.title, domain: c.domain, age: c.age, use: c.use, text: c.text, files: c.files.map(f => ({ hash: f.hash, name: f.name, type: f.type })),
+    source: c.source, byName: c.byName, orgName: c.orgName, status: c.status, note: c.note || null, at: c.at,
+    consent: c.consent ? { byName: c.consent.byName, at: c.consent.at } : null, curated: c.curated ? { byName: c.curated.byName, at: c.curated.at } : null,
+    mine: !!user && c.by === user.id,
+    canEdit: !!user && c.by === user.id && c.status !== 'approved'
+  });
+  const canSee = (user, c) => c.status === 'approved' || (!!user && (c.by === user.id || isCurator(user, isAdmin) || (isDirector(user, isAdmin) && c.org && c.org === orgKeyOf(user))));
+  const filesOf = (body, owner) => (Array.isArray(body.files) ? body.files : []).slice(0, 6)
+    .map(f => ({ hash: str(f?.hash, 64), name: str(f?.name, 120), type: str(f?.type, 60), owner })).filter(f => HASH.test(f.hash) && MEDIA.file(owner, f.hash));
+
+  return {
+  // 已入库的案例：?q=&domain=&age=&use=  要登录（实名共享，不对外）
+  'GET /api/cases': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const sp = new URL(req.url, 'http://x').searchParams;
+    const q = norm(sp.get('q')), domain = sp.get('domain') || '', age = sp.get('age') || '', use = sp.get('use') || '';
+    let list = db.cases.filter(c => c.status === 'approved');
+    if (domain) list = list.filter(c => c.domain === domain);
+    if (age) list = list.filter(c => c.age === age);
+    if (use) list = list.filter(c => c.use === use);
+    if (q) list = list.filter(c => norm([c.title, c.text, c.byName, c.orgName, LEVELS[c.source?.levelId] || ''].join(' ')).includes(q));
+    list.sort((a, b) => (b.curated?.at || b.at) - (a.curated?.at || a.at));
+    json(res, 200, { cases: list.map(c => pub(c, user)), uses: USES, ages: AGES, total: db.cases.filter(c => c.status === 'approved').length });
+  },
+  // 本人的（含待同意、待审核、退回的）
+  'GET /api/cases/mine': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    json(res, 200, { cases: db.cases.filter(c => c.by === user.id).sort((a, b) => b.at - a.at).map(c => pub(c, user)) });
+  },
+  // 待办：园长看本园待同意的；审核人看待审核的
+  'GET /api/cases/queue': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const director = isDirector(user, isAdmin), curator = isCurator(user, isAdmin);
+    if (!director && !curator) return json(res, 403, { error: 'directors and curators only', code: 'queue' });
+    const org = orgKeyOf(user);
+    const consent = director && org ? db.cases.filter(c => c.status === 'consent' && c.org === org && c.by !== user.id) : [];
+    const pending = curator ? db.cases.filter(c => c.status === 'pending') : [];
+    json(res, 200, { consent: consent.sort((a, b) => a.at - b.at).map(c => pub(c, user)), pending: pending.sort((a, b) => a.at - b.at).map(c => pub(c, user)), director, curator });
+  },
+  // 交一个案例（自荐）或改自己的：{ id?, title, domain, age?, use, text, files?, submissionId? }
+  // 园长交自己的也要过审核；园长从本园已通过的实践关作品推荐（submissionId 不是自己的）时，作者是提交的教师，园长同意视为已给。
+  'POST /api/cases': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const id = str(body.id, 40);
+    let c = id ? db.cases.find(x => x.id === id) : null;
+    if (id && !c) return json(res, 404, { error: 'no such case' });
+    if (c && (c.by !== user.id || c.status === 'approved')) return json(res, 403, { error: 'not yours or already in the library', code: 'edit' });
+    const title = str(body.title, 120), text = str(body.text, 6000);
+    if (!title) return json(res, 400, { error: 'title required', code: 'title' });
+    if (!text || text.length < 50) return json(res, 400, { error: 'write at least 50 characters', code: 'text' });
+    if (!DOMAINS.includes(body.domain)) return json(res, 400, { error: 'domain required', code: 'domain' });
+    const use = USES[body.use] ? body.use : (c ? c.use : 'idea');
+    const age = AGES.includes(body.age) ? body.age : (c && body.age === undefined ? c.age : null);
+    // 从实践关作品推荐
+    let author = user, source = { kind: 'own' }, files = [];
+    const subId = str(body.submissionId, 40);
+    if (subId) {
+      const s = (db.submissions || []).find(x => x.id === subId);
+      if (!s) return json(res, 404, { error: 'no such submission' });
+      if (s.status !== 'pass') return json(res, 400, { error: 'only reviewed and passed works', code: 'not-passed' });
+      if (s.uid !== user.id) {
+        // 园长推荐本园教师的作品
+        if (!isDirector(user, isAdmin) || !s.org || s.org !== orgKeyOf(user)) return json(res, 403, { error: 'only your own work, or your kindergarten\'s as the director', code: 'org' });
+        author = db.users.find(u => u.id === s.uid) || user;
+      }
+      source = { kind: 'submission', submissionId: s.id, levelId: s.levelId };
+      files = s.files.map(f => ({ ...f, owner: s.uid }));
+    }
+    // 改的时候没带 files：附图不动
+    files = (c && !subId && !Array.isArray(body.files)) ? c.files : files.concat(filesOf(body, user.id)).slice(0, 6);
+    const now = Date.now();
+    if (c) {
+      Object.assign(c, { title, domain: body.domain, age, use, text, files, updatedAt: now });
+      if (c.status === 'rejected') { c.status = isDirector(user, isAdmin) ? 'pending' : 'consent'; c.note = null; }
+    } else {
+      const org = orgKeyOf(author), orgName = author.academy?.org?.name || null;
+      const directorSelf = isDirector(user, isAdmin);
+      c = { id: crypto.randomBytes(9).toString('base64url'), title, domain: body.domain, age, use, text, files, source,
+        by: author.id, byName: author.name, org, orgName, status: directorSelf ? 'pending' : 'consent', note: null, at: now,
+        consent: directorSelf ? { by: user.id, byName: user.name, at: now } : null, curated: null };
+      db.cases.push(c);
+    }
+    saveDb();
+    audit(req, id ? 'case.edit' : 'case.new', { user, msg: c.id });
+    json(res, 200, { case: pub(c, user) });
+  },
+  // 园长同意 / 审核人入库或退回：{ id, action: 'consent' | 'approve' | 'reject', note? }
+  'POST /api/cases/decide': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const c = db.cases.find(x => x.id === str(body.id, 40));
+    if (!c) return json(res, 404, { error: 'no such case' });
+    const note = str(body.note, 1000), now = Date.now();
+    if (body.action === 'consent') {
+      if (!isDirector(user, isAdmin) || !c.org || c.org !== orgKeyOf(user)) return json(res, 403, { error: 'the kindergarten\'s director only', code: 'org' });
+      if (c.status !== 'consent') return json(res, 400, { error: 'not waiting for consent', code: 'state' });
+      c.status = 'pending'; c.consent = { by: user.id, byName: user.name, at: now };
+    } else if (body.action === 'approve' || body.action === 'reject') {
+      if (!isCurator(user, isAdmin) && !(body.action === 'reject' && c.status === 'consent' && isDirector(user, isAdmin) && c.org === orgKeyOf(user))) return json(res, 403, { error: 'curators only', code: 'curator' });
+      if (c.status === 'approved') return json(res, 400, { error: 'already in the library', code: 'state' });
+      if (body.action === 'reject' && !note) return json(res, 400, { error: 'say why', code: 'note' });
+      if (body.action === 'approve') { if (c.status === 'consent') c.consent = c.consent || { by: user.id, byName: user.name, at: now }; c.status = 'approved'; c.curated = { by: user.id, byName: user.name, at: now }; c.note = note || null; }
+      else { c.status = 'rejected'; c.note = note; }
+    } else return json(res, 400, { error: 'action must be consent, approve or reject', code: 'action' });
+    saveDb();
+    audit(req, 'case.' + body.action, { user, msg: c.id });
+    json(res, 200, { case: pub(c, user) });
+  },
+  'POST /api/cases/delete': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const c = db.cases.find(x => x.id === str(body.id, 40));
+    if (!c) return json(res, 404, { error: 'no such case' });
+    if (!(c.by === user.id && c.status !== 'approved') && !isCurator(user, isAdmin)) return json(res, 403, { error: 'not allowed', code: 'edit' });
+    db.cases = db.cases.filter(x => x.id !== c.id); saveDb();
+    audit(req, 'case.delete', { user, msg: c.id });
+    json(res, 200, { ok: true });
+  },
+  // 管理员标审核人：{ uid, curator: true|false }
+  'PUT /api/cases/curator': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    if (!isAdmin(user)) return json(res, 403, { error: 'admins only', code: 'admin' });
+    const body = await readBody(req);
+    const t = db.users.find(u => u.id === String(body.uid || ''));
+    if (!t) return json(res, 404, { error: 'no such user' });
+    t.academy = { ...(t.academy || { role: 'teacher', org: null, source: null }), curator: body.curator === true };
+    if (!t.academy.curator) delete t.academy.curator;
+    saveDb();
+    audit(req, 'case.curator', { user, msg: `${t.id} ${body.curator === true ? 'on' : 'off'}` });
+    json(res, 200, { id: t.id, curator: body.curator === true });
+  },
+  'GET /api/cases/file': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const q = new URL(req.url, 'http://x').searchParams;
+    const c = db.cases.find(x => x.id === q.get('id'));
+    const hash = q.get('hash') || '';
+    if (!c || !canSee(user, c)) return json(res, 404, { error: 'not found' });
+    const f = c.files.find(x => x.hash === hash);
+    if (!f) return json(res, 404, { error: 'not found' });
+    const m = MEDIA.file(f.owner, hash);
+    if (!m) return json(res, 404, { error: 'media-missing' });
+    await sendMediaFile(res, m, hash);
+  }
+  };
+}

@@ -9,10 +9,17 @@ import Icon from '../../components/Icon.jsx'
 import { Button, TextArea } from '../../components/ui.jsx'
 import { fmtDay } from './common.jsx'
 import { StatusTag } from './SubmissionBox.jsx'
+import { domainOf } from '../../lib/capability.js'
+import { levelOf } from '../../lib/lessons.js'
 
 export const canReview = u => !!u && (u.academy?.role === 'director' || u.academy?.reviewer === true || !!u.admin)
 
-function Card({ s, onReviewed }) {
+function Card({ s, onReviewed, director }) {
+  const nav = useNavigate()
+  const recommend = () => {
+    const lv = levelOf(s.levelId)
+    nav('/cases?from=' + encodeURIComponent(JSON.stringify({ submissionId: s.id, title: s.title, domain: domainOf(lv) || 'obs', text: s.text || '' })))
+  }
   const [scores, setScores] = useState(() => s.rubric.map(() => 0)), [comment, setComment] = useState(''), [busy, setBusy] = useState(false), [open, setOpen] = useState(false)
   const send = async verdict => {
     if (verdict === 'revise' && !comment.trim()) return useUI.getState().toast('需修改要写清楚改哪里')
@@ -27,6 +34,7 @@ function Card({ s, onReviewed }) {
     {s.text && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{s.text}</div>}
     {s.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{s.files.map(f => <a key={f.hash} href={`api/submissions/file?id=${s.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/submissions/file?id=${s.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {done && s.review && <div className="small" style={{ marginTop: 10, color: 'var(--label-2)' }}>{s.review.byName} · {fmtDay(s.review.at)}{s.review.comment ? ' · ' + s.review.comment : ''}</div>}
+    {done && s.status === 'pass' && director && <div style={{ marginTop: 8 }}><Button size="sm" icon="sparkles" onClick={recommend}>推荐入案例库</Button></div>}
     {!done && (open ? <div style={{ marginTop: 12, paddingTop: 12, borderTop: 'var(--hair) solid var(--sep)' }}>
       {s.rubric.map((r, i) => <div key={i} className="ac-row" style={{ marginTop: 6 }}>
         <span style={{ fontSize: 14, flex: 1 }}>{r}</span>
@@ -55,8 +63,8 @@ export default function Review() {
     {head}
     <div className="sect"><div className="sect-t">待点评 · {data.pending.length}</div>
       {!data.pending.length && <div className="card small muted">现在没有待点评的提交。</div>}
-      {data.pending.map(s => <Card key={s.id} s={s} onReviewed={load} />)}
+      {data.pending.map(s => <Card key={s.id} s={s} onReviewed={load} director={user.academy?.role === 'director' || !!user.admin} />)}
     </div>
-    {data.done.length > 0 && <div className="sect"><div className="sect-t">最近点评过</div>{data.done.map(s => <Card key={s.id} s={s} onReviewed={load} />)}</div>}
+    {data.done.length > 0 && <div className="sect"><div className="sect-t">最近点评过</div>{data.done.map(s => <Card key={s.id} s={s} onReviewed={load} director={user.academy?.role === 'director' || !!user.admin} />)}</div>}
   </div>
 }
