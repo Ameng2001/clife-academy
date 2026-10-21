@@ -869,6 +869,38 @@ paths:
       responses:
         '200': { description: 体检卡 }
         '403': { description: 不是园长 }
+  /api/district/summary:
+    get:
+      tags: [academy]
+      operationId: academyDistrictSummary
+      summary: 区县看板（区县管理员、管理员）
+      description: '`{ district, orgs:[{ key, name }], orgCount, members_total, finished, certified, passes7d, medians, domains:[{ key, name, median }], rateMedian, checkup:{ pushed, warn }, activity:{ contests, drillAnswers, cases, lectureBookings } }`。园所只给名单；各领域覆盖率与完成率只给中位数，且不足 3 园时为 null；不排名、无单园数、无测验分。管理员可 `?district=id:xxx|name:xxx`。'
+      responses:
+        '200': { description: 区县汇总 }
+        '403': { description: 不是区县管理员 }
+  /api/district/orgs:
+    get:
+      tags: [academy]
+      operationId: academyDistrictOrgs
+      summary: 本区园所名单（成员带区县的 ＋ 手工挂接的）
+      responses:
+        '200': { description: '`{ district, orgs:[{ key, name, via, members }] }`' }
+    put:
+      tags: [academy]
+      operationId: academyDistrictAttachOrgs
+      summary: 把园挂进本区
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { orgs: { type: array, items: { type: object, properties: { id: { type: string }, name: { type: string } } } } } } } } }
+      responses:
+        '200': { description: '`{ added, rejected:[{ i, code }], orgs }`' }
+  /api/district/orgs/remove:
+    post:
+      tags: [academy]
+      operationId: academyDistrictDetachOrg
+      summary: 解除手工挂接（成员自带区县的园不能解）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [org], properties: { org: { type: string } } } } } }
+      responses:
+        '200': { description: ok }
+        '404': { description: 不是手工挂的 }
   /api/me/checkup:
     get:
       tags: [academy]

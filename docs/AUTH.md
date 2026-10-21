@@ -32,6 +32,10 @@
 
 `GET /api/org/summary`（`api/academy/org.js`）：园长或管理员看本园各岗位汇总与补训建议，按 `academy.org` 圈人，不跨园；人员列表无测验分。网页 `/org`，小程序首页园长块。
 
+## 区县看板
+
+`GET /api/district/summary`（`api/academy/district.js`）：区县管理员（`academy.role === 'district'`，没有园所、有 `academy.district`）或管理员（`?district=`）看本区汇总：园所名单（无数字）、园所数、在学人数、认证人数、各领域覆盖率中位数（不足 3 园不给）、共同体活动、体检汇总的两个计数。一所园属于区县，当它的成员账号带同一个 `academy.district`（平台给），或区县管理员 `PUT /api/district/orgs` 手工挂接。不给任何一所园的数，不排名。网页 `/district`，小程序 `pages/district`。
+
 ## 证据提交与点评
 
 实践关、研讨关的「做」不走平台事件，走提交（`api/academy/submissions.js`）：`POST /api/submissions` 交文字与照片引用（照片先 `PUT /api/media/{hash}` 存在本人名下），`GET /api/submissions?level=` 看本人的提交与点评，研讨关交过以后带同园他人的作答。

@@ -22,6 +22,7 @@ export default function Login({ relogin = false } = {}) {
   const [name, setName] = useState('')
   const [role, setRole] = useState('nurse')
   const [org, setOrg] = useState('柳北区示例幼儿园')
+  const [district, setDistrict] = useState('')
 
   const signedIn = async u => {
     setUser(u, { adopt: true })
@@ -84,10 +85,13 @@ export default function Login({ relogin = false } = {}) {
       <TextField placeholder="姓名" value={name} onChange={e => setName(e.target.value)} />
       <div className="row" style={{ gap: 8, marginTop: 8 }}>
         <select className="ac-sel" value={role} onChange={e => setRole(e.target.value)} style={{ flex: 1 }}>{Object.keys(ROLES).map(k => <option key={k} value={k}>{ROLES[k].label}</option>)}</select>
-        <TextField placeholder="园所" value={org} onChange={e => setOrg(e.target.value)} style={{ flex: 2 }} />
+        {role === 'district'
+          ? <TextField placeholder="区县（如 柳北区）" value={district} onChange={e => setDistrict(e.target.value)} style={{ flex: 2 }} />
+          : <TextField placeholder="园所" value={org} onChange={e => setOrg(e.target.value)} style={{ flex: 2 }} />}
       </div>
+      {role !== 'district' && <TextField placeholder="所属区县（可空；区县看板按它圈园）" value={district} onChange={e => setDistrict(e.target.value)} style={{ marginTop: 8 }} />}
       <div style={{ height: 10 }} />
-      <Button variant="tinted" disabled={busy || !name.trim()} onClick={() => login('/api/login/dev', { name: name.trim(), role, org }, '登录失败')}>进入</Button>
+      <Button variant="tinted" disabled={busy || !name.trim()} onClick={() => login('/api/login/dev', { name: name.trim(), role, org, district }, '登录失败')}>进入</Button>
     </div>}
 
     {!auth.platform && !auth.wechat && !auth.dev && <div className="card small muted" style={{ textAlign: 'start' }}>这台服务器还没有配置登录方式。设置 PLATFORM_AUTH_URL 或 WX_APPID / WX_SECRET，本机开发可设 DEV_LOGIN=1。</div>}

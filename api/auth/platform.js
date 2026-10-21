@@ -49,13 +49,14 @@ export function platformLoginUrl() {
   return PLATFORM_LOGIN_URL;
 }
 
-export const ROLES = ['nurse', 'teacher', 'care', 'it', 'director'];
+export const ROLES = ['nurse', 'teacher', 'care', 'it', 'director', 'district'];
 const ROLE_ALIASES = {
   nurse: 'nurse', 保健医: 'nurse', 保健员: 'nurse', 保健老师: 'nurse', 卫生保健: 'nurse', 园医: 'nurse', 医务: 'nurse',
   teacher: 'teacher', 班级教师: 'teacher', 教师: 'teacher', 老师: 'teacher', 主班: 'teacher', 配班: 'teacher', 班主任: 'teacher',
   care: 'care', 保育员: 'care', 保育: 'care', 保育老师: 'care',
   it: 'it', 信息接口人: 'it', 信息员: 'it', 信息管理员: 'it', 管理员: 'it',
-  director: 'director', 园长: 'director', 副园长: 'director', 业务园长: 'director', 保教主任: 'director', 教学园长: 'director'
+  director: 'director', 园长: 'director', 副园长: 'director', 业务园长: 'director', 保教主任: 'director', 教学园长: 'director',
+  district: 'district', 区县管理员: 'district', 区县: 'district', 教育局: 'district', 区县教育局: 'district', 教研员: 'district', 学前科: 'district', 教师发展中心: 'district'
 };
 export function roleOf(v) {
   // 平台可能给数组（多岗位）：取第一个认识的
@@ -72,7 +73,7 @@ const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : typeof v =
 const pathOf = (obj, p) => String(p || '').split('.').filter(Boolean).reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), obj);
 
 const FIELDS = (() => {
-  const d = { uid: 'uid', name: 'name', orgId: 'org.id', orgName: 'org.name', role: 'role' };
+  const d = { uid: 'uid', name: 'name', orgId: 'org.id', orgName: 'org.name', role: 'role', districtId: 'district.id', districtName: 'district.name' };
   try { return { ...d, ...(process.env.PLATFORM_FIELDS ? JSON.parse(process.env.PLATFORM_FIELDS) : {}) }; } catch { return d; }
 })();
 const OK = (() => {
@@ -80,13 +81,15 @@ const OK = (() => {
   return m ? { path: m[1].trim(), value: m[2].trim() } : null;
 })();
 
-/** 平台的答复 → { uid, name, org, role }。字段位置由 PLATFORM_FIELDS 定。 */
+/** 平台的答复 → { uid, name, org, role, district }。字段位置由 PLATFORM_FIELDS 定。区县字段可缺。 */
 export function profileOf(data) {
   if (OK && String(pathOf(data, OK.path)) !== OK.value) throw new PlatformError('platform refused', 'rejected');
   const uid = str(pathOf(data, FIELDS.uid), 64);
   if (!uid) throw new PlatformError('no uid in answer', 'upstream');
   const orgId = str(pathOf(data, FIELDS.orgId), 64) || null, orgName = str(pathOf(data, FIELDS.orgName), 80) || null;
-  return { uid, name: str(pathOf(data, FIELDS.name), 40) || '平台用户', org: orgId || orgName ? { id: orgId, name: orgName } : null, role: roleOf(pathOf(data, FIELDS.role)) };
+  const dId = str(pathOf(data, FIELDS.districtId), 64) || null, dName = str(pathOf(data, FIELDS.districtName), 80) || null;
+  return { uid, name: str(pathOf(data, FIELDS.name), 40) || '平台用户', org: orgId || orgName ? { id: orgId, name: orgName } : null, role: roleOf(pathOf(data, FIELDS.role)),
+    district: dId || dName ? { id: dId, name: dName } : null };
 }
 
 async function call(fetchImpl, url, init, timeoutMs) {

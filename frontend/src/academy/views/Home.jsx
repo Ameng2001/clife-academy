@@ -20,7 +20,7 @@ export default function Home() {
   const credits = Object.values(S.credits || {}).reduce((a, b) => a + b, 0)
   // 登录了就显示平台给的园所名，没登录（演示）用样例园名
   const user = useStore(s => s.user)
-  const orgName = user?.academy?.org?.name || ORG
+  const orgName = user?.academy?.org?.name || user?.academy?.district?.name || ORG
   const d = new Date()
   const [pair, setPair] = useState(null)
   const [lecture, setLecture] = useState(null)
@@ -59,7 +59,9 @@ export default function Home() {
 
     <div className="tiles">
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
-      {user?.academy?.role === 'director' || user?.admin
+      {user?.academy?.role === 'district'
+        ? <div className="tile tappable" onClick={() => nav('/district')}><div className="l"><Icon name="gauge" />区县看板</div><div className="v">{user.academy.district?.name || '本区'}</div><div className="small muted">园所数、覆盖率中位数、认证人数</div></div>
+        : user?.academy?.role === 'director' || user?.admin
         ? <div className="tile tappable" onClick={() => nav('/org')}><div className="l"><Icon name="gauge" />园长看板</div><div className="v">本园</div><div className="small muted">各岗位完成情况与补训建议</div></div>
         : <div className="tile"><div className="l"><Icon name="gauge" />本园体检</div><div className="v">{chk?.sum ? chk.sum.warn : '—'}<span className="small muted"> 项需关注</span></div><div className="small muted">{chk?.recommendations?.length ? `推荐你学「${chk.recommendations[0].title}」` : chk?.sum ? '本周园长看板出卡' : '登录后显示'}</div></div>}
     </div>
@@ -67,7 +69,7 @@ export default function Home() {
     <div className="sect">
       <div className="sect-t">各岗位进度</div>
       <div className="sect-b">
-        {ROLE_PATH_KEYS.map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
+        {ROLE_PATH_KEYS.filter(p => PATH_META[p]?.kind !== 'admin' || p === path).map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
           <div style={{ flex: 1 }}><div className="lrow-t">{s.name}</div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${s.total ? s.done / s.total * 100 : 0}%` }} /></div></div>
           <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
         </div> })}

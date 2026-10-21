@@ -5,16 +5,19 @@
  * 探针体检卡要接平台数据，不在这里。
  *
  * 园所归属：user.academy.org 的 id，没有 id 用 name（开发桩与微信登录的账号只有 name）。 */
-import { PATH_LEN, ROLE_PATH, PATH_NAMES, LEVELS } from './events-data.js';
+import { PATH_LEN, ROLE_PATH, PATH_NAMES, LEVELS, PATH_KIND } from './events-data.js';
+
+// 园内岗位：ROLE_PATH 里走 role 路径的；区县管理员（admin 路径）不属于园所，不进园长看板的分组
+export const ORG_ROLES = Object.freeze(Object.keys(ROLE_PATH).filter(r => PATH_KIND[ROLE_PATH[r]] === 'role'));
 
 const WEEK = 7 * 86400000;
 export const orgKeyOf = u => { const o = u?.academy?.org; return o ? (o.id ? 'id:' + o.id : o.name ? 'name:' + o.name : null) : null; };
-const roleOf = u => (ROLE_PATH[u?.academy?.role] ? u.academy.role : 'teacher');
+const roleOf = u => (ORG_ROLES.includes(u?.academy?.role) ? u.academy.role : 'teacher');
 
 /** 纯函数：成员与各自的状态文档 → 汇总。导出便于测试。 */
 export function summarize(members, stateOf, now = Date.now()) {
   const roles = {};
-  for (const r of Object.keys(ROLE_PATH)) roles[r] = { role: r, name: PATH_NAMES[ROLE_PATH[r]] || r, path: ROLE_PATH[r], total: PATH_LEN[ROLE_PATH[r]] || 0, members: 0, finished: 0, started: 0, doneSum: 0, passes7d: 0, stuck: {} };
+  for (const r of ORG_ROLES) roles[r] = { role: r, name: PATH_NAMES[ROLE_PATH[r]] || r, path: ROLE_PATH[r], total: PATH_LEN[ROLE_PATH[r]] || 0, members: 0, finished: 0, started: 0, doneSum: 0, passes7d: 0, stuck: {} };
   const people = [];
   let passes7d = 0;
   for (const u of members) {

@@ -3,7 +3,8 @@
  * 三条路都落到同一件事：找到或建立 db.users 里的一个用户，发一张 session（cookie 给网页，token 给
  * 小程序，两者同一个 makeSession），把岗位与园所记在 user.academy 上。密码与 passkey 路由不动。
  *
- * user.academy = { role, org:{id,name}|null, source:'wechat'|'platform'|'dev', linkedAt }
+ * user.academy = { role, org:{id,name}|null, district:{id,name}|null, source:'wechat'|'platform'|'dev', linkedAt }
+ * district 是区县归属：区县管理员（role 'district'）必有，园所账号可有（平台给了就记，区县看板按它圈园）。
  * 身份键：user.wx.openid（微信）、user.platform.uid（平台）。同一个人两条路登录会是两个用户——
  * 合并留给平台方做 unionid/手机号对账，首期不做。 */
 import crypto from 'node:crypto';
@@ -21,7 +22,7 @@ export const authConfig = () => ({
 });
 
 export const academyOf = u => (u?.academy && typeof u.academy === 'object'
-  ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, source: u.academy.source || null, ...(u.academy.reviewer === true ? { reviewer: true } : {}), ...(u.academy.curator === true ? { curator: true } : {}) }
+  ? { role: ROLES.includes(u.academy.role) ? u.academy.role : 'teacher', org: u.academy.org || null, ...(u.academy.district ? { district: u.academy.district } : {}), source: u.academy.source || null, ...(u.academy.reviewer === true ? { reviewer: true } : {}), ...(u.academy.curator === true ? { curator: true } : {}) }
   : null);
 
 export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin, readSession }) {
@@ -78,14 +79,14 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
     const now = new Date().toISOString();
     if (!user) {
       user = { id: newId(), name: p.name, created: now, platform: { uid: p.uid },
-        academy: { role: p.role, org: p.org, source: 'platform', linkedAt: now } };
+        academy: { role: p.role, org: p.org, district: p.district || null, source: 'platform', linkedAt: now } };
       claimFirstAdmin(req, user);
       db.users.push(user);
       audit(req, 'auth.register.ok', { user, msg: 'platform' });
     } else {
       // 平台是岗位与园所的权威来源：每次登录以平台为准，园长在大课堂里改的岗位不保留。
       user.name = p.name;
-      user.academy = { ...(user.academy || {}), role: p.role, org: p.org, source: 'platform' };
+      user.academy = { ...(user.academy || {}), role: p.role, org: p.org, district: p.district || null, source: 'platform' };
     }
     saveDb();
     answer(req, res, user, 'auth.platform.ok');
@@ -99,15 +100,18 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
     const name = text(body.name).trim().slice(0, 40);
     if (!name) return json(res, 400, { error: 'name required', code: 'missing' });
     const role = roleOf(body.role);
-    const orgName = text(body.org).trim().slice(0, 80) || '演示幼儿园';
+    // 区县管理员没有园所，只有区县；园所账号可带区县（区县看板按它圈园）
+    const districtName = text(body.district).trim().slice(0, 80);
+    const district = districtName ? { id: null, name: districtName } : role === 'district' ? { id: null, name: '演示区' } : null;
+    const org = role === 'district' ? null : { id: null, name: text(body.org).trim().slice(0, 80) || '演示幼儿园' };
     let user = db.users.find(u => u.dev && u.name === name);
     const now = new Date().toISOString();
     if (!user) {
-      user = { id: newId(), name, created: now, dev: true, academy: { role, org: { id: null, name: orgName }, source: 'dev', linkedAt: now } };
+      user = { id: newId(), name, created: now, dev: true, academy: { role, org, district, source: 'dev', linkedAt: now } };
       claimFirstAdmin(req, user);
       db.users.push(user);
     } else {
-      user.academy = { ...(user.academy || {}), role, org: { id: null, name: orgName }, source: 'dev' };
+      user.academy = { ...(user.academy || {}), role, org, district, source: 'dev' };
     }
     saveDb();
     answer(req, res, user, 'auth.dev.ok');
