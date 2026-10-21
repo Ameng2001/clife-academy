@@ -1,7 +1,7 @@
 // 一关的结算：上游 finish-workout.js 的教师版。纯函数，返回新状态，不改入参。
 //
 // 规则（与大课堂原型 tryPass 一致，加了可配置门槛）：
-//   · 「做」：关卡要求平台事件的，必须收到该事件（zuoDone）；不要求的直接算做完
+//   · 「做」：工具关要求平台事件的，必须收到该事件；实践关要证据被点评通过；研讨关要交了作答（都是 zuoDone）；不要求的直接算做完
 //   · 「测」：正确率 ≥ passRate（默认 1.0，即全对；gated 策略可降到 0.8）
 //   · 只有 current 状态的关能通过；重复结算不加分
 // 日志只追加：sessions 记这一次学习发生了什么，progress 记结果。改规则不改历史。
@@ -16,7 +16,7 @@ export const CREDITS_PER_LEVEL = 1
 /** 这一关当前能不能通过，以及为什么不能。 */
 export function canPass(level, { zuoDone = false, right = 0, of = 0, passRate = DEFAULT_PASS_RATE } = {}) {
   if (!level) return { ok: false, why: 'no-level' }
-  if (level.needsEvent && !zuoDone) return { ok: false, why: 'zuo' }
+  if ((level.needsEvent || level.needsSubmission) && !zuoDone) return { ok: false, why: 'zuo' }
   const total = of || level.qs.length
   if (total > 0 && right / total < passRate) return { ok: false, why: 'quiz' }
   return { ok: true, why: null }

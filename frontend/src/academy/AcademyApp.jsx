@@ -19,6 +19,7 @@ import Paths from './views/Paths.jsx'
 import Level from './views/Level.jsx'
 import Me from './views/Me.jsx'
 import Director from './views/Director.jsx'
+import Review from './views/Review.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -76,6 +77,7 @@ function Shell() {
           <Route path="/level/:id" element={<Level />} />
           <Route path="/me" element={<Me />} />
           <Route path="/org" element={<Director />} />
+          <Route path="/review" element={<Review />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />

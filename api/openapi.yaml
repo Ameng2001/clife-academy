@@ -712,6 +712,55 @@ paths:
         '200': { description: '`{ org, at, roles: [{ role, name, path, total, members, finished, started, avgDone, rate, passes7d, next }], members: [{ id, name, role, roleName, done, total, lastAt }], passes7d, members_total }`' }
         '401': { description: 未登录 }
         '403': { description: 不是园长（director） }
+  /api/submissions:
+    post:
+      tags: [academy]
+      operationId: academySubmit
+      summary: 实践关交证据 / 研讨关作答
+      description: '`{ levelId, text, files: [{ hash, name, type }] }`。照片先 `PUT /api/media/{hash}` 存在本人名下再引用。实践关进入待点评；研讨关交了即算通过。工具关是 400（tool-level）。'
+      responses:
+        '200': { description: '`{ submission }`' }
+        '400': { description: 关卡不存在、工具关、空提交 }
+        '401': { description: 未登录 }
+    get:
+      tags: [academy]
+      operationId: academyMySubmissions
+      summary: 本人的提交
+      description: '`?level=` 只要那一关；研讨关交过以后带同园他人的作答 `others`，以及该关的点评量表 `rubric`。'
+      responses:
+        '200': { description: '`{ submissions, others, rubric, title }`' }
+        '401': { description: 未登录 }
+  /api/review/queue:
+    get:
+      tags: [academy]
+      operationId: academyReviewQueue
+      summary: 点评队列（园长、管理员、academy.reviewer）
+      description: 本园待点评的提交（按时间先后）与最近点评过的 20 条，不含本人的。
+      responses:
+        '200': { description: '`{ pending, done }`' }
+        '401': { description: 未登录 }
+        '403': { description: 没有点评权 }
+  /api/submissions/review:
+    post:
+      tags: [academy]
+      operationId: academyReview
+      summary: 点评一条提交
+      description: '`{ id, verdict: pass | revise, scores: [1–5 …], comment }`。需修改必须写意见。只能点评本园、非本人的提交。'
+      responses:
+        '200': { description: '`{ submission }`' }
+        '400': { description: verdict 不合法、需修改没写意见 }
+        '403': { description: 没有点评权或不在本园 }
+        '404': { description: 没有这条提交 }
+  /api/submissions/file:
+    get:
+      tags: [academy]
+      operationId: academySubmissionFile
+      summary: 证据文件
+      description: '`?id=&hash=`。提交者本人或本园点评人可读；文件本身存在提交者的 media 名下。'
+      responses:
+        '200': { description: 文件 }
+        '403': { description: 既不是本人也不是本园点评人 }
+        '404': { description: 没有这条提交或这个文件 }
   /api/me/academy:
     put:
       tags: [academy]

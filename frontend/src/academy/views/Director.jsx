@@ -66,6 +66,10 @@ export default function Director() {
       </div>)}
     </div></div>
 
+    <div className="sect"><div className="sect-t">点评</div>
+      <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">实践关待点评</div><div className="small muted">本园老师交的观察记录等证据，按量表给意见。</div></div><Icon name="chevronRight" /></div>
+    </div>
+
     <div className="sect"><div className="sect-t">本园应用体检</div>
       <div className="card small muted">{PROBES.length} 项探针接平台数据后每周出卡。这里只看园所对平台的使用情况，不出现任何幼儿数据，不排名，不作考核依据。</div>
     </div>

@@ -32,6 +32,11 @@
 
 `GET /api/org/summary`（`api/academy/org.js`）：园长或管理员看本园各岗位汇总与补训建议，按 `academy.org` 圈人，不跨园；人员列表无测验分。网页 `/org`，小程序首页园长块。
 
+## 证据提交与点评
+
+实践关、研讨关的「做」不走平台事件，走提交（`api/academy/submissions.js`）：`POST /api/submissions` 交文字与照片引用（照片先 `PUT /api/media/{hash}` 存在本人名下），`GET /api/submissions?level=` 看本人的提交与点评，研讨关交过以后带同园他人的作答。
+点评权是园长、管理员或 `academy.reviewer === true` 的账号（后者由管理员在 db 里标，首期没有界面）：`GET /api/review/queue` 本园待点评，`POST /api/submissions/review` 给 pass / revise 与 1–5 分量表，revise 必须写意见；只能点评本园、非本人的提交。证据文件经 `GET /api/submissions/file?id=&hash=`，提交者本人或本园点评人可读。网页 `/review`，小程序首期只交文字。
+
 ## 小程序侧
 
 小程序工程在文档仓库 `deals/06 柳州-徐明/本地运营/学前大课堂/app/miniprogram/`，接口层三个文件：

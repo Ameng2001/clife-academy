@@ -21,7 +21,7 @@ export default function Paths() {
       {levelsOf(path).map(l => { const lv = levelOf(l.id), st = statusOf(S.progress, l.id); return (
         <div key={l.id} className={'lrow ac-lv ' + st + (st === 'locked' ? '' : ' tap')} onClick={() => st !== 'locked' && nav('/level/' + l.id)}>
           <span className="n">{st === 'done' ? <Icon name="check" /> : l.i + 1}</span>
-          <div style={{ flex: 1, minWidth: 0 }}><div className="t">{lv.title}</div><div className="s">{lv.scene} · {lv.dur}{lv.needsEvent ? ' · 实操' : ''}</div></div>
+          <div style={{ flex: 1, minWidth: 0 }}><div className="t">{lv.title}</div><div className="s">{lv.scene} · {lv.dur}{lv.needsEvent ? ' · 实操' : lv.type === 'practice' ? ' · 实践' : lv.type === 'seminar' ? ' · 研讨' : ''}</div></div>
           {st === 'locked' ? <Icon name="lock" /> : <Icon name="chevronRight" />}
         </div>) })}
     </div></div>

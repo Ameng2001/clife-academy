@@ -1,12 +1,11 @@
 // 微课库：全部关卡按岗位 × 场景浏览，不受解锁限制；关键词搜标题、目标、步骤、平台菜单路径、场景、按钮名。
 // 教师记得的往往是「批量调整在哪个菜单」，所以菜单路径与步骤文本都在搜索范围里。纯函数。
-import D from './lessons-data.js'
-import { PATH_KEYS, levelOf, levelId, pathNameOf } from './lessons.js'
+import { PATH_KEYS, levelsOf, levelOf, levelId, pathNameOf } from './lessons.js'
 
 /** 全部关卡（含标题替换后的 levelOf 结果），按路径顺序。 */
 export function allLessons() {
   const out = []
-  for (const p of PATH_KEYS) for (let i = 0; i < D.PATHS[p].length; i++) out.push(levelOf(levelId(p, i)))
+  for (const p of PATH_KEYS) for (let i = 0; i < levelsOf(p).length; i++) out.push(levelOf(levelId(p, i)))
   return out
 }
 

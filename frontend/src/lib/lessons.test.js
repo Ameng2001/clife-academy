@@ -4,9 +4,13 @@ import {
 } from './lessons.js'
 
 describe('lessons: the course library', () => {
-  it('has the five role paths with the counts the plan states', () => {
-    expect(PATH_KEYS).toEqual(['nurse', 'teacher', 'care', 'it', 'director'])
-    expect(PATH_KEYS.reduce((n, p) => n + levelCount(p), 0)).toBe(34)
+  it('has the five role paths with the counts the plan states, plus the domain paths', () => {
+    expect(PATH_KEYS.slice(0, 5)).toEqual(['nurse', 'teacher', 'care', 'it', 'director'])
+    expect(PATH_KEYS.slice(0, 5).reduce((n, p) => n + levelCount(p), 0)).toBe(34)
+    expect(PATH_KEYS).toContain('obs')
+    expect(levelOf('obs-0').type).toBe('practice'); expect(levelOf('obs-0').needsSubmission).toBe(true); expect(levelOf('obs-0').needsEvent).toBe(false)
+    expect(levelOf('obs-1').type).toBe('seminar')
+    expect(levelOf('nurse-0').type).toBe('tool')
     expect(levelCount('director')).toBe(6)
   })
   it('round-trips level ids and refuses ones outside the path', () => {

@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
 import { Button } from '../../components/ui.jsx'
-import { ORG, PROBES, PATH_KEYS, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
+import { ORG, PROBES, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
+import { canReview } from './Review.jsx'
 import { drafts } from '../../lib/level-draft.js'
 import { useS, myPath, RoleSelect } from './common.jsx'
 import { useStore } from '../../store/useStore.js'
@@ -29,7 +30,7 @@ export default function Home() {
         <div className="big" style={{ marginTop: 4 }}>第 {today.i + 1} 关 · {today.title}</div>
         <div className="ac-note" style={{ marginTop: 6 }}>{today.goal}</div>
         <div className="ac-row" style={{ marginTop: 12 }}>
-          <span className="small muted">{today.scene} · {today.dur}{today.needsEvent ? ' · 含平台实操' : ''}</span>
+          <span className="small muted">{today.scene} · {today.dur}{today.needsEvent ? ' · 含平台实操' : today.type === 'practice' ? ' · 交证据' : today.type === 'seminar' ? ' · 情景研讨' : ''}</span>
           <Button variant="primary" icon="play" onClick={() => nav('/level/' + today.id)}>{drafts.has(today.id) ? '继续' : '开始'}</Button>
         </div>
       </> : <div className="big" style={{ marginTop: 4 }}>本路径已全部通过 🎉</div>}
@@ -47,11 +48,22 @@ export default function Home() {
     <div className="sect">
       <div className="sect-t">各岗位进度</div>
       <div className="sect-b">
-        {PATH_KEYS.map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
+        {ROLE_PATH_KEYS.map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
           <div style={{ flex: 1 }}><div className="lrow-t">{s.name}</div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${s.total ? s.done / s.total * 100 : 0}%` }} /></div></div>
           <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
         </div> })}
       </div>
     </div>
+
+    {PATH_KEYS.length > ROLE_PATH_KEYS.length && <div className="sect">
+      <div className="sect-t">领域路径</div>
+      <div className="sect-b">
+        {PATH_KEYS.filter(p => !ROLE_PATH_KEYS.includes(p)).map(p => { const s = pathSummary(S.progress, p); return <div key={p} className="lrow tap" onClick={() => nav('/paths/' + p)}>
+          <div style={{ flex: 1 }}><div className="lrow-t">{s.name}<span className="small muted" style={{ marginInlineStart: 8 }}>{PATH_META[p]?.domain}</span></div><div className="ac-bar" style={{ marginTop: 6 }}><i style={{ width: `${s.total ? s.done / s.total * 100 : 0}%` }} /></div></div>
+          <span className="small muted" style={{ marginInlineStart: 12 }}>{s.done}/{s.total}</span><Icon name="chevronRight" />
+        </div> })}
+      </div>
+    </div>}
+    {canReview(user) && user?.academy?.role !== 'director' && <div className="sect"><div className="sect-b"><div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">点评队列</div><div className="small muted">本园实践关待点评</div></div><Icon name="chevronRight" /></div></div></div>}
   </div>
 }

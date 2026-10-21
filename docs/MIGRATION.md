@@ -262,3 +262,10 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
 - **2026-10-22（夜 3）** 微课库与搜索（ROADMAP B 期）。`lib/library.js` 纯函数：全部 34 关按岗位 × 场景筛，关键词搜标题、目标、步骤、平台菜单路径、按钮名、场景，
   多词逗号分隔须同时命中，标题命中排前，`snippet()` 给命中处摘要；5 项测试（前端 128 全过）。`views/Library.jsx`（`/library`，底栏第三个标签），
   筛选与关键词进 URL 便于分享；未解锁的关能进关卡页看「讲」「看」，页顶提示通关仍按路径顺序。小程序 `utils/library.js` 同一规则，`pages/lessons` 加搜索框与命中摘要。
+- **2026-10-22（夜 4）** 关卡三种类型与证据提交（ROADMAP B 期）。课程包：`lib/lessons-extra.js` 手写领域路径（`obs` 观察与评价，首期两关：实践关「事实与推断」、研讨关「家长问孩子今天怎么样」，带 `type`、`evidence`、`prompt`、`rubric`、`refs`），
+  `lib/lessons.js` 把它与生成的 `lessons-data.js` 合并，`levelOf` 出 `type` / `needsEvent` / `needsSubmission`，`ROLE_PATH_KEYS` 与 `PATH_KEYS` 分开（首页「各岗位进度」只列岗位路径，领域路径另起一段）。
+  `finish-level.js` 的 `canPass`：要事件或要提交的关，「做」没完成不能结算。服务端 `api/academy/submissions.js`：`POST/GET /api/submissions`、`GET /api/review/queue`、`POST /api/submissions/review`、`GET /api/submissions/file`；
+  实践关交了进 pending，点评 pass 才算「做」完成，revise 必须写意见、可再交；研讨关交了即 pass，交过以后能看同园他人作答；点评权＝园长、管理员、`academy.reviewer`，只看本园、不评自己；
+  证据照片走上游 media 存储（`PUT /api/media/{hash}` 存在提交者名下），本园点评人经 `/api/submissions/file` 读。`build-academy-events.mjs` 改走 `lessons.js`，另生成 `LEVEL_TYPES`、`RUBRICS`。
+  前端：`store/useSubmissions.js`、`views/SubmissionBox.jsx`（关卡页「做」的实践 / 研讨分支：文字＋照片、状态卡、点评、同园作答）、`views/Review.jsx`（`/review` 点评队列，量表 1–5 分＋意见；园长看板与首页有入口）、`lib/upload.js`（sha256 ＋ PUT）。
+  测试：api 4 项新增（`academy-submissions.test.js`）、前端 128 全过。小程序：`utils/extra.js` 同源的领域路径由 `gen_mp_data.py` 合进 `data.js`（`ROLE_PATHS`、`PATH_META`），`utils/submissions.js`，关卡页「做」按类型分支（先交文字，照片在网页端），harness 25 项。

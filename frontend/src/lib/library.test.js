@@ -4,12 +4,12 @@ import { allLessons, allScenes, searchLessons, snippet } from './library.js'
 describe('微课库搜索', () => {
   it('lists every level across paths and the scenes in order', () => {
     const all = allLessons()
-    expect(all.length).toBe(34)
+    expect(all.length).toBe(36)
     expect(all[0].id).toBe('nurse-0')
     expect(allScenes()[0]).toBe('账号')
   })
   it('empty query returns everything, filters narrow it', () => {
-    expect(searchLessons('').length).toBe(34)
+    expect(searchLessons('').length).toBe(36)
     expect(searchLessons('', { path: 'care' }).length).toBe(4)
     expect(searchLessons('', { scene: '出勤与请假' }).every(r => r.lesson.scene === '出勤与请假')).toBe(true)
   })

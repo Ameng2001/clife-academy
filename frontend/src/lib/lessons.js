@@ -2,9 +2,14 @@
 //
 // 关卡 id 是 `<pathKey>-<index>`（nurse-5）。index 从 0 起，是该路径数组里的位置；
 // 路径顺序就是推进顺序（上游 rotation 的「下一个没做的就是今天的」）。
-import D from './lessons-data.js'
+import D0 from './lessons-data.js'
+import { EXTRA_PATHS, EXTRA_PATHN, EXTRA_META } from './lessons-extra.js'
 
+// 工具线（生成物）＋ 领域路径（手写）合成一份
+const D = { ...D0, PATHS: { ...D0.PATHS, ...EXTRA_PATHS }, PATHN: { ...D0.PATHN, ...EXTRA_PATHN } }
 export const PATH_KEYS = Object.freeze(Object.keys(D.PATHS))
+export const ROLE_PATH_KEYS = Object.freeze(Object.keys(D0.PATHS))
+export const PATH_META = EXTRA_META
 export const ROLES = D.ROLES
 export const PATH_NAMES = D.PATHN
 export const PROBES = D.PROBES
@@ -36,13 +41,18 @@ export function levelOf(id) {
     steps: featured ? D.OBS.steps : raw.steps,
     qs: featured ? D.OBS.qs : raw.qs,
     skill: D.SKMAP[raw.scene] || null,
+    // 关卡类型：tool 平台事件判通（工具线全是）；practice 交证据＋点评；seminar 情景题作答
+    type: raw.type === 'practice' || raw.type === 'seminar' ? raw.type : 'tool',
     // 「做」这一段要不要平台事件：空字符串的关没有实操（只讲看测）
-    needsEvent: !!(raw.event && String(raw.event).trim())
+    needsEvent: (raw.type === 'practice' || raw.type === 'seminar') ? false : !!(raw.event && String(raw.event).trim()),
+    // 要不要提交（实践关的证据、研讨关的作答）
+    needsSubmission: raw.type === 'practice' || raw.type === 'seminar'
   }
 }
 
 export const titleOf = id => levelOf(id)?.title ?? null
 export const pathNameOf = path => D.PATHN[path] ?? path
+export const isRolePath = path => ROLE_PATH_KEYS.includes(path)
 export const pathOfRole = role => D.ROLES[role]?.path ?? null
 export const levelCount = path => (D.PATHS[path] || []).length
 

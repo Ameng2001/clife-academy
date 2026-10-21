@@ -27,6 +27,9 @@ describe('finish-level: settling one level', () => {
     const withEvent = levelOf('nurse-0'), without = { ...withEvent, needsEvent: false }
     expect(canPass(withEvent, { zuoDone: false, right: 1, of: 1 })).toEqual({ ok: false, why: 'zuo' })
     expect(canPass(without, { zuoDone: false, right: 1, of: 1 }).ok).toBe(true)
+    // 实践关与研讨关：没提交（zuoDone）也不能过
+    expect(canPass(levelOf('obs-0'), { zuoDone: false, right: 1, of: 1 })).toEqual({ ok: false, why: 'zuo' })
+    expect(canPass(levelOf('obs-1'), { zuoDone: true, right: 1, of: 1 }).ok).toBe(true)
   })
   it('applies the pass rate: all right by default, 80 % when gated', () => {
     const lv = levelOf('nurse-0')

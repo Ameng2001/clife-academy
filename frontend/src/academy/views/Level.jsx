@@ -10,6 +10,8 @@ import { finishLevel, canPass } from '../../lib/finish-level.js'
 import { drafts, useDraft } from '../../lib/level-draft.js'
 import { levelDone, eventRefs } from '../../lib/events.js'
 import { useEvents } from '../../store/useEvents.js'
+import { useSubmissions, zuoDoneOf, latestOf } from '../../store/useSubmissions.js'
+import SubmissionBox from './SubmissionBox.jsx'
 import { useS, update } from './common.jsx'
 
 const SEGS = [['jiang', '讲'], ['kan', '看'], ['zuo', '做'], ['ce', '测']]
@@ -26,7 +28,10 @@ export default function Level() {
   const events = useEvents(s => s.events)
   // 「做」：平台回传了这关的事件就算完成；没登录（演示）时用本地草稿里的模拟回传
   const fromPlatform = levelDone(events, lv)
-  const zuoDone = fromPlatform || d.zuoDone
+  // 实践关 / 研讨关：按本人提交判（实践关要点评通过；研讨关交了就算）
+  const subs = useSubmissions(s => s.byLevel[id]?.submissions)
+  const fromSubmission = lv.needsSubmission && zuoDoneOf(lv, subs)
+  const zuoDone = fromPlatform || fromSubmission || d.zuoDone
   const canDemo = !!config?.events?.demo && !!user
   // 等回传时每 10 秒问一次服务端；登录了才问
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function Level() {
   const answered = lv.qs.filter((_, i) => d.answers[i] != null).length
   const right = lv.qs.filter((q, i) => d.answers[i] != null && q.o[d.answers[i]][1] === 1).length
   const gate = canPass(lv, { zuoDone, right, of: lv.qs.length })
-  const segDone = { jiang: true, kan: true, zuo: !lv.needsEvent || zuoDone, ce: answered === lv.qs.length && gate.ok }
+  const segDone = { jiang: true, kan: true, zuo: !(lv.needsEvent || lv.needsSubmission) || zuoDone, ce: answered === lv.qs.length && gate.ok }
 
   const simulate = async () => {
     if (canDemo) {
@@ -47,7 +52,8 @@ export default function Level() {
     } else setDraft(id, x => { x.zuoDone = true; x.events = [...x.events, 'demo:' + lv.event] })
   }
   const pass = () => {
-    const r = finishLevel(S, id, { zuoDone, right, of: lv.qs.length, events: fromPlatform ? eventRefs(events, lv) : d.events })
+    const refs = fromPlatform ? eventRefs(events, lv) : fromSubmission ? ['sub:' + latestOf(subs).id] : d.events
+    const r = finishLevel(S, id, { zuoDone, right, of: lv.qs.length, events: refs })
     if (!r.passed) { useUI.getState().toast(r.why === 'quiz' ? '测验还没全对，改一改再提交。' : r.why === 'zuo' ? '「做」这一步还没完成。' : '这一关现在不能结算。'); return }
     update(s => { s.progress = r.S.progress; s.sessions = r.S.sessions; s.credits = r.S.credits })
     drafts.clear(id)
@@ -76,7 +82,7 @@ export default function Level() {
       {lv.featured === 'obs'
         ? <video className="ac-video" controls playsInline src={`lessons/${id}.mp4`} />
         : <div className="ac-video" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--label-3)', fontSize: 14 }}>微课制作中 · {lv.dur}</div>}
-      <div className="ac-note" style={{ marginTop: 10 }}>白板微课，{lv.dur}。看完到「做」里在平台上实际操作一次。</div>
+      <div className="ac-note" style={{ marginTop: 10 }}>白板微课，{lv.dur}。{lv.type === 'practice' ? '看完到「做」里在班上做一次，交一份证据。' : lv.type === 'seminar' ? '看完到「做」里写下你的回答。' : '看完到「做」里在平台上实际操作一次。'}</div>
       <div style={{ marginTop: 14 }}><Button variant="primary" onClick={() => setDraft(id, x => { x.seg = 'zuo' })}>下一步：去做</Button></div>
     </div>}
 
@@ -88,7 +94,8 @@ export default function Level() {
           <span className="tag" style={zuoDone ? { color: 'var(--green)', background: 'color-mix(in srgb,var(--green) 16%,transparent)' } : undefined}>{zuoDone ? '平台已回传' : user ? '等待平台回传' : '登录后由平台回传'}</span>
           {!zuoDone && (canDemo || !user) && <Button size="sm" variant="tinted" onClick={simulate}>模拟回传（演示）</Button>}
         </div>
-      </> : <div className="ac-note">这一关没有平台实操，直接进入测验。</div>}
+      </> : lv.needsSubmission ? <SubmissionBox lv={lv} status={st} />
+        : <div className="ac-note">这一关没有平台实操，直接进入测验。</div>}
       <div style={{ marginTop: 14 }}><Button variant="primary" disabled={!segDone.zuo} onClick={() => setDraft(id, x => { x.seg = 'ce' })}>下一步：测一测</Button></div>
     </div>}
 
@@ -100,7 +107,7 @@ export default function Level() {
         {a != null && <div className="ac-fb">{q.o[a][2]}{q.o[a][1] !== 1 && <> <button className="btn plain" style={{ padding: 0, marginInlineStart: 6, color: 'var(--acc)' }} onClick={() => setDraft(id, x => { const n = { ...x.answers }; delete n[qi]; x.answers = n; x.seg = q.jump || 'jiang' })}>回去看「{q.jump === 'kan' ? '看' : '讲'}」再答</button></>}</div>}
       </div> })}
       <div className="ac-row">
-        <span className="small muted">{answered}/{lv.qs.length} 题 · 对 {right}</span>
+        <span className="small muted">{answered}/{lv.qs.length} 题 · 对 {right}{lv.needsSubmission && !zuoDone && answered === lv.qs.length ? (lv.type === 'practice' ? ' · 等点评通过后结算' : ' · 先到「做」交回答') : ''}</span>
         {st === 'current' ? <Button variant="primary" icon="checkCircle" disabled={!(answered === lv.qs.length && gate.ok)} onClick={pass}>通关</Button> : <Button onClick={() => nav('/paths/' + lv.path)}>返回路径</Button>}
       </div>
     </div>}
