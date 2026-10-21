@@ -241,4 +241,7 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   **待办**：拿到平台答复后填契约第 7 节、按第 6 节配参数、用测试账号跑一遍；平台注销联动与学习记录回传另立接口。
 - **2026-10-22（下午 2）** 卸掉前端无用依赖：capacitor 全家（core/app/filesystem/share/local-notifications、mlkit 扫码、secure-storage、android/ios/cli/assets）、
   jsqr、lean-qr，锁文件同步。`web/Dockerfile` 去掉拷 `api/coach/core/` 的一步与 capacitor postinstall 的说明，只拷 frontend/。
-  构建与 120 项测试照常。注意 `scripts/build-coach-assets.mjs` 还引用已删除的 `frontend/src/lib/exercises-data.js`，归属 api 侧 coach 改造，到时一并处理。
+  构建与 120 项测试照常。
+- **2026-10-22（下午 3）** `scripts/build-coach-assets.mjs` 去掉动作库生成（源 `exercises-data.js` 已删），只生成 prompts.js；
+  `library-data.js` 标为冻结快照，`build-coach-library.mjs` 别名删除。`--check` 通过。
+  已知：`api/test/coach-limits.test.js` 有 2 项在此之前就失败（上游健身 coach 的排队与评审逻辑），与本次无关，coach 改业务时一并处理。

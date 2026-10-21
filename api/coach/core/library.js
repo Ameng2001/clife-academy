@@ -1,7 +1,7 @@
 /* The exercise catalogue the Coach reasons over, in the five fields it needs.
  *
- * `library-data.js` is generated from the frontend dataset and committed (see
- * scripts/build-coach-assets.mjs) — the same arrangement the translated instruction packs use.
+ * `library-data.js` 是上游从前端动作数据集生成并提交的产物；那份数据集已删，这里是冻结快照，
+ * 等 coach 改成大课堂业务时整体替换（docs/MIGRATION.md 第三节）。
  * It is an ES module rather than JSON on purpose: bare node needs createRequire for JSON, Vite
  * needs an import attribute, and this file has to load under both without either knowing.
  */
