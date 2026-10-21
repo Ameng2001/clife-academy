@@ -16,6 +16,7 @@ import webpush from 'web-push';
 import * as coachConfig from './coach/config.js';
 import * as coachJobs from './coach/jobs.js';
 import { coachRoutes } from './coach/routes.js';
+import { authRoutes, authConfig, academyOf } from './auth/routes.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -949,6 +950,8 @@ setInterval(() => { AUTH_BURST.sweep(); ADDR_FAILS.sweep(); ACCOUNT_FAILS.sweep(
 // budget; `null` spends only that.
 const THROTTLED = {
   'POST /api/login/password': 'password', 'POST /api/login/password-reset': 'password',
+  // 大课堂登录（auth/routes.js）：只花地址预算，失败不按账号计——code/ticket 由外部签发，猜不出来。
+  'POST /api/login/wechat': null, 'POST /api/login/platform': null, 'POST /api/login/dev': null,
   'POST /api/register/password': 'signup',
   'POST /api/account/password': 'password', 'DELETE /api/account/password': null,
   // Setting an e-mail only spends the budget and asks the address's e-mail pause; an address
@@ -1934,6 +1937,7 @@ const routes = {
     // that has no Coach. The key's absence is that answer.
     json(res, 200, {
       invite_only: INVITE_ONLY, allow_guest: ALLOW_GUEST,
+      ...authConfig(),
       // Only when on, so an instance without passwords answers exactly as it did before (#118).
       ...(PASSWORD_LOGIN ? { password_login: true } : {}),
       // Public: the sign-in screen is the first thing that reads it.
@@ -1957,7 +1961,7 @@ const routes = {
     if (!s) return json(res, 401, { error: 'not signed in' });
     const { user } = s;
     const renew = s.bearer && s.exp - Date.now() < SESSION_DAYS * 86400000 / 2;
-    json(res, 200, { user: { id: user.id, name: user.name, admin: isAdmin(user) }, ...(renew ? { token: makeSession(user) } : {}) });
+    json(res, 200, { user: { id: user.id, name: user.name, admin: isAdmin(user), academy: academyOf(user) }, ...(renew ? { token: makeSession(user) } : {}) });
   },
 
   'POST /api/register/options': async (req, res) => {
@@ -2574,6 +2578,8 @@ const routes = {
   // them: they are closures over db and SECRET, and passing them in keeps that module free of
   // a cycle. Every one of them is inert while the feature is unconfigured.
   ...coachRoutes({ json, readBody, readSession, requireAdmin }),
+  // 大课堂登录：微信小程序、平台账号、开发桩（auth/routes.js）。
+  ...authRoutes({ json, readBody, db, saveDb, makeSession, sessionCookie, publicUser, audit, text, claimFirstAdmin }),
 
   /* ---------- photos & videos ---------- */
   // Absent, not refusing, when MEDIA_UPLOADS=0: a 404 is what a server from before the feature

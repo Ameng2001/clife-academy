@@ -195,3 +195,7 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   `scripts/dev.sh` 一键起 api＋vite。
   **待办（第 1 周内）**：微信与平台登录适配器替换上游 Login；`progress`/`sessions` 需要自己的合并规则（只追加、按 levelId 取 passedAt 最早），
   现在跟整块状态走「新的赢」；上游健身视图与 lib 逐步删除；`lvDraft` 不该推服务器（`update(…, false)` 只是不触发推送，草稿仍在 S 里）。
+- **2026-10-21（下午）** 登录三条入口：`api/auth/wechat.js`（code→openid）、`platform.js`（ticket→档案，岗位别名表）、`routes.js`（建档、发 session、cookie＋token）、
+  `DEV_LOGIN` 开发桩；`/api/config` 出 `auth` 块，`/api/me` 带 `academy`；`api/test/auth.test.js` 6 项。前端 `src/academy/views/Login.jsx` 替换上游登录页，
+  登录后 `S.role` 取服务端岗位。浏览器验证：开发桩以园长身份登录 → 首页岗位、姓名、我的页正确，服务端 `state-<uid>.json` 落了 progress。
+  说明在 `docs/AUTH.md`。平台契约待与平台团队对齐。

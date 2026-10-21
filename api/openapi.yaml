@@ -129,6 +129,8 @@ tags:
     description: Health and public configuration
   - name: auth
     description: Passkey (WebAuthn) registration and login, sessions
+  - name: academy
+    description: 大课堂登录：微信小程序、平台账号、开发桩（api/auth/）。没开的入口是 404。
   - name: pairing
     description: Mobile-app pairing (code from a signed-in browser tab)
   - name: password
@@ -589,6 +591,75 @@ paths:
               example: { code: "K7WQ2MZP" }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /api/login/wechat:
+    post:
+      tags: [academy]
+      operationId: academyLoginWechat
+      summary: 微信小程序登录（code 换 openid）
+      description: |
+        小程序 `wx.login()` 的 code 换 openid（jscode2session），按 openid 找到或建立用户，发会话。
+        网页侧拿 cookie，小程序拿 `token` 作 `Authorization: Bearer`。只在 `WX_APPID` 与 `WX_SECRET` 都设时存在。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: wx.login() 返回的 code }
+                name: { type: string, description: 首次登录时的显示名，可省 }
+      responses:
+        '200': { description: 已登录。`{ user: { id, name, admin, academy }, token }` }
+        '401': { description: code 无效或微信拒绝（`code` 为 `bad-code` 或 `wx:<errcode>`） }
+        '502': { description: 微信没有应答 }
+        '404': { description: 入口未开启 }
+  /api/login/platform:
+    post:
+      tags: [academy]
+      operationId: academyLoginPlatform
+      summary: 平台账号登录（ticket 换档案）
+      description: |
+        把平台签发的一次性 ticket 发到 `PLATFORM_AUTH_URL` 验证，按平台 uid 找到或建立用户，岗位与园所以平台为准。
+        契约见 docs/AUTH.md。只在 `PLATFORM_AUTH_URL` 设时存在。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticket]
+              properties:
+                ticket: { type: string }
+      responses:
+        '200': { description: 已登录。`{ user: { id, name, admin, academy }, token }` }
+        '401': { description: 票据无效（`rejected`）或格式不对（`bad-ticket`） }
+        '502': { description: 平台没有应答 }
+        '404': { description: 入口未开启 }
+  /api/login/dev:
+    post:
+      tags: [academy]
+      operationId: academyLoginDev
+      summary: 开发桩登录（DEV_LOGIN=1 才有）
+      description: 名字＋岗位＋园所直接进，不验任何东西。生产环境绝不能开。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                role: { type: string, description: nurse / teacher / care / it / director 或中文岗位名 }
+                org: { type: string }
+      responses:
+        '200': { description: 已登录 }
+        '400': { description: 缺 name }
+        '404': { description: 入口未开启 }
   /api/pair/redeem:
     post:
       tags: [pairing]

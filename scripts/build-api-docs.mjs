@@ -125,6 +125,7 @@ const TAGS = {
   meta: { title: 'Meta', side: 'Health &amp; public config' },
   auth: { title: 'Auth', side: 'Passkeys &amp; sessions' },
   pairing: { title: 'Pairing', side: 'Connect the mobile app' },
+  academy: { title: '大课堂登录', side: '微信小程序、平台账号、开发桩' },
   password: { title: 'Password', side: 'Optional name &amp; password (PASSWORD_LOGIN)' },
   passkeys: { title: 'Passkeys', side: 'More passkeys &amp; device links' },
   data: { title: 'Data', side: 'State sync' },
