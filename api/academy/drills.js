@@ -142,6 +142,19 @@ export function drillRoutes({ json, readBody, db, saveDb, readSession, audit, is
     json(res, 200, { drill: pubDrill(d, user), answers: list.slice(0, 200).map(a => pubAnswer(a, user)), locked: false });
   },
   // 点评一份作答：{ answerId, comment, featured? }。一句意见即可；精选的在列表里排前面。
+  // 作答人标点评「有帮助」：{ answerId, on:true|false }
+  'POST /api/drills/helpful': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const a = db.drillAnswers.find(x => x.id === String(body.answerId || '') && x.uid === user.id);
+    if (!a) return json(res, 404, { error: 'no such answer' });
+    if (!a.review) return json(res, 400, { error: 'not reviewed yet', code: 'review' });
+    a.review.helpful = body.on === false ? null : (a.review.helpful || now());
+    saveDb();
+    audit(req, 'drill.helpful', { user, msg: `${a.id} ${a.review.helpful ? 'on' : 'off'}` });
+    json(res, 200, { answer: pubAnswer(a, user) });
+  },
   'POST /api/drills/review': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });

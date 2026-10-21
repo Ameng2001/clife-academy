@@ -115,6 +115,20 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     if (notifier) { const [p, i] = s.levelId.split(/-(?=\d+$)/); notifier.send(s.uid, 'review', { title: LEVELS[s.levelId] || s.levelId, verdict: verdict === 'pass' ? '通过' : '需修改', at: s.review.at, comment, by: user.name }, `pages/level/level?p=${p}&i=${i}`); }
   },
 
+  // 提交人标点评「有帮助」：{ id, on:true|false }。只对自己的提交、有点评的；点评人的「点评 20 次且被标有帮助」勋章用它。
+  'POST /api/submissions/helpful': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const s = db.submissions.find(x => x.id === str(body.id, 40) && x.uid === user.id);
+    if (!s) return json(res, 404, { error: 'no such submission' });
+    if (!s.review) return json(res, 400, { error: 'not reviewed yet', code: 'review' });
+    s.review.helpful = body.on === false ? null : (s.review.helpful || Date.now());
+    saveDb();
+    audit(req, 'submission.helpful', { user, msg: `${s.id} ${s.review.helpful ? 'on' : 'off'}` });
+    json(res, 200, { submission: pub(s) });
+  },
+
   // 证据文件：提交者本人，或本园点评人
   'GET /api/submissions/file': async (req, res) => {
     const user = readSession(req);

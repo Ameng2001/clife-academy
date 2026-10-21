@@ -75,6 +75,7 @@ function Drill({ d, user, first, onChange, onEdit, onDelete }) {
         <div className="ac-row"><span className="small muted">我的回答 · {fmtDay(d.mine.updatedAt)}</span>{d.mine.review?.featured && <span className="tag" style={{ color: 'var(--acc)' }}>精选</span>}</div>
         <div style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{d.mine.text}</div>
         {d.mine.review && <div className="small" style={{ marginTop: 8, paddingTop: 8, borderTop: 'var(--hair) solid var(--sep)', color: 'var(--label-2)' }}>{d.mine.review.byName} 的点评：{d.mine.review.comment}</div>}
+        {d.mine.review && <div className="row" style={{ gap: 8, marginTop: 6, alignItems: 'center' }}><Button size="sm" variant={d.mine.review.helpful ? 'tinted' : 'plain'} onClick={async () => { try { await api('/api/drills/helpful', { method: 'POST', body: JSON.stringify({ answerId: d.mine.id, on: !d.mine.review.helpful }) }); load() } catch (e) { useUI.getState().toast('没标成') } }}>{d.mine.review.helpful ? '已标「有帮助」' : '这条点评有帮助'}</Button><span className="small muted">只有你能标；计点评人的贡献勋章</span></div>}
         <div className="row" style={{ gap: 8, marginTop: 8 }}><Button size="sm" onClick={() => { setText(d.mine.text); setEditing(true) }}>再写一版</Button><Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, d.mine)}>分享到案例库</Button></div>
       </div>}
       {canAnswer && <div style={{ marginTop: 12 }}>

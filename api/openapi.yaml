@@ -1208,6 +1208,22 @@ paths:
       parameters: [{ name: no, in: query, required: true, schema: { type: string } }]
       responses:
         '200': { description: '`{ valid, no, name, orgName, from, to, hours, at, issuer }`' }
+  /api/submissions/helpful:
+    post:
+      tags: [academy]
+      operationId: academySubmissionHelpful
+      summary: 提交人标点评「有帮助」（可取消）；计点评人的贡献勋章
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, on: { type: boolean } } } } } }
+      responses:
+        '200': { description: '`{ submission }`' }
+  /api/drills/helpful:
+    post:
+      tags: [academy]
+      operationId: academyDrillHelpful
+      summary: 作答人标点评「有帮助」（可取消）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [answerId], properties: { answerId: { type: string }, on: { type: boolean } } } } } }
+      responses:
+        '200': { description: '`{ answer }`' }
   /api/me/checkup:
     get:
       tags: [academy]

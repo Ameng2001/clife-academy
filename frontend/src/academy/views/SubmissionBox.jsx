@@ -5,6 +5,7 @@ import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { useSubmissions, latestOf } from '../../store/useSubmissions.js'
 import { uploadMedia } from '../../lib/upload.js'
+import { api } from '../../lib/api.js'
 import Icon from '../../components/Icon.jsx'
 import { Button, TextArea } from '../../components/ui.jsx'
 import { fmtDay } from './common.jsx'
@@ -61,6 +62,7 @@ export default function SubmissionBox({ lv, status, onDone }) {
         <div className="small muted">{latest.review.byName} 的点评 · {fmtDay(latest.review.at)}</div>
         {lv.rubric?.length > 0 && latest.review.scores?.some(x => x) && <div className="small" style={{ marginTop: 4 }}>{lv.rubric.map((r, i) => latest.review.scores[i] ? `${r} ${latest.review.scores[i]}/5` : null).filter(Boolean).join(' · ')}</div>}
         {latest.review.comment && <div style={{ marginTop: 4, fontSize: 15, lineHeight: 1.5 }}>{latest.review.comment}</div>}
+        <div className="row" style={{ gap: 8, marginTop: 8, alignItems: 'center' }}><Button size="sm" variant={latest.review.helpful ? 'tinted' : 'plain'} icon={latest.review.helpful ? 'checkCircle' : undefined} onClick={async () => { try { await api('/api/submissions/helpful', { method: 'POST', body: JSON.stringify({ id: latest.id, on: !latest.review.helpful }) }); useSubmissions.getState().load(lv.id) } catch (e) { useUI.getState().toast('没标成') } }}>{latest.review.helpful ? '已标「有帮助」' : '这条点评有帮助'}</Button><span className="small muted">只有你能标；计点评人的贡献勋章，不公开</span></div>
       </div>}
       {status === 'current' && latest.status !== 'pass' && !practice && <div style={{ marginTop: 10 }}><Button size="sm" onClick={() => { setText(latest.text || ''); setEditing(true) }}>再写一版</Button></div>}
       {status === 'current' && latest.status === 'revise' && <div style={{ marginTop: 10 }}><Button size="sm" variant="tinted" onClick={() => { setText(latest.text || ''); setEditing(true) }}>按意见改一版再交</Button></div>}

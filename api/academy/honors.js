@@ -29,6 +29,7 @@ export function createLedger(db) {
 }
 
 const THRESHOLDS = { cases: [1, 5, 20], featured: [1, 5], reviews: [20], answers: [10] };
+export const HELPFUL_MIN = 5;
 /** 一个人的勋章。stateOf(uid) 给客户端状态（progress）。 */
 export function badgesOf(uid, { db, stateOf, pairs }) {
   const out = [];
@@ -49,8 +50,10 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
   for (const n of THRESHOLDS.cases) out.push({ key: `cases-${n}`, kind: 'contribution', name: n === 1 ? '第一条案例' : `案例 ${n} 条`, desc: `案例被采纳 ${n} 条`, on: cases.length >= n, at: cases[n - 1] || null, progress: Math.min(cases.length, n), of: n });
   const feat = (db.drillAnswers || []).filter(a => a.uid === uid && a.review?.featured).map(a => a.review.at).sort((a, b) => a - b);
   for (const n of THRESHOLDS.featured) out.push({ key: `featured-${n}`, kind: 'contribution', name: n === 1 ? '第一次精选' : `精选 ${n} 次`, desc: `研讨作答被标精选 ${n} 次`, on: feat.length >= n, at: feat[n - 1] || null, progress: Math.min(feat.length, n), of: n });
-  const reviews = [...(db.submissions || []).filter(s => s.review?.by === uid).map(s => s.review.at), ...(db.drillAnswers || []).filter(a => a.review?.by === uid).map(a => a.review.at)].sort((a, b) => a - b);
-  for (const n of THRESHOLDS.reviews) out.push({ key: `reviews-${n}`, kind: 'contribution', name: `点评 ${n} 次`, desc: `给同事的作品与作答写过 ${n} 次意见`, on: reviews.length >= n, at: reviews[n - 1] || null, progress: Math.min(reviews.length, n), of: n });
+  // 点评 20 次且被标「有帮助」≥ 5 次（ROADMAP 第七节）：被标的是作品或作答的作者自己点的，点评人看不到谁没点
+  const rv = [...(db.submissions || []).filter(s => s.review?.by === uid).map(s => s.review), ...(db.drillAnswers || []).filter(a => a.review?.by === uid).map(a => a.review)];
+  const reviews = rv.map(r => r.at).sort((a, b) => a - b), helpful = rv.filter(r => r.helpful).map(r => r.helpful).sort((a, b) => a - b);
+  for (const n of THRESHOLDS.reviews) { const ok = reviews.length >= n && helpful.length >= HELPFUL_MIN; out.push({ key: `reviews-${n}`, kind: 'contribution', name: `点评 ${n} 次且有帮助`, desc: `给同事的作品与作答写过 ${n} 次意见，其中至少 ${HELPFUL_MIN} 次被作者标「有帮助」 · 已点评 ${reviews.length}，被标 ${helpful.length}`, on: ok, at: ok ? Math.max(reviews[n - 1], helpful[HELPFUL_MIN - 1]) : null, progress: Math.min(reviews.length, n) + Math.min(helpful.length, HELPFUL_MIN), of: n + HELPFUL_MIN }); }
   const acc = (db.questions || []).flatMap(q => q.answers.filter(a => a.by === uid && a.accepted).map(a => a.acceptedAt || a.at)).sort((a, b) => a - b);
   for (const n of THRESHOLDS.answers) out.push({ key: `answers-${n}`, kind: 'contribution', name: `答疑被采纳 ${n} 次`, desc: `回答同事的提问，被提问人采纳 ${n} 次`, on: acc.length >= n, at: acc[n - 1] || null, progress: Math.min(acc.length, n), of: n });
   if (pairs) {
