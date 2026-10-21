@@ -117,6 +117,7 @@ export default function Admin() {
 
       <Group title="研修期次" icon="calendar">
         <Row to="/programs" title="研修项目" sub="建期次、定名单、记完成；学时进档案" n={`${o.programs.open} 期报名中`} />
+        <Row to="/portfolio?rule=1" title="学时规则与证明格式" sub="按市里确认表填：折算分钟、各类附加、取整、出具单位、落款、说明文字；改了只影响以后出具的证明" />
         <Row to="/certs" title="骨干认证期次" sub="报名、答辩、结果" n={`${o.programs.cohortsOpen} 期`} />
         <Row to="/lectures" title="园长大讲堂" sub="排场、邀分享者" n={`${o.programs.lecturesUpcoming} 场将开`} />
         <Row to="/studios" title="名师工作室与年度展示" sub="工作室、展示场次" n={`${o.content.studios} 室 · ${o.programs.showcasesOpen} 场`} />

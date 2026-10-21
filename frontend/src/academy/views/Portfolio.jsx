@@ -36,9 +36,11 @@ export function HoursSheet({ c }) {
 
 function RuleForm({ rule, onSaved }) {
   const [f, setF] = useState({ ...rule }), [busy, setBusy] = useState(false)
+  // 从运营后台 /portfolio?rule=1 跳来时滚到表单
+  useEffect(() => { if (new URLSearchParams(location.hash.split('?')[1] || '').get('rule') === '1') document.getElementById('hours-rule')?.scrollIntoView({ block: 'start' }) }, [])
   const N = (k, w = 70) => <input className="ac-sel" style={{ width: w }} type="number" value={f[k]} onChange={e => setF({ ...f, [k]: e.target.value })} />
   const save = async () => { setBusy(true); try { const r = await api('/api/hours/rule', { method: 'PUT', body: JSON.stringify(f) }); toast('已存'); onSaved(r.rule) } catch (e) { toast('没存成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) } }
-  return <div className="card" style={{ marginTop: 10 }}>
+  return <div id="hours-rule" className="card" style={{ marginTop: 10 }}>
     <div className="small muted">计时规则与证明格式（管理员）：按与市教育局、教师发展中心谈定的口径填；改了只影响以后出具的证明。</div>
     <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}><span className="small">每</span>{N('minutesPerHour')}<span className="small">分钟 = 1 学时 · 实践关另加</span>{N('practiceExtra')}<span className="small">分钟 · 研讨关另加</span>{N('seminarExtra')}<span className="small">分钟 · 骨干答辩通过加</span>{N('backboneMinutes')}<span className="small">分钟</span></div>
     <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}><span className="small">取整到</span><select className="ac-sel" value={f.roundTo} onChange={e => setF({ ...f, roundTo: Number(e.target.value) })}><option value={0.25}>0.25</option><option value={0.5}>0.5</option><option value={1}>1</option></select><span className="small">学时 ·</span><label className="small"><input type="checkbox" checked={!!f.lectureCounts} onChange={e => setF({ ...f, lectureCounts: e.target.checked })} /> 大讲堂预约且已开播的计入（没有到场记录，默认不计）</label></div>
