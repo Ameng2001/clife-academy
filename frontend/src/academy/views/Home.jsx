@@ -25,6 +25,8 @@ export default function Home() {
   const [pair, setPair] = useState(null)
   const [community, setCommunity] = useState(null)
   const [qa, setQa] = useState(null)
+  const [show, setShow] = useState(null)
+  useEffect(() => { if (user) api('/api/showcases').then(r => setShow(r.showcases.find(x => !x.closedAt) || null)).catch(() => setShow(null)); else setShow(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/questions').then(setQa).catch(() => setQa(null)); else setQa(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/me/community').then(r => setCommunity(r.community)).catch(() => setCommunity(null)); else setCommunity(null) }, [user?.id])
   const [lecture, setLecture] = useState(null)
@@ -113,6 +115,9 @@ export default function Home() {
       {qa.queue.length > 0 && <div className="lrow tap" onClick={() => nav('/questions?tab=queue')}><div style={{ flex: 1 }}><div className="lrow-t">待我回答 {qa.queue.length} 条{qa.escalated ? ` · 转讲师 ${qa.escalated}` : ''}</div><div className="small muted">助手已整理材料{qa.assistantConfigured ? '并起了草稿，确认或改一改' : '，写一条回答'}</div></div><Icon name="chevronRight" /></div>}
       {qa.mine.filter(q => q.status === 'open').slice(0, 2).map(q => <div key={q.id} className="lrow tap" onClick={() => nav('/questions?id=' + q.id)}><div style={{ flex: 1 }}><div className="lrow-t">{q.text}</div><div className="small muted">等回答{q.answers.length ? ` · 已有 ${q.answers.length} 条，去采纳` : ''}</div></div><Icon name="chevronRight" /></div>)}
     </div></div>}
+    {show && <div className="card tappable" style={{ marginTop: 14 }} onClick={() => nav('/studios?show=' + show.id)}>
+      <div className="small muted">市级展示 · {show.studioName} 主持</div><div style={{ fontWeight: 600, marginTop: 2 }}>{show.title}</div><div className="small muted">{fmtDay(show.at)}{show.place ? ' · ' + show.place : ''} · 上台 {show.entryCount} 件 · 作品与名师点评，没有分数</div>
+    </div>}
     {community && <div className="sect"><div className="sect-t">跨园共同体</div><div className="sect-b">
       <div className="lrow tap" onClick={() => nav('/cases?community=1')}><div style={{ flex: 1 }}><div className="lrow-t">{community.name}</div><div className="small muted">{community.orgs.map(o => o.name + (o.key === community.lead ? '（组长园）' : '')).join('、')} · 共同体案例 {community.cases} 条{community.drills ? ` · 联合研讨题 ${community.drills}` : ''}</div></div><Icon name="chevronRight" /></div>
     </div></div>}

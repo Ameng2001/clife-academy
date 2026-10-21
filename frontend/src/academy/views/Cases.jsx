@@ -25,7 +25,7 @@ function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
     <div className="ac-row tap" onClick={onOpen} style={{ alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, lineHeight: 1.4 }}>{c.title}</div>
-        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.byTitles?.length ? '（' + c.byTitles.join('、') + '）' : ''}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}{c.source?.tag ? ' · ' + c.source.tag : ''}</div>
+        <div className="small muted" style={{ marginTop: 4 }}>{dname(c.domain)}{c.age ? ' · ' + c.age : ''} · <span style={{ color: 'var(--acc)' }}>{uses[c.use] || c.use}</span> · {c.byName}{c.byTitles?.length ? '（' + c.byTitles.join('、') + '）' : ''}{c.orgName ? ' · ' + c.orgName : ''}{c.source?.levelId ? ' · 出自「' + (titleOf(c.source.levelId) || c.source.levelId) + '」' : ''}{c.source?.tag ? ' · ' + c.source.tag : ''}{c.showcase ? ' · 市级展示 · ' + c.showcase.year : ''}</div>
       </div>
       {c.status !== 'approved' || c.mine ? <span className="small" style={{ color: col, flex: 'none' }}>{t}</span> : <Icon name={open ? 'chevronUp' : 'chevronDown'} />}
     </div>
@@ -47,14 +47,14 @@ export default function Cases() {
   const [sp, setSp] = useSearchParams()
   const tab = sp.get('tab') || 'all'
   const [q, setQ] = useState(sp.get('q') || '')
-  const domain = sp.get('domain') || '', use = sp.get('use') || '', age = sp.get('age') || '', community = sp.get('community') === '1'
+  const domain = sp.get('domain') || '', use = sp.get('use') || '', age = sp.get('age') || '', community = sp.get('community') === '1', showcase = sp.get('showcase') === '1'
   const setParam = (k, v) => { const n = new URLSearchParams(sp); if (v) n.set(k, v); else n.delete(k); setSp(n, { replace: true }) }
   const [data, setData] = useState(null), [mine, setMine] = useState(null), [queue, setQueue] = useState(null)
   const [form, setForm] = useState(null), [busy, setBusy] = useState(false), [openId, setOpenId] = useState(null), [notes, setNotes] = useState({})
   const fileRef = useRef()
   const load = async () => {
     if (!user) { setData(null); return }
-    const p = new URLSearchParams(); if (q.trim()) p.set('q', q.trim()); if (domain) p.set('domain', domain); if (use) p.set('use', use); if (age) p.set('age', age); if (community) p.set('community', '1')
+    const p = new URLSearchParams(); if (q.trim()) p.set('q', q.trim()); if (domain) p.set('domain', domain); if (use) p.set('use', use); if (age) p.set('age', age); if (community) p.set('community', '1'); if (showcase) p.set('showcase', '1')
     try { setData(await api('/api/cases?' + p.toString())) } catch (e) { useUI.getState().toast('没取到案例' + (e.message ? '：' + e.message : '')) }
     api('/api/cases/mine').then(setMine).catch(() => setMine(null))
     api('/api/cases/queue').then(setQueue).catch(() => setQueue(null))
@@ -140,6 +140,7 @@ export default function Cases() {
         <span style={{ width: 8 }} />
         {AGES.map(a => <button key={a} className={'chip' + (a === age ? ' on' : '')} onClick={() => setParam('age', a === age ? null : a)}>{a}</button>)}
         {data?.community && <><span style={{ width: 8 }} /><button className={'chip' + (community ? ' on' : '')} onClick={() => setParam('community', community ? null : '1')} title={data.community.name}>本共同体</button></>}
+        {data?.showcased > 0 && <button className={'chip' + (showcase ? ' on' : '')} onClick={() => setParam('showcase', showcase ? null : '1')}>市级展示</button>}
       </div>
       {data && !data.cases.length && <div className="card small muted">还没有入库的案例。{data.total ? '换个筛选试试。' : '做过的好事值得写下来：点右上角「分享一个」。'}</div>}
       {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} />)}

@@ -43,7 +43,7 @@ export default function Honors() {
       {p.history?.length > 0 && <div style={{ marginTop: 10 }}>{p.history.slice(0, 8).map((x, i) => <div key={i} className="ac-row small" style={{ marginTop: 4 }}><span className="muted">{fmtDay(x.at)} · {x.tool ? x.tool + ' · ' : ''}{x.note}</span><span style={{ color: x.n > 0 ? 'var(--green)' : 'var(--label-2)' }}>{x.n > 0 ? '+' : ''}{x.n}</span></div>)}</div>}
     </div>}
 
-    {h?.titles.length > 0 && <div className="sect"><div className="sect-t">荣誉称号</div><div className="sect-b">
+    {h?.titles.length > 0 && <div className="sect"><div className="sect-t">荣誉称号 <span className="tap small" style={{ color: 'var(--acc)', marginInlineStart: 8 }} onClick={() => nav('/studios')}>名师工作室 ›</span></div><div className="sect-b">
       {h.titles.map(t => <div key={t.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t"><Icon name="crown" /> {t.label}</div><div className="small muted">{t.byName} 授 · {fmtDay(t.at)} · {t.reason}</div></div></div>)}
     </div></div>}
 

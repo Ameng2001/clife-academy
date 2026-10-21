@@ -35,7 +35,7 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     id: c.id, title: c.title, domain: c.domain, age: c.age, use: c.use, text: c.text, files: c.files.map(f => ({ hash: f.hash, name: f.name, type: f.type })),
     source: c.source, byName: c.byName, orgName: c.orgName, status: c.status, note: c.note || null, at: c.at,
     consent: c.consent ? { byName: c.consent.byName, at: c.consent.at } : null, curated: c.curated ? { byName: c.curated.byName, at: c.curated.at } : null,
-    mine: !!user && c.by === user.id, byTitles: titlesOf(db, c.by).map(t => t.label),
+    mine: !!user && c.by === user.id, byTitles: titlesOf(db, c.by).map(t => t.label), ...(c.showcase ? { showcase: c.showcase } : {}),
     canEdit: !!user && c.by === user.id && c.status !== 'approved',
     usedByMe: !!user && usesOf(c.id).some(u => u.uid === user.id),
     ...(seesUses(user, c) ? { used: usesOf(c.id).length, uses: usesOf(c.id).sort((a, b) => b.at - a.at).map(u => ({ name: u.name, orgName: u.orgName, note: u.note, at: u.at })) } : {})
@@ -55,12 +55,13 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     const community = communities ? communities.ofOrg(orgKeyOf(user)) : null;
     let list = db.cases.filter(c => c.status === 'approved');
     if (sp.get('community') === '1' && community) { const keys = new Set(community.orgs.map(o => o.key)); list = list.filter(c => keys.has(c.org)); }
+    if (sp.get('showcase') === '1') list = list.filter(c => c.showcase);
     if (domain) list = list.filter(c => c.domain === domain);
     if (age) list = list.filter(c => c.age === age);
     if (use) list = list.filter(c => c.use === use);
     if (q) list = list.filter(c => norm([c.title, c.text, c.byName, c.orgName, LEVELS[c.source?.levelId] || ''].join(' ')).includes(q));
     list.sort((a, b) => (b.curated?.at || b.at) - (a.curated?.at || a.at));
-    json(res, 200, { cases: list.map(c => pub(c, user)), uses: USES, ages: AGES, total: db.cases.filter(c => c.status === 'approved').length, community: community ? { id: community.id, name: community.name } : null });
+    json(res, 200, { cases: list.map(c => pub(c, user)), uses: USES, ages: AGES, total: db.cases.filter(c => c.status === 'approved').length, community: community ? { id: community.id, name: community.name } : null, showcased: db.cases.filter(c => c.status === 'approved' && c.showcase).length });
   },
   // 本人的（含待同意、待审核、退回的）
   'GET /api/cases/mine': async (req, res) => {

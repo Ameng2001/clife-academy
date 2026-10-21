@@ -31,6 +31,7 @@ import Checkup from './views/Checkup.jsx'
 import District from './views/District.jsx'
 import Certificates from './views/Certificates.jsx'
 import Questions from './views/Questions.jsx'
+import Studios from './views/Studios.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -100,6 +101,7 @@ function Shell() {
           <Route path="/district" element={<District />} />
           <Route path="/certs" element={<Certificates />} />
           <Route path="/questions" element={<Questions />} />
+          <Route path="/studios" element={<Studios />} />
           <Route path="/certs/:id" element={<Certificates />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />

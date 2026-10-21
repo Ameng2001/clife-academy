@@ -1060,6 +1060,98 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, note: { type: string } } } } } }
       responses:
         '200': { description: '`{ question }`' }
+  /api/studios:
+    get:
+      tags: [academy]
+      operationId: academyStudios
+      summary: 名师工作室列表（全平台登录用户）：名称、方向、主持人、成员、产出；主持人多看申请人
+      responses:
+        '200': { description: '`{ studios, canManage, eligible, member }`' }
+    post:
+      tags: [academy]
+      operationId: academyStudioSave
+      summary: 建 / 改工作室（管理员）：名称、方向、学期、简介、主持人
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [name, hostUid], properties: { id: { type: string }, name: { type: string }, focus: { type: string }, term: { type: string }, intro: { type: string }, hostUid: { type: string }, closed: { type: boolean } } } } } }
+      responses:
+        '200': { description: '`{ studio }`' }
+  /api/studios/apply:
+    post:
+      tags: [academy]
+      operationId: academyStudioApply
+      summary: 申请加入（要有骨干教师认证）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ studio }`' }
+  /api/studios/members:
+    post:
+      tags: [academy]
+      operationId: academyStudioMembers
+      summary: 成员管理（主持人）：accept / decline / add / remove；加入授「名师工作室成员」称号
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, uid, action], properties: { id: { type: string }, uid: { type: string }, action: { type: string, enum: [accept, decline, add, remove] }, reason: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ studio }`' }
+  /api/studios/cases:
+    post:
+      tags: [academy]
+      operationId: academyStudioCases
+      summary: 收录工作室产出（主持人；成员的已入库案例）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, caseIds], properties: { id: { type: string }, caseIds: { type: array, items: { type: string } } } } } } }
+      responses:
+        '200': { description: '`{ studio }`' }
+  /api/showcases:
+    get:
+      tags: [academy]
+      operationId: academyShowcases
+      summary: 市级展示列表（全平台）：上台作品与名师点评，没有分数与名次
+      responses:
+        '200': { description: '`{ showcases, canHost, studios }`' }
+    post:
+      tags: [academy]
+      operationId: academyShowcaseSave
+      summary: 建 / 改市级展示（工作室主持人）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [studioId, title], properties: { id: { type: string }, studioId: { type: string }, year: { type: string }, title: { type: string }, theme: { type: string }, at: { type: integer }, place: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ showcase }`' }
+  /api/showcases/one:
+    get:
+      tags: [academy]
+      operationId: academyShowcaseOne
+      summary: 一场市级展示；主持人多看候选池（各共同体赛入选作品 ＋ 工作室产出）
+      parameters: [{ name: id, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ showcase }`' }
+  /api/showcases/entries:
+    post:
+      tags: [academy]
+      operationId: academyShowcaseEntries
+      summary: 定上台作品与顺序（主持人，最多 12 件）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, caseIds], properties: { id: { type: string }, caseIds: { type: array, items: { type: string } } } } } } }
+      responses:
+        '200': { description: '`{ showcase }`' }
+  /api/showcases/comment:
+    post:
+      tags: [academy]
+      operationId: academyShowcaseComment
+      summary: 名师点评一件上台作品（主持人；对作品不对人）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, caseId, text], properties: { id: { type: string }, caseId: { type: string }, text: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ showcase }`' }
+  /api/showcases/sharer:
+    post:
+      tags: [academy]
+      operationId: academyShowcaseSharer
+      summary: 授「年度分享者」称号（主持人；只能授上台作品作者，留理由）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, uid, reason], properties: { id: { type: string }, uid: { type: string }, reason: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ showcase }`' }
+  /api/showcases/close:
+    post:
+      tags: [academy]
+      operationId: academyShowcaseClose
+      summary: 收官：上台案例标「市级展示 · 年份」
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, summary: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ showcase }`' }
   /api/me/checkup:
     get:
       tags: [academy]
