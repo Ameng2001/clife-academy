@@ -37,18 +37,36 @@ export default function Login({ relogin = false } = {}) {
     finally { setBusy(false) }
   }
 
-  // 平台登录完跳回 #/login/platform?ticket=…：拿票据换会话，然后回首页
+  // 平台登录完跳回来：ticket 模式带 ?ticket=，oauth2 模式带 ?code=&state=。
+  // 回来的地址可能是 {origin}/login/platform?…（oauth2 的 redirect_uri 不能带 #）也可能是 #/login/platform?…，两种都认。
   useEffect(() => {
-    if (!loc.pathname.startsWith('/login/platform')) return
-    const ticket = new URLSearchParams(loc.search).get('ticket')
+    const fromPath = window.location.pathname.replace(/\/$/, '').endsWith('/login/platform')
+    if (!fromPath && !loc.pathname.startsWith('/login/platform')) return
+    const q = new URLSearchParams(fromPath ? window.location.search : loc.search)
+    const ticket = q.get('ticket'), code = q.get('code'), state = q.get('state')
+    if (fromPath) history.replaceState(null, '', window.location.pathname.replace(/\/login\/platform$/, '/') + '#/home')
     nav('/home', { replace: true })
-    if (ticket) login('/api/login/platform', { ticket }, '平台登录失败')
+    if (code) {
+      let want = null
+      try { want = sessionStorage.getItem('academy_oauth_state'); sessionStorage.removeItem('academy_oauth_state') } catch { /* 无妨 */ }
+      if (want && state !== want) { useUI.getState().toast('平台登录回跳不匹配，请重试'); return }
+      login('/api/login/platform', { code, redirect_uri: redirectUri() }, '平台登录失败')
+    } else if (ticket) login('/api/login/platform', { ticket }, '平台登录失败')
   }, [loc.pathname])
 
+  // oauth2 的回跳地址：{origin}{base}login/platform（与服务端 PLATFORM_REDIRECT_URI 一致）
+  const redirectUri = () => location.origin + location.pathname.replace(/[^/]*$/, '') + 'login/platform'
   const toPlatform = () => {
     if (!auth.platform_login_url) { useUI.getState().toast('平台登录地址未配置'); return }
+    const url = auth.platform_login_url
+    if (auth.platform_mode === 'oauth2') {
+      const state = Math.random().toString(36).slice(2) + Date.now().toString(36)
+      try { sessionStorage.setItem('academy_oauth_state', state) } catch { /* 无妨 */ }
+      location.href = url + '&state=' + encodeURIComponent(state)
+      return
+    }
     const back = location.origin + location.pathname + '#/login/platform'
-    location.href = auth.platform_login_url + (auth.platform_login_url.includes('?') ? '&' : '?') + 'redirect=' + encodeURIComponent(back)
+    location.href = url + (url.includes('?') ? '&' : '?') + 'redirect=' + encodeURIComponent(back)
   }
 
   const wrap = { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '78vh', textAlign: 'center' }

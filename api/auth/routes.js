@@ -8,14 +8,15 @@
  * 合并留给平台方做 unionid/手机号对账，首期不做。 */
 import crypto from 'node:crypto';
 import { wechatConfigured, code2session, WechatError } from './wechat.js';
-import { platformConfigured, verifyTicket, roleOf, ROLES, PlatformError, PLATFORM_LOGIN_URL } from './platform.js';
+import { platformConfigured, verifyTicket, exchangeCode, roleOf, ROLES, PlatformError, PLATFORM_MODE, platformLoginUrl } from './platform.js';
 
 export const DEV_LOGIN = /^(1|true|yes|on)$/i.test(process.env.DEV_LOGIN || '');
 
 export const authConfig = () => ({
   auth: {
     wechat: wechatConfigured(), platform: platformConfigured(), dev: DEV_LOGIN,
-    ...(PLATFORM_LOGIN_URL ? { platform_login_url: PLATFORM_LOGIN_URL } : {})
+    ...(platformConfigured() ? { platform_mode: PLATFORM_MODE } : {}),
+    ...(platformLoginUrl() ? { platform_login_url: platformLoginUrl() } : {})
   }
 });
 
@@ -65,7 +66,8 @@ export function authRoutes({ json, readBody, db, saveDb, makeSession, sessionCoo
   'POST /api/login/platform': async (req, res) => {
     const body = await readBody(req);
     let p;
-    try { p = await verifyTicket(body.ticket); }
+    // ticket 模式收 { ticket }；oauth2 模式收 { code, redirect_uri? }（redirect_uri 要与跳授权页时的一致）
+    try { p = PLATFORM_MODE === 'oauth2' ? await exchangeCode(body.code, { redirectUri: text(body.redirect_uri) || undefined }) : await verifyTicket(body.ticket); }
     catch (e) {
       const code = e instanceof PlatformError ? e.code : 'upstream';
       audit(req, 'auth.platform.fail', { ok: false, msg: code });

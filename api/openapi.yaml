@@ -619,10 +619,11 @@ paths:
     post:
       tags: [academy]
       operationId: academyLoginPlatform
-      summary: 平台账号登录（ticket 换档案）
+      summary: 平台账号登录（ticket 换档案，或 OAuth2 授权码）
       description: |
-        把平台签发的一次性 ticket 发到 `PLATFORM_AUTH_URL` 验证，按平台 uid 找到或建立用户，岗位与园所以平台为准。
-        契约见 docs/AUTH.md。只在 `PLATFORM_AUTH_URL` 设时存在。
+        `PLATFORM_AUTH_MODE=ticket`（默认）：把平台签发的一次性 ticket 发到 `PLATFORM_AUTH_URL` 验证；
+        `oauth2`：用授权码到 `PLATFORM_OAUTH_TOKEN_URL` 换 access_token，再取 `PLATFORM_OAUTH_USERINFO_URL`。
+        都按平台 uid 找到或建立用户，岗位与园所以平台为准。契约见 docs/PLATFORM-AUTH.md。平台未配置时是 404。
       security: []
       requestBody:
         required: true
@@ -630,9 +631,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [ticket]
               properties:
-                ticket: { type: string }
+                ticket: { type: string, description: ticket 模式 }
+                code: { type: string, description: oauth2 模式的授权码 }
+                redirect_uri: { type: string, description: oauth2 模式，与跳授权页时一致；省略用 PLATFORM_REDIRECT_URI }
       responses:
         '200': { description: 已登录。`{ user: { id, name, admin, academy }, token }` }
         '401': { description: 票据无效（`rejected`）或格式不对（`bad-ticket`） }

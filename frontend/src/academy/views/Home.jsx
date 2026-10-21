@@ -4,6 +4,7 @@ import { Button } from '../../components/ui.jsx'
 import { ORG, PROBES, PATH_KEYS, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
 import { drafts } from '../../lib/level-draft.js'
 import { useS, myPath, RoleSelect } from './common.jsx'
+import { useStore } from '../../store/useStore.js'
 
 export default function Home() {
   const nav = useNavigate(), S = useS()
@@ -12,10 +13,12 @@ export default function Home() {
   const cur = cursorOf(S.progress, path)
   const today = sum.finished ? null : levelOf(levelId(path, cur))
   const credits = Object.values(S.credits || {}).reduce((a, b) => a + b, 0)
+  // 登录了就显示平台给的园所名，没登录（演示）用样例园名
+  const orgName = useStore(s => s.user?.academy?.org?.name) || ORG
   const d = new Date()
   return <div className="narrow">
     <div className="hdr">
-      <div><h1>学前大课堂</h1><div className="sub">{ORG} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
+      <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
       <div className="hdr-actions"><RoleSelect S={S} /><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     </div>
 

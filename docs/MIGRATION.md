@@ -231,3 +231,11 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   「我的」页登录/退出，顶栏显示「岗位 · 姓名」。api 新增 `PUT /api/me/academy`（自己改岗位；平台账号 403），`auth.test.js` 7 项。
   用 Node 顶替 `wx` 对着真 api 跑了一遍接口层：访客通关 → 微信登录只问真通过的那关 → 改岗位 → 网页端写入 → 回前台拉取 → 再通关 409 并集 → 退出回演示态。
   未做：微信开发者工具里的真机联调（需要 WX_APPID/WX_SECRET 与合法域名）；平台登录态在小程序内的接法等平台契约。
+- **2026-10-22（下午）** 对齐平台登录契约。调研结论：成交资料里没有平台或基座的身份接口文档，只知道平台账号是手机号＋验证码、三端共用、
+  基座有「统一身份与权限」子系统；现有适配器假定了一个自造的 ticket 核验接口与固定字段名，平台未必照此。于是写 `docs/PLATFORM-AUTH.md`
+  （文档仓库同步《平台登录对接契约.md》）给平台接口人：两种方式（一次性票据 / OAuth2 授权码）、档案五字段与岗位对照、网页与小程序回跳、
+  失败码、配置项、七条待对齐问题。`api/auth/platform.js` 相应改成可配：`PLATFORM_AUTH_MODE`，`PLATFORM_FIELDS` 点路径取字段、`PLATFORM_OK` 判外包业务码、
+  `role` 可给数组；oauth2 模式 `exchangeCode`（code → token → userinfo），`platformLoginUrl()` 拼授权地址。`/api/config.auth` 多 `platform_mode`。
+  `Login.jsx` 认 `?ticket=` 与 `?code=&state=` 两种回跳（路径式 `/login/platform` 与 hash 式都认），state 存 sessionStorage 校验。
+  小程序 `auth.loginPlatform/ticketFrom`，`app.js` 启动与回前台读 `extraData.ticket` / `query.ticket` 换会话。`api/test/auth.test.js` 加外包业务码与 oauth2 两项，17 项全过。
+  **待办**：拿到平台答复后填契约第 7 节、按第 6 节配参数、用测试账号跑一遍；平台注销联动与学习记录回传另立接口。

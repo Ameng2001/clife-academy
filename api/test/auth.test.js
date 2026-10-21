@@ -34,6 +34,22 @@ function startStub() {
         if (t === 'tk-nurse') return out(200, { uid: 'p-2', name: '李老师', org: { id: 'o-1', name: '柳北区示例幼儿园' }, role: 'nurse' });
         return out(401, { error: 'bad ticket' });
       }
+      // 基座风格：200 外包 { code, data }，字段名不同
+      if (u.pathname === '/sso/verify2') {
+        const t = JSON.parse(body || '{}').ticket;
+        if (t === 'tk-ok') return out(200, { code: 0, data: { userId: 9001, realName: '周保健', orgCode: 'K-01', orgName: '鱼峰区示例幼儿园', roleName: ['保健医', '教师'] } });
+        return out(200, { code: 40101, msg: '票据无效' });
+      }
+      // OAuth2：授权码换 token，token 取用户信息
+      if (u.pathname === '/oauth/token') {
+        const f = new URLSearchParams(body);
+        if (f.get('grant_type') === 'authorization_code' && f.get('code') === 'ac-1' && f.get('client_id') === 'cid' && f.get('client_secret') === 'csec' && f.get('redirect_uri') === 'http://localhost:8080/login/platform') return out(200, { access_token: 'at-1', token_type: 'Bearer', expires_in: 7200 });
+        return out(400, { error: 'invalid_grant' });
+      }
+      if (u.pathname === '/oauth/userinfo') {
+        if (req.headers.authorization === 'Bearer at-1') return out(200, { uid: 'p-7', name: '陈园长', org: { id: 'o-2', name: '柳南区示例幼儿园' }, role: '业务园长' });
+        return out(401, { error: 'invalid_token' });
+      }
       out(404, {});
     });
   });
@@ -77,7 +93,7 @@ test('config announces which entrances exist', async t => {
   const stub = await startStub(); t.after(() => stub.srv.close());
   const { call } = await startServer(t, stub.base);
   const c = await call('GET', '/api/config');
-  assert.deepEqual(c.json.auth, { wechat: true, platform: true, dev: true });
+  assert.deepEqual(c.json.auth, { wechat: true, platform: true, dev: true, platform_mode: 'ticket' });
 });
 
 test('dev login creates a user with role and org, hands out a bearer token that /api/me accepts', async t => {
@@ -141,6 +157,44 @@ test('platform: a ticket makes a user with the platform role and org, re-login r
   assert.equal(b.json.user.academy.role, 'nurse');
   assert.notEqual(b.json.user.id, a.json.user.id);
   const bad = await call('POST', '/api/login/platform', { ticket: 'tk-bad' });
+  assert.equal(bad.status, 401);
+  assert.equal(bad.json.code, 'rejected');
+});
+
+test('platform: PLATFORM_FIELDS and PLATFORM_OK read an enveloped answer with other field names; a 200 refusal is still rejected', async t => {
+  const stub = await startStub(); t.after(() => stub.srv.close());
+  const { call } = await startServer(t, stub.base, {
+    PLATFORM_AUTH_URL: stub.base + '/sso/verify2', PLATFORM_OK: 'code=0',
+    PLATFORM_FIELDS: JSON.stringify({ uid: 'data.userId', name: 'data.realName', orgId: 'data.orgCode', orgName: 'data.orgName', role: 'data.roleName' })
+  });
+  const a = await call('POST', '/api/login/platform', { ticket: 'tk-ok' });
+  assert.equal(a.status, 200, JSON.stringify(a.json));
+  assert.equal(a.json.user.name, '周保健');
+  assert.deepEqual(a.json.user.academy, { role: 'nurse', org: { id: 'K-01', name: '鱼峰区示例幼儿园' }, source: 'platform' });
+  const bad = await call('POST', '/api/login/platform', { ticket: 'tk-no' });
+  assert.equal(bad.status, 401);
+  assert.equal(bad.json.code, 'rejected');
+});
+
+test('platform: oauth2 mode exchanges a code for a token, reads userinfo, and announces the authorize url', async t => {
+  const stub = await startStub(); t.after(() => stub.srv.close());
+  const { call } = await startServer(t, stub.base, {
+    PLATFORM_AUTH_URL: '', PLATFORM_AUTH_MODE: 'oauth2', PLATFORM_CLIENT_ID: 'cid', PLATFORM_CLIENT_SECRET: 'csec',
+    PLATFORM_OAUTH_AUTHORIZE_URL: stub.base + '/oauth/authorize', PLATFORM_OAUTH_TOKEN_URL: stub.base + '/oauth/token', PLATFORM_OAUTH_USERINFO_URL: stub.base + '/oauth/userinfo'
+  });
+  const c = await call('GET', '/api/config');
+  assert.equal(c.json.auth.platform, true);
+  assert.equal(c.json.auth.platform_mode, 'oauth2');
+  const u = new URL(c.json.auth.platform_login_url);
+  assert.equal(u.pathname, '/oauth/authorize');
+  assert.equal(u.searchParams.get('response_type'), 'code');
+  assert.equal(u.searchParams.get('client_id'), 'cid');
+  assert.equal(u.searchParams.get('redirect_uri'), 'http://localhost:8080/login/platform');
+  const a = await call('POST', '/api/login/platform', { code: 'ac-1' });
+  assert.equal(a.status, 200, JSON.stringify(a.json));
+  assert.deepEqual(a.json.user.academy, { role: 'director', org: { id: 'o-2', name: '柳南区示例幼儿园' }, source: 'platform' });
+  assert.equal(stub.seen.find(s => s.path === '/oauth/userinfo').auth, 'Bearer at-1');
+  const bad = await call('POST', '/api/login/platform', { code: 'ac-x' });
   assert.equal(bad.status, 401);
   assert.equal(bad.json.code, 'rejected');
 });
