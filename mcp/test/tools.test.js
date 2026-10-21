@@ -11,6 +11,7 @@ const ANSWERS = {
   '/api/org/summary': { org: { name: '甲园' }, at: 1, members_total: 4, passes7d: 3, members: [{ name: '甲一', done: 3 }], roles: [{ name: '保健医', path: 'care', members: 2, finished: 0, started: 2, avgDone: 3, total: 8, rate: 38, passes7d: 3 }] },
   '/api/review/stats': { pending: 1, overdue: 0, oldestAt: 1, medianMinutes: 40, queue: [{ id: 'x', name: '甲一' }], orgs: [{ name: '甲园', members: 4, pending: 1, overdue: 0, key: 'name:甲园' }] },
   '/api/cases': { total: 2, cases: [{ id: 'c1', title: '影子从哪来', domain: 'play', byName: '甲一', orgName: '甲园', at: 1, text: '一段正文' }] },
+  '/api/org/cohort': { org: { name: '甲园' }, at: 1, city: { others: 3, enough: true, rate: { mine: 7, median: 6 }, roles: [], domains: [] }, district: null },
   '/api/lectures': { upcoming: [{ id: 'l1', title: '讲堂', at: 1, minutes: 60 }] }, '/api/drills': { current: [] }, '/api/notices': { notices: [{ title: '停电', text: '周五', until: null }] }
 }
 function fakeFetch(url, init) {
@@ -50,6 +51,10 @@ describe('tools', () => {
     expect(s.roles[0]).toMatchObject({ role: '保健医', members: 2, rate_pct: 38 }); expect(JSON.stringify(s)).not.toContain('甲一')
     const v = await byName.org_review_stats({})
     expect(v.pending).toBe(1); expect(v.queue).toBeUndefined(); expect(v.orgs[0]).toEqual({ name: '甲园', members: 4, pending: 1, overdue: 0 }); expect(JSON.stringify(v)).not.toContain('甲一')
+  })
+  test('org_cohort passes the city block through', async () => {
+    const r = await byName.org_cohort({})
+    expect(r.city.rate).toEqual({ mine: 7, median: 6 }); expect(r.org).toBe('甲园')
   })
   test('search_cases passes the query through and trims the text', async () => {
     const r = await byName.search_cases({ q: '影子', community: true })

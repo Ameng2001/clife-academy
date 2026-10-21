@@ -46,6 +46,7 @@ import { weeklyRoutes } from './academy/weekly.js';
 import { coachRoutes as academyCoachRoutes } from './academy/coach.js';
 import { adminRoutes as academyAdminRoutes } from './academy/admin.js';
 import { tokenRoutes as academyTokenRoutes, tokenUserOf, looksLikeToken } from './academy/tokens.js';
+import { cohortRoutes as academyCohortRoutes } from './academy/cohort.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2659,6 +2660,7 @@ const routes = {
   ...academyCoachRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS }),
   ...academyAdminRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, auditRows: () => auditKeep(auditLines()) }),
   ...academyTokenRoutes({ json, readBody, db, saveDb, readSession, audit }),
+  ...academyCohortRoutes({ json, db, readSession, isAdmin, readStateCached }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

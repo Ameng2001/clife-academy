@@ -73,6 +73,10 @@
 
 `api/academy/admin.js`：`/api/admin/overview` 与 `/api/admin/notices` 只给管理员（非管理员 403 并记 `admin.denied`）；汇总只有数字，不带个人成绩。`/api/notices` 登录了就能读，只给没到期的。`/admin` 页里的停用、邀请码、审计流水复用上游 `/api/admin/users`、`/api/admin/user/disable`、`/api/admin/invites*`、`/api/admin/audit`，权限不变（管理员不能被停用）。公告发改撤记审计 `academy.notice.save` / `academy.notice.remove`。
 
+## 园所间匿名中位数
+
+`api/academy/cohort.js`：`/api/org/cohort` 只给园长与管理员（管理员 `?org=`）；应答里只有本园的数与其他园的中位数，其他园不足 3 所时中位数为 null；任何一所别的园的名字和数都不出现。
+
 ## 只读接口令牌（MCP 桥）
 
 `api/academy/tokens.js`：任何登录用户可建最多 5 枚，`cla_<id>.<secret>`，库里只存 sha256，新建应答给一次。`sessionOf` 把它当 bearer 会话：不过期、不续签（`GET /api/me` 不回新 token）；分发处对带它的非 GET 在进路由前就 403（`code: readonly`），所以令牌不可能写任何东西。能读什么仍由各接口按账号判，令牌不放大权限；撤销、账号停用即失效。新建与撤记审计 `academy.token.new` / `academy.token.revoke`。

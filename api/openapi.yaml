@@ -4285,6 +4285,14 @@ paths:
       description: '`{ id }`'
       responses:
         '200': { description: '`{ ok }`' }
+  /api/org/cohort:
+    get:
+      tags: [academy]
+      operationId: academyOrgCohort
+      summary: 园所间匿名中位数：本园对其他园（全市）与本区的整体完成率、各岗位完成率、七领域覆盖率、近 30 天在学占比
+      description: 园长、管理员（`?org=`）。其他园 ≥ 3 所才给中位数；只给中位数，不给任何一所别的园的数，不排名、不点名。
+      responses:
+        '200': { description: '`{ org, at, city:{ others, enough, rate, active30, roles, domains }, district|null }`' }
 components:
   securitySchemes:
     cookieAuth:

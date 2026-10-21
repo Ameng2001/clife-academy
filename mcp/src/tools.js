@@ -53,6 +53,10 @@ export const TOOLS = [
     handler: async () => { const r = await get('/api/org/checkup'); return { org: r.orgName || r.org, pushed_by_platform: r.pushed, card: r.card } }
   },
   {
+    name: 'org_cohort', description: '本园对其他园的匿名对照（园长、管理员）：整体完成率、各岗位完成率、七领域覆盖率、近 30 天在学占比，本园的数与其他园的中位数；其他园 ≥ 3 所才有中位数；不排名、不点名。', schema: {},
+    handler: async () => { const r = await get('/api/org/cohort'); return { org: r.org?.name || null, at: when(r.at), city: r.city, district: r.district } }
+  },
+  {
     name: 'org_honors', description: '园所集体荣誉（园长、管理员）：本园拿到的集体徽章。', schema: {},
     handler: async () => get('/api/org/honors')
   },

@@ -11,6 +11,8 @@ import Icon from '../../components/Icon.jsx'
 import { Button, TextField } from '../../components/ui.jsx'
 import { fmtDay } from './common.jsx'
 
+const DOMAIN_SHORT = { env: '环境', life: '一日生活', play: '游戏', plan: '教育活动', obs: '观察评价', comm: '沟通合作', reflect: '反思发展' }
+
 export default function Director() {
   const nav = useNavigate()
   const user = useStore(s => s.user)
@@ -39,6 +41,8 @@ export default function Director() {
   useEffect(() => { if (user) { load(); loadPairs() } }, [user?.id])
   const [checkup, setCheckup] = useState(null)
   useEffect(() => { if (user) api('/api/org/checkup').then(setCheckup).catch(() => setCheckup(null)) }, [user?.id])
+  const [cohort, setCohort] = useState(null)
+  useEffect(() => { if (user) api('/api/org/cohort').then(setCohort).catch(() => setCohort(null)) }, [user?.id])
   const [titles, setTitles] = useState(null), [titleFor, setTitleFor] = useState(null), [titleKey, setTitleKey] = useState('seed'), [titleLabel, setTitleLabel] = useState(''), [reason, setReason] = useState('')
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
   const [certs, setCerts] = useState(null)
@@ -88,6 +92,17 @@ export default function Director() {
         <span className="small muted" style={{ marginInlineStart: 12, minWidth: 56, textAlign: 'end' }}>{r.rate}%<br />{r.avgDone}/{r.total} 关</span>
       </div>)}
     </div></div>
+
+    {cohort?.city && <div className="sect"><div className="sect-t">与其他园对照 <span className="small muted">只给中位数 · 不排名、不点名</span></div><div className="sect-b">
+      {[{ k: 'city', t: '全市其他园', c: cohort.city }, ...(cohort.district ? [{ k: 'd', t: cohort.district.name + '其他园', c: cohort.district }] : [])].map(({ k, t, c }) => <div key={k} className="lrow" style={{ alignItems: 'flex-start' }}><div style={{ flex: 1 }}>
+        <div className="lrow-t">{t}<span className="small muted" style={{ marginInlineStart: 8 }}>{c.others} 所{c.enough ? '' : ` · 不足 ${c.minOthers} 所，不显示中位数`}</span></div>
+        {c.enough && <div className="small" style={{ marginTop: 4, lineHeight: 1.7 }}>
+          <div>整体完成率 本园 {c.rate.mine}% · 中位 {c.rate.median}%　近 30 天在学 本园 {c.active30.mine}% · 中位 {c.active30.median}%</div>
+          {c.roles.filter(r => r.median != null).length > 0 && <div className="muted">{c.roles.filter(r => r.median != null).map(r => `${r.name} 本园 ${r.mine}% · 中位 ${r.median}%`).join('　')}</div>}
+          <div className="muted">领域覆盖：{c.domains.map(d => `${DOMAIN_SHORT[d.key] || d.name} ${d.mine}/${d.median}`).join('　')}<span style={{ marginInlineStart: 6 }}>（本园/中位，%）</span></div>
+        </div>}
+      </div></div>)}
+    </div></div>}
 
     <div className="sect"><div className="sect-t">补训建议</div><div className="sect-b">
       {!needs.length && <div className="lrow small muted">各岗位都已完成，或还没有人开始。</div>}
