@@ -64,6 +64,7 @@ export default function Home() {
     </div>
 
     <div className="tiles">
+      {user?.admin && user.academy?.role !== 'director' && <div className="tile tappable" onClick={() => nav('/ops')}><div className="l"><Icon name="gauge" />点评时效</div><div className="v">全平台</div><div className="small muted">待点评、超期、各园一行</div></div>}
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
       {user?.academy?.role === 'district'
         ? <div className="tile tappable" onClick={() => nav('/district')}><div className="l"><Icon name="gauge" />区县看板</div><div className="v">{user.academy.district?.name || '本区'}</div><div className="small muted">园所数、覆盖率中位数、认证人数</div></div>

@@ -36,6 +36,7 @@ import { certificateRoutes } from './academy/certificates.js';
 import { questionRoutes } from './academy/questions.js';
 import { studioRoutes } from './academy/studios.js';
 import { portfolioRoutes } from './academy/portfolio.js';
+import { reviewStatRoutes } from './academy/reviewstats.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2635,6 +2636,7 @@ const routes = {
   ...QUESTIONS.routes,
   ...studioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...portfolioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
+  ...reviewStatRoutes({ json, db, readSession, isAdmin, pairs: PAIRS }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

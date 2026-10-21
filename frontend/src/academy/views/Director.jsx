@@ -43,6 +43,8 @@ export default function Director() {
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
   const [certs, setCerts] = useState(null)
   useEffect(() => { if (user) api('/api/org/certificates').then(setCerts).catch(() => setCerts(null)) }, [user?.id])
+  const [stats, setStats] = useState(null)
+  useEffect(() => { if (user) api('/api/review/stats').then(setStats).catch(() => setStats(null)) }, [user?.id])
   useEffect(() => { if (user) loadTitles() }, [user?.id])
   const grantTitle = async () => {
     if (reason.trim().length < 5) return useUI.getState().toast('写授予理由，至少 5 字')
@@ -140,6 +142,7 @@ export default function Director() {
 
     <div className="sect"><div className="sect-t">点评</div>
       <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">实践关待点评</div><div className="small muted">本园老师交的观察记录等证据，按量表给意见。</div></div><Icon name="chevronRight" /></div>
+      <div className="lrow tap" onClick={() => nav('/ops')}><div style={{ flex: 1 }}><div className="lrow-t">点评时效{stats ? ` · 待点评 ${stats.pending}${stats.overdue ? `，超两个工作日 ${stats.overdue}` : ''}` : ''}</div><div className="small muted">{stats?.medianHours != null ? `近 30 天中位 ${stats.medianHours} 小时 · ` : ''}每周看一次队列与时效，不排名。</div></div><Icon name="chevronRight" /></div>
     </div>
 
     <div className="sect"><div className="sect-t tap" onClick={() => nav('/checkup')}>本园应用体检 <Icon name="chevronRight" /></div>

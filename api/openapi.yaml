@@ -1224,6 +1224,14 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [answerId], properties: { answerId: { type: string }, on: { type: boolean } } } } } }
       responses:
         '200': { description: '`{ answer }`' }
+  /api/review/stats:
+    get:
+      tags: [academy]
+      operationId: academyReviewStats
+      summary: 点评时效看板：待点评、超两个工作日、近 30 天完成数与中位时长、点评队伍、答疑队列（园长本园；管理员全平台＋各园一行）
+      description: 看队列与时效，不列点评人各自点了多少，不排名。
+      responses:
+        '200': { description: '`{ scope, pending, overdue, oldestAt, done30, medianHours, within2d, reviewers, active30, members, questions, queue, orgs? }`' }
   /api/me/checkup:
     get:
       tags: [academy]

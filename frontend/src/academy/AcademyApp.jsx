@@ -33,6 +33,7 @@ import Certificates from './views/Certificates.jsx'
 import Questions from './views/Questions.jsx'
 import Studios from './views/Studios.jsx'
 import Portfolio from './views/Portfolio.jsx'
+import ReviewStats from './views/ReviewStats.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -104,6 +105,7 @@ function Shell() {
           <Route path="/questions" element={<Questions />} />
           <Route path="/studios" element={<Studios />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/ops" element={<ReviewStats />} />
           <Route path="/portfolio/hours/:id" element={<Portfolio />} />
           <Route path="/certs/:id" element={<Certificates />} />
           <Route path="/library" element={<Library />} />
