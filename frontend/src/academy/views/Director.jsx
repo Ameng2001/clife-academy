@@ -15,13 +15,28 @@ export default function Director() {
   const nav = useNavigate()
   const user = useStore(s => s.user)
   const [data, setData] = useState(null), [err, setErr] = useState(null), [busy, setBusy] = useState(false)
+  const [pairs, setPairs] = useState([]), [mentor, setMentor] = useState(''), [mentee, setMentee] = useState('')
+  const loadPairs = async () => { try { setPairs((await api('/api/org/pairs')).pairs) } catch { /* 403 等：不显示 */ } }
+  const addPair = async () => {
+    if (!mentor || !mentee) return
+    setBusy(true)
+    try { const r = await api('/api/org/pairs', { method: 'PUT', body: JSON.stringify({ mentor, mentee }) }); useUI.getState().toast(r.replaced ? '已换带教教师' : '已配对'); setMentor(''); setMentee(''); await loadPairs() }
+    catch (e) { useUI.getState().toast('没配成' + (e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
+  const endPair = async p => {
+    setBusy(true)
+    try { await api('/api/org/pairs/end', { method: 'POST', body: JSON.stringify({ id: p.id }) }); useUI.getState().toast('已结束'); await loadPairs() }
+    catch (e) { useUI.getState().toast('没结束成' + (e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
   const load = async () => {
     setBusy(true)
     try { setData(await api('/api/org/summary')); setErr(null) }
     catch (e) { setErr(e) }
     finally { setBusy(false) }
   }
-  useEffect(() => { if (user) load() }, [user?.id])
+  useEffect(() => { if (user) { load(); loadPairs() } }, [user?.id])
   const setReviewer = async m => {
     setBusy(true)
     try { await api('/api/org/reviewer', { method: 'PUT', body: JSON.stringify({ uid: m.id, reviewer: !m.reviewer }) }); useUI.getState().toast(m.reviewer ? `${m.name} 不再是点评人` : `${m.name} 已设为点评人`); await load() }
@@ -72,6 +87,20 @@ export default function Director() {
         {m.id !== user.id && m.role !== 'director' && <button className={'chip' + (m.reviewer ? ' on' : '')} style={{ marginInlineStart: 10 }} disabled={busy} title={m.reviewer ? '取消点评人' : '设为点评人'} onClick={() => setReviewer(m)}>{m.reviewer ? '取消' : '设为点评人'}</button>}
       </div>)}
       <div className="lrow small muted">点评人能看本园的点评队列、按量表点评实践关的提交。一般是种子教师或教研主任；园长本来就能点评。</div>
+    </div></div>
+
+    <div className="sect"><div className="sect-t">带教配对</div><div className="sect-b">
+      {!pairs.length && <div className="lrow small muted">还没有配对。带教教师能看到、能点评所带教师的实践关作品。</div>}
+      {pairs.map(p => <div key={p.id} className="lrow">
+        <div style={{ flex: 1 }}><div className="lrow-t">{p.mentor.name} 带 {p.mentee.name}</div><div className="small muted">{fmtDay(p.at)} 起</div></div>
+        <button className="chip" disabled={busy} onClick={() => endPair(p)}>结束</button>
+      </div>)}
+      {data.members.length > 1 && <div className="lrow" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <select className="ac-sel" value={mentor} onChange={e => setMentor(e.target.value)} style={{ flex: 1, minWidth: 120 }}><option value="">带教教师</option>{data.members.filter(m => m.id !== mentee).map(m => <option key={m.id} value={m.id}>{m.name} · {m.roleName}</option>)}</select>
+        <span className="small muted">带</span>
+        <select className="ac-sel" value={mentee} onChange={e => setMentee(e.target.value)} style={{ flex: 1, minWidth: 120 }}><option value="">新教师</option>{data.members.filter(m => m.id !== mentor && m.role !== 'director').map(m => <option key={m.id} value={m.id}>{m.name} · {m.roleName}</option>)}</select>
+        <Button size="sm" variant="tinted" disabled={busy || !mentor || !mentee} onClick={addPair}>配对</Button>
+      </div>}
     </div></div>
 
     <div className="sect"><div className="sect-t">点评</div>

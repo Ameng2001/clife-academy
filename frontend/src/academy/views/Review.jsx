@@ -23,7 +23,7 @@ function Card({ s, onReviewed }) {
   }
   const done = s.status !== 'pending'
   return <div className="card" style={{ marginTop: 10 }}>
-    <div className="ac-row"><div><div style={{ fontWeight: 600 }}>{s.title}</div><div className="small muted">{s.name}{s.role ? ' · ' + ({ nurse: '保健医', teacher: '班级教师', care: '保育员', it: '信息接口人', director: '园长' }[s.role] || s.role) : ''} · {fmtDay(s.at)}</div></div><StatusTag status={s.status} /></div>
+    <div className="ac-row"><div><div style={{ fontWeight: 600 }}>{s.title}</div><div className="small muted">{s.name}{s.mentee ? ' · 带教' : ''}{s.role ? ' · ' + ({ nurse: '保健医', teacher: '班级教师', care: '保育员', it: '信息接口人', director: '园长' }[s.role] || s.role) : ''} · {fmtDay(s.at)}</div></div><StatusTag status={s.status} /></div>
     {s.text && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{s.text}</div>}
     {s.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{s.files.map(f => <a key={f.hash} href={`api/submissions/file?id=${s.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/submissions/file?id=${s.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {done && s.review && <div className="small" style={{ marginTop: 10, color: 'var(--label-2)' }}>{s.review.byName} · {fmtDay(s.review.at)}{s.review.comment ? ' · ' + s.review.comment : ''}</div>}
@@ -47,9 +47,9 @@ export default function Review() {
   const [data, setData] = useState(null), [err, setErr] = useState(null)
   const load = async () => { try { setData(await api('/api/review/queue')); setErr(null) } catch (e) { setErr(e) } }
   useEffect(() => { if (user) load() }, [user?.id])
-  const head = <div className="hdr"><div><h1>点评</h1><div className="sub">本园实践关的提交 · 评作品不评人</div></div><div className="hdr-actions"><button className="iconbtn" onClick={load}><Icon name="repeat" /></button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+  const head = <div className="hdr"><div><h1>点评</h1><div className="sub">{data?.scope === 'mentees' ? '所带教师的实践关提交' : '本园实践关的提交'} · 评作品不评人</div></div><div className="hdr-actions"><button className="iconbtn" onClick={load}><Icon name="repeat" /></button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
   if (!user) return <div className="narrow">{head}<div className="card small muted">登录后可用。</div></div>
-  if (err) return <div className="narrow">{head}<div className="card small">{err.status === 403 ? '这页给园长与被指定的点评人。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
+  if (err) return <div className="narrow">{head}<div className="card small">{err.status === 403 ? '这页给园长、被指定的点评人与带教教师。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
   if (!data) return <div className="narrow">{head}<div className="card small muted">正在取数…</div></div>
   return <div className="narrow">
     {head}

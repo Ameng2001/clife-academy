@@ -20,7 +20,7 @@ const HASH = /^[0-9a-f]{64}$/;
 
 export const canReview = (u, isAdmin) => !!u && (u.academy?.role === 'director' || u.academy?.reviewer === true || isAdmin(u));
 
-export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null }) {
+export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null, pairs = null }) {
   db.submissions = db.submissions || [];
   const newId = () => crypto.randomBytes(9).toString('base64url');
   const pub = (s, { withUser = false } = {}) => ({
@@ -28,6 +28,9 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     ...(withUser ? { uid: s.uid, name: s.name, role: s.role } : {})
   });
   const mine = uid => db.submissions.filter(s => s.uid === uid);
+  // 谁能点评谁：本园点评人（园长、管理员、reviewer）看全园；带教教师看所带的人
+  const mentees = u => (pairs ? pairs.menteesOf(u.id) : []);
+  const mayReview = (u, s) => (canReview(u, isAdmin) && !!s.org && s.org === orgKeyOf(u) && s.uid !== u.id) || (pairs ? pairs.isMentorOf(u.id, s.uid) : false);
 
   return {
   // 交一次：{ levelId, text, files:[{hash,name,type}] }
@@ -51,7 +54,12 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     audit(req, 'submission.new', { user, msg: levelId });
     json(res, 200, { submission: pub(s) });
     // 实践关：通知本园点评人（订阅消息，有额度才发；失败不影响提交）
-    if (type === 'practice' && notifier) for (const r of notifier.reviewersOf(s.org, user.id, isAdmin)) notifier.send(r.id, 'queue', { title: LEVELS[levelId] || levelId, who: user.name, at: s.at, note: text }, 'pages/home/home');
+    if (type === 'practice' && notifier) {
+      const targets = notifier.reviewersOf(s.org, user.id, isAdmin).map(r => r.id);
+      const m = pairs ? pairs.mentorOf(user.id) : null;
+      if (m && !targets.includes(m)) targets.push(m);
+      for (const id of targets) notifier.send(id, 'queue', { title: LEVELS[levelId] || levelId, who: user.name, at: s.at, note: text }, 'pages/home/home');
+    }
   },
 
   // 本人的提交；?level= 只要那一关。研讨关交过以后带同园他人的作答（others）。
@@ -73,24 +81,26 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
   'GET /api/review/queue': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    if (!canReview(user, isAdmin)) return json(res, 403, { error: 'reviewers only', code: 'reviewer' });
+    const my = mentees(user);
+    if (!canReview(user, isAdmin) && !my.length) return json(res, 403, { error: 'reviewers only', code: 'reviewer' });
     const org = orgKeyOf(user);
-    const inOrg = org ? db.submissions.filter(s => s.org === org && s.uid !== user.id) : [];
+    // 点评人：本园全部；只是带教教师：所带的人
+    const inOrg = canReview(user, isAdmin) ? (org ? db.submissions.filter(s => s.org === org && s.uid !== user.id) : []) : db.submissions.filter(s => my.includes(s.uid));
     const pending = inOrg.filter(s => s.status === 'pending').sort((a, b) => a.at - b.at);
     const done = inOrg.filter(s => s.status !== 'pending' && s.type === 'practice').sort((a, b) => (b.review?.at || 0) - (a.review?.at || 0)).slice(0, 20);
-    const row = s => ({ ...pub(s, { withUser: true }), title: LEVELS[s.levelId] || s.levelId, rubric: RUBRICS[s.levelId] || [] });
-    json(res, 200, { pending: pending.map(row), done: done.map(row) });
+    const row = s => ({ ...pub(s, { withUser: true }), title: LEVELS[s.levelId] || s.levelId, rubric: RUBRICS[s.levelId] || [], mentee: my.includes(s.uid) });
+    json(res, 200, { pending: pending.map(row), done: done.map(row), scope: canReview(user, isAdmin) ? 'org' : 'mentees' });
   },
 
   // 点评：{ id, verdict:'pass'|'revise', scores:[1..5], comment }
   'POST /api/submissions/review': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    if (!canReview(user, isAdmin)) return json(res, 403, { error: 'reviewers only', code: 'reviewer' });
+    if (!canReview(user, isAdmin) && !mentees(user).length) return json(res, 403, { error: 'reviewers only', code: 'reviewer' });
     const body = await readBody(req);
     const s = db.submissions.find(x => x.id === str(body.id, 40));
     if (!s) return json(res, 404, { error: 'no such submission' });
-    if (!s.org || s.org !== orgKeyOf(user) || s.uid === user.id) return json(res, 403, { error: 'not in your kindergarten', code: 'org' });
+    if (!mayReview(user, s)) return json(res, 403, { error: 'not in your kindergarten', code: 'org' });
     const verdict = body.verdict === 'pass' ? 'pass' : body.verdict === 'revise' ? 'revise' : null;
     if (!verdict) return json(res, 400, { error: 'verdict must be pass or revise', code: 'verdict' });
     const rubric = RUBRICS[s.levelId] || [];
@@ -113,7 +123,7 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     const s = db.submissions.find(x => x.id === q.get('id'));
     const hash = q.get('hash') || '';
     if (!s || !HASH.test(hash) || !s.files.some(f => f.hash === hash)) return json(res, 404, { error: 'not found' });
-    if (s.uid !== user.id && !(canReview(user, isAdmin) && s.org && s.org === orgKeyOf(user))) return json(res, 403, { error: 'forbidden' });
+    if (s.uid !== user.id && !mayReview(user, s)) return json(res, 403, { error: 'forbidden' });
     const f = MEDIA.file(s.uid, hash);
     if (!f) return json(res, 404, { error: 'media-missing' });
     await sendMediaFile(res, f, hash);

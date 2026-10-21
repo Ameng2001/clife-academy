@@ -35,7 +35,7 @@
 ## 证据提交与点评
 
 实践关、研讨关的「做」不走平台事件，走提交（`api/academy/submissions.js`）：`POST /api/submissions` 交文字与照片引用（照片先 `PUT /api/media/{hash}` 存在本人名下），`GET /api/submissions?level=` 看本人的提交与点评，研讨关交过以后带同园他人的作答。
-点评权是园长、管理员或 `academy.reviewer === true` 的账号（园长在网页 `/org` 本园人员里点「设为点评人」，走 `PUT /api/org/reviewer`，只能标本园的人、不能标自己）：`GET /api/review/queue` 本园待点评，`POST /api/submissions/review` 给 pass / revise 与 1–5 分量表，revise 必须写意见；只能点评本园、非本人的提交。证据文件经 `GET /api/submissions/file?id=&hash=`，提交者本人或本园点评人可读。网页 `/review`，小程序首期只交文字。
+点评权是园长、管理员或 `academy.reviewer === true` 的账号（园长在网页 `/org` 本园人员里点「设为点评人」，走 `PUT /api/org/reviewer`，只能标本园的人、不能标自己）：`GET /api/review/queue` 本园待点评，`POST /api/submissions/review` 给 pass / revise 与 1–5 分量表，revise 必须写意见；只能点评本园、非本人的提交。带教教师（`api/academy/pairs.js`，园长在 `/org` 配对）不需要 reviewer 标记，也能看、能点评所带的人的提交。证据文件经 `GET /api/submissions/file?id=&hash=`，提交者本人或本园点评人可读。网页 `/review`，小程序首期只交文字。
 
 ## 订阅消息
 

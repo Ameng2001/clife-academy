@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../../lib/api.js'
 import Icon from '../../components/Icon.jsx'
 import { Button } from '../../components/ui.jsx'
 import { ORG, PROBES, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
@@ -18,6 +20,8 @@ export default function Home() {
   const user = useStore(s => s.user)
   const orgName = user?.academy?.org?.name || ORG
   const d = new Date()
+  const [pair, setPair] = useState(null)
+  useEffect(() => { if (user) api('/api/me/pair').then(setPair).catch(() => setPair(null)); else setPair(null) }, [user?.id])
   return <div className="narrow">
     <div className="hdr">
       <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
@@ -64,6 +68,10 @@ export default function Home() {
         </div> })}
       </div>
     </div>}
+    {(pair?.mentor || pair?.mentees?.length > 0) && <div className="sect"><div className="sect-t">带教</div><div className="sect-b">
+      {pair.mentor && <div className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">带教教师：{pair.mentor.name}</div><div className="small muted">你的实践关作品由 {pair.mentor.name} 点评</div></div></div>}
+      {pair.mentees?.length > 0 && <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">带着 {pair.mentees.map(m => m.name).join('、')}</div><div className="small muted">看他们的实践关作品并点评</div></div><Icon name="chevronRight" /></div>}
+    </div></div>}
     {canReview(user) && user?.academy?.role !== 'director' && <div className="sect"><div className="sect-b"><div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">点评队列</div><div className="small muted">本园实践关待点评</div></div><Icon name="chevronRight" /></div></div></div>}
   </div>
 }

@@ -700,6 +700,43 @@ paths:
       responses:
         '200': { description: '`{ events: [{ id, event, at, ref, src, received, levels }], now }`' }
         '401': { description: 未登录 }
+  /api/me/pair:
+    get:
+      tags: [academy]
+      operationId: academyMyPair
+      summary: 本人的带教配对
+      description: '`{ mentor: { id, name, role } | null, mentees: [...] }`。'
+      responses:
+        '200': { description: 配对 }
+        '401': { description: 未登录 }
+  /api/org/pairs:
+    get:
+      tags: [academy]
+      operationId: academyOrgPairs
+      summary: 本园的带教配对（园长、管理员）
+      responses:
+        '200': { description: '`{ pairs: [{ id, mentor, mentee, at }] }`' }
+        '403': { description: 不是园长 }
+    put:
+      tags: [academy]
+      operationId: academyOrgPair
+      summary: 配一对
+      description: '`{ mentor, mentee }`，两人都在本园。被带教的人已有带教教师的，旧配对结束（`replaced: true`）。带教教师能看、能点评所带的人的实践关提交。'
+      responses:
+        '200': { description: '`{ pair, replaced }`' }
+        '400': { description: 自己带自己 }
+        '403': { description: 不是园长，或不在本园 }
+        '404': { description: 没有这个人 }
+  /api/org/pairs/end:
+    post:
+      tags: [academy]
+      operationId: academyOrgPairEnd
+      summary: 结束一对
+      description: '`{ id }`。'
+      responses:
+        '200': { description: '`{ ok }`' }
+        '403': { description: 不是园长，或不在本园 }
+        '404': { description: 没有这对 }
   /api/org/reviewer:
     put:
       tags: [academy]
