@@ -29,6 +29,7 @@ import { drillRoutes } from './academy/drills.js';
 import { honorRoutes, createLedger } from './academy/honors.js';
 import { pointsRoutes } from './academy/points.js';
 import { contestRoutes } from './academy/contests.js';
+import { checkupRoutes } from './academy/checkup.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2618,6 +2619,7 @@ const routes = {
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
   ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER }),
   ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER }),
+  ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 

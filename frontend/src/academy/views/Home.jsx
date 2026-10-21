@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import Icon from '../../components/Icon.jsx'
 import { Button } from '../../components/ui.jsx'
-import { ORG, PROBES, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
+import { ORG, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
 import { canReview } from './Review.jsx'
 import { drafts } from '../../lib/level-draft.js'
 import { useS, myPath, RoleSelect, fmtDay } from './common.jsx'
@@ -26,6 +26,8 @@ export default function Home() {
   const [lecture, setLecture] = useState(null)
   const [drill, setDrill] = useState(null)
   const [contest, setContest] = useState(null)
+  const [chk, setChk] = useState(null)
+  useEffect(() => { if (user) api('/api/me/checkup').then(setChk).catch(() => setChk(null)); else setChk(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/contests').then(r => setContest(r.current[0] || null)).catch(() => setContest(null)); else setContest(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/drills').then(r => setDrill(r.current[0] || null)).catch(() => setDrill(null)); else setDrill(null) }, [user?.id])
   useEffect(() => { api('/api/lectures').then(r => setLecture(r.upcoming[0] || null)).catch(() => setLecture(null)) }, [user?.id])
@@ -59,7 +61,7 @@ export default function Home() {
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
       {user?.academy?.role === 'director' || user?.admin
         ? <div className="tile tappable" onClick={() => nav('/org')}><div className="l"><Icon name="gauge" />园长看板</div><div className="v">本园</div><div className="small muted">各岗位完成情况与补训建议</div></div>
-        : <div className="tile"><div className="l"><Icon name="gauge" />本园体检</div><div className="v">{PROBES.length} 项</div><div className="small muted">探针接平台后显示</div></div>}
+        : <div className="tile"><div className="l"><Icon name="gauge" />本园体检</div><div className="v">{chk?.sum ? chk.sum.warn : '—'}<span className="small muted"> 项需关注</span></div><div className="small muted">{chk?.recommendations?.length ? `推荐你学「${chk.recommendations[0].title}」` : chk?.sum ? '本周园长看板出卡' : '登录后显示'}</div></div>}
     </div>
 
     <div className="sect">
@@ -93,6 +95,9 @@ export default function Home() {
       <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{drill.title}</div>
       <div className="small" style={{ color: drill.mine ? 'var(--green)' : 'var(--acc)' }}>{drill.mine ? (drill.mine.review ? '已答 · ' + drill.mine.review.byName + ' 点评了' : '已答 · 看同园老师怎么答') : '去作答'} <Icon name="chevronRight" /></div>
     </div>}
+    {chk?.recommendations?.length > 0 && <div className="sect"><div className="sect-t">本园体检推给你的关</div><div className="sect-b">
+      {chk.recommendations.map(r => <div key={r.levelId} className="lrow tap" onClick={() => nav('/level/' + r.levelId)}><div style={{ flex: 1 }}><div className="lrow-t">「{r.title}」</div><div className="small muted">{r.why}</div></div><Icon name="chevronRight" /></div>)}
+    </div></div>}
     {contest && <div className="card tappable" style={{ marginTop: 14 }} onClick={() => nav('/contests?id=' + contest.id)}>
       <div className="ac-row"><span className="small muted"><Icon name="trophy" /> 斗课 · {contest.phase === 'open' ? '应战中，' + fmtDay(contest.dueAt) + ' 截止' : '互评与点评'}</span><span className="small muted">{contest.entries} 人应战</span></div>
       <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{contest.title}</div>

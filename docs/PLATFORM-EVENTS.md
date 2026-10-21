@@ -73,3 +73,41 @@ Content-Type: application/json
 2. 用户标识：与登录契约一致即可，请确认平台事件层拿到的是同一个 `uid`。
 3. 第 4 节的触发点逐条确认，尤其「三端各登录 1 次」「PAD 与小程序各登录 1 次」这两个跨端事件由谁汇总。
 4. 历史操作要不要补传（教师在学关之前已经做过的）：大课堂接受任何时间的事件，补传与否由平台定。
+
+## 7. 探针数据回传（体检卡）
+
+大课堂的园长看板每周一出一张「本园应用体检卡」，12 项探针。11 项由平台回传园级数字，「学习」一项大课堂自己算。阈值、状态与文字都在大课堂侧（`api/academy/checkup.js`），平台只给数。
+边界：数是园级运行指标，不含任何幼儿数据；大课堂不做园所排名、不作教师考核依据；区县只看汇总口径。
+
+```
+POST https://{大课堂域名}/api/checkup
+Authorization: Bearer {PLATFORM_EVENTS_KEY}      ← 与事件回传同一把密钥
+Content-Type: application/json
+
+单园  { "org": { "id": "org-001" }, "week": "2026-11-02", "probes": { "disease": 5, "tickets": 4, "devices": 2, "fitness": 0, "morning": 1, "meals": 1, "accounts": 1, "basics": 0.96, "attendance": 0.98, "sleep": 1, "research": 14 } }
+批量  { "cards": [ { … }, { … } ] }               ← 一次最多 50 园
+```
+
+| 字段 | 必填 | 说明 |
+|---|---|---|
+| `org.id` / `org.name` | 二选一 | 与登录契约里的园所 `org.id` 同一个；没有 id 的园用名字 |
+| `week` | 否 | 这组数属于哪一周，任一天即可，大课堂归到周一；缺省算本周 |
+| `probes` | 是 | 至少一项；一园一周一条，后到的按键覆盖，可以分几次补齐 |
+
+| 键 | 探针 | 平台给什么数 |
+|---|---|---|
+| `disease` | 疾病管理 | 未填写康复结论的疾病记录条数 |
+| `tickets` | 工单 | 本周同一主题的咨询次数（取最多的一个主题） |
+| `devices` | 设备在线 | 连续离线 ≥ 2 天的设备台数 |
+| `fitness` | 体能 | 本学期完成国体测评的班级比例（0–1） |
+| `morning` | 晨午检 | 本周有晨午检记录的在园日比例（0–1） |
+| `meals` | 膳食 | 下周带量食谱是否已发布（1 / 0） |
+| `accounts` | 账号覆盖 | 已开通 / 应开通岗位账号的比例（0–1） |
+| `basics` | 基础数据 | 健康档案字段完整度（0–1） |
+| `attendance` | 出勤与请假 | 出勤当日确认率（0–1） |
+| `sleep` | 睡眠 | 本周睡眠垫有数据回传的在园日比例（0–1） |
+| `research` | 教研 | 本月课案篇数 |
+
+应答：`200 { "accepted": 2, "rejected": [ { "i": 1, "code": "unknown-probe", "keys": ["bogus"], "accepted": true } ] }`。`code` 还有 `no-org`、`no-probes`、`bad-value`（负数或非数）。定义可随时查 `GET /api/checkup/probes`。
+建议每周一早上回传上周数；新上线园所前两周大课堂只开账号覆盖、基础数据、设备在线三项，其余照传即可。
+大课堂侧的自动化测试在 `api/test/academy-checkup.test.js`。

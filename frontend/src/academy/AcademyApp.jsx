@@ -27,6 +27,7 @@ import Lectures from './views/Lectures.jsx'
 import Drills from './views/Drills.jsx'
 import Honors from './views/Honors.jsx'
 import Contests from './views/Contests.jsx'
+import Checkup from './views/Checkup.jsx'
 import Library from './views/Library.jsx'
 import './academy.css'
 
@@ -92,6 +93,7 @@ function Shell() {
           <Route path="/drills" element={<Drills />} />
           <Route path="/honors" element={<Honors />} />
           <Route path="/contests" element={<Contests />} />
+          <Route path="/checkup" element={<Checkup />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<Navigate to="/home" replace />} />

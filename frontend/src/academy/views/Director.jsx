@@ -1,12 +1,12 @@
 // 园长看板：本园各岗位在大课堂里的学习情况（GET /api/org/summary）。
 // 只按岗位汇总与补训建议；人员列表只有通过关数与最近学习日期，没有测验分；不跨园、不排名（docs/ROADMAP.md 第八节）。
-// 探针体检卡要接平台数据，这里先占位。
+// 探针体检卡：GET /api/org/checkup（views/Checkup.jsx 的 CheckupCard）。
 import { useEffect, useState } from 'react'
 import { useUI } from '../../store/useUI.js'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { api } from '../../lib/api.js'
-import { PROBES } from '../../lib/lessons.js'
+import { CheckupCard } from './Checkup.jsx'
 import Icon from '../../components/Icon.jsx'
 import { Button, TextField } from '../../components/ui.jsx'
 import { fmtDay } from './common.jsx'
@@ -37,6 +37,8 @@ export default function Director() {
     finally { setBusy(false) }
   }
   useEffect(() => { if (user) { load(); loadPairs() } }, [user?.id])
+  const [checkup, setCheckup] = useState(null)
+  useEffect(() => { if (user) api('/api/org/checkup').then(setCheckup).catch(() => setCheckup(null)) }, [user?.id])
   const [titles, setTitles] = useState(null), [titleFor, setTitleFor] = useState(null), [titleKey, setTitleKey] = useState('seed'), [titleLabel, setTitleLabel] = useState(''), [reason, setReason] = useState('')
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
   useEffect(() => { if (user) loadTitles() }, [user?.id])
@@ -132,8 +134,8 @@ export default function Director() {
       <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">实践关待点评</div><div className="small muted">本园老师交的观察记录等证据，按量表给意见。</div></div><Icon name="chevronRight" /></div>
     </div>
 
-    <div className="sect"><div className="sect-t">本园应用体检</div>
-      <div className="card small muted">{PROBES.length} 项探针接平台数据后每周出卡。这里只看园所对平台的使用情况，不出现任何幼儿数据，不排名，不作考核依据。</div>
+    <div className="sect"><div className="sect-t tap" onClick={() => nav('/checkup')}>本园应用体检 <Icon name="chevronRight" /></div>
+      {checkup ? <CheckupCard data={checkup} compact /> : <div className="card small muted">12 项探针接平台数据后每周出卡。只看园所对平台的使用情况，不出现任何幼儿数据，不排名，不作考核依据。</div>}
     </div>
     <div style={{ height: 8 }} /><Button variant="ghost" className="dim" onClick={() => nav('/home')}>回首页</Button>
   </div>

@@ -851,6 +851,38 @@ paths:
       responses:
         '200': { description: 文件 }
         '404': { description: 没有 }
+  /api/checkup:
+    post:
+      tags: [academy]
+      operationId: academyCheckupPush
+      summary: 平台回传本周探针数（PLATFORM_EVENTS_KEY 或管理员）
+      description: '`{ org:{id?|name}, week?, probes:{ disease, tickets, devices, fitness, morning, meals, accounts, basics, attendance, sleep, research } }` 或 `{ cards:[…] }`（≤ 50）。数是园级运行指标，不含任何幼儿数据。一园一周一条，后到的按键覆盖。'
+      responses:
+        '200': { description: '`{ accepted, rejected:[{ i, code }] }`' }
+        '403': { description: 没带平台密钥也不是管理员 }
+  /api/org/checkup:
+    get:
+      tags: [academy]
+      operationId: academyOrgCheckup
+      summary: 本园体检卡（园长、管理员）
+      description: '`{ org, card:{ week, weeks, sum, probes:[{ key, name, status, text, weeks, consecutive, go, act }], recommendations, limited } }`。「学习」一项大课堂自己算；新上线园所前两周只开三项；连续两周需关注的项给对应岗位推荐关卡。'
+      responses:
+        '200': { description: 体检卡 }
+        '403': { description: 不是园长 }
+  /api/me/checkup:
+    get:
+      tags: [academy]
+      operationId: academyMyCheckup
+      summary: 本园体检推给我这个岗位的关卡
+      responses:
+        '200': { description: '`{ week, recommendations, sum, limited }`' }
+  /api/checkup/probes:
+    get:
+      tags: [academy]
+      operationId: academyCheckupProbes
+      summary: 12 项探针定义（给平台接口人）
+      responses:
+        '200': { description: '`{ probes, earlyDays }`' }
   /api/contests:
     get:
       tags: [academy]
