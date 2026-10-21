@@ -73,6 +73,7 @@
  * device that came back online after any time away brought back every workout, routine, custom
  * exercise, weigh-in or favourite the other device had removed meanwhile.
  */
+import { mergeAcademy, academyExtras } from './academy-merge.js'
 import { beatsWeight } from './exercises.js'
 import { bestWeightForEntry } from './history.js'
 import { convertStateUnit, convertBodyWeight } from './units.js'
@@ -613,6 +614,8 @@ const OWN_MERGE = new Set([
   '_ts', '_rev', '_wid', '_wids', '_unstamped', '_prior', 'active', 'unit', 'unitSet', 'resetAt', 'resetIds', 'deleted', 'edited', 'undone', 'routineOrder',
   'workouts', 'routines', 'customEx', 'equipProfiles', 'gymCards', 'bodyweight', 'measurements', 'favEx',
   'exWeights', 'balanceOverrides', 'loadKind', 'plates', 'dbLoad', 'dumbbells', 'dayNotes',
+  // 大课堂（lib/academy-merge.js）：进度取并集、记录只追加、学分重算；草稿不进同步
+  'progress', 'sessions', 'credits', 'lvDraft',
 ])
 // Stamped per key instead of whole: one day of the plan, one exercise's note or bar.
 const PER_KEY = new Set(['week', 'dayPlan', 'exNotes', 'barWeights'])
@@ -867,6 +870,8 @@ export function mergeStates(a0, b0, { prefer } = {}) {
     }
     if (Object.keys(undone).length) out.undone = undone; else delete out.undone
   }
+  // 大课堂的三个字段有自己的规则，与 prefer 无关：通过是事实，签到也不能丢
+  mergeAcademy(out, n, o)
   if (deleted) out.deleted = deleted; else delete out.deleted
   out._ts = Math.max(a._ts || 0, b._ts || 0)
   if (resetAt) out.resetAt = resetAt
@@ -1110,6 +1115,7 @@ export function stampEntries(prev = [], next = [], now = Date.now()) { return st
 // made on the phone on a day the profile already had one was dropped without the question ever
 // being asked. Weights are compared in the server's unit.
 export function localExtras(local, server) {
+  const levels = academyExtras(local, server)
   const have = new Set(list(server?.workouts).map(workoutKey))
   const days = new Map(list(server?.bodyweight).filter(e => e && e.d != null).map(e => [e.d, e]))
   const ex = new Set(list(server?.customEx).map(e => e?.id))
@@ -1134,5 +1140,6 @@ export function localExtras(local, server) {
     customEx: list(local?.customEx).filter(e => e && !ex.has(e.id)).length,
     ...(routines ? { routines } : {}),
     ...(setup ? { setup } : {}),
+    ...(levels ? { levels } : {}),
   }
 }

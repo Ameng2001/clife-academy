@@ -199,3 +199,9 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   `DEV_LOGIN` 开发桩；`/api/config` 出 `auth` 块，`/api/me` 带 `academy`；`api/test/auth.test.js` 6 项。前端 `src/academy/views/Login.jsx` 替换上游登录页，
   登录后 `S.role` 取服务端岗位。浏览器验证：开发桩以园长身份登录 → 首页岗位、姓名、我的页正确，服务端 `state-<uid>.json` 落了 progress。
   说明在 `docs/AUTH.md`。平台契约待与平台团队对齐。
+- **2026-10-21（晚）** 进度合并与草稿只留本地。`lib/academy-merge.js`：`progress` 取并集、同关卡取 `passedAt` 最早；`sessions` 按 id 并集、按结束时间排序；
+  `credits` 由 `progress` 推导，不再各自同步；`lvDraft` 从 `S` 移除，合并时一并剔除。挂进 `lib/sync-merge.js`（`OWN_MERGE` 登记四个字段，`localExtras` 多出 `levels`）。
+  草稿改走 `lib/level-draft.js`（localStorage `academy_drafts_v1`，`useDraft(id)` 订阅），通关即清；不进 `S`、不进 `PUT /api/data`。
+  登录接管：`runAdopt` 的询问条件加上 `extras.levels`，`askAddDeviceData` 出中文弹层「把这台设备上通过的关卡记到账号里？」。
+  浏览器验证：访客通过 nurse-0、留 nurse-1 草稿 → 以已有 director-0 的账号登录 → 弹层确认 → 本地与服务端均为 `director-0 + nurse-0`，学分各 1，草稿仍在本地、服务端无 `lvDraft`。
+  测试：`academy-merge.test.js` 9 项、`level-draft.test.js` 3 项；api 契约测试 13 项通过。

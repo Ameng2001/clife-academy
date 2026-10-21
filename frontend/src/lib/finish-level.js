@@ -7,6 +7,9 @@
 // 日志只追加：sessions 记这一次学习发生了什么，progress 记结果。改规则不改历史。
 import { levelOf, statusOf } from './lessons.js'
 
+// 记录的 id：合并时按它去重（lib/academy-merge.js），所以两台设备同一毫秒也不能撞
+const sessionId = now => now.toString(36) + '-' + Math.random().toString(36).slice(2, 8)
+
 export const DEFAULT_PASS_RATE = 1
 export const CREDITS_PER_LEVEL = 1
 
@@ -28,7 +31,7 @@ export function finishLevel(S, id, attempt = {}, { now = Date.now(), passRate = 
   if (!level) return { S, passed: false, why: 'no-level' }
   const progress = S.progress || {}
   const session = {
-    d: new Date(now).toISOString().slice(0, 10), levelId: id,
+    id: sessionId(now), d: new Date(now).toISOString().slice(0, 10), levelId: id,
     start: attempt.start ?? now, end: attempt.end ?? now,
     quiz: { right: attempt.right ?? 0, of: attempt.of ?? level.qs.length },
     events: Array.isArray(attempt.events) ? attempt.events.slice() : [],

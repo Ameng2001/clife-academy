@@ -110,10 +110,13 @@ export function addDeviceSetupMessage(routines) {
 }
 export function askAddDeviceData(extras) {
   const logged = extras.workouts || extras.bodyweight || extras.customEx
+  // 大课堂：这台设备没登录时通过的关卡（lib/academy-merge.js academyExtras）
+  const levels = Number(extras.levels) || 0
   return new Promise(resolve => confirmSheet({
-    title: logged ? t('Add this device\'s workouts to your profile?') : t('Add this device\'s plan to your profile?'),
-    message: logged ? addDeviceDataMessage(extras.workouts, extras.bodyweight) : addDeviceSetupMessage(extras.routines),
-    confirmText: t('Add them'), cancelText: t('Keep profile as is'),
+    title: levels ? '把这台设备上通过的关卡记到账号里？' : logged ? t('Add this device\'s workouts to your profile?') : t('Add this device\'s plan to your profile?'),
+    message: levels ? `这台设备在没登录时通过了 ${levels} 关。记到账号里，或者保持账号在服务器上的样子。`
+      : logged ? addDeviceDataMessage(extras.workouts, extras.bodyweight) : addDeviceSetupMessage(extras.routines),
+    confirmText: levels ? '记到账号里' : t('Add them'), cancelText: levels ? '保持账号原样' : t('Keep profile as is'),
     onConfirm: () => resolve(true), onCancel: () => resolve(false), locked: true
   }))
 }

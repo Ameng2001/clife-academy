@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
 import { Button } from '../../components/ui.jsx'
 import { ORG, PROBES, PATH_KEYS, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
+import { drafts } from '../../lib/level-draft.js'
 import { useS, myPath, RoleSelect } from './common.jsx'
 
 export default function Home() {
@@ -25,7 +26,7 @@ export default function Home() {
         <div className="ac-note" style={{ marginTop: 6 }}>{today.goal}</div>
         <div className="ac-row" style={{ marginTop: 12 }}>
           <span className="small muted">{today.scene} · {today.dur}{today.needsEvent ? ' · 含平台实操' : ''}</span>
-          <Button variant="primary" icon="play" onClick={() => nav('/level/' + today.id)}>{S.lvDraft?.[today.id] ? '继续' : '开始'}</Button>
+          <Button variant="primary" icon="play" onClick={() => nav('/level/' + today.id)}>{drafts.has(today.id) ? '继续' : '开始'}</Button>
         </div>
       </> : <div className="big" style={{ marginTop: 4 }}>本路径已全部通过 🎉</div>}
       <div className="ac-bar"><i style={{ width: `${sum.total ? sum.done / sum.total * 100 : 0}%` }} /></div>

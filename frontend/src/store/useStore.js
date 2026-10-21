@@ -239,9 +239,9 @@ export const DEF = {
   balanceTemplate: DEFAULT_TEMPLATE_ID, balanceOverrides: {},
   // ── 大课堂（clife-academy）──
   // role: 本人岗位（lib/lessons.js ROLES）；progress: { [levelId]: { passedAt, credits, quiz } }，只增不改；
-  // sessions: 每次学习一条，只追加（lib/finish-level.js）；credits: 按路径累计学分；
-  // lvDraft: 关卡进行中的草稿 { [levelId]: { seg, zuoDone, events, answers } }，通关后清掉。
-  role: 'nurse', progress: {}, sessions: [], credits: {}, lvDraft: {},
+  // sessions: 每次学习一条，只追加（lib/finish-level.js）；credits: 按路径累计学分，合并时从 progress 重算。
+  // 合并规则在 lib/academy-merge.js。关卡草稿不在 S 里（lib/level-draft.js，只留本机）。
+  role: 'nurse', progress: {}, sessions: [], credits: {},
 }
 const clone = o => JSON.parse(JSON.stringify(o))
 
@@ -298,7 +298,8 @@ function loadState() {
 // weigh-ins and custom exercises. A custom exercise is all a new guest may have made — with its
 // photo or video, which the server counts as unreferenced until the state that names it lands —
 // so a profile created from such a copy takes it at once, like one holding a workout.
-const hasData = st => !!((st.workouts || []).length || (st.routines || []).length || (st.bodyweight || []).length || (st.customEx || []).length || (st.measurements || []).length)
+const hasData = st => !!((st.workouts || []).length || (st.routines || []).length || (st.bodyweight || []).length || (st.customEx || []).length || (st.measurements || []).length
+  || Object.values(st.progress || {}).some(e => e && e.passedAt))
 
 // Decide whether a pulled account state may replace the local saved state. A local active workout
 // is deliberately carried forward: the server stores completed/saved state, while the in-progress
@@ -1146,7 +1147,8 @@ export const useStore = create((set, get) => {
     reached()
     let asked = false
     const askAbout = async extras => {
-      if (!(extras.workouts || extras.bodyweight || extras.customEx || extras.routines || extras.setup) || typeof ask !== 'function') return false
+      // extras.levels：大课堂里这台设备没登录时通过的关卡（lib/academy-merge.js academyExtras）
+      if (!(extras.workouts || extras.bodyweight || extras.customEx || extras.routines || extras.setup || extras.levels) || typeof ask !== 'function') return false
       asked = true
       return !!(await ask(extras))
     }

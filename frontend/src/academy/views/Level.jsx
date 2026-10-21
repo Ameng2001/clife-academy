@@ -1,4 +1,4 @@
-// 一关：讲 → 看 → 做 → 测。草稿存在 S.lvDraft[id]，换设备接着学；通关走 finish-level.js。
+// 一关：讲 → 看 → 做 → 测。草稿只留本机（lib/level-draft.js），通关走 finish-level.js。
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
@@ -6,11 +6,11 @@ import Icon from '../../components/Icon.jsx'
 import { Button } from '../../components/ui.jsx'
 import { levelOf, statusOf } from '../../lib/lessons.js'
 import { finishLevel, canPass } from '../../lib/finish-level.js'
+import { drafts, useDraft } from '../../lib/level-draft.js'
 import { useS, update } from './common.jsx'
 
 const SEGS = [['jiang', '讲'], ['kan', '看'], ['zuo', '做'], ['ce', '测']]
-const draftOf = (S, id) => S.lvDraft?.[id] || { seg: 'jiang', zuoDone: false, events: [], answers: {} }
-const setDraft = (id, mut) => update(s => { const d = { ...draftOf(s, id) }; mut(d); s.lvDraft = { ...(s.lvDraft || {}), [id]: d } }, false)
+const setDraft = (id, mut) => drafts.set(id, mut)
 
 export default function Level() {
   const nav = useNavigate(), S = useS()
@@ -18,7 +18,7 @@ export default function Level() {
   const lv = levelOf(id)
   if (!lv) return <div className="narrow"><div className="empty">没有这一关。</div></div>
   const st = statusOf(S.progress, id)
-  const d = draftOf(S, id)
+  const d = useDraft(id)
   const answered = lv.qs.filter((_, i) => d.answers[i] != null).length
   const right = lv.qs.filter((q, i) => d.answers[i] != null && q.o[d.answers[i]][1] === 1).length
   const gate = canPass(lv, { zuoDone: d.zuoDone, right, of: lv.qs.length })
@@ -27,7 +27,8 @@ export default function Level() {
   const pass = () => {
     const r = finishLevel(S, id, { zuoDone: d.zuoDone, right, of: lv.qs.length, events: d.events })
     if (!r.passed) { useUI.getState().toast(r.why === 'quiz' ? '测验还没全对，改一改再提交。' : r.why === 'zuo' ? '「做」这一步还没完成。' : '这一关现在不能结算。'); return }
-    update(s => { s.progress = r.S.progress; s.sessions = r.S.sessions; s.credits = r.S.credits; const { [id]: _, ...rest } = s.lvDraft || {}; s.lvDraft = rest })
+    update(s => { s.progress = r.S.progress; s.sessions = r.S.sessions; s.credits = r.S.credits })
+    drafts.clear(id)
     useUI.getState().toast(`第 ${lv.i + 1} 关通过，+1 学分`)
     nav('/paths/' + lv.path, { replace: true })
   }
