@@ -24,6 +24,8 @@ export default function Home() {
   const d = new Date()
   const [pair, setPair] = useState(null)
   const [community, setCommunity] = useState(null)
+  const [qa, setQa] = useState(null)
+  useEffect(() => { if (user) api('/api/questions').then(setQa).catch(() => setQa(null)); else setQa(null) }, [user?.id])
   useEffect(() => { if (user) api('/api/me/community').then(r => setCommunity(r.community)).catch(() => setCommunity(null)); else setCommunity(null) }, [user?.id])
   const [lecture, setLecture] = useState(null)
   const [drill, setDrill] = useState(null)
@@ -107,6 +109,10 @@ export default function Home() {
       <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{contest.title}</div>
       <div className="small" style={{ color: contest.mine ? 'var(--green)' : 'var(--acc)' }}>{contest.phase === 'open' ? (contest.mine ? '已应战 · 改作品' : '自愿应战，交一份活动设计') : '看同事的设计、互评'} <Icon name="chevronRight" /></div>
     </div>}
+    {qa && (qa.queue.length > 0 || qa.mine.some(q => q.status === 'open')) && <div className="sect"><div className="sect-t">答疑</div><div className="sect-b">
+      {qa.queue.length > 0 && <div className="lrow tap" onClick={() => nav('/questions?tab=queue')}><div style={{ flex: 1 }}><div className="lrow-t">待我回答 {qa.queue.length} 条{qa.escalated ? ` · 转讲师 ${qa.escalated}` : ''}</div><div className="small muted">助手已整理材料{qa.assistantConfigured ? '并起了草稿，确认或改一改' : '，写一条回答'}</div></div><Icon name="chevronRight" /></div>}
+      {qa.mine.filter(q => q.status === 'open').slice(0, 2).map(q => <div key={q.id} className="lrow tap" onClick={() => nav('/questions?id=' + q.id)}><div style={{ flex: 1 }}><div className="lrow-t">{q.text}</div><div className="small muted">等回答{q.answers.length ? ` · 已有 ${q.answers.length} 条，去采纳` : ''}</div></div><Icon name="chevronRight" /></div>)}
+    </div></div>}
     {community && <div className="sect"><div className="sect-t">跨园共同体</div><div className="sect-b">
       <div className="lrow tap" onClick={() => nav('/cases?community=1')}><div style={{ flex: 1 }}><div className="lrow-t">{community.name}</div><div className="small muted">{community.orgs.map(o => o.name + (o.key === community.lead ? '（组长园）' : '')).join('、')} · 共同体案例 {community.cases} 条{community.drills ? ` · 联合研讨题 ${community.drills}` : ''}</div></div><Icon name="chevronRight" /></div>
     </div></div>}

@@ -996,6 +996,70 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string } } } } } }
       responses:
         '200': { description: '`{ cohort }`' }
+  /api/questions:
+    get:
+      tags: [academy]
+      operationId: academyQuestions
+      summary: 答疑：我的提问、我能答的队列、本关已答（?level=）
+      description: '`{ mine, queue, faq, canAnswer, assistantConfigured, escalated }`。每条带 `assistant`（归类、概括、草稿、把握、材料）与 `answers`。队列：本园种子教师 / 园长 / 点评人看本园开放的，带教教师看所带的，管理员（本地讲师）看全部，两个工作日没人答的 `escalated` 排前。'
+      responses:
+        '200': { description: 问答列表 }
+    post:
+      tags: [academy]
+      operationId: academyQuestionAsk
+      summary: 提问（带关卡）；助手立刻整理，接了模型就起草，问题同时进本园种子教师队列
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [levelId, text], properties: { levelId: { type: string }, text: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ question, assistantConfigured }`' }
+        '429': { description: 开放中的提问已有五条 }
+  /api/questions/similar:
+    get:
+      tags: [academy]
+      operationId: academyQuestionSimilar
+      summary: 问之前先看看：相似的已答问题与相关案例
+      parameters: [{ name: levelId, in: query, schema: { type: string } }, { name: q, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ sources:[{ kind, id, title, text }] }`' }
+  /api/questions/one:
+    get:
+      tags: [academy]
+      operationId: academyQuestionOne
+      summary: 一条提问（本人、能答的人、本园或共同体看已答的）
+      parameters: [{ name: id, in: query, required: true, schema: { type: string } }]
+      responses:
+        '200': { description: '`{ question, sources }`' }
+  /api/questions/answer:
+    post:
+      tags: [academy]
+      operationId: academyQuestionAnswer
+      summary: 回答（种子教师、园长、点评人、带教教师、本地讲师）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, text], properties: { id: { type: string }, text: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ question }`' }
+  /api/questions/confirm:
+    post:
+      tags: [academy]
+      operationId: academyQuestionConfirm
+      summary: 种子教师确认助手草稿（可改），成为署名回答
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, text: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ question }`' }
+  /api/questions/accept:
+    post:
+      tags: [academy]
+      operationId: academyQuestionAccept
+      summary: 提问人采纳一条回答（计答疑被采纳勋章）
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id, answerId], properties: { id: { type: string }, answerId: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ question }`' }
+  /api/questions/close:
+    post:
+      tags: [academy]
+      operationId: academyQuestionClose
+      summary: 提问人标已解决（助手整理够用也算）；管理员可关
+      requestBody: { required: true, content: { application/json: { schema: { type: object, required: [id], properties: { id: { type: string }, note: { type: string } } } } } }
+      responses:
+        '200': { description: '`{ question }`' }
   /api/me/checkup:
     get:
       tags: [academy]

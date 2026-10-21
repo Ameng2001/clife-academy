@@ -28,7 +28,7 @@ export function createLedger(db) {
   };
 }
 
-const THRESHOLDS = { cases: [1, 5, 20], featured: [1, 5], reviews: [20] };
+const THRESHOLDS = { cases: [1, 5, 20], featured: [1, 5], reviews: [20], answers: [10] };
 /** 一个人的勋章。stateOf(uid) 给客户端状态（progress）。 */
 export function badgesOf(uid, { db, stateOf, pairs }) {
   const out = [];
@@ -51,6 +51,8 @@ export function badgesOf(uid, { db, stateOf, pairs }) {
   for (const n of THRESHOLDS.featured) out.push({ key: `featured-${n}`, kind: 'contribution', name: n === 1 ? '第一次精选' : `精选 ${n} 次`, desc: `研讨作答被标精选 ${n} 次`, on: feat.length >= n, at: feat[n - 1] || null, progress: Math.min(feat.length, n), of: n });
   const reviews = [...(db.submissions || []).filter(s => s.review?.by === uid).map(s => s.review.at), ...(db.drillAnswers || []).filter(a => a.review?.by === uid).map(a => a.review.at)].sort((a, b) => a - b);
   for (const n of THRESHOLDS.reviews) out.push({ key: `reviews-${n}`, kind: 'contribution', name: `点评 ${n} 次`, desc: `给同事的作品与作答写过 ${n} 次意见`, on: reviews.length >= n, at: reviews[n - 1] || null, progress: Math.min(reviews.length, n), of: n });
+  const acc = (db.questions || []).flatMap(q => q.answers.filter(a => a.by === uid && a.accepted).map(a => a.acceptedAt || a.at)).sort((a, b) => a - b);
+  for (const n of THRESHOLDS.answers) out.push({ key: `answers-${n}`, kind: 'contribution', name: `答疑被采纳 ${n} 次`, desc: `回答同事的提问，被提问人采纳 ${n} 次`, on: acc.length >= n, at: acc[n - 1] || null, progress: Math.min(acc.length, n), of: n });
   if (pairs) {
     const mentees = pairs.menteesOf(uid), done = mentees.map(m => { const u = (db.users || []).find(x => x.id === m); const path = u && ROLE_PATH[u.academy?.role]; return path ? finishedFor(m, path, stateOf) : null; }).filter(Boolean);
     out.push({ key: 'mentor', kind: 'contribution', name: '带出一个人', desc: '带教的新教师完成了本岗位路径', on: done.length > 0, at: done.length ? Math.min(...done) : null, progress: done.length ? 1 : 0, of: 1 });

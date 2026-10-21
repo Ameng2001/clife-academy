@@ -13,6 +13,7 @@ import { useEvents } from '../../store/useEvents.js'
 import { useSubmissions, zuoDoneOf, latestOf } from '../../store/useSubmissions.js'
 import SubmissionBox from './SubmissionBox.jsx'
 import { useS, update } from './common.jsx'
+import { AskBox } from './Questions.jsx'
 
 const SEGS = [['jiang', '讲'], ['kan', '看'], ['zuo', '做'], ['ce', '测']]
 const setDraft = (id, mut) => drafts.set(id, mut)
@@ -113,5 +114,6 @@ export default function Level() {
         {st === 'current' ? <Button variant="primary" icon="checkCircle" disabled={!(answered === lv.qs.length && gate.ok)} onClick={pass}>通关</Button> : <Button onClick={() => nav('/paths/' + lv.path)}>返回路径</Button>}
       </div>
     </div>}
+    <AskBox levelId={id} />
   </div>
 }

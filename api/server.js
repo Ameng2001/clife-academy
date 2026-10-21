@@ -33,6 +33,7 @@ import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
 import { communityRoutes, createCommunities } from './academy/communities.js';
 import { certificateRoutes } from './academy/certificates.js';
+import { questionRoutes } from './academy/questions.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1784,6 +1785,8 @@ const PAIRS = createPairs(db);
 // 关卡以外的学分台账（案例入库、作答精选）；勋章按记录算，称号人授。
 const LEDGER = createLedger(db);
 const COMMUNITIES = createCommunities(db);
+const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER });
+setInterval(() => { try { QUESTIONS.escalateDue(); } catch { /* 下一轮再试 */ } }, 10 * 60000).unref?.();
 // 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
 const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
 setInterval(() => { LECTURES.tick().catch(e => console.error('lecture reminder:', e.message)); }, 60000).unref();
@@ -2627,6 +2630,7 @@ const routes = {
   ...districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...communityRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
   ...certificateRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
+  ...QUESTIONS.routes,
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 
