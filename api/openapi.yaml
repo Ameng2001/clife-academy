@@ -769,6 +769,57 @@ paths:
       responses:
         '200': { description: 文件 }
         '404': { description: 没有 }
+  /api/drills:
+    get:
+      tags: [academy]
+      operationId: academyDrills
+      summary: 每周一题：开放中、已收题，出题人另见未开放的
+      description: '`?q=`。`{ current, past, upcoming, canPost, postScope }`，每题带 `phase`、本人作答 `mine`、本园作答人数 `answered`、精选数 `featured`。'
+      responses:
+        '200': { description: 题 }
+        '401': { description: 未登录 }
+    post:
+      tags: [academy]
+      operationId: academyDrillSave
+      summary: 出题或改（管理员面向全平台，园长只面向本园）
+      description: '`{ id?, title(≥10 字), context?, role?, domain?, openAt?, closeAt?, scope? }`。默认今天开放、七天后收。'
+      responses:
+        '200': { description: '`{ drill }`' }
+        '400': { description: 题干太短 }
+        '403': { description: 不是管理员或园长，或不是自己出的题 }
+  /api/drills/delete:
+    post:
+      tags: [academy]
+      operationId: academyDrillDelete
+      summary: 删一题（连同作答）
+      responses:
+        '200': { description: '`{ ok }`' }
+  /api/drills/answer:
+    post:
+      tags: [academy]
+      operationId: academyDrillAnswer
+      summary: 作答或改自己的作答
+      description: '`{ id, text(≥20 字) }`。一人一题一份，改了算最新；已点评的保留点评。'
+      responses:
+        '200': { description: '`{ drill }`' }
+        '400': { description: 太短，或题还没开放 }
+  /api/drills/answers:
+    get:
+      tags: [academy]
+      operationId: academyDrillAnswers
+      summary: 一题的作答（同园、自己答了才看得到；点评人与带教教师例外）
+      description: '`?id=`。精选在前。`locked` 为 true 表示还没答、看不到。'
+      responses:
+        '200': { description: '`{ drill, answers, locked }`' }
+  /api/drills/review:
+    post:
+      tags: [academy]
+      operationId: academyDrillReview
+      summary: 点评一份作答（园长、点评人、管理员，或作答人的带教教师）
+      description: '`{ answerId, comment, featured? }`。一句意见，可标精选；没有分数与排名。'
+      responses:
+        '200': { description: '`{ answer }`' }
+        '403': { description: 自己的，或不是本园 }
   /api/lectures:
     get:
       tags: [academy]

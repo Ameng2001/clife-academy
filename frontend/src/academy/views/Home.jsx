@@ -24,6 +24,8 @@ export default function Home() {
   const d = new Date()
   const [pair, setPair] = useState(null)
   const [lecture, setLecture] = useState(null)
+  const [drill, setDrill] = useState(null)
+  useEffect(() => { if (user) api('/api/drills').then(r => setDrill(r.current[0] || null)).catch(() => setDrill(null)); else setDrill(null) }, [user?.id])
   useEffect(() => { api('/api/lectures').then(r => setLecture(r.upcoming[0] || null)).catch(() => setLecture(null)) }, [user?.id])
   const bookLecture = async () => {
     if (!user) return useUI.getState().toast('登录后才能预约')
@@ -83,6 +85,11 @@ export default function Home() {
       <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0' }}>{lecture.title}</div>
       {lecture.desc && <div className="small" style={{ opacity: .9 }}>{lecture.desc}</div>}
       <div style={{ marginTop: 10 }}><Button size="sm" style={{ background: '#fff', color: 'var(--acc)' }} icon={lecture.booked ? 'bellSlash' : 'bell'} onClick={e => { e.stopPropagation(); bookLecture() }}>{lecture.booked ? '已预约 · 开播前提醒' : '预约直播'}</Button></div>
+    </div>}
+    {drill && <div className="card tappable" style={{ marginTop: 14 }} onClick={() => nav('/drills')}>
+      <div className="ac-row"><span className="small muted">每周一题{drill.scope === 'org' ? ' · 本园' : ''}</span><span className="small muted">{drill.answered} 人答</span></div>
+      <div style={{ fontWeight: 600, fontSize: 16, lineHeight: 1.45, margin: '6px 0' }}>{drill.title}</div>
+      <div className="small" style={{ color: drill.mine ? 'var(--green)' : 'var(--acc)' }}>{drill.mine ? (drill.mine.review ? '已答 · ' + drill.mine.review.byName + ' 点评了' : '已答 · 看同园老师怎么答') : '去作答'} <Icon name="chevronRight" /></div>
     </div>}
     {(pair?.mentor || pair?.mentees?.length > 0) && <div className="sect"><div className="sect-t">带教</div><div className="sect-b">
       {pair.mentor && <div className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">带教教师：{pair.mentor.name}</div><div className="small muted">你的实践关作品由 {pair.mentor.name} 点评</div></div></div>}

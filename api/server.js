@@ -25,6 +25,7 @@ import { createPairs, pairRoutes } from './academy/pairs.js';
 import { resourceRoutes } from './academy/resources.js';
 import { caseRoutes } from './academy/cases.js';
 import { lectureRoutes } from './academy/lectures.js';
+import { drillRoutes } from './academy/drills.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -2608,6 +2609,7 @@ const routes = {
   // 案例库（academy/cases.js）
   ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   ...LECTURES.routes,
+  ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS }),
   // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
   ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 
