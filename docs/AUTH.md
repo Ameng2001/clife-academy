@@ -37,6 +37,12 @@
 实践关、研讨关的「做」不走平台事件，走提交（`api/academy/submissions.js`）：`POST /api/submissions` 交文字与照片引用（照片先 `PUT /api/media/{hash}` 存在本人名下），`GET /api/submissions?level=` 看本人的提交与点评，研讨关交过以后带同园他人的作答。
 点评权是园长、管理员或 `academy.reviewer === true` 的账号（后者由管理员在 db 里标，首期没有界面）：`GET /api/review/queue` 本园待点评，`POST /api/submissions/review` 给 pass / revise 与 1–5 分量表，revise 必须写意见；只能点评本园、非本人的提交。证据文件经 `GET /api/submissions/file?id=&hash=`，提交者本人或本园点评人可读。网页 `/review`，小程序首期只交文字。
 
+## 订阅消息
+
+小程序订阅消息（`api/academy/notify.js`），只做两类、都是事件触发：实践关被点评了通知教师（`review`），本园有新的实践关提交通知园长与点评人（`queue`）。没有定时的「今日一关」提醒，守 ROADMAP 第九节「不催、不计在线时长」。
+订阅消息是一次性的：小程序里用户每点一次「允许」，`POST /api/notify/subscribe` 记一次额度，发一条用一条；点「拒绝」或微信答 43101 清零。`GET /api/notify` 给模板 ID 与本人剩余额度。模板 ID 与字段映射走 `WX_TMPL_*`（见 `.env.example`），没配时路由不存在、提交与点评照常。
+发送要 openid：微信登录的账号自带；平台账号在小程序里订阅时带 `wx.login()` 的 code，服务端换 openid 绑到该账号（`user.wx.openid`，只用于推送；已被别的账号占用的 openid 不抢）。
+
 ## 小程序侧
 
 小程序工程在文档仓库 `deals/06 柳州-徐明/本地运营/学前大课堂/app/miniprogram/`，接口层三个文件：

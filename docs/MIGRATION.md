@@ -272,3 +272,7 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
 - **2026-10-22（夜 5）** 「沟通与合作」领域路径（ROADMAP 第三节「家长工作六件事」）。`lessons-extra.js` 加 `comm` 六关：接园时的一句话反馈（研讨）、家长会的前十分钟（实践，交开场稿）、
   一次个别约谈（研讨）、群里公开质疑（研讨）、孩子可能需要专业帮助时（研讨，教师不诊断）、一次家园活动的设计（实践，交方案）。场景 → 技能块加 `EXTRA_SKMAP`（family），`lessons.js` 合并。
   措辞守 2026 年口径：不点名、不分档、不比较；群里只收不辩；特殊需要只说事实与频率，评估的决定留给家长。全部 42 关，前端 128 项全过；小程序 `extra.js` 同步，harness 25 项。
+- **2026-10-22（夜 6）** 小程序订阅消息（ROADMAP B 期最后一项）。`api/academy/notify.js`：两类事件触发的模板（`review` 点评结果通知教师、`queue` 新提交通知本园点评人），
+  一次性额度记在 `db.subscriptions`，`GET /api/notify`、`POST /api/notify/subscribe`（可带 wx.login code 给平台账号绑 openid）；access_token 缓存、过期重取一次、43101 清零；
+  字段按微信规则截断，映射走 `WX_TMPL_*_DATA`。`submissions.js` 在实践关提交后与点评后调 `notifier.send`，失败只记日志。没配模板时路由不存在。
+  小程序 `utils/notify.js`：实践关提交后问一次 `review`，首页园长块按钮订阅 `queue`。api 4 项新测试（微信桩含 token 过期与拒收），harness 27 项。待真机：在公共模板库选模板、填 ID 与字段映射。

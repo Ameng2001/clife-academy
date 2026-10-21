@@ -20,6 +20,7 @@ import { authRoutes, authConfig, academyOf, DEV_LOGIN } from './auth/routes.js';
 import { academyEventRoutes, eventsConfig } from './academy/events.js';
 import { orgRoutes } from './academy/org.js';
 import { submissionRoutes } from './academy/submissions.js';
+import { createNotifier, notifyRoutes, notifyConfigured } from './academy/notify.js';
 import { startCadence } from './coach/cadence.js';
 import { startWarmup } from './coach/warmup.js';
 import { dayReminderPush, nudgePush, restTimerPush, testPush } from './push-messages.js';
@@ -1765,6 +1766,8 @@ const passkeyRoutes = {
 const MEDIA_LIMITS = mediaLimits(process.env);
 const MEDIA_ON = MEDIA_LIMITS.enabled;
 const MEDIA = createMediaStore({ dir: path.join(DATA, 'uploads'), limits: MEDIA_LIMITS, readState });
+// 订阅消息发送器：没配模板时 send() 直接答 no-template，提交与点评照常。
+const NOTIFIER = createNotifier({ db, saveDb });
 // Leftovers of uploads the previous process was receiving when it stopped.
 try { MEDIA.cleanTmp(); } catch (e) { console.error('media: boot cleanup failed', e.message); }
 // Per profile, not per address: every upload is signed in, and behind a proxy one address can be
@@ -2589,7 +2592,9 @@ const routes = {
   // 园长看板（academy/org.js）。
   ...orgRoutes({ json, readSession, db, readStateCached, isAdmin }),
   // 实践关证据提交与点评（academy/submissions.js）。
-  ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
+  ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER }),
+  // 小程序订阅消息（academy/notify.js）：WX_TMPL_REVIEW / WX_TMPL_QUEUE 设了才有。
+  ...(notifyConfigured() ? notifyRoutes({ json, readBody, db, saveDb, readSession, audit, notifier: NOTIFIER }) : {}),
 
   /* ---------- photos & videos ---------- */
   // Absent, not refusing, when MEDIA_UPLOADS=0: a 404 is what a server from before the feature

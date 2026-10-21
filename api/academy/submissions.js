@@ -12,6 +12,7 @@
 import crypto from 'node:crypto';
 import { LEVEL_TYPES, LEVELS, RUBRICS } from './events-data.js';
 import { orgKeyOf } from './org.js';
+import { fmtTime } from './notify.js';
 
 const TEXT_MAX = 4000, FILES_MAX = 6, PER_USER_MAX = 500;
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
@@ -19,7 +20,7 @@ const HASH = /^[0-9a-f]{64}$/;
 
 export const canReview = (u, isAdmin) => !!u && (u.academy?.role === 'director' || u.academy?.reviewer === true || isAdmin(u));
 
-export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }) {
+export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null }) {
   db.submissions = db.submissions || [];
   const newId = () => crypto.randomBytes(9).toString('base64url');
   const pub = (s, { withUser = false } = {}) => ({
@@ -49,6 +50,8 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     db.submissions.push(s); saveDb();
     audit(req, 'submission.new', { user, msg: levelId });
     json(res, 200, { submission: pub(s) });
+    // 实践关：通知本园点评人（订阅消息，有额度才发；失败不影响提交）
+    if (type === 'practice' && notifier) for (const r of notifier.reviewersOf(s.org, user.id, isAdmin)) notifier.send(r.id, 'queue', { title: LEVELS[levelId] || levelId, who: user.name, at: s.at, note: text }, 'pages/home/home');
   },
 
   // 本人的提交；?level= 只要那一关。研讨关交过以后带同园他人的作答（others）。
@@ -99,6 +102,7 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     saveDb();
     audit(req, 'submission.review', { user, msg: `${s.levelId} ${verdict}` });
     json(res, 200, { submission: pub(s, { withUser: true }) });
+    if (notifier) { const [p, i] = s.levelId.split(/-(?=\d+$)/); notifier.send(s.uid, 'review', { title: LEVELS[s.levelId] || s.levelId, verdict: verdict === 'pass' ? '通过' : '需修改', at: s.review.at, comment, by: user.name }, `pages/level/level?p=${p}&i=${i}`); }
   },
 
   // 证据文件：提交者本人，或本园点评人

@@ -761,6 +761,24 @@ paths:
         '200': { description: 文件 }
         '403': { description: 既不是本人也不是本园点评人 }
         '404': { description: 没有这条提交或这个文件 }
+  /api/notify:
+    get:
+      tags: [academy]
+      operationId: academyNotify
+      summary: 订阅消息模板与本人剩余额度
+      description: '`{ templates: { review?, queue? }, mine: { review, queue } | null }`。WX_TMPL_REVIEW / WX_TMPL_QUEUE 没设时路由不存在。'
+      responses:
+        '200': { description: 模板与额度 }
+  /api/notify/subscribe:
+    post:
+      tags: [academy]
+      operationId: academySubscribe
+      summary: 小程序回报订阅结果
+      description: '`{ results: { review: accept | reject, queue: … }, code? }`。accept 记一次额度，reject 清零；账号没有 openid 时用 `wx.login()` 的 code 换一个绑上，只用于推送。'
+      responses:
+        '200': { description: '`{ mine, openid, bound }`' }
+        '401': { description: 未登录 }
+        '404': { description: 没配订阅消息 }
   /api/me/academy:
     put:
       tags: [academy]
