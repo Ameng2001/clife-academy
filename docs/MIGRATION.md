@@ -205,3 +205,6 @@ AGPL-3.0 的义务是：对通过网络使用软件的用户提供修改后的�
   登录接管：`runAdopt` 的询问条件加上 `extras.levels`，`askAddDeviceData` 出中文弹层「把这台设备上通过的关卡记到账号里？」。
   浏览器验证：访客通过 nurse-0、留 nurse-1 草稿 → 以已有 director-0 的账号登录 → 弹层确认 → 本地与服务端均为 `director-0 + nurse-0`，学分各 1，草稿仍在本地、服务端无 `lvDraft`。
   测试：`academy-merge.test.js` 9 项、`level-draft.test.js` 3 项；api 契约测试 13 项通过。
+- **2026-10-21（晚 2）** SyncBanner 的「登录」指到大课堂登录页。`components/SyncBanner.jsx` 加 `signIn` 属性，宿主替换登录动作（不传仍走上游 passkey / Settings）。
+  `AcademyApp.jsx`：访客点它 → 退出访客态 → Login；已登录但服务端不认这个浏览器（`sync.status === 'auth'`）→ 临时让页面给 Login，登上去自动回应用。
+  Login 收 `relogin`：出「登录已过期」提示、藏「先看看」。浏览器验证两条：访客点横幅 → 登录页；重启 api 清掉会话后刷新 → 登录页带过期提示 → 重新登录 → 回首页、横幅消失。

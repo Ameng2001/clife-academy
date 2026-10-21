@@ -69,7 +69,8 @@ export function useConnectionTrouble() {
   return !on && show && (view.tone === 'off' || view.tone === 'bad' || view.tone === 'wait')
 }
 
-export default function SyncBanner() {
+// `signIn`：宿主替换登录动作（大课堂把它指到自己的登录页）；不传则走上游的 passkey / Settings。
+export default function SyncBanner({ signIn } = {}) {
   const nav = useNavigate()
   const on = useStore(s => showsConnection(s.S))
   const local = useStore(s => showsLocalLine(s.S))
@@ -98,7 +99,7 @@ export default function SyncBanner() {
     connect: connectServer,
     // Signed in, or with a session the server ended: the passkey right here. A guest goes to
     // Settings, where signing in sits next to creating a profile.
-    signin: () => (user || status === 'auth' ? signInAgain() : nav('/settings/account')),
+    signin: () => (signIn ? signIn({ user, status }) : user || status === 'auth' ? signInAgain() : nav('/settings/account')),
   }[view.action]
   const label = actionLabel(view)
   const inner = <>

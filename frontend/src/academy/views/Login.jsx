@@ -11,7 +11,8 @@ import Icon from '../../components/Icon.jsx'
 import { Button, TextField } from '../../components/ui.jsx'
 import { ROLES } from '../../lib/lessons.js'
 
-export default function Login() {
+// relogin：服务端结束了会话，从 SyncBanner 回来重新登录；此时不给「先看看」，本地改动仍在。
+export default function Login({ relogin = false } = {}) {
   const nav = useNavigate(), loc = useLocation()
   const { setUser, adoptProfile, setGuest } = useStore()
   const config = useStore(s => s.config)
@@ -55,6 +56,7 @@ export default function Login() {
     <div style={{ fontSize: 54, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="clipboard" /></div>
     <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-.028em', margin: '10px 0 4px' }}>学前大课堂</h1>
     <div className="muted" style={{ marginBottom: 30 }}>按岗位走关，在平台上做一次就算一次。</div>
+    {relogin && <div className="card small" style={{ textAlign: 'start', marginBottom: 10 }}>登录已过期，请重新登录。这台设备上的进度还在，登上去会一并记到账号里。</div>}
 
     {auth.platform && <><Button variant="primary" icon="key" disabled={busy} onClick={toPlatform}>平台账号登录</Button><div style={{ height: 10 }} /></>}
     {auth.wechat && <div className="card small muted" style={{ textAlign: 'start', marginBottom: 10 }}>微信登录请在「柳州智投」小程序里打开大课堂；网页端用平台账号。</div>}
@@ -71,6 +73,6 @@ export default function Login() {
     </div>}
 
     {!auth.platform && !auth.wechat && !auth.dev && <div className="card small muted" style={{ textAlign: 'start' }}>这台服务器还没有配置登录方式。设置 PLATFORM_AUTH_URL 或 WX_APPID / WX_SECRET，本机开发可设 DEV_LOGIN=1。</div>}
-    {canGuest && <><div style={{ height: 8 }} /><Button variant="ghost" className="dim" onClick={() => setGuest(true)}>不登录，先看看</Button></>}
+    {canGuest && !relogin && <><div style={{ height: 8 }} /><Button variant="ghost" className="dim" onClick={() => setGuest(true)}>不登录，先看看</Button></>}
   </div>
 }

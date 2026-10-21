@@ -1,6 +1,6 @@
 // 大课堂的应用壳：沿用上游的 store（状态、同步、登录）、主题、Toast、Modals、SyncBanner，
 // 路由与底栏换成大课堂的。上游 App.jsx 留作对照，等视图替换完再删。
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
@@ -42,8 +42,15 @@ function Tabs() {
 
 function Shell() {
   const navigate = useNavigate(), loc = useLocation()
-  const { S, user, ready } = useStore()
+  const { S, user, ready, setGuest } = useStore()
   const isGuest = useStore(s => s.isGuest())
+  const syncStatus = useStore(s => s.sync?.status)
+  // SyncBanner 的「登录」指到大课堂登录页，不走上游的 passkey：访客退出访客态；
+  // 已登录但服务端不认这个浏览器（status 'auth'，开机时 store 已清掉 user，会话中途失效则还留着）
+  // 就临时让出页面给 Login，登上去 status 离开 'auth' 自动回到应用。
+  const [relogin, setRelogin] = useState(false)
+  useEffect(() => { if (syncStatus !== 'auth') setRelogin(false) }, [syncStatus])
+  const toLogin = () => { if (isGuest) setGuest(false); else if (user) setRelogin(true) }
   useEffect(() => { setNav(navigate) }, [navigate])
   const accent = accentValue(S)
   useEffect(() => {
@@ -54,12 +61,12 @@ function Shell() {
   useEffect(() => { document.documentElement.lang = 'zh' }, [])
   useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
 
-  const authed = user || isGuest
+  const authed = (user || isGuest) && !(relogin && syncStatus === 'auth')
   if (!ready && !authed) return <div id="app"><div style={{ paddingTop: '44vh', display: 'flex', justifyContent: 'center', fontSize: 34, color: 'var(--label-3)' }}><Icon name="clipboard" /></div></div>
   return <>
     <div id="app" className="vfade" key={loc.pathname}>
       <ErrorBoundary>
-        {!authed ? <Login /> : <Routes>
+        {!authed ? <Login relogin={syncStatus === 'auth'} /> : <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/paths" element={<Paths />} />
           <Route path="/paths/:path" element={<Paths />} />
@@ -71,7 +78,7 @@ function Shell() {
         </Routes>}
       </ErrorBoundary>
     </div>
-    <SyncBanner />
+    <SyncBanner signIn={toLogin} />
     {authed && <Tabs />}
     <Modals />
     <Toast />
