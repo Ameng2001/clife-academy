@@ -26,6 +26,7 @@ import CapabilityMap from './views/CapabilityMap.jsx'
 import Resources from './views/Resources.jsx'
 import Cases from './views/Cases.jsx'
 import Works from './views/Works.jsx'
+import AgentShare from './views/AgentShare.jsx'
 import Community from './views/Community.jsx'
 import Lectures from './views/Lectures.jsx'
 import Forms from './views/Forms.jsx'
@@ -114,6 +115,7 @@ function Shell() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/works" element={<Works />} />
+          <Route path="/works/agent" element={<AgentShare />} />
           <Route path="/community" element={<Community />} />
           <Route path="/lectures" element={<Lectures />} />
           <Route path="/forms/:caseId" element={<Forms />} />

@@ -102,7 +102,7 @@ export default function Works() {
   const card = (w, extra) => <WorkCard key={w.id} w={w} open={openId === w.id} onOpen={() => setOpenId(openId === w.id ? null : w.id)} onUsed={used} actions={extra} />
 
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>课程成果</h1><div className="sub">在教研工坊做出来、班里用过的课 · 实名共享 · 每门写明改了什么</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button>{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一门课</Button>}</div></div>
+    <div className="hdr"><div><h1>课程成果</h1><div className="sub">在教研工坊做出来、班里用过的课 · 实名共享 · 每门写明改了什么</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button>{user && !form && <button className="chip" onClick={() => nav('/works/agent')}><Icon name="sparkles" /> 用 Agent 整理</button>}{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一门课</Button>}</div></div>
     {!user && <div className="card small muted">课程成果实名共享，登录后可见。</div>}
     {user && <div className="ac-tabs" style={{ marginBottom: 12 }}>
       <button className={tab === 'all' ? 'on' : ''} onClick={() => setParam('tab', null)}>全部{data ? ` ${data.total}` : ''}</button>
@@ -111,7 +111,7 @@ export default function Works() {
     </div>}
 
     {form && <div className="card" style={{ marginBottom: 14 }}>
-      <div className="small muted" style={{ marginBottom: 8 }}>{form.draft ? '补齐这份草稿 · 「改了什么」只能你自己写，Agent 填的不算' : form.id ? '改这门' : '分享一门课'} · 在教研工坊里点「分享到幼师学坊」会自动填好；手填也行。不出现幼儿姓名与正脸；交了以后园长同意、审核人入库，入库记积分</div>
+      <div className="small muted" style={{ marginBottom: 8 }}>{form.draft ? '补齐这份草稿 · 「改了什么」只能你自己写，Agent 填的不算' : form.id ? '改这门' : '分享一门课'} · 在教研工坊里点「分享到幼师学坊」会自动填好；手填也行；也可以<span className="tap" style={{ color: 'var(--acc)' }} onClick={() => nav('/works/agent')}>让 Agent 先整理成草稿</span>。不出现幼儿姓名与正脸；交了以后园长同意、审核人入库，入库记积分</div>
       <TextField placeholder="课程名，如「运动：下肢力量锻炼」" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
       <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <select className="ac-sel" value={form.pipeline} onChange={e => setForm({ ...form, pipeline: e.target.value })} style={{ flex: 2, minWidth: 140 }}>{PIPES.map(([k, t]) => <option key={k} value={k}>{t}</option>)}</select>

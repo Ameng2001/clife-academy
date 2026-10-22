@@ -4505,6 +4505,14 @@ paths:
         '200': { description: '`{ work }`' }
         '400': { description: 'title / pipeline / summary / changes / domains 不合' }
         '403': { description: 不是本人的，或已入库 }
+  /api/skill/share-work.md:
+    get:
+      tags: [academy]
+      operationId: academyShareSkill
+      summary: 给外部 Agent 读的分享 Skill（公开，text/markdown；同挂 /skill/share-work.md）
+      description: '不要登录。字段表、从教研工坊导出物里取什么、不许做的（不填 changes、不带幼儿信息与工坊评分）、怎么调 `POST /api/works/draft`、落了草稿把地址给教师。内容由 brand 与 ORIGIN 拼出，缓存 5 分钟。'
+      responses:
+        '200': { description: 'SKILL.md 正文' }
   /api/works/draft:
     post:
       tags: [academy]

@@ -23,6 +23,7 @@ async function startServer(t) {
     return { status: r.status, json: await r.json().catch(() => null) };
   };
   const login = async (name, role, org) => { const r = await call('POST', '/api/login/dev', { name, role, org }); return { auth: { Authorization: 'Bearer ' + r.json.token }, id: r.json.user.id }; };
+  call.base = base;
   return { call, login };
 }
 
@@ -81,5 +82,18 @@ test('a submit token can post a case and light forms as its owner, nothing else;
   // 只读令牌仍然一律 403
   const ro = await call('POST', '/api/me/tokens', { label: 'MCP' }, dir.auth);
   assert.equal((await call('POST', '/api/cases', { title: 'x', domain: 'life', use: 'adapt', text }, { Authorization: 'Bearer ' + ro.json.token })).json.code, 'readonly');
-  const list = await call('GET', '/api/me/tokens', null, dir.auth); assert.deepEqual(list.json.submitRoutes, ['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms']);
+  const list = await call('GET', '/api/me/tokens', null, dir.auth); assert.deepEqual(list.json.submitRoutes, ['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft']);
+});
+
+test('the share skill is public markdown at /skill/share-work.md and /api/skill/share-work.md, and tells the agent to use the draft route and leave changes alone', async t => {
+  const { call } = await startServer(t);
+  for (const p of ['/skill/share-work.md', '/api/skill/share-work.md']) {
+    const r = await fetch(call.base + p);
+    assert.equal(r.status, 200); assert.match(r.headers.get('content-type'), /^text\/markdown/);
+    const md = await r.text();
+    assert.ok(md.startsWith('---\nname: share-work'), 'frontmatter');
+    assert.ok(md.includes('/api/works/draft'), 'draft route');
+    assert.ok(md.includes('不填 `changes`'), 'no changes');
+    assert.ok(md.includes('cla_'), 'token prefix');
+  }
 });

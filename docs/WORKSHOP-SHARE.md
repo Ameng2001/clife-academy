@@ -63,7 +63,7 @@ Content-Type: application/json
 
 ## 草稿（外部 Agent 走这条）
 
-用 Claude 等 Agent 整理课程的教师，不直接 `POST /api/works`，而是 `POST /api/works/draft`（同样的令牌、同样的字段）：
+用 Claude 等 Agent 整理课程的教师，不直接 `POST /api/works`，而是 `POST /api/works/draft`（同样的令牌、同样的字段）。给 Agent 读的说明在 `GET /skill/share-work.md`（公开，text/markdown，也挂在 `/api/skill/share-work.md`）；教师在学坊「课程成果 → 用 Agent 整理」页拿到带这个地址与令牌的指令。
 
 - 只要 `title` 与 `pipeline`，`summary` 可短，`changes` **不要带**，带了服务端也丢弃：「改了什么」只能教师自己写；
 - 应答 `{ work, url, next }`，`url` 是 `/works?tab=mine&id=<id>`，把它给教师；教师在学坊打开，补齐「改了什么」后点「交给园长」才进流程；

@@ -35,6 +35,7 @@ import { honorRoutes, createLedger } from './academy/honors.js';
 import { pointsRoutes, TOOLS } from './academy/points.js';
 import { mallRoutes } from './academy/mall.js';
 import { createQuota, quotaRoutes } from './academy/quota.js';
+import { skillRoutes } from './academy/skill.js';
 import { contestRoutes } from './academy/contests.js';
 import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
@@ -2663,6 +2664,7 @@ const routes = {
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
   ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER, quota: QUOTA }),
   ...quotaRoutes({ json, readBody, db, readSession, audit, isAdmin, quota: QUOTA, tools: TOOLS }),
+  ...skillRoutes({ db, origin: ORIGIN }),
   ...mallRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES, ledger: LEDGER }),
   ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),

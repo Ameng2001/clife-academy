@@ -111,6 +111,7 @@ export default defineConfig({
     fs: { allow: ['..'] },
     proxy: {
       '/api': { target: backend, changeOrigin: true, headers: { Origin: apiOrigin } },
+      '/skill': { target: backend, changeOrigin: true },
       ...(media ? {
         '/exercise-media': { target: media, changeOrigin: true }
       } : {})
