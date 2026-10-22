@@ -63,6 +63,6 @@ export default function Camps() {
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>办</Button></div></div>
     </div>}
     {data && !data.camps.length && <div className="card small muted">还没有练习营。{data.canHost ? '点右上角「办一个」。' : ''}</div>}
-    {data?.camps.map(c => <Camp key={c.id} c={c} user={user} onChange={load} />)}
+    <div className="grid2">{data?.camps.map(c => <Camp key={c.id} c={c} user={user} onChange={load} />)}</div>
   </div>
 }

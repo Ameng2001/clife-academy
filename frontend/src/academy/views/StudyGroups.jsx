@@ -62,6 +62,6 @@ export default function StudyGroups() {
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>发</Button></div></div>
     </div>}
     {data && !data.tasks.length && <div className="card small muted">还没有任务。{data.canHost ? '点右上角「发任务」。' : '教研主任发了会在这里出现。'}</div>}
-    {data?.tasks.map(t => <Task key={t.id} t={t} min={data.minReply} onChange={load} />)}
+    <div className="grid2">{data?.tasks.map(t => <Task key={t.id} t={t} min={data.minReply} onChange={load} />)}</div>
   </div>
 }
