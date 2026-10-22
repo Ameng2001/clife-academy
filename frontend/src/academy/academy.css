@@ -87,3 +87,9 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
 @media (max-width:999.98px){.landing-side{display:contents}}
 
 @media print{.no-print,.ac-tabs,nav{display:none !important}body{background:#fff}}
+
+/* 手机：页头动作区可以换行、可以收，标题列至少占一半，副题不被挤成一条窄柱 */
+@media (max-width: 999px) {
+  #app .hdr > div:first-child { flex: 1 1 52%; }
+  #app .hdr > .hdr-actions { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+}
