@@ -1,7 +1,7 @@
 // 平台名称：从 /api/config 的 brand 取（运营方在运营后台改），没拿到前用默认。
 import { useStore } from '../store/useStore.js'
 
-export const FALLBACK = { name: 'C-Life 学前大课堂', short: '学前大课堂', region: '', tagline: '按岗位走关，在平台上做一次就算一次。', credit: '' }
+export const FALLBACK = { name: '幼师学坊', short: '幼师学坊', region: '', tagline: '按岗位走关，在平台上做一次就算一次。', credit: '' }
 
 export function useBrand() {
   const c = useStore(s => s.config)
