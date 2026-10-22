@@ -73,7 +73,7 @@
 | 观察评价工具 | 生成一份量表 | 10 |
 | 贝果实验室 | 一次创新课生成 | 20 |
 
-工坊服务端接这段的联调脚本：`scripts/workshop-spend-check.mjs`（算价参考实现 `priceOf(pipeline, weeks, adapted)` 在里面）。钱包页整包 `GET /api/points/of?uid=`（夜 70）：`name`、`points`、`quota {left, used, orgName}`、`sections` 四栏小计（learn 学与贡献 / interact 互动 / tool 工具扣减 / mall 教学物料商城）、`history[]` 每笔带 `group`、`links {mall, honors}`、`mallHint`；从园所额度扣的那几笔 `sub: 'quota'`，钱包页标「园所额度」。工坊钱包页只渲染，不自己算。
+工坊服务端接这段的联调脚本：`scripts/workshop-spend-check.mjs`（算价参考实现 `priceOf(pipeline, weeks, adapted)` 在里面）。钱包页整包 `GET /api/points/of?uid=`（夜 70）：`name`、`points`、`quota {left, used, orgName}`、`sections` 四栏小计（learn 学与贡献 / interact 互动 / tool 工具扣减 / mall 教学物料商城）、`history[]` 每笔带 `group`、`links {mall, honors}`、`mallHint`；从园所额度扣的那几笔 `sub: 'quota'`，钱包页标「园所额度」。工坊钱包页只渲染，不自己算。钱包相关的功能点一律记 docs/WALLET-TODO.md，学坊不做钱包界面。
 
 定价原则：一个教师一学期认真走完两条路径（约 12 关 120 分 + 路径 100 + 证书 100）加分享一门课（30），攒下的积分够在工坊做两到三门课。学得多、分享得多的人，工坊基本不花钱；没学的人也能做，但得由园所给额度（见五）。
 
