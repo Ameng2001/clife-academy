@@ -9,8 +9,9 @@ import { fmtWhen } from './Lectures.jsx'
 
 const KIND = { role: '岗位', domain: '领域', stage: '阶段', admin: '管理' }
 export default function Landing({ relogin }) {
-  const [lec, setLec] = useState(null)
-  useEffect(() => { api('/api/lectures').then(setLec).catch(() => setLec(null)) }, [])
+  const [lec, setLec] = useState(null), [pol, setPol] = useState(null)
+  useEffect(() => { api('/api/lectures').then(setLec).catch(() => setLec(null)); api('/api/policy').then(setPol).catch(() => setPol(null)) }, [])
+  const rule = id => pol?.rules.find(r => r.id === id)
   const groups = ['role', 'domain', 'stage', 'admin'].map(k => [k, PATH_KEYS.filter(p => (PATH_META[p]?.kind || 'role') === k)]).filter(([, ps]) => ps.length)
   const total = PATH_KEYS.reduce((a, p) => a + levelsOf(p).length, 0)
   const next = lec?.upcoming?.[0]
@@ -22,9 +23,10 @@ export default function Landing({ relogin }) {
         <p>{PATH_KEYS.length} 条路径 {total} 关，保健医、班级教师、保育员、园长各走各的线，七个专业领域都有。学到的在园里做了，平台记一次，学分可以换工具额度，也计入继续教育学时。</p>
         <div className="landing-points">
           <div><Icon name="play" /><b>讲、看、做</b><span>每关先讲清楚，再看一段演示，最后在园里做一次或交一份作品</span></div>
-          <div><Icon name="sparkles" /><b>评作品不评人</b><span>作品由点评人、带教教师看，不排名、不公开分数，案例实名共享</span></div>
-          <div><Icon name="shield" /><b>不碰幼儿数据</b><span>不用数字产品评价幼儿，幼儿不对屏，平台只记教师自己的学习</span></div>
+          <div><Icon name="sparkles" /><b>{rule('work-not-person')?.title || '评作品不评人'}</b><span>{rule('no-ranking')?.text || '作品由点评人、带教教师看，不排名、不公开分数，案例实名共享'}</span></div>
+          <div><Icon name="shield" /><b>{rule('child-data')?.title || '不碰幼儿数据'}</b><span>{rule('child-data')?.text || '不用数字产品评价幼儿，幼儿不对屏，平台只记教师自己的学习'}</span></div>
         </div>
+        {pol && <div className="small muted" style={{ marginTop: -10, marginBottom: 16 }}>全部 {pol.rules.length} 条口径见登录后的「平台口径」页；运营方改一处，这里与模型提示一起变。</div>}
       </div>
       <div className="landing-cols">
         <div className="card">

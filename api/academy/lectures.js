@@ -16,6 +16,7 @@ import crypto from 'node:crypto';
 import { TITLES } from './honors.js';
 import { orgKeyOf } from './org.js';
 import * as assistant from './assistant.js';
+import { systemRules } from './policy.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const HASH = /^[0-9a-f]{64}$/;
@@ -55,8 +56,8 @@ export function packDraftOf(l, script) {
   const poster = { headline: clip(l.title || '', 40), lines: [...points.slice(0, 4), ...(l.speaker ? [l.speaker + ' 主讲 · 园长大讲堂'] : [])].slice(0, PACK_LINES_MAX) };
   return { preview: { points }, clips, poster };
 }
-const PACK_SYSTEM = `你在整理一场幼儿园园长大讲堂的「讲堂包」：讲前预习卡要点、讲后微课切片的标题与一句话简介、一张知识海报的标题与几行字。
-规矩：只根据给你的讲稿与草稿改措辞，不新增讲稿里没有的内容；不出现任何幼儿姓名或个人信息；不写口号、不夸大；句子短，像人在说话。
+export const PACK_SYSTEM = `你在整理一场幼儿园园长大讲堂的「讲堂包」：讲前预习卡要点、讲后微课切片的标题与一句话简介、一张知识海报的标题与几行字。
+${systemRules(['ai-drafts', 'child-data', 'child-screen', 'real-name', 'plain'])}
 结构照草稿：points 条数不变；clips 条数与 id 不变，只改 title（≤ 30 字）和 desc（≤ 200 字）；poster.lines 条数不变。只输出 JSON，不要别的。`;
 export async function polishPack(draft, l, script) {
   if (!assistant.configured()) return { pack: draft, model: false };

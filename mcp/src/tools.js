@@ -16,6 +16,10 @@ export const TOOLS = [
     handler: async () => { const r = await get('/api/me'); const u = r.user; return { id: u.id, name: u.name, admin: !!u.admin, role: u.academy?.role || null, org: u.academy?.org?.name || null, district: u.academy?.district?.name || null, reviewer: !!u.academy?.reviewer, curator: !!u.academy?.curator } }
   },
   {
+    name: 'policy', description: '平台口径：十条红线（不碰幼儿数据、不排名、评作品不评人、AI 只起草……），回答任何涉及边界的问题前先看这个。', schema: {},
+    handler: async () => { const r = await get('/api/policy'); return { version: r.version, rules: r.rules } }
+  },
+  {
     name: 'list_paths', description: '课程目录：15 条路径（岗位、领域、阶段、区县管理员）各几关。', schema: {},
     handler: async () => ({ paths: PATH_KEYS.map(pathRow), total_levels: PATH_KEYS.reduce((n, p) => n + levelCount(p), 0) })
   },

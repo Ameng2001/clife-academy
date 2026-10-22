@@ -4390,6 +4390,15 @@ paths:
       responses:
         '200': { description: '`{ forms, kinds }`' }
 
+  /api/policy:
+    get:
+      tags: [academy]
+      operationId: academyPolicy
+      summary: 口径库：平台的十条红线（不碰幼儿数据、幼儿不对屏、不排名、评作品不评人、AI 只起草、不打卡、学分是工具额度、实名署名、不做点赞墙、句子短）。不登录也给
+      description: 各模块给模型的 SYSTEM 提示从同一份 `academy/policy.js` 拼出；改口径只改那一个文件。
+      responses:
+        '200': { description: '`{ version, rules:[{ id, title, text, why, where }] }`' }
+
 components:
   securitySchemes:
     cookieAuth:

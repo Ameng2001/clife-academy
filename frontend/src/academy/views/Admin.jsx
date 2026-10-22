@@ -145,6 +145,7 @@ export default function Admin() {
       </Group>
 
       <Group title="审计" icon="shield">
+        <Row to="/policy" title="平台口径" sub="十条红线：不碰幼儿数据、不排名、评作品不评人、AI 只起草……各模块与模型提示同一份" />
         <div className="small muted" style={{ padding: '4px 0' }}>24 小时 {o.audit.day} 条，其中失败 {o.audit.dayFail}；留存 {o.audit.total} 条</div>
         <Audit n={o.audit.total} />
       </Group>

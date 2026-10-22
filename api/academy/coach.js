@@ -11,6 +11,7 @@ import { orgKeyOf } from './org.js';
 import { PATH_LEN, PATH_NAMES, PATH_KIND, LEVELS, LEVEL_TYPES, LEVEL_DOMAIN, LEVEL_INFO, DOMAINS, ROLE_PATH } from './events-data.js';
 import { termOf, ITEMS } from './selfreview.js';
 import * as assistant from './assistant.js';
+import { systemRules } from './policy.js';
 
 const DAY = 86400000;
 export const STALL_DAYS = 14, REVISE_MIN = 2, WEEKS = 16, PER_WEEK = 2, MAX_WEEKS = 20;
@@ -103,8 +104,8 @@ export function draftDebrief(ev, levelId, { db }) {
   return { kind: 'debrief', levelId, title: LEVELS[levelId] || levelId, type, domain: LEVEL_DOMAIN[levelId] ? DOMAIN_NAME[LEVEL_DOMAIN[levelId]] : null, summary: points.join('；') || '这一关还没有记录。', next, changes: [] };
 }
 
-const SYSTEM = `你是幼儿园教师专业发展的 Coach，只根据给你的学习记录（路径进度、作品点评、每周一题、自评、带教）说话。
-规矩：不评价教师这个人，只说事与下一步；不出现任何幼儿信息；不排名、不比较同事；不写口号。
+export const SYSTEM = `你是幼儿园教师专业发展的 Coach，只根据给你的学习记录（路径进度、作品点评、每周一题、自评、带教）说话。
+${systemRules(['work-not-person', 'child-data', 'no-ranking', 'no-checkin', 'plain'])}
 你收到一份规则草稿（JSON），只改措辞与排序，不改结构：关卡 id 不能换、不能加；changes 只能是草稿里已有的那几条，可以改 why 和 how 的措辞。
 用简体中文，句子短。只输出 JSON，不要别的。`;
 

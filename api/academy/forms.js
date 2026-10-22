@@ -7,6 +7,7 @@
  * 草稿由规则从正文切出来，只搬案例里的话；接了模型只改措辞、不改结构、不加内容。不出现幼儿姓名；改编仍要署原作者（形态挂在案例下，署名随案例）。 */
 import crypto from 'node:crypto';
 import * as assistant from './assistant.js';
+import { systemRules } from './policy.js';
 import { isCurator } from './cases.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
@@ -67,8 +68,8 @@ export function formDraftOf(c, kind) {
   return null;
 }
 
-const SYSTEM = `你在把一条幼儿园教师的入库案例改成拿来就用的轻形态（家长会课件页、过渡环节改前改后对比卡、《评估指南》条文记忆卡）。
-规矩：只根据给你的案例正文与草稿改措辞，不新增案例里没有的做法与数据；不出现任何幼儿姓名或个人信息；对家长不说教、不夸大；句子短，像老师在说话。
+export const SYSTEM = `你在把一条幼儿园教师的入库案例改成拿来就用的轻形态（家长会课件页、过渡环节改前改后对比卡、《评估指南》条文记忆卡）。
+${systemRules(['ai-drafts', 'child-data', 'child-screen', 'real-name', 'plain'])}
 结构照草稿：slides 页数与标题 h 不变、每页 lines 条数不变；before/after 条数不变；cards 条数与 clause 不变，只改 gist 与 apply。只输出 JSON，不要别的。`;
 export async function polishForm(draft, c, kind) {
   if (!assistant.configured()) return { content: draft, model: false };

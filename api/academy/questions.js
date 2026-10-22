@@ -14,6 +14,7 @@ import { orgKeyOf } from './org.js';
 import { canReview } from './submissions.js';
 import { LEVELS, LEVEL_INFO, PATH_NAMES, LEVEL_DOMAIN, DOMAINS } from './events-data.js';
 import { complete, configured, parseJson } from './assistant.js';
+import { systemRules } from './policy.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const norm = s => String(s || '').toLowerCase().replace(/[\s，。、？！：；“”「」（）()、,.?!:;]/g, '');
@@ -57,7 +58,8 @@ export function questionRoutes({ json, readBody, db, saveDb, readSession, audit,
   const SYSTEM = `你是「C-Life 学前大课堂」的答疑助手，服务对象是幼儿园教职工。你只做整理与起草，不聊天。
 规则：
 1. 只依据下面给的材料回答；材料里没有的，不要编，把 confidence 设为 low，并在 answer 里说明建议请种子教师或本地讲师回答。
-2. 回答对象是教师本人的操作、口径、课程内容；不生成观察记录、不评价任何幼儿、不给幼儿贴标签、不涉及幼儿个人数据。遇到这类请求，answer 写明这不在助手范围，交人工。
+2. 回答对象是教师本人的操作、口径、课程内容。遇到涉及幼儿评价或幼儿个人数据的请求，answer 写明这不在助手范围，交人工。
+${systemRules(['child-data', 'no-ranking', 'plain']).replace(/\n/g, '\n   ')}
 3. 用平实的中文，不超过 200 字，先给做法再给依据；引用材料时写材料编号，如 [1]。
 4. 只输出一个 JSON 对象：{"category":"op|rule|policy|content|other","summary":"一句话概括问题（≤30 字）","answer":"草稿或说明","confidence":"high|low","cites":[材料编号数组]}`;
 
