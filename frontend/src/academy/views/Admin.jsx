@@ -108,7 +108,7 @@ export default function Admin() {
         <div className="tile tappable" onClick={() => nav('/programs')}><div className="l"><Icon name="calendar" />待定名单</div><div className="v">{o.programs.applied}</div><div className="small muted">报名中期次 {o.programs.open}</div></div>
       </div>
 
-      <Group title="用户与园所" icon="person">
+      <div className="grid2 groups"><Group title="用户与园所" icon="person">
         <Row to="/org" title="园所看板、称号、带教配对" sub={`园所 ${o.people.orgs} · 园长 ${o.people.directors} · 点评人 ${o.people.reviewers} · 配对中 ${o.people.pairs}`} />
         <Row to="/district" title="区县与共同体" sub={`区县管理员 ${o.people.district} · 共同体 ${o.people.communities}`} />
         <Users />
@@ -149,7 +149,7 @@ export default function Admin() {
         <Row to="/policy" title="平台口径" sub="十条红线：不碰幼儿数据、不排名、评作品不评人、AI 只起草……各模块与模型提示同一份" />
         <div className="small muted" style={{ padding: '4px 0' }}>24 小时 {o.audit.day} 条，其中失败 {o.audit.dayFail}；留存 {o.audit.total} 条</div>
         <Audit n={o.audit.total} />
-      </Group>
+      </Group></div>
       <div className="small muted" style={{ marginTop: 10 }}>这页只汇总与入口。改权限（园长、点评人、审核人、区县管理员）在园所页与区县页；删用户、清审计不放在界面上，走命令行。</div>
     </>}
   </div>
