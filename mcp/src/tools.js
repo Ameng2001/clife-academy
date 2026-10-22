@@ -81,7 +81,7 @@ export const TOOLS = [
     handler: async () => {
       const [l, d, n] = await Promise.all([get('/api/lectures'), get('/api/drills'), get('/api/notices')])
       return {
-        lectures: (l.upcoming || []).slice(0, 5).map(x => ({ id: x.id, title: x.title, at: when(x.at), minutes: x.minutes, speaker: x.speaker, booked: !!x.booked })),
+        lectures: (l.upcoming || []).slice(0, 5).map(x => ({ id: x.id, title: x.title, at: when(x.at), minutes: x.minutes, speaker: x.speaker, booked: !!x.booked, preview: x.pack?.preview?.points || [] })),
         drills: (d.current || []).slice(0, 5).map(x => ({ id: x.id, title: x.title, domain: x.domain, scope: x.scope, closes: when(x.closeAt), answers: x.answers ?? undefined })),
         notices: (n.notices || []).map(x => ({ title: x.title, text: x.text, until: day(x.until) }))
       }

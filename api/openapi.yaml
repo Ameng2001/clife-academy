@@ -4333,6 +4333,31 @@ paths:
       description: '`{ id }`'
       responses:
         '200': { description: '`{ ok }`' }
+  /api/lectures/pack/draft:
+    post:
+      tags: [academy]
+      operationId: academyLecturePackDraft
+      summary: 管理员：从讲稿生成讲堂包草稿（预习卡要点、微课切片、知识海报）并存到这场
+      description: "`{ id, script }`，讲稿 ≥ 40 字。规则切段，接了模型只改措辞不改结构；再用 `POST /api/lectures/pack` 改定。"
+      responses:
+        '200': { description: '`{ lecture }`，`lecture.pack` 含 `script`（管理员才给）' }
+        '400': { description: '`code: script` 讲稿太短或切不出来' }
+  /api/lectures/pack:
+    post:
+      tags: [academy]
+      operationId: academyLecturePackSave
+      summary: 管理员：保存改定的讲堂包；`pack: null` 删掉
+      description: "`{ id, pack:{ preview:{points[≤5]}, clips:[{id,title,desc,start?}][≤6], poster:{headline,lines[≤6]} } }`。预习卡随场次一直可见；切片与海报讲完才对外。"
+      responses:
+        '200': { description: '`{ lecture }`' }
+  /api/lectures/clips:
+    get:
+      tags: [academy]
+      operationId: academyLectureClips
+      summary: 讲堂微课：讲完场次的切片（微课库「讲堂微课」一节、小程序）。谁都能看
+      responses:
+        '200': { description: '`{ clips:[{ id, lectureId, lecture, speaker, at, title, desc, start, replayUrl }] }`' }
+
 components:
   securitySchemes:
     cookieAuth:

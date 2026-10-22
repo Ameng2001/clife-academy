@@ -1,4 +1,4 @@
-// 园长大讲堂：每月一场。直播在第三方，这里只做预约、回放列表、讲义。排场是管理员（本地运营方）的事。
+// 园长大讲堂：每月一场。直播在第三方，这里只做预约、回放列表、讲义，加一个讲堂包（讲前预习卡、讲后微课切片与知识海报）。排场与讲堂包是管理员（本地运营方）的事。
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
@@ -15,11 +15,58 @@ const toLocal = at => { const d = new Date(at); return `${d.getFullYear()}-${pad
 const A = { display: 'inline-flex', width: 'auto' }
 const EMPTY = { id: null, title: '', desc: '', who: '园长', speaker: '', when: '', minutes: 60, liveUrl: '', replayUrl: '', slidesUrl: '', slidesFile: null, notes: '', caseIds: [], titleIds: [] }
 
-function Card({ l, first, user, onBook, onEdit, onDelete }) {
+// 讲堂包（管理员）：贴讲稿→生成草稿（预习卡要点、微课切片、海报）→改定→存。规则切段，接了模型只改措辞。
+const lines = v => String(v || '').split('\n').map(x => x.trim()).filter(Boolean)
+function PackEditor({ l, onDone }) {
+  const toast = useUI.getState().toast
+  const p = l.pack
+  const [script, setScript] = useState(p?.script || ''), [busy, setBusy] = useState(false)
+  const [points, setPoints] = useState((p?.preview?.points || []).join('\n')), [clips, setClips] = useState(p?.clips || []), [headline, setHeadline] = useState(p?.poster?.headline || l.title), [plines, setPlines] = useState((p?.poster?.lines || []).join('\n'))
+  useEffect(() => { if (p) { setPoints((p.preview?.points || []).join('\n')); setClips(p.clips || []); setHeadline(p.poster?.headline || l.title); setPlines((p.poster?.lines || []).join('\n')); setScript(p.script || '') } }, [p?.draftedAt, p?.updatedAt])
+  const draft = async () => { if (script.trim().length < 40) return toast('讲稿至少 40 字'); setBusy(true); try { await api('/api/lectures/pack/draft', { method: 'POST', body: JSON.stringify({ id: l.id, script }) }); toast('草稿出来了，改完存'); onDone() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) } }
+  const save = async () => { setBusy(true); try { await api('/api/lectures/pack', { method: 'POST', body: JSON.stringify({ id: l.id, pack: { preview: { points: lines(points) }, clips: clips.filter(c => c.title.trim()), poster: { headline, lines: lines(plines) } } }) }); toast('已存'); onDone(true) } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) } }
+  const remove = async () => { if (!confirm('删掉这场的讲堂包？')) return; try { await api('/api/lectures/pack', { method: 'POST', body: JSON.stringify({ id: l.id, pack: null }) }); onDone(true) } catch (e) { toast('没成') } }
+  const setClip = (i, k, v) => setClips(cs => cs.map((c, j) => j === i ? { ...c, [k]: v } : c))
+  return <div className="card" style={{ marginTop: 8, padding: 12, background: 'var(--bg-2, var(--card))', color: 'var(--label)' }}>
+    <div className="small muted">讲堂包 · 讲稿贴进来，规则切出预习卡、微课切片、海报{p ? (p.model ? ' · 模型改过措辞' : ' · 规则草稿') : ''}。只搬讲稿里的话，不加内容。</div>
+    <TextArea rows={5} style={{ marginTop: 6 }} placeholder="讲稿或提纲：小标题单独一行，段落之间空一行，切得准" value={script} onChange={e => setScript(e.target.value)} />
+    <div className="row" style={{ gap: 8, marginTop: 6, justifyContent: 'flex-end' }}><Button size="sm" variant={p ? undefined : 'primary'} disabled={busy} onClick={draft}>{busy ? '在切…' : p ? '重新生成草稿' : '生成讲堂包草稿'}</Button></div>
+    {p && <>
+      <div className="small muted" style={{ marginTop: 8 }}>讲前 · 预习卡要点（一行一条，最多 5 条）</div>
+      <TextArea rows={4} style={{ marginTop: 4 }} value={points} onChange={e => setPoints(e.target.value)} />
+      <div className="small muted" style={{ marginTop: 8 }}>讲后 · 微课切片（最多 6 条，讲完才对外；回放里的起点秒数可不填）</div>
+      {clips.map((c, i) => <div key={c.id || i} className="row" style={{ gap: 6, marginTop: 4, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <TextField placeholder="切片标题" value={c.title} onChange={e => setClip(i, 'title', e.target.value)} style={{ flex: 1, minWidth: 140 }} />
+        <TextField type="number" placeholder="起点秒" value={c.start ?? ''} onChange={e => setClip(i, 'start', e.target.value === '' ? null : Number(e.target.value))} style={{ width: 90 }} />
+        <TextArea rows={2} placeholder="一句话简介" value={c.desc} onChange={e => setClip(i, 'desc', e.target.value)} style={{ flexBasis: '100%' }} />
+      </div>)}
+      {clips.length < 6 && <div style={{ marginTop: 4 }}><Button size="sm" onClick={() => setClips([...clips, { id: 'c' + (clips.length + 1), title: '', desc: '', start: null }])}>加一条切片</Button></div>}
+      <div className="small muted" style={{ marginTop: 8 }}>讲后 · 知识海报（标题＋几行字，讲完才对外）</div>
+      <TextField style={{ marginTop: 4 }} placeholder="海报标题" value={headline} onChange={e => setHeadline(e.target.value)} />
+      <TextArea rows={4} style={{ marginTop: 4 }} placeholder="一行一条，最多 6 条" value={plines} onChange={e => setPlines(e.target.value)} />
+      <div className="row" style={{ gap: 8, marginTop: 8, justifyContent: 'flex-end' }}><Button size="sm" onClick={remove}>删包</Button><Button size="sm" onClick={() => onDone(true)}>收起</Button><Button size="sm" variant="primary" disabled={busy} onClick={save}>存</Button></div>
+    </>}
+  </div>
+}
+
+// 知识海报：一张卡，讲完才有
+function Poster({ poster, lecture }) {
+  if (!poster?.headline) return null
+  return <div style={{ marginTop: 10, borderRadius: 14, padding: '14px 16px', background: 'linear-gradient(135deg, var(--acc), color-mix(in srgb, var(--acc) 55%, #1c3b33))', color: '#fff' }}>
+    <div className="small" style={{ opacity: .8 }}>园长大讲堂 · 知识海报</div>
+    <div style={{ fontWeight: 800, fontSize: 19, margin: '4px 0 8px', lineHeight: 1.3 }}>{poster.headline}</div>
+    {poster.lines?.map((x, i) => <div key={i} style={{ fontSize: 14, lineHeight: 1.6 }}>· {x}</div>)}
+    <div className="small" style={{ opacity: .7, marginTop: 8 }}>{lecture.speaker ? lecture.speaker + ' 主讲 · ' : ''}{fmtWhen(lecture.at, lecture.minutes).split(' 周')[0]}</div>
+  </div>
+}
+
+function Card({ l, first, user, onBook, onEdit, onDelete, onChange }) {
   const toast = useUI.getState().toast
   const nav = useNavigate()
+  const [packOpen, setPackOpen] = useState(false)
   const tone = first ? { background: 'var(--acc)', color: '#fff' } : {}
   const sub = first ? { opacity: .85 } : { color: 'var(--label-2)' }
+  const pk = l.pack
   return <div className="card" style={{ marginTop: 10, ...tone }}>
     <div className="small" style={sub}>{first ? '下一场 · ' : ''}{fmtWhen(l.at, l.minutes)}{l.phase === 'live' ? ' · 正在直播' : ''}</div>
     <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0', lineHeight: 1.35 }}>{l.title}</div>
@@ -35,8 +82,14 @@ function Card({ l, first, user, onBook, onEdit, onDelete }) {
         </>}
       {l.slides?.url && <a className="btn btn-sm" style={A} href={l.slides.url} target="_blank" rel="noreferrer"><Icon name="clipboard" /> 讲义</a>}
       {l.slides?.file && <a className="btn btn-sm" style={A} href={`api/lectures/file?id=${l.id}`} target="_blank" rel="noreferrer"><Icon name="clipboard" /> 讲义</a>}
-      {onEdit && <><Button size="sm" onClick={() => onEdit(l)}>改</Button><Button size="sm" onClick={() => onDelete(l)}>删</Button></>}
+      {onEdit && <><Button size="sm" onClick={() => onEdit(l)}>改</Button><Button size="sm" onClick={() => onDelete(l)}>删</Button><Button size="sm" style={first ? { background: 'rgba(255,255,255,.18)', color: '#fff' } : {}} onClick={() => setPackOpen(o => !o)}>{pk ? '讲堂包' : '做讲堂包'}</Button></>}
     </div>
+    {pk?.preview?.points?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><div style={{ fontWeight: 600 }}>{l.phase === 'done' ? '这场讲了' : '讲前先看'}</div>{pk.preview.points.map((x, i) => <div key={i} style={{ lineHeight: 1.6 }}>{i + 1}. {x}</div>)}</div>}
+    {l.phase === 'done' && pk?.clips?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><div style={{ fontWeight: 600 }}>微课切片 · {pk.clips.length} 条<span className="tap" style={{ marginInlineStart: 8, textDecoration: 'underline', fontWeight: 400 }} onClick={() => nav('/library?q=' + encodeURIComponent(l.title.slice(0, 8)))}>微课库里也有</span></div>
+      {pk.clips.map(c => <div key={c.id} style={{ marginTop: 4 }}>{l.replayUrl ? <a href={l.replayUrl + (c.start ? '#t=' + c.start : '')} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>{c.title}</a> : <span>{c.title}</span>}{c.start ? <span style={{ opacity: .7 }}> · {Math.floor(c.start / 60)}′{String(c.start % 60).padStart(2, '0')}″</span> : null}{c.desc ? <div style={{ opacity: .85 }}>{c.desc}</div> : null}</div>)}
+    </div>}
+    {l.phase === 'done' && <Poster poster={pk?.poster} lecture={l} />}
+    {packOpen && onEdit && <PackEditor l={l} onDone={close => { onChange(); if (close === true) setPackOpen(false) }} />}
     {l.sharers?.length > 0 && <div className="small" style={{ marginTop: 8, ...sub }}>分享者：{l.sharers.map(s => s.name + (s.orgName ? '（' + s.orgName + '）' : '') + (s.caseTitle ? '《' + s.caseTitle + '》' : '')).join('、')} · 各 10 分钟</div>}
     {l.notes && l.phase === 'done' && <div className="small" style={{ marginTop: 10, whiteSpace: 'pre-wrap', ...sub }}>{l.notes}</div>}
     {l.showcase?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><Icon name="sparkles" /> 展示案例：{l.showcase.map(c => <span key={c.id} className="tap" style={{ textDecoration: 'underline', marginInlineEnd: 8 }} onClick={e => { e.stopPropagation(); nav('/cases?q=' + encodeURIComponent(c.title)) }}>《{c.title}》{c.byName}</span>)}</div>}
@@ -112,9 +165,9 @@ export default function Lectures() {
     </div>}
 
     {data && !data.upcoming.length && <div className="card small muted">下一场还没排。{data.canEdit ? '点右上角「排一场」。' : '排上了会在这里和首页出现。'}</div>}
-    {data?.upcoming.map((l, i) => <Card key={l.id} l={l} first={i === 0} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} />)}
+    {data?.upcoming.map((l, i) => <Card key={l.id} l={l} first={i === 0} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}
     {data?.done.length > 0 && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">回放 · {data.done.length}</div>
-      {data.done.map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} />)}
+      {data.done.map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}
     </div>}
     {sharers && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">分享者候选 <span className="small muted">被「用过，有效」≥ {sharers.usesMin} 次或入库 ≥ {sharers.casesMin} 条或入选 · 邀请用的名单，不公开</span></div>
       {data?.upcoming.length > 1 && <div className="row" style={{ gap: 8, marginBottom: 6, alignItems: 'center' }}><span className="small muted">邀到哪一场</span><select className="ac-sel" value={inviteTo} onChange={e => setInviteTo(e.target.value)}>{data.upcoming.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></div>}
