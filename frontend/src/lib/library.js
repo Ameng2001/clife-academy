@@ -49,3 +49,19 @@ export function snippet(l, query, max = 40) {
   for (const f of fields) { const n = norm(f); const t = ts.find(t => n.includes(t)); if (t) { const i = n.indexOf(t); const s = String(f); return (i > 12 ? '…' : '') + s.slice(Math.max(0, i - 12), i + max) } }
   return l.goal || ''
 }
+
+/** 一日生活环节 → 场景。精品微课「一日生活」视图按这个顺序分组；不在表里的场景（账号、教研、园长工作台…）不属于一日生活，不显示。 */
+export const DAY_PARTS = [
+  ['入园与晨检', ['出勤与请假', '晨午检', '健康检查', '安全']],
+  ['进餐与午睡', ['膳食', '进餐', '午睡', '睡眠健康']],
+  ['活动与游戏', ['活动设计', '活动现场', '区角', '自主游戏', '游戏分享', '数智体能', '课中互动', '墙面与主题']],
+  ['过渡与一日常规', ['过渡环节', '一日常规', '观察记录', '日常反馈']],
+  ['健康与特殊情况', ['疾病防控', '疾病管理', '健康档案', '体检', '冲突处理', '特殊需要']],
+  ['离园与家园', ['家长会', '个别约谈', '家园活动']],
+]
+const PART_OF = new Map(DAY_PARTS.flatMap(([part, scenes]) => scenes.map(s => [s, part])))
+export const dayPartOf = scene => PART_OF.get(scene) || null
+/** 按环节分组的关卡：[[环节, [关卡…]], …]，空环节不出。 */
+export function lessonsByDayPart(rows) {
+  return DAY_PARTS.map(([part, scenes]) => [part, rows.filter(r => scenes.includes(r.lesson.scene))]).filter(([, ls]) => ls.length)
+}

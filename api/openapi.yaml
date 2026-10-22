@@ -4436,6 +4436,16 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string }, short: { type: string }, region: { type: string }, tagline: { type: string }, credit: { type: string }, reset: { type: boolean } } } } } }
       responses:
         '200': { description: '`{ brand }`' }
+  /api/org/recent-events:
+    get:
+      tags: [academy]
+      operationId: academyOrgRecentEvents
+      summary: 本园最近触发过的实操事件名
+      description: '`?days=7`（1–90）。本园（同 org 的在用账号）在这段时间回传过的事件，按次数从多到少最多 20 条，只给 `{ event, levels }`，不给次数、不给人；账号没有园所时只看本人（`scope: self`）。精品微课「本周常查」用它把事件映射到场景。'
+      responses:
+        '200': { description: '`{ days, events: [{ event, levels }], scope: org|self }`' }
+        '401': { description: 未登录 }
+
 components:
   securitySchemes:
     cookieAuth:

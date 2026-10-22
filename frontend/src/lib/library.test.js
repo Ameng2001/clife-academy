@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { allLessons, allScenes, searchLessons, snippet } from './library.js'
+import { allLessons, allScenes, searchLessons, snippet, DAY_PARTS, dayPartOf, lessonsByDayPart } from './library.js'
 
 describe('微课库搜索', () => {
   it('lists every level across paths and the scenes in order', () => {
@@ -29,5 +29,15 @@ describe('微课库搜索', () => {
     const l = searchLessons('批量管理')[0].lesson
     expect(snippet(l, '批量管理')).toContain('批量管理')
     expect(snippet(l, '')).toBe(l.goal)
+  })
+  it('day parts cover only daily-routine scenes, every listed scene exists, and grouping keeps order', () => {
+    const scenes = new Set(allScenes())
+    for (const [, ss] of DAY_PARTS) for (const sc of ss) expect(scenes.has(sc), sc).toBe(true)
+    expect(dayPartOf('午睡')).toBe('进餐与午睡')
+    expect(dayPartOf('账号')).toBe(null)
+    const groups = lessonsByDayPart(searchLessons(''))
+    expect(groups[0][0]).toBe('入园与晨检')
+    expect(groups.every(([, ls]) => ls.length > 0)).toBe(true)
+    expect(groups.flatMap(([, ls]) => ls).length).toBeLessThan(100)
   })
 })

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api.js'
 import Icon from '../../components/Icon.jsx'
-import { Button } from '../../components/ui.jsx'
+import { Button, TextField } from '../../components/ui.jsx'
 import { ORG, PATH_KEYS, ROLE_PATH_KEYS, PATH_META, levelId, levelOf, cursorOf, pathSummary, pathNameOf } from '../../lib/lessons.js'
 import { canReview } from './Review.jsx'
 import { drafts } from '../../lib/level-draft.js'
@@ -71,6 +71,12 @@ export default function Home() {
       <div className="small muted" style={{ marginTop: 6 }}>{sum.done} / {sum.total} 关 · {credits} 学分</div>
       {plan && plan.levels.length > 0 && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={() => nav('/coach')}>本周待学（Coach 学期计划第 {plan.week} 周）：{plan.levels.map(l => (l.passed ? '✓ ' : '') + l.title).join('、')} ›</div>}
     </div>
+
+    <form className="card" style={{ marginTop: 10, padding: 12 }} onSubmit={e => { e.preventDefault(); const v = e.currentTarget.q.value.trim(); nav('/library' + (v ? '?q=' + encodeURIComponent(v) : '')) }}>
+      <div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>遇到事查一下 · 精品微课</div>
+      <div className="row" style={{ gap: 8, marginTop: 6 }}><TextField name="q" placeholder="搜标题、操作步骤、平台菜单，如「批量管理」" style={{ flex: 1 }} /><Button type="submit" size="sm" variant="tinted" icon="magnifier">查</Button></div>
+      <div className="small muted" style={{ marginTop: 6 }}>不受解锁限制，点开直接看「讲」与「看」；走关还是在学习路径。</div>
+    </form>
 
     <div className="tiles">
       {user?.admin && <div className="tile tappable" onClick={() => nav('/admin')}><div className="l"><Icon name="gear" />运营后台</div><div className="v">六组事</div><div className="small muted">用户与园所、研修期次、资源与案例、发题与点评、公告、审计</div></div>}

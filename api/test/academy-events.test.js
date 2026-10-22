@@ -113,3 +113,23 @@ test('without DEV_LOGIN a session cannot post events and config omits demo', asy
   const r = await call('POST', '/api/events', { event: '完成 1 次批量调整' }, { Authorization: 'Bearer ' + login.json.token });
   assert.equal(r.status, 403); assert.equal(r.json.code, 'platform-only');
 });
+
+test('org recent-events: counts the org\'s events into an ordered name list without people or numbers', async t => {
+  const stub = await startStub(); t.after(() => stub.srv.close());
+  const { call } = await startServer(t, stub.base);
+  const a = await call('POST', '/api/login/dev', { name: '王老师', role: 'teacher', org: '测试园' });
+  const b = await call('POST', '/api/login/dev', { name: '李保健', role: 'nurse', org: '测试园' });
+  const c = await call('POST', '/api/login/dev', { name: '外园老师', role: 'teacher', org: '别的园' });
+  const A = { Authorization: 'Bearer ' + a.json.token }, B = { Authorization: 'Bearer ' + b.json.token }, C = { Authorization: 'Bearer ' + c.json.token };
+  await call('POST', '/api/events', { event: '完成 1 次本班出勤确认', ref: 'r1' }, A);
+  await call('POST', '/api/events', { event: '完成 1 次本班出勤确认', ref: 'r2' }, B);
+  await call('POST', '/api/events', { event: '三端各登录 1 次', ref: 'r3' }, B);
+  await call('POST', '/api/events', { event: '新增或核对 1 个班级', ref: 'r4' }, C);
+  const r = await call('GET', '/api/org/recent-events?days=7', null, A);
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  assert.equal(r.json.scope, 'org');
+  assert.deepEqual(r.json.events.map(e => e.event), ['完成 1 次本班出勤确认', '三端各登录 1 次']);
+  assert.deepEqual(r.json.events[0].levels, ['teacher-1']);
+  assert.ok(r.json.events.every(e => !('count' in e) && !('uid' in e) && !('by' in e)));
+  assert.equal((await call('GET', '/api/org/recent-events')).status, 401);
+});

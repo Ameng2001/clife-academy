@@ -12,9 +12,11 @@
  *
  * 幂等：同一用户同一 id 只收一次；没 id 的按 (event, ref) 去重，ref 为空则不去重（平台每次回传算一次）。
  * 存储：db.events，每用户最多 EVENTS_PER_USER 条，超出丢最旧的。
- * GET /api/events?since=<ms>：本人的事件，按收到时间升序，最多 500 条。 */
+ * GET /api/events?since=<ms>：本人的事件，按收到时间升序，最多 500 条。
+ * GET /api/org/recent-events?days=7：本园最近触发过的事件名，按次数从多到少，只给事件名与关卡 id，不给次数、不给人。给精品微课「本周常查」用。 */
 import crypto from 'node:crypto';
 import { EVENTS } from './events-data.js';
+import { orgKeyOf } from './org.js';
 
 const KEY = process.env.PLATFORM_EVENTS_KEY || '';
 export const EVENTS_PER_USER = 2000;
@@ -101,6 +103,19 @@ export function academyEventRoutes({ json, readBody, db, saveDb, readSession, au
     if (r === 'accepted') saveDb();
     const mine = db.events.filter(e => e.uid === user.id).map(forClient);
     json(res, 200, { accepted: r === 'accepted' ? 1 : 0, duplicates: r === 'duplicate' ? 1 : 0, rejected: [], events: mine });
+  },
+
+  'GET /api/org/recent-events': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const key = orgKeyOf(user);
+    const days = Math.min(90, Math.max(1, Number(new URL(req.url, 'http://x').searchParams.get('days') || 7) || 7));
+    const since = Date.now() - days * 86400000;
+    const uids = new Set(key ? db.users.filter(u => !u.disabled && orgKeyOf(u) === key).map(u => u.id) : [user.id]);
+    const count = new Map();
+    for (const e of db.events) if (uids.has(e.uid) && e.at >= since) count.set(e.event, (count.get(e.event) || 0) + 1);
+    const events = [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh')).slice(0, 20).map(([event]) => ({ event, levels: levelsOfEvent(event) }));
+    json(res, 200, { days, events, scope: key ? 'org' : 'self' });
   },
 
   'GET /api/events': async (req, res) => {

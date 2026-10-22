@@ -1,6 +1,6 @@
 // 一关：讲 → 看 → 做 → 测。草稿只留本机（lib/level-draft.js），通关走 finish-level.js。
 import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import Icon from '../../components/Icon.jsx'
@@ -25,6 +25,9 @@ export default function Level() {
   if (!lv) return <div className="narrow"><div className="empty">没有这一关。</div></div>
   const st = statusOf(S.progress, id)
   const d = useDraft(id)
+  // 从精品微课进来带 ?seg=jiang|kan：查阅用，直接落到那一段（做与测不接受，仍按草稿）
+  const [sp] = useSearchParams()
+  useEffect(() => { const seg = sp.get('seg'); if (seg === 'jiang' || seg === 'kan') setDraft(id, x => { x.seg = seg }) }, [id])
   const user = useStore(s => s.user), config = useStore(s => s.config)
   const events = useEvents(s => s.events)
   // 「做」：平台回传了这关的事件就算完成；没登录（演示）时用本地草稿里的模拟回传
