@@ -1,4 +1,4 @@
-/* 桥到学前大课堂 api 的 HTTP 客户端：只发 GET，带只读接口令牌（在网页「设置 → 只读接口令牌」新建）。
+/* 桥到学前教师发展平台 api 的 HTTP 客户端：只发 GET，带只读接口令牌（在网页「设置 → 只读接口令牌」新建）。
    ACADEMY_URL   服务地址，如 https://academy.example.com 或本地 http://127.0.0.1:3000
    ACADEMY_TOKEN 令牌，cla_ 开头 */
 let _fetch = globalThis.fetch
@@ -12,7 +12,7 @@ export function config() {
 
 export function checkConfig() {
   const { url, token } = config()
-  if (!url) throw Object.assign(new Error('没设 ACADEMY_URL（学前大课堂的地址，如 https://academy.example.com）'), { code: 'CONFIG' })
+  if (!url) throw Object.assign(new Error('没设 ACADEMY_URL（平台的地址，如 https://academy.example.com）'), { code: 'CONFIG' })
   if (!token) throw Object.assign(new Error('没设 ACADEMY_TOKEN（网页「设置 → 只读接口令牌」里新建）'), { code: 'CONFIG' })
   if (!token.startsWith('cla_')) throw Object.assign(new Error('ACADEMY_TOKEN 不像只读令牌（应以 cla_ 开头）'), { code: 'CONFIG' })
   return { url, token }

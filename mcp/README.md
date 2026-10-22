@@ -1,4 +1,4 @@
-# 学前大课堂 MCP 只读桥
+# 学前教师发展平台 MCP 只读桥
 
 园长、教育局（区县管理员）用自己的 LLM 客户端（Claude Desktop、Cursor、Cline 等）问本园、本区的学习进度：「保健医路径这周过了几关」「待点评超期的有几件」「本区覆盖率中位数多少」。桥是一个本地 stdio 进程，客户端起它，它拿一枚**只读接口令牌**去调学前大课堂的 GET 接口。
 
@@ -9,7 +9,7 @@
 
 ## 接法
 
-1. 在学前大课堂网页「设置 → 只读接口令牌」新建一枚，标签写客户端名。令牌只显示这一次，`cla_` 开头，复制走；最多 5 枚在用，点一枚可撤。
+1. 在平台网页「设置 → 只读接口令牌」新建一枚，标签写客户端名。令牌只显示这一次，`cla_` 开头，复制走；最多 5 枚在用，点一枚可撤。
 2. 装依赖：
 
 ```bash
@@ -25,7 +25,7 @@ cd mcp && npm install
       "command": "node",
       "args": ["/绝对路径/clife-academy/mcp/src/index.js"],
       "env": {
-        "ACADEMY_URL": "https://academy.example.com",   // 学前大课堂地址；本地开发 http://127.0.0.1:3000
+        "ACADEMY_URL": "https://academy.example.com",   // 平台地址；本地开发 http://127.0.0.1:3000
         "ACADEMY_TOKEN": "cla_…"
       }
     }

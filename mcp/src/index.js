@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* 学前大课堂 MCP 只读桥 — stdio。LLM 客户端（Claude Desktop、Cursor 等）本地起这个进程，它拿只读接口令牌去调学前大课堂的 GET 接口。
+/* 学前教师发展平台 MCP 只读桥 — stdio。LLM 客户端（Claude Desktop、Cursor 等）本地起这个进程，它拿只读接口令牌去调平台的 GET 接口。
    只读：令牌在服务端就只允许 GET；能看什么按账号判。 */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
