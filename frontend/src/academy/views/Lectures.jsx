@@ -165,9 +165,10 @@ export default function Lectures() {
     </div>}
 
     {data && !data.upcoming.length && <div className="card small muted">下一场还没排。{data.canEdit ? '点右上角「排一场」。' : '排上了会在这里和首页出现。'}</div>}
-    {data?.upcoming.map((l, i) => <Card key={l.id} l={l} first={i === 0} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}
+    {data?.upcoming.slice(0, 1).map(l => <Card key={l.id} l={l} first user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}
+    <div className="grid2">{data?.upcoming.slice(1).map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}</div>
     {data?.done.length > 0 && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">回放 · {data.done.length}</div>
-      {data.done.map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}
+      <div className="grid2">{data.done.map(l => <Card key={l.id} l={l} user={user} onBook={book} onEdit={data.canEdit ? edit : null} onDelete={del} onChange={load} />)}</div>
     </div>}
     {sharers && <div className="sect" style={{ marginTop: 18 }}><div className="sect-t">分享者候选 <span className="small muted">被「用过，有效」≥ {sharers.usesMin} 次或入库 ≥ {sharers.casesMin} 条或入选 · 邀请用的名单，不公开</span></div>
       {data?.upcoming.length > 1 && <div className="row" style={{ gap: 8, marginBottom: 6, alignItems: 'center' }}><span className="small muted">邀到哪一场</span><select className="ac-sel" value={inviteTo} onChange={e => setInviteTo(e.target.value)}>{data.upcoming.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}</select></div>}

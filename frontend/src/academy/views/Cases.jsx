@@ -22,7 +22,7 @@ function CaseCard({ c, uses, onOpen, open, actions, onUsed, onAdapt }) {
   const nav = useNavigate()
   const [useNote, setUseNote] = useState('')
   const [t, col] = STATUS[c.status] || [c.status, 'var(--label-2)']
-  return <div className="card" style={{ marginTop: 10 }}>
+  return <div className={'card' + (open ? ' open' : '')} style={{ marginTop: 10 }}>
     <div className="ac-row tap" onClick={onOpen} style={{ alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, lineHeight: 1.4 }}>{c.title}</div>
@@ -151,25 +151,25 @@ export default function Cases() {
         {data?.showcased > 0 && <button className={'chip' + (showcase ? ' on' : '')} onClick={() => setParam('showcase', showcase ? null : '1')}>市级展示</button>}
       </div>
       {data && !data.cases.length && <div className="card small muted">还没有入库的案例。{data.total ? '换个筛选试试。' : '做过的好事值得写下来：点右上角「分享一个」。'}</div>}
-      {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} onAdapt={adapt} />)}
+      <div className="grid2">{data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} onAdapt={adapt} />)}</div>
     </>}
 
     {user && tab === 'mine' && <>
       {mine && !mine.cases.length && <div className="card small muted">还没交过。退回的可以改了再交。</div>}
-      {mine?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
-        actions={c.canEdit && <><Button size="sm" onClick={() => setForm({ id: c.id, title: c.title, domain: c.domain, age: c.age || '', use: c.use, text: c.text, files: c.files, adaptedFrom: c.adaptedFrom ? { id: c.adaptedFrom.id, title: c.adaptedFrom.title, byName: c.adaptedFrom.byName } : null, adaptNote: c.adaptedFrom?.note || '' })}>{c.status === 'rejected' ? '改了再交' : '改'}</Button><Button size="sm" onClick={() => del(c)}>删</Button></>} />)}
+      <div className="grid2">{mine?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
+        actions={c.canEdit && <><Button size="sm" onClick={() => setForm({ id: c.id, title: c.title, domain: c.domain, age: c.age || '', use: c.use, text: c.text, files: c.files, adaptedFrom: c.adaptedFrom ? { id: c.adaptedFrom.id, title: c.adaptedFrom.title, byName: c.adaptedFrom.byName } : null, adaptNote: c.adaptedFrom?.note || '' })}>{c.status === 'rejected' ? '改了再交' : '改'}</Button><Button size="sm" onClick={() => del(c)}>删</Button></>} />)}</div>
     </>}
 
     {user && tab === 'queue' && queue && <>
       {queue.director && <div className="sect"><div className="sect-t">本园待同意 · {queue.consent.length}</div>
         {!queue.consent.length && <div className="card small muted">没有待同意的。老师自荐的案例会先到这里，你同意后才进审核。</div>}
-        {queue.consent.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
-          actions={<><TextField placeholder="不同意时写一句原因" value={notes[c.id] || ''} onChange={e => setNotes({ ...notes, [c.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" onClick={() => decide(c, 'reject')}>不同意</Button><Button size="sm" variant="primary" disabled={busy} onClick={() => decide(c, 'consent')}>同意，转审核</Button></>} />)}
+        <div className="grid2">{queue.consent.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
+          actions={<><TextField placeholder="不同意时写一句原因" value={notes[c.id] || ''} onChange={e => setNotes({ ...notes, [c.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" onClick={() => decide(c, 'reject')}>不同意</Button><Button size="sm" variant="primary" disabled={busy} onClick={() => decide(c, 'consent')}>同意，转审核</Button></>} />)}</div>
       </div>}
       {queue.curator && <div className="sect"><div className="sect-t">待审核 · {queue.pending.length}</div>
         {!queue.pending.length && <div className="card small muted">没有待审核的。</div>}
-        {queue.pending.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
-          actions={<><TextField placeholder="意见（退回必填）" value={notes[c.id] || ''} onChange={e => setNotes({ ...notes, [c.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" onClick={() => decide(c, 'reject')}>退回</Button><Button size="sm" variant="primary" icon="checkCircle" disabled={busy} onClick={() => decide(c, 'approve')}>入库</Button></>} />)}
+        <div className="grid2">{queue.pending.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
+          actions={<><TextField placeholder="意见（退回必填）" value={notes[c.id] || ''} onChange={e => setNotes({ ...notes, [c.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" onClick={() => decide(c, 'reject')}>退回</Button><Button size="sm" variant="primary" icon="checkCircle" disabled={busy} onClick={() => decide(c, 'approve')}>入库</Button></>} />)}</div>
       </div>}
     </>}
   </div>
