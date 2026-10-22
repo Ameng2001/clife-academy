@@ -136,7 +136,7 @@ export default function Lectures() {
     setBusy(true)
     try { const m = await uploadMedia(f); setForm(x => ({ ...x, slidesFile: m, slidesUrl: '' })) } catch (err) { useUI.getState().toast('上传失败' + (err.message ? '：' + err.message : '')) } finally { setBusy(false) }
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>园长大讲堂</h1><div className="sub">每月一场 · 安排在午睡时段 · 直播后有回放与讲义</div></div><div className="hdr-actions">{data?.canEdit && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>排一场</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
 
     {form && <div className="card" style={{ marginBottom: 14 }}>

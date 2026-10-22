@@ -66,7 +66,7 @@ export default function Questions() {
   useEffect(() => { load() }, [user?.id])
   useEffect(() => { if (data?.canAnswer && !sp.get('tab') && !sp.get('id') && data.queue.length && !data.mine.length) setTab('queue') }, [data?.canAnswer])
   const list = data ? (tab === 'queue' ? data.queue : data.mine) : []
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>答疑</h1><div className="sub">每关底部问 · 助手整理，种子教师回答 · 两个工作日没人答转本地讲师</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {!user && <div className="card small muted">登录后在关卡页底部提问。</div>}
     {data && <>

@@ -1,5 +1,6 @@
 // 大课堂的应用壳：沿用上游的 store（状态、同步、登录）、主题、Toast、Modals、SyncBanner，
 // 路由、底栏、设置、同步状态条都是大课堂自己的；上游健身视图已删。
+// 壳分两套：手机底部四个 tab（Tabs），桌面 ≥ 1000px 顶部导航（TopNav）；哪套显示由 academy.css 的断点定。没登录时是 Landing（桌面左介绍右登录卡）。
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
@@ -12,7 +13,8 @@ import ErrorBoundary from '../components/ErrorBoundary.jsx'
 import Modals from '../components/Modals.jsx'
 import Toast from '../components/Toast.jsx'
 import SyncBanner from './components/SyncBanner.jsx'
-import Login from './views/Login.jsx'
+import Landing from './views/Landing.jsx'
+import TopNav from './components/TopNav.jsx'
 import Settings from './views/Settings.jsx'
 import Home from './views/Home.jsx'
 import Paths from './views/Paths.jsx'
@@ -92,7 +94,7 @@ function Shell() {
   return <>
     <div id="app" className="vfade" key={loc.pathname}>
       <ErrorBoundary>
-        {!authed ? <Login relogin={syncStatus === 'auth'} /> : <Routes>
+        {!authed ? <Landing relogin={syncStatus === 'auth'} /> : <Routes>
           <Route path="/home" element={<Home />} />
           <Route path="/paths" element={<Paths />} />
           <Route path="/paths/:path" element={<Paths />} />
@@ -132,6 +134,7 @@ function Shell() {
     </div>
     <SyncBanner signIn={toLogin} />
     {authed && <Tabs />}
+    {authed && <TopNav />}
     <Modals />
     <Toast />
   </>

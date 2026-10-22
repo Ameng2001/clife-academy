@@ -41,7 +41,7 @@ export default function Checkup() {
   const user = useStore(s => s.user)
   const [data, setData] = useState(null), [err, setErr] = useState(null)
   useEffect(() => { if (user) api('/api/org/checkup').then(setData).catch(e => setErr(e.code === 'director' ? '园长才能看体检卡。' : '没取到体检卡。')); }, [user?.id])
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>本园应用体检</h1><div className="sub">每周一出卡 · 共 12 项 · 只看平台使用情况</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {!user && <div className="card small muted">园长登录后看。</div>}
     {err && <div className="card small muted">{err}</div>}

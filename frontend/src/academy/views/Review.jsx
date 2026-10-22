@@ -56,7 +56,7 @@ export default function Review() {
   const load = async () => { try { setData(await api('/api/review/queue')); setErr(null) } catch (e) { setErr(e) } }
   useEffect(() => { if (user) load() }, [user?.id])
   const head = <div className="hdr"><div><h1>点评</h1><div className="sub">{data?.scope === 'mentees' ? '所带教师的实践关提交' : '本园实践关的提交'} · 评作品不评人</div></div><div className="hdr-actions"><button className="iconbtn" onClick={load}><Icon name="repeat" /></button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
-  if (!user) return <div className="narrow">{head}<div className="card small muted">登录后可用。</div></div>
+  if (!user) return <div className="narrow wide">{head}<div className="card small muted">登录后可用。</div></div>
   if (err) return <div className="narrow">{head}<div className="card small">{err.status === 403 ? '这页给园长、被指定的点评人与带教教师。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
   if (!data) return <div className="narrow">{head}<div className="card small muted">正在取数…</div></div>
   return <div className="narrow">

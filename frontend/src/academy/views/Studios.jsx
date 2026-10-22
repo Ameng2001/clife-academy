@@ -83,7 +83,7 @@ export default function Studios() {
     if (sform.title.trim().length < 2 || !sform.studioId) return toast('写标题、选主持的工作室')
     setBusy(true); await post('/api/showcases', { ...sform, at: new Date(sform.date + 'T09:00').getTime() }, '已建', () => { setSform(null); load() }); setBusy(false)
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>名师工作室</h1><div className="sub">市级 · 专家讲师主持，骨干教师参加，产出园本案例 · 每年一次市级展示</div></div><div className="hdr-actions">{data?.canManage && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ name: '', focus: '', term: '', intro: '', hostUid: '' })}>建工作室</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后可见。</div>}
     {form && <div className="card" style={{ marginBottom: 14 }}>

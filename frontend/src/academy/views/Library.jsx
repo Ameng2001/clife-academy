@@ -24,7 +24,7 @@ export default function Library() {
   const clipRows = useMemo(() => { const k = q.trim().toLowerCase(); return k ? clips.filter(c => [c.title, c.desc, c.lecture, c.speaker].some(x => (x || '').toLowerCase().includes(k))) : clips }, [clips, q])
   const mmss = s => `${Math.floor(s / 60)}′${String(s % 60).padStart(2, '0')}″`
 
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>微课库</h1><div className="sub">全部 {searchLessons('').length} 关按岗位与场景查，不受解锁限制</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/resources')}><Icon name="folder" /> 资源库</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 案例库</button></div></div>
     <div style={{ position: 'relative', marginBottom: 12 }}>
       <TextField placeholder="搜标题、操作步骤、平台菜单，如「批量管理」" value={q} onChange={e => setQ(e.target.value)} style={{ paddingInlineStart: 36 }} />

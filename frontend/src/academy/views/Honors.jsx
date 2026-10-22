@@ -25,7 +25,7 @@ export default function Honors() {
     finally { setBusy(false) }
   }
   const growth = h?.badges.filter(b => b.kind === 'growth') || [], contrib = h?.badges.filter(b => b.kind === 'contribution') || []
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>荣誉与学分</h1><div className="sub">只给本人看 · 不排行 · 不与考核挂钩</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
 

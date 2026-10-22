@@ -48,7 +48,7 @@ export default function Programs() {
     setBusy(true)
     try { await api('/api/programs', { method: 'POST', body: JSON.stringify({ title: form.title, kind: form.kind, term: form.term, from: new Date(form.from + 'T09:00').getTime(), to: new Date(form.to + 'T17:00').getTime(), place: form.place, hours: Number(form.hours) || 0, capacity: Number(form.capacity) || 0, note: form.note }) }); toast('已建'); setForm(null); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>研修项目</h1><div className="sub">寒暑假研修、园长研修、专题培训 · 报名、名单、学时</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ title: '', kind: data.kinds[0], term: '', from: toLocal(Date.now() + 14 * 86400000), to: toLocal(Date.now() + 16 * 86400000), place: '', hours: 8, capacity: 0, note: '' })}>建期次</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card">

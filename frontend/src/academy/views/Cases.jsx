@@ -110,7 +110,7 @@ export default function Cases() {
   }
   const queueCount = (queue?.consent?.length || 0) + (queue?.pending?.length || 0)
 
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>案例库</h1><div className="sub">园里真实做过的事 · 实名共享 · 每条标明怎么用</div></div><div className="hdr-actions">{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一个</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">案例库实名共享，登录后可见。</div>}
     {user && <div className="ac-tabs" style={{ marginBottom: 12 }}>

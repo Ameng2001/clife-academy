@@ -47,11 +47,12 @@ export default function Home() {
   const [notices, setNotices] = useState([])
   useEffect(() => { if (user) api('/api/notices').then(r => setNotices(r.notices)).catch(() => setNotices([])); else setNotices([]) }, [user?.id])
   useEffect(() => { if (user) api('/api/me/coach').then(r => setPlan(r.plan)).catch(() => setPlan(null)); else setPlan(null) }, [user?.id])
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr">
       <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
       <div className="hdr-actions"><RoleSelect S={S} /><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     </div>
+    <div className="home-grid"><div className="home-main">
     {notices.map(n => <div key={n.id} className="card" style={{ marginBottom: 10, padding: 12, background: 'color-mix(in srgb,var(--acc) 8%,transparent)' }}><div style={{ fontWeight: 600 }}><Icon name="speaker" /> {n.title}</div><div className="small" style={{ marginTop: 2, whiteSpace: 'pre-wrap' }}>{n.text}</div><div className="small muted" style={{ marginTop: 2 }}>平台公告 · {fmtDay(n.at)}{n.until ? ' · 至 ' + fmtDay(n.until) : ''}</div></div>)}
 
     <div className="card">
@@ -107,6 +108,7 @@ export default function Home() {
         </div> })}
       </div>
     </div>}
+    </div><aside className="home-side">
     {lecture && <div className="card tappable" style={{ background: 'var(--acc)', color: '#fff', marginTop: 14 }} onClick={() => nav('/lectures')}>
       <div className="small" style={{ opacity: .85 }}>园长大讲堂 · 每月一场</div>
       <div className="small" style={{ opacity: .85, marginTop: 2 }}>{fmtWhen(lecture.at, lecture.minutes)}{lecture.phase === 'live' ? ' · 正在直播' : ''}</div>
@@ -142,5 +144,6 @@ export default function Home() {
       {pair.mentees?.length > 0 && <div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">带着 {pair.mentees.map(m => m.name).join('、')}</div><div className="small muted">看他们的实践关作品并点评</div></div><Icon name="chevronRight" /></div>}
     </div></div>}
     {canReview(user) && user?.academy?.role !== 'director' && <div className="sect"><div className="sect-b"><div className="lrow tap" onClick={() => nav('/review')}><div style={{ flex: 1 }}><div className="lrow-t">点评队列</div><div className="small muted">本园实践关待点评</div></div><Icon name="chevronRight" /></div></div></div>}
+  </aside></div>
   </div>
 }

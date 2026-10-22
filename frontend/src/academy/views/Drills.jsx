@@ -108,7 +108,7 @@ export default function Drills() {
     catch (e) { useUI.getState().toast('没存成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>每周一题</h1><div className="sub">一道情景题 · 答了看同园老师怎么答 · 园长给一句意见</div></div><div className="hdr-actions">{data?.canPost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>出一题</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后作答。同园可见，不做公共广场。</div>}
 

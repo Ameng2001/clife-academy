@@ -55,7 +55,7 @@ export default function Resources() {
   }
   const kinds = data?.kinds || {}
 
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>资源库</h1><div className="sub">文献与政策 · 模板与工具</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 案例库</button>{data?.canAdd && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>加一条</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     <div style={{ position: 'relative', marginBottom: 12 }}>
       <TextField placeholder="搜书名、模板名，如「评估指南」「观察记录」" value={q} onChange={e => setQ(e.target.value)} style={{ paddingInlineStart: 36 }} />

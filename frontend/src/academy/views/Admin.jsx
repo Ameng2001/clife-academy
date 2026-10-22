@@ -96,7 +96,7 @@ export default function Admin() {
   const load = () => { if (user) api('/api/admin/overview').then(r => { setD(r); setErr('') }).catch(e => setErr(e.status === 403 ? '只有管理员能看这页。' : '没取到。')) }
   useEffect(load, [user?.id])
   const o = d?.overview
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>运营后台</h1><div className="sub">六组事 · 数字与入口 · 不列个人、不排名</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {err && <div className="card small muted">{err}</div>}

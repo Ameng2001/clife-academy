@@ -69,7 +69,7 @@ export default function Director() {
     <div className="hdr-actions"><button className="iconbtn" disabled={busy} onClick={load}><Icon name="repeat" /></button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
   </div>
 
-  if (!user) return <div className="narrow">{head}<div className="card small muted">登录园长账号后可看本园情况。</div></div>
+  if (!user) return <div className="narrow wide">{head}<div className="card small muted">登录园长账号后可看本园情况。</div></div>
   if (err) return <div className="narrow">{head}<div className="card small">{err.status === 403 ? '这页只给园长看。岗位由平台账号决定。' : err.status === 401 ? '登录已过期，请重新登录。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
   if (!data) return <div className="narrow">{head}<div className="card small muted">正在取数…</div></div>
 

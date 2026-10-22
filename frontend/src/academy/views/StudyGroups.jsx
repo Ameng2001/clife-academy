@@ -49,7 +49,7 @@ export default function StudyGroups() {
     setBusy(true)
     try { await api('/api/studytasks', { method: 'POST', body: JSON.stringify({ title: form.title, prompt: form.prompt, caseId: form.caseId || undefined, dueAt: new Date(form.due + 'T23:59').getTime() }) }); toast('已发'); setForm(null); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>园内教研组</h1><div className="sub">课例研讨任务 · 先交再看 · 记进「反思与发展」</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ title: '', prompt: '', caseId: '', due: toLocal(Date.now() + 7 * 86400000) })}>发任务</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card">

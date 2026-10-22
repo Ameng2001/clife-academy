@@ -128,7 +128,7 @@ export default function Contests() {
     catch (e) { toast('没存成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   const all = data ? [...data.current, ...data.past] : []
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>斗课</h1><div className="sub">同课异构擂台 · {data?.hostScope === 'community' ? '共同体赛' : '园内赛与共同体赛'} · 自愿参加，评作品不评人</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm(EMPTY())}>出题</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后参加。园内可见。</div>}
 

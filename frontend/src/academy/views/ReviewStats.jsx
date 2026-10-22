@@ -21,7 +21,7 @@ export default function ReviewStats() {
   const user = useStore(s => s.user)
   const [d, setD] = useState(null), [err, setErr] = useState(null), [w, setW] = useState(null)
   useEffect(() => { if (!user) return; api('/api/review/stats').then(setD).catch(e => setErr(e.code === 'director' ? '园长与管理员看。' : '没取到。')); api('/api/ops/weekly').then(setW).catch(() => setW(null)) }, [user?.id])
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>点评时效</h1><div className="sub">{d?.scope === 'all' ? '全平台' : d?.orgName || '本园'} · 每周看一次 · 队列与时效，不排名</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {err && <div className="card small muted">{err}</div>}
     {d && <>

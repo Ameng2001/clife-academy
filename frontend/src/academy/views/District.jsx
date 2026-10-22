@@ -46,7 +46,7 @@ export default function District() {
     catch (e) { useUI.getState().toast('没解成' + (e.message ? '：' + e.message : '')) }
   }
   const dn = d?.district?.name || user?.academy?.district?.name || ''
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>区县看板</h1><div className="sub">{dn ? dn + ' · ' : ''}只看汇总 · 不列单园 · 不排名</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     {!user && <div className="card small muted">区县管理员登录后看。</div>}
     {err && <div className="card small muted">{err}</div>}

@@ -52,7 +52,7 @@ export default function Camps() {
     setBusy(true)
     try { await api('/api/camps', { method: 'POST', body: JSON.stringify({ title: form.title, intro: form.intro, days, startAt: new Date(form.start + 'T06:00').getTime(), scope: form.scope }) }); toast('已办'); setForm(null); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>练习营</h1><div className="sub">自愿、短期、营内互看 · 不打卡、不排名</div></div><div className="hdr-actions">{data?.canHost && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ title: '', intro: '', days: '', start: toLocal(Date.now() + 86400000), scope: 'org' })}>办一个</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card">
