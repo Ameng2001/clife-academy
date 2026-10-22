@@ -73,7 +73,7 @@
 | 观察评价工具 | 生成一份量表 | 10 |
 | 贝果实验室 | 一次创新课生成 | 20 |
 
-工坊服务端接这段的联调脚本：`scripts/workshop-spend-check.mjs`（算价参考实现 `priceOf(pipeline, weeks, adapted)` 在里面）。流水 `GET /api/points/of?uid=` 里从园所额度扣的那几笔 `sub: 'quota'`，钱包页可以标「园所额度」。
+工坊服务端接这段的联调脚本：`scripts/workshop-spend-check.mjs`（算价参考实现 `priceOf(pipeline, weeks, adapted)` 在里面）。钱包页整包 `GET /api/points/of?uid=`（夜 70）：`name`、`points`、`quota {left, used, orgName}`、`sections` 四栏小计（learn 学与贡献 / interact 互动 / tool 工具扣减 / mall 教学物料商城）、`history[]` 每笔带 `group`、`links {mall, honors}`、`mallHint`；从园所额度扣的那几笔 `sub: 'quota'`，钱包页标「园所额度」。工坊钱包页只渲染，不自己算。
 
 定价原则：一个教师一学期认真走完两条路径（约 12 关 120 分 + 路径 100 + 证书 100）加分享一门课（30），攒下的积分够在工坊做两到三门课。学得多、分享得多的人，工坊基本不花钱；没学的人也能做，但得由园所给额度（见五）。
 
@@ -115,7 +115,7 @@
 | ~~钱包页~~ 不做：钱包页与教研工坊统一，教师在工坊的钱包页看余额、明细与花销（工坊用 `TOOLS_API_KEY` 调 `GET /api/points/of?uid=` 取流水）；学坊荣誉页只留余额与最近几笔 | 工坊仓库 | — |
 | ~~物料商城~~ 已做（夜 61）：物料（范围 / 库存 / 收货方式）、换、取消退回、发货签收；运营后台入口；小程序页 | — | — |
 | ~~园所额度池~~ 已做（夜 63）：充值（管理员）、分配与收回（园长）、工具扣减先额度后积分；商城不用额度 | — | — |
-| 工坊侧按管线扣减与改编半价、钱包页两行 | 工坊线上版，待办见 docs/WORKSHOP-TODO.md 第三节 | 中 |
+| 工坊侧按管线扣减与改编半价、钱包页两行 | 工坊线上版，待办见 docs/WORKSHOP-TODO.md 第三节；学坊侧接口与联调脚本已齐（夜 69、70） | 中 |
 
 ## 七、不做的
 

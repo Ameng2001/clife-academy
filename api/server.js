@@ -2667,7 +2667,7 @@ const routes = {
   ...LECTURES.routes,
   ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
-  ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER, quota: QUOTA }),
+  ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER, quota: QUOTA, origin: ORIGIN }),
   ...quotaRoutes({ json, readBody, db, readSession, audit, isAdmin, quota: QUOTA, tools: TOOLS }),
   ...skillRoutes({ db, origin: ORIGIN }),
   ...mallRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES, ledger: LEDGER }),

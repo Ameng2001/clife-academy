@@ -195,6 +195,15 @@ test('quota: admin tops up a kindergarten, the director allocates and recalls, t
   const hist = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json.history.filter(h => h.kind === 'spend');
   assert.deepEqual(hist.map(h => [h.sub, h.n, h.tool]).sort(), [['quota', -30, '教研工坊'], [null, -10, '教研工坊']].sort());
   assert.equal((await call('GET', '/api/me/points', null, wang.auth)).json.history.filter(h => h.kind === 'spend').length, 2);
+  // 工坊钱包页要的整包：姓名、两行余额、四栏小计、每笔的 group、入口链接
+  const w = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json;
+  assert.equal(w.name, '王老师'); assert.equal(w.uid, wang.id); assert.equal(w.quota.orgName, '柳北区示例幼儿园');
+  assert.deepEqual(w.sections.map(x => [x.key, x.label]), [['learn', '学与贡献'], ['interact', '互动'], ['tool', '工具扣减'], ['mall', '教学物料商城']]);
+  assert.equal(w.sections.find(x => x.key === 'tool').n, -40); assert.equal(w.sections.find(x => x.key === 'tool').count, 2);
+  assert.equal(w.sections.find(x => x.key === 'learn').n, 20);
+  assert.ok(w.history.every(h => ['learn', 'interact', 'tool', 'mall'].includes(h.group)));
+  assert.equal(w.links.mall, 'http://localhost:8080/#/mall'); assert.ok(w.links.honors.endsWith('/#/honors')); assert.equal(w.mallHint, '换教学物料');
+  assert.equal(w.points, (await call('GET', '/api/me/points', null, wang.auth)).json.points, 'wallet balance equals what the teacher sees in 学坊');
   assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 11, ref: 'course-2' }, key)).status, 409, 'quota 0 + points 10 < 11');
   // 再分 20，只用额度扣 5：个人积分不动；园长收回剩下的 15
   await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 20 }, zhao.auth);

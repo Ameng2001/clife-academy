@@ -18,6 +18,9 @@ import { orgKeyOf } from './org.js';
 const TOOLS_KEY = (process.env.TOOLS_API_KEY || '').trim();
 export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察评价工具', bagel: '贝果实验室' });
 const TOOL_LABEL = { ...TOOLS, mall: '教学物料商城' };
+// 钱包页的四栏（工坊钱包页按这个分组显示，docs/WORKSHOP-TODO.md 第 15 条）：学与贡献、互动、工具扣减、商城
+export const GROUPS = Object.freeze({ learn: '学与贡献', interact: '互动', tool: '工具扣减', mall: '教学物料商城' });
+export const groupOf = p => p.kind === 'interact' ? 'interact' : p.tool === 'mall' ? 'mall' : (p.kind === 'spend' && p.tool) ? 'tool' : 'learn';
 // 学与贡献：事件 → 默认积分。键就是 ledger.grant 的 kind；level 是客户端的过关
 export const EARN = Object.freeze({
   level:    { name: '关卡过关', n: 10 },
@@ -46,7 +49,7 @@ const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateStrin
 const sameMonth = (a, b) => { const x = new Date(a), y = new Date(b); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth(); };
 const intIn = (v, lo, hi) => { const n = Math.floor(Number(v)); return n >= lo && n <= hi ? n : null; };
 
-export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger, quota = null }) {
+export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger, quota = null, origin = "" }) {
   db.points = db.points || [];
   db.pointsRules = db.pointsRules && typeof db.pointsRules === 'object' ? db.pointsRules : { at: 0, byName: null };
   const earnN = k => { const v = db.pointsRules.earn?.[k]; return Number.isInteger(v) && v >= 0 ? v : EARN[k].n; };
@@ -98,7 +101,14 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   };
   const quotaOf = uid => { const u = db.users.find(x => x.id === uid); return quota && u ? { left: quota.left(uid), used: quota.used(uid), orgName: u.academy?.org?.name || null } : { left: 0, used: 0, orgName: null }; };
   const summary = uid => { settle(uid); return { points: balance(uid), quota: quotaOf(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
-  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
+  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, group: groupOf(p), n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
+  // 工坊钱包页要的整包：两行余额、四栏小计、入口链接。余额与学坊「我的」同一份 summary()，不会两边不一样
+  const base = String(origin || '').replace(/\/+$/, '');
+  const wallet = uid => {
+    const u = db.users.find(x => x.id === uid), hist = history(uid).map(pubRow);
+    const sections = Object.entries(GROUPS).map(([key, label]) => ({ key, label, n: hist.filter(h => h.group === key).reduce((s, h) => s + h.n, 0), count: hist.filter(h => h.group === key).length }));
+    return { uid, name: u?.name || null, ...summary(uid), sections, history: hist, links: { mall: base + '/#/mall', honors: base + '/#/honors', rules: base + '/#/honors' }, mallHint: '换教学物料' };
+  };
   // 流水：个人积分的每一笔，加上从园所额度扣的（在 orgQuotaLog 里，sub 标 quota），按时间倒序
   const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at })) : [])].sort((a, b) => b.at - a.at);
   const toolAuth = req => TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
@@ -148,7 +158,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (!toolAuth(req)) { if (!adminOnly(req, res)) return; }
     const uid = new URL(req.url, 'http://x').searchParams.get('uid') || '';
     if (!db.users.some(x => x.id === uid)) return json(res, 404, { error: 'no such user' });
-    json(res, 200, { ...summary(uid), history: history(uid).map(pubRow) });
+    json(res, 200, wallet(uid));
   },
   // 规则（管理员）：GET 看；POST { earn?: {…}, interact?: {…} } 改，学与贡献 0–1000、互动 0–100，0 是不给；只影响之后的
   'GET /api/admin/points/rules': async (req, res) => {

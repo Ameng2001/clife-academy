@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* 教研工坊 ↔ 幼师学坊 积分扣减联调（docs/WORKSHOP-TODO.md 第 12–14 条；接口 docs/POINTS-DESIGN.md 第三节）。
+/* 教研工坊 ↔ 幼师学坊 积分扣减与钱包页联调（docs/WORKSHOP-TODO.md 第 12–15 条；接口 docs/POINTS-DESIGN.md 第三节）。
  *
  * 给工坊服务端的同学用：对着学坊测试环境把「查余额 → 按管线扣减 → 重复调用不再扣 → 不够答 409 → 园所额度先扣 → 改编半价」跑一遍，
  * 每步打印请求、应答与判定，最后一行 PASS / FAIL。扣掉的积分只在测试账号上。
@@ -112,6 +112,15 @@ check('7c 算价：改编 theme 3 周 = 45', priceOf('theme', 3, true).n === 45)
 // 8. 流水：工坊钱包页用 /api/points/of 取；tool 显示「教研工坊」
 r = await call('GET', `/api/points/of?uid=${encodeURIComponent(uid)}`, null, tools);
 check('8 流水 200，有 tool 为「教研工坊」的一笔', r.status === 200 && Array.isArray(r.json?.history) && (!enough || r.json.history.some(h => h.kind === 'spend' && h.tool === '教研工坊')));
+
+// 9. 钱包页整包（待办第 15 条）：两行余额、四栏小计、每笔带 group、「换教学物料」入口
+const W = r.json || {};
+check('9 钱包页：name、points、quota.left / used / orgName', typeof W.name === 'string' && typeof W.points === 'number' && W.quota && typeof W.quota.left === 'number' && typeof W.quota.used === 'number' && 'orgName' in W.quota, `${W.name} · 积分 ${W.points} · 园所额度 ${W.quota?.left}`);
+check('9b 四栏小计 sections：learn / interact / tool / mall，各带 label、n、count', Array.isArray(W.sections) && JSON.stringify(W.sections.map(x => x.key)) === JSON.stringify(['learn', 'interact', 'tool', 'mall']) && W.sections.every(x => x.label && typeof x.n === 'number' && typeof x.count === 'number'), W.sections?.map(x => `${x.label} ${x.n}`).join(' · '));
+check('9c 每笔流水带 group，工坊的扣减在 tool 栏，从园所额度扣的 sub 为 quota', (W.history || []).every(h => ['learn', 'interact', 'tool', 'mall'].includes(h.group)) && (!enough || (W.history || []).some(h => h.group === 'tool' && h.tool === '教研工坊')));
+check('9d 入口链接 links.mall 指向学坊 /#/mall，带 mallHint', typeof W.links?.mall === 'string' && W.links.mall.endsWith('/#/mall') && W.mallHint === '换教学物料', W.links?.mall);
+const me = await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`, null, tools);
+check('9e 钱包页余额与 balance 接口一致（也就是教师在学坊「我的」看到的）', me.json?.points === W.points && me.json?.quota === W.quota?.left);
 
 summary();
 
