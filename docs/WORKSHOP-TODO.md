@@ -30,7 +30,7 @@
 | # | 待办 | 要点 | 验收 |
 |---|---|---|---|
 | 12 | 服务端接 `TOOLS_API_KEY` | 工坊服务端配学坊地址与密钥；账号统一登录，用同一个 `uid` | `GET /api/points/balance?uid=` 返回余额、园所额度与合计 |
-| 13 | 按管线扣减 | 起草确认那一步调 `POST /api/points/spend { uid, tool: 'workshop', n, ref, note }`。建议价：主题式 30 / 周、项目式 40 / 周、单节活动 10；`ref` 用课程 id 加阶段（如 `course:1522:draft`），同一 `ref` 重复调用不再扣。学坊先扣园所额度再扣个人积分，应答 `fromQuota / fromPoints`。余额不够答 `409 insufficient`，工坊提示「积分不够：去幼师学坊学几关，或请园长分配园所额度」 | 学坊流水里出现 tool 为教研工坊的扣减 |
+| 13 | 按管线扣减 | 起草确认那一步调 `POST /api/points/spend { uid, tool: 'workshop', n, ref, note }`。建议价：主题式 30 / 周、项目式 40 / 周、单节活动 10；`ref` 用课程 id 加阶段（如 `course:1522:draft`），同一 `ref` 重复调用不再扣。学坊先扣园所额度再扣个人积分，应答 `fromQuota / fromPoints`。余额不够答 `409 insufficient`，工坊提示「积分不够：去幼师学坊学几关，或请园长分配园所额度」 | 学坊流水里出现 tool 为教研工坊的扣减。学坊给了联调脚本：`ACADEMY_URL=<学坊测试环境> TOOLS_API_KEY=<密钥> node scripts/workshop-spend-check.mjs --uid <测试教师 uid>`，查余额、扣减、重复 ref、超额 409、字段校验、流水一遍跑完打 PASS；`--price pbl 4 --adapted` 只算价，`priceOf()` 是算价的参考实现 |
 | 14 | 改编半价 | `?from=` 开的课按原价 5 折扣 | 流水 note 写「改编自《…》 5 折」 |
 | 15 | 钱包页两行 | 工坊个人页的钱包：`GET /api/points/of?uid=`（带密钥）取流水，余额显示「积分 N」「园所额度 N」两行，明细列学与贡献、互动、工具扣减、商城；加一个「换教学物料」入口到 `<学坊>/#/mall`。**不做**充值、转赠、排行 | 教师在工坊看到的余额与学坊「我的」一致 |
 

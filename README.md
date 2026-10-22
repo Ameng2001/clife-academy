@@ -15,7 +15,7 @@ frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见
 mcp/        只读 MCP 桥：园长、教育局用自己的 LLM 客户端查进度，拿「设置」里建的只读令牌调 GET 接口（见 mcp/README.md）
 web/        nginx：托前端、反代 /api
 docs/       MIGRATION.md 迁移方案；upstream/ 上游原文档
-scripts/    import-lessons.py 从大课堂原型导入课程数据
+scripts/    import-lessons.py 从大课堂原型导入课程数据；workshop-spend-check.mjs 教研工坊接积分扣减的联调脚本（给工坊服务端的同学）
 ```
 
 ## 开发

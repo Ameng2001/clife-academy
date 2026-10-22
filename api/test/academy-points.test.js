@@ -191,6 +191,10 @@ test('quota: admin tops up a kindergarten, the director allocates and recalls, t
   r = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 40, ref: 'course-1' }, key);
   assert.equal(r.status, 200); assert.equal(r.json.fromQuota, 30); assert.equal(r.json.fromPoints, 10); assert.equal(r.json.points, 10); assert.equal(r.json.quota, 0);
   r = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 40, ref: 'course-1' }, key); assert.equal(r.json.duplicate, true); assert.equal(r.json.points, 10);
+  // 流水里两笔都在：从额度扣的标 sub quota，从积分扣的不标；两边 tool 都显示「教研工坊」
+  const hist = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json.history.filter(h => h.kind === 'spend');
+  assert.deepEqual(hist.map(h => [h.sub, h.n, h.tool]).sort(), [['quota', -30, '教研工坊'], [null, -10, '教研工坊']].sort());
+  assert.equal((await call('GET', '/api/me/points', null, wang.auth)).json.history.filter(h => h.kind === 'spend').length, 2);
   assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 11, ref: 'course-2' }, key)).status, 409, 'quota 0 + points 10 < 11');
   // 再分 20，只用额度扣 5：个人积分不动；园长收回剩下的 15
   await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 20 }, zhao.auth);

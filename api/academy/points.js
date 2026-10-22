@@ -99,6 +99,8 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   const quotaOf = uid => { const u = db.users.find(x => x.id === uid); return quota && u ? { left: quota.left(uid), used: quota.used(uid), orgName: u.academy?.org?.name || null } : { left: 0, used: 0, orgName: null }; };
   const summary = uid => { settle(uid); return { points: balance(uid), quota: quotaOf(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
   const pubRow = p => ({ kind: p.kind, sub: p.sub || null, n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
+  // 流水：个人积分的每一笔，加上从园所额度扣的（在 orgQuotaLog 里，sub 标 quota），按时间倒序
+  const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at })) : [])].sort((a, b) => b.at - a.at);
   const toolAuth = req => TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
   const adminOnly = (req, res) => { const user = readSession(req); if (!user) { json(res, 401, { error: 'not signed in' }); return null; } if (!isAdmin(user)) { json(res, 403, { error: 'admins only', code: 'admin' }); return null; } return user; };
 
@@ -106,7 +108,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   'GET /api/me/points': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    json(res, 200, { ...summary(user.id), history: rows(user.id).sort((a, b) => b.at - a.at).slice(0, 100).map(pubRow) });
+    json(res, 200, { ...summary(user.id), history: history(user.id).slice(0, 100).map(pubRow) });
   },
   // 工具服务端查余额：?uid=   （TOOLS_API_KEY）
   'GET /api/points/balance': async (req, res) => {
@@ -146,7 +148,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (!toolAuth(req)) { if (!adminOnly(req, res)) return; }
     const uid = new URL(req.url, 'http://x').searchParams.get('uid') || '';
     if (!db.users.some(x => x.id === uid)) return json(res, 404, { error: 'no such user' });
-    json(res, 200, { ...summary(uid), history: rows(uid).sort((a, b) => b.at - a.at).map(pubRow) });
+    json(res, 200, { ...summary(uid), history: history(uid).map(pubRow) });
   },
   // 规则（管理员）：GET 看；POST { earn?: {…}, interact?: {…} } 改，学与贡献 0–1000、互动 0–100，0 是不给；只影响之后的
   'GET /api/admin/points/rules': async (req, res) => {
