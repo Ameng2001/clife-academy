@@ -48,7 +48,7 @@
 
 ### 两个联调脚本
 
-学坊仓库 `scripts/` 下，Node 18 以上直接跑，不装依赖。每步打印请求、应答与判定，最后一行 `PASS n/n` 或 `FAIL`，退出码 0 / 1，可以放进工坊的 CI。两个脚本都只动测试账号，交上去的课园长不同意就留在「等园长同意」，不进库。
+学坊仓库 `scripts/` 下，Node 18 以上直接跑，不装依赖；根目录 `package.json` 也挂了 `npm run check:share` / `check:spend` / `check:workshop`（两个连跑）/ `price`，参数跟在 `--` 后面。每步打印请求、应答与判定，最后一行 `PASS n/n` 或 `FAIL`，退出码 0 / 1，可以放进工坊的 CI。两个脚本都只动测试账号，交上去的课园长不同意就留在「等园长同意」，不进库。
 
 | 脚本 | 验哪几条 | 要什么 |
 |---|---|---|
@@ -58,21 +58,25 @@
 **分享（第 1–8 条）**
 
 ```bash
-ACADEMY_URL=https://<学坊测试环境> ACADEMY_TOKEN=cla_… node scripts/workshop-share-check.mjs
+ACADEMY_URL=https://<学坊测试环境> ACADEMY_TOKEN=cla_… npm run check:share
 ```
+
+等于 `node scripts/workshop-share-check.mjs`。
 
 `ACADEMY_TOKEN` 是教师在学坊「设置 → 接口令牌 → 新建一枚投稿令牌」建的。另有一枚只读令牌时加 `--readonly-token cla_…`，顺带验它该被怎么拒（自检 `ok:false`、投稿 `403 readonly`）。
 
 **积分、钱包与改编来源（第 9、10、12–15 条）**
 
 ```bash
-ACADEMY_URL=https://<学坊测试环境> TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --uid <教师 uid> --work <学坊成果 id>
+ACADEMY_URL=https://<学坊测试环境> TOOLS_API_KEY=… npm run check:spend -- --uid <教师 uid> --work <学坊成果 id>
 ```
+
+等于 `node scripts/workshop-spend-check.mjs --uid … --work …`。两个一起：`ACADEMY_URL=… ACADEMY_TOKEN=… TOOLS_API_KEY=… npm run check:workshop -- --uid … --work …`（`--` 后的参数只传给第二个脚本，分享脚本不要参数）。
 
 - `--uid` 传平台账号的 uid（统一登录）或学坊的 `user.id` 都行，`404 uid` 是这位教师还没登过学坊。
 - `--work` 给一门入库且允许改编的学坊成果 id，用来验改编报价、半价扣减与开课前核对（第 9、10、14 条）；不给就跳过那几步并说一句。
 - 账户余额不够 10 分时扣减那步走 409 分支，脚本仍算通过，但要看完整效果先让测试教师学几关或请园长分配园所额度。
-- 只算价不连学坊：`node scripts/workshop-spend-check.mjs --price pbl 4 --adapted`，`priceOf()` 是工坊算价的参考实现。
+- 只算价不连学坊：`npm run price -- pbl 4 --adapted`（即 `node scripts/workshop-spend-check.mjs --price pbl 4 --adapted`），`priceOf()` 是工坊算价的参考实现。
 
 **本机开发桩**（学坊开发者自测用，工坊不用管）：学坊 api 用 `DEV_LOGIN=1 TOOLS_API_KEY=tools-secret` 起着，两个脚本分别加 `--dev <姓名>`，自动建账号、建令牌、推 3 关攒分；积分脚本再加 `--admin <本机 db 里的管理员姓名>` 可以顺带充园所额度。
 

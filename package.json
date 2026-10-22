@@ -1,4 +1,13 @@
 {
+  "name": "clife-academy",
+  "private": true,
+  "description": "幼师学坊：根目录只放跨 api / frontend 的脚本；api 与 frontend 各有自己的 package.json",
+  "scripts": {
+    "check:share": "node scripts/workshop-share-check.mjs",
+    "check:spend": "node scripts/workshop-spend-check.mjs",
+    "check:workshop": "node scripts/workshop-share-check.mjs && node scripts/workshop-spend-check.mjs",
+    "price": "node scripts/workshop-spend-check.mjs --price"
+  },
   "devDependencies": {
     "js-yaml": "^4.1.0"
   }
