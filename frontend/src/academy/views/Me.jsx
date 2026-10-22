@@ -24,9 +24,9 @@ export default function Me() {
   return <div className="narrow">
     <div className="hdr"><div><h1>我的</h1><div className="sub">{user ? user.name : '演示账号'} · {sum.name}</div></div><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     <div className="tiles">
-      <div className="tile tappable" onClick={() => nav('/honors')}><div className="l">积分</div><div className="v">{points ? points.points : '—'}</div>{honors && <div className="small muted">{honors.titles.length ? honors.titles.map(t => t.label).join('、') + ' · ' : ''}勋章 {honors.badges.filter(b => b.on).length} · 换物料</div>}</div>
+      <div className="tile tappable" onClick={() => nav('/mall')}><div className="l">积分</div><div className="v">{points ? points.points : '—'}</div><div className="small muted" style={{ color: 'var(--acc)' }}>去换物料 ›</div></div>
       <div className="tile"><div className="l">本岗位已通过</div><div className="v">{sum.done}<span className="small muted"> / {sum.total}</span></div></div>
-      <div className="tile"><div className="l">岗位徽章</div><div className="v">{badges.filter(b => b.finished).length}</div></div>
+      <div className="tile tappable" onClick={() => nav('/honors')}><div className="l">岗位徽章</div><div className="v">{badges.filter(b => b.finished).length}</div>{honors && <div className="small muted">{honors.titles.length ? honors.titles.map(t => t.label).join('、') + ' · ' : ''}勋章 {honors.badges.filter(b => b.on).length} · 荣誉 ›</div>}</div>
       <div className="tile"><div className="l">初级岗位认证</div><div className="v" style={{ fontSize: 18 }}>{sum.finished ? '可报名' : '未达到'}</div></div>
     </div>
     <div className="sect"><div className="sect-t">能力地图</div><div className="sect-b">

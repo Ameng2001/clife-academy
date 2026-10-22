@@ -52,6 +52,8 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
   #topnav .links{display:flex;gap:2px;flex:1}
   #topnav .right{display:flex;gap:4px;align-items:center}
   #topnav .iconbtn{width:34px;height:34px}
+  #topnav .pts{background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc);font-weight:600;margin-right:4px}
+  #topnav .pts:hover{background:color-mix(in srgb,var(--acc) 20%,transparent);color:var(--acc)}
   body #app{max-width:1200px;padding-top:calc(var(--conn) + 80px);padding-bottom:60px}
   #app .narrow{max-width:860px}
   #app .narrow.wide{max-width:1100px}
