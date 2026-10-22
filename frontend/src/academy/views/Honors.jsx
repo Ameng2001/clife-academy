@@ -21,11 +21,14 @@ export default function Honors() {
 
     {p && <div className="card">
       <div className="tiles" style={{ margin: 0 }}>
-        <div className="tile"><div className="l">积分</div><div className="v">{p.points}</div><div className="small muted">{p.quota?.left > 0 ? `另有园所额度 ${p.quota.left}，只能用在工具上` : '过关、入库、互动都自动记'}</div></div>
+        <div className="tile"><div className="l">积分</div><div className="v">{p.points}</div><div className="small muted">{p.quota?.left > 0 || p.quota?.used > 0 ? `园所额度 ${p.quota.left}（园长分的，只用在工具上，先扣它再扣积分${p.quota.used ? `，已用 ${p.quota.used}` : ''}）` : '过关、入库、互动都自动记'}</div></div>
         <div className="tile"><div className="l">通过的关</div><div className="v">{p.levelsPassed}</div><div className="small muted">每关 {p.rules?.earn?.level ?? 10} 积分</div></div>
       </div>
       <div className="small muted" style={{ marginTop: 10 }}>积分是工具的使用额度：{Object.values(p.tools).join('、')}里换特定资源时扣。只有你自己看得到，不排行、不可转赠。明细与花销在教研工坊的钱包页看，两边是同一个账。 <span className="tap" style={{ color: 'var(--acc)' }} onClick={() => nav('/mall')}>教学物料商城 ›</span></div>
-      {p.history?.length > 0 && <div style={{ marginTop: 10 }}>{p.history.slice(0, 8).map((x, i) => <div key={i} className="ac-row small" style={{ marginTop: 4 }}><span className="muted">{fmtDay(x.at)} · {x.tool ? x.tool + ' · ' : ''}{x.sub === 'quota' ? '园所额度 · ' : ''}{x.note}</span><span style={{ color: x.n > 0 ? 'var(--green)' : 'var(--label-2)' }}>{x.n > 0 ? '+' : ''}{x.n}</span></div>)}</div>}
+      {p.history?.length > 0 && <div style={{ marginTop: 10 }}>
+        <div className="small muted">最近几笔{p.history.some(x => x.sub === 'quota') ? '。标「园所额度」的几笔扣的是园长分的额度，没动你的积分' : ''}</div>
+        {p.history.slice(0, 8).map((x, i) => <div key={i} className="ac-row small" style={{ marginTop: 4 }}><span className="muted">{fmtDay(x.at)} · {x.tool ? x.tool + ' · ' : ''}{x.sub === 'quota' && <span className="tag acc" style={{ marginInlineEnd: 4 }}>园所额度</span>}{x.note}</span><span title={x.sub === 'quota' ? '从园所额度扣' : undefined} style={{ color: x.n > 0 ? 'var(--green)' : x.sub === 'quota' ? 'var(--label-3)' : 'var(--label-2)' }}>{x.n > 0 ? '+' : ''}{x.n}</span></div>)}
+      </div>}
     </div>}
 
     {h?.titles.length > 0 && <div className="sect"><div className="sect-t">荣誉称号 <span className="tap small" style={{ color: 'var(--acc)', marginInlineStart: 8 }} onClick={() => nav('/studios')}>名师工作室 ›</span></div><div className="sect-b">
