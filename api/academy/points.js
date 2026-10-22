@@ -118,7 +118,9 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   };
   const quotaOf = uid => { const u = db.users.find(x => x.id === uid); return quota && u ? { left: quota.left(uid), used: quota.used(uid), orgName: u.academy?.org?.name || null } : { left: 0, used: 0, orgName: null }; };
   const summary = uid => { settle(uid); return { points: balance(uid), quota: quotaOf(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
-  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, group: groupOf(p), n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
+  // 改编半价那几笔带来源成果（WALLET-TODO W9）：工坊钱包页可以点到学坊那门成果
+  const adaptedOf = id => { if (!id) return null; const w = (db.works || []).find(x => x.id === id); return { id, title: w ? w.title : null, url: base + '/#/works?id=' + id }; };
+  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, group: groupOf(p), n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at, ...(p.adaptedFrom ? { adaptedFrom: adaptedOf(p.adaptedFrom) } : {}) });
   // 工坊钱包页要的整包：两行余额、四栏小计、入口链接。余额与学坊「我的」同一份 summary()，不会两边不一样
   // 改编依据：学坊里一门入库、允许改编的成果。没传就不是改编；传了但不合答 400 adapt
   const adaptBasis = raw => {
@@ -130,13 +132,21 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   };
   const noteOf = (price, adapted, extra) => [adapted ? `改编自《${adapted.title}》 5 折` : null, price ? price.note : null, extra].filter(Boolean).join(' · ');
   const base = String(origin || '').replace(/\/+$/, '');
-  const wallet = uid => {
-    const u = db.users.find(x => x.id === uid), hist = history(uid).map(pubRow);
-    const sections = Object.entries(GROUPS).map(([key, label]) => ({ key, label, n: hist.filter(h => h.group === key).reduce((s, h) => s + h.n, 0), count: hist.filter(h => h.group === key).length }));
-    return { uid, platformUid: u?.platform?.uid || null, name: u?.name || null, ...summary(uid), sections, history: hist, links: { mall: base + '/#/mall', honors: base + '/#/honors', rules: base + '/#/honors' }, mallHint: '换教学物料' };
+  // 钱包页整包。?before=<at>&limit=<n> 翻页（WALLET-TODO W10）：四栏小计始终按全量算，history 只给这一页，nextBefore 给下一页用；不传 limit 就全给
+  const wallet = (uid, { before = 0, limit = 0 } = {}) => {
+    const u = db.users.find(x => x.id === uid), all = history(uid).map(pubRow);
+    const sections = Object.entries(GROUPS).map(([key, label]) => ({ key, label, n: all.filter(h => h.group === key).reduce((s, h) => s + h.n, 0), count: all.filter(h => h.group === key).length }));
+    const after = before > 0 ? all.filter(h => h.at < before) : all;
+    const page = limit > 0 ? after.slice(0, limit) : after;
+    const nextBefore = limit > 0 && after.length > page.length ? page[page.length - 1].at : null;
+    return { uid, platformUid: u?.platform?.uid || null, name: u?.name || null, ...summary(uid), sections, history: page, total: all.length, nextBefore, quotaLog: quotaLog(uid),
+      links: { mall: base + '/#/mall', honors: base + '/#/honors', rules: base + '/#/honors', paths: base + '/#/paths' }, mallHint: '换教学物料' };
   };
   // 流水：个人积分的每一笔，加上从园所额度扣的（在 orgQuotaLog 里，sub 标 quota），按时间倒序
-  const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at })) : [])].sort((a, b) => b.at - a.at);
+  const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at, adaptedFrom: r.adaptedFrom || null })) : [])].sort((a, b) => b.at - a.at);
+  // 教师视角的园所额度来龙去脉（WALLET-TODO W11）：园长分了多少、收回多少、在哪个工具用了多少；不进 history，不算积分
+  const quotaLog = uid => quota ? quota.ofUser(uid).sort((a, b) => b.at - a.at).map(r => ({ kind: r.kind, n: r.kind === 'alloc' ? r.n : -r.n, byName: r.kind === 'spend' ? null : r.byName || null, tool: r.tool ? (TOOL_LABEL[r.tool] || r.tool) : null, note: r.note || null, at: r.at,
+    text: r.kind === 'alloc' ? `${r.byName || '园长'} 分了 ${r.n}` : r.kind === 'recall' ? `${r.byName || '园长'} 收回没用的 ${r.n}` : `在${TOOL_LABEL[r.tool] || r.tool || '工具'}用了 ${r.n}${r.note ? '（' + r.note + '）' : ''}` })) : [];
   const adminOnly = (req, res) => { const user = readSession(req); if (!user) { json(res, 401, { error: 'not signed in' }); return null; } if (!isAdmin(user)) { json(res, 403, { error: 'admins only', code: 'admin' }); return null; } return user; };
 
   return {
@@ -209,7 +219,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     const q = quotaOf(uid).left;
     if (balance(uid) + q < n) return json(res, 409, { error: 'insufficient points', code: 'insufficient', points: balance(uid), quota: q });
     // 先扣园所分配的额度，再扣自己赚的
-    const fromQuota = quota ? quota.spend(u, n, tool, ref, note) : 0, fromPoints = n - fromQuota;
+    const fromQuota = quota ? quota.spend(u, n, tool, ref, note, ad.value ? { adaptedFrom: ad.value.id } : {}) : 0, fromPoints = n - fromQuota;
     if (fromPoints > 0) push({ uid, kind: 'spend', n: -fromPoints, tool, ref, note, ...(ad.value ? { adaptedFrom: ad.value.id } : {}) });
     saveDb();
     audit(req, 'points.spend', { user: u, msg: `${tool} ${ref} -${n}（园所额度 ${fromQuota}，积分 ${fromPoints}${ad.value ? '，改编自 ' + ad.value.id + ' 5 折' : ''}）` });
@@ -218,9 +228,9 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   // 一个人的流水：管理员对账用；工坊的钱包页（钱包页与工坊统一，学坊不单独做）带 TOOLS_API_KEY 取。?uid=
   'GET /api/points/of': async (req, res) => {
     if (!toolAuth(req)) { if (!adminOnly(req, res)) return; }
-    const u = toolUserOf(db, new URL(req.url, 'http://x').searchParams.get('uid'));
+    const sp = new URL(req.url, 'http://x').searchParams, u = toolUserOf(db, sp.get('uid'));
     if (!u) return json(res, 404, { error: 'no such user', code: 'uid' });
-    json(res, 200, wallet(u.id));
+    json(res, 200, wallet(u.id, { before: Math.floor(Number(sp.get('before'))) || 0, limit: Math.min(500, Math.floor(Number(sp.get('limit'))) || 0) }));
   },
   // 规则（管理员）：GET 看；POST { earn?: {…}, interact?: {…} } 改，学与贡献 0–1000、互动 0–100，0 是不给；只影响之后的
   'GET /api/admin/points/rules': async (req, res) => {

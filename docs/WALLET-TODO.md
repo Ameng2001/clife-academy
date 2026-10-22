@@ -23,16 +23,16 @@
 | W6 | 流水列表：日期 · 工具 · 备注 · ±n | `history[]`（at、tool、note、n） | 接口已齐 · 待工坊 |
 | W7 | 从园所额度扣的几笔标「园所额度」，数字淡色，不计入个人积分变动 | `history[].sub === 'quota'` | 接口已齐 · 待工坊 |
 | W8 | 按四栏筛流水 | `history[].group` | 接口已齐 · 待工坊 |
-| W9 | 改编半价的几笔，备注里已有「改编自《…》 5 折」，点开能到学坊那门成果 | `history[].note`；成果 id 现在只在服务端流水行 `adaptedFrom`，没公开 | **待学坊**：`pubRow` 加 `adaptedFrom`（id、title） |
-| W10 | 分页或「加载更多」：现在一次给全部 | `history` 全量 | **待学坊**：`?before=<at>&limit=` |
-| W11 | 园所额度的来龙去脉：哪天园长分了多少、哪天收回多少（教师视角） | 现在只给扣的几笔，分与收在园长的 `GET /api/org/quota` 里 | **待学坊**：`history` 里加 `quota-alloc` / `quota-recall` 行，或另给 `quotaLog[]` |
+| W9 | 改编半价的几笔，备注里已有「改编自《…》 5 折」，点开能到学坊那门成果 | `history[].adaptedFrom {id, title, url}` | 接口已齐 · 待工坊 |
+| W10 | 分页或「加载更多」 | `?before=<at>&limit=`，应答 `total`、`nextBefore`；`sections` 始终按全量 | 接口已齐 · 待工坊 |
+| W11 | 园所额度的来龙去脉：哪天园长分了多少、哪天收回多少、在哪个工具用了多少（教师视角） | `quotaLog[]`（kind、n、byName、tool、text、at），不进 history | 接口已齐 · 待工坊 |
 
 ## 三、花之前
 
 | # | 功能点 | 取什么 | 状态 |
 |---|---|---|---|
 | W12 | 起草确认前的报价：原价、改编折后价、够不够、先扣额度多少再扣积分多少 | `GET /api/points/quote?pipeline=&weeks=&adaptedFrom=&uid=`（`full`、`n`、`enough`、`points`、`quota`） | 接口已齐 · 待工坊 |
-| W13 | 不够时的一句话与两条路：「去幼师学坊学几关」链到学坊路径页、「请园长分配园所额度」 | `409 insufficient` 的 `points`、`quota`；`links.honors` | 接口已齐 · 待工坊（学坊可加 `links.paths`） |
+| W13 | 不够时的一句话与两条路：「去幼师学坊学几关」链到学坊路径页、「请园长分配园所额度」 | `409 insufficient` 的 `points`、`quota`；`links.paths` | 接口已齐 · 待工坊 |
 | W14 | 价表展示：主题式 30 / 周、项目式 40 / 周、单节活动 10、改编 5 折 | `GET /api/tools/ping` 的 `prices`，或 quote 应答的 `prices` | 接口已齐 · 待工坊 |
 
 ## 四、不做的
@@ -43,9 +43,4 @@
 
 ## 五、学坊侧待办（从上表抽出）
 
-1. W9：`/api/points/of` 的 `history[]` 公开 `adaptedFrom {id, title}`。
-2. W10：`/api/points/of` 支持 `?before=&limit=`。
-3. W11：教师视角的园所额度分与收。
-4. W13：`links` 加 `paths`。
-
-做完一条把上表状态改成「接口已齐」。
+四条都已做（2026-10-22 夜 81）：W9 `adaptedFrom {id, title, url}`、W10 `?before=&limit=`、W11 `quotaLog[]`、W13 `links.paths`。上表 14 条现在全是「接口已齐 · 待工坊」。再有新功能点加到上表，学坊要动的抽到这里。

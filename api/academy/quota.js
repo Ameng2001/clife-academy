@@ -24,10 +24,10 @@ export function createQuota(db, saveDb) {
   const used = uid => sum(ofUser(uid), 'spend');
   const push = row => { const r = { id: newId(), at: Date.now(), ...row }; db.orgQuotaLog.push(r); saveDb(); return r; };
   /** 工具扣减时先扣园所额度：答实际扣掉的数（0 到 n）。幂等由 points.js 按 (tool, ref) 在两本账上一起查。 */
-  const spend = (u, n, tool, ref, note) => {
+  const spend = (u, n, tool, ref, note, extra = {}) => {
     const org = orgKeyOf(u); if (!org) return 0;
     const take = Math.min(left(u.id), n); if (take < 1) return 0;
-    push({ org, orgName: u.academy?.org?.name || null, kind: 'spend', n: take, uid: u.id, name: u.name, tool, ref, note, by: u.id, byName: u.name });
+    push({ org, orgName: u.academy?.org?.name || null, kind: 'spend', n: take, uid: u.id, name: u.name, tool, ref, note, by: u.id, byName: u.name, ...extra });
     return take;
   };
   const spent = (uid, tool, ref) => ofUser(uid).some(r => r.kind === 'spend' && r.tool === tool && r.ref === ref);

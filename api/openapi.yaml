@@ -872,7 +872,9 @@ paths:
       description: |
         `?uid=`。钱包页与教研工坊统一，学坊不单独做：工坊的钱包页用这条取明细（docs/WORKSHOP-TODO.md 第 15 条）。
         应答：`points` 个人积分、`quota { left, used, orgName }` 园所额度、`sections` 四栏小计（learn 学与贡献 / interact 互动 / tool 工具扣减 / mall 教学物料商城，各带 label、n、count）、
-        `history[]` 每笔带 `group`（四栏之一）、`tool`（显示名）、`sub`（从园所额度扣的是 quota）、`links { mall, honors }` 入口地址、`mallHint`。
+        `history[]` 每笔带 `group`（四栏之一）、`tool`（显示名）、`sub`（从园所额度扣的是 quota）、改编半价那几笔带 `adaptedFrom {id, title, url}`；`links { mall, honors, paths }` 入口地址、`mallHint`。
+        `quotaLog[]` 教师视角的园所额度来龙去脉（kind alloc / recall / spend，n 正进负出，byName、tool、text 一句话），不进 history、不算积分。
+        翻页 `?before=<at>&limit=<n>`（limit ≤ 500）：`sections` 与 `total` 按全量，`history` 只给这一页，`nextBefore` 给下一页用；不传 limit 全给。
         余额与 `GET /api/me/points` 同一份算法。不给充值、转赠、排行。
       responses:
         '200': { description: 余额、四栏小计、流水与入口链接 }

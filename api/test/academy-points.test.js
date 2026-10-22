@@ -208,7 +208,14 @@ test('quota: admin tops up a kindergarten, the director allocates and recalls, t
   assert.equal(w.sections.find(x => x.key === 'tool').n, -40); assert.equal(w.sections.find(x => x.key === 'tool').count, 2);
   assert.equal(w.sections.find(x => x.key === 'learn').n, 20);
   assert.ok(w.history.every(h => ['learn', 'interact', 'tool', 'mall'].includes(h.group)));
-  assert.equal(w.links.mall, 'http://localhost:8080/#/mall'); assert.ok(w.links.honors.endsWith('/#/honors')); assert.equal(w.mallHint, '换教学物料');
+  assert.equal(w.links.mall, 'http://localhost:8080/#/mall'); assert.ok(w.links.honors.endsWith('/#/honors')); assert.ok(w.links.paths.endsWith('/#/paths')); assert.equal(w.mallHint, '换教学物料');
+  // 教师视角的园所额度来龙去脉：分 30、在工坊用 30；不进 history
+  assert.deepEqual(w.quotaLog.map(x => [x.kind, x.n]), [['spend', -30], ['alloc', 30]]); assert.equal(w.quotaLog[1].byName, '赵园长'); assert.ok(w.quotaLog[1].text.startsWith('赵园长 分了 30')); assert.ok(w.quotaLog[0].text.startsWith('在教研工坊用了 30'));
+  // 翻页：limit 1 两页翻完，sections 与 total 仍按全量
+  const p1 = (await call('GET', '/api/points/of?uid=' + wang.id + '&limit=1', null, key)).json;
+  assert.equal(p1.history.length, 1); assert.equal(p1.total, w.history.length); assert.ok(p1.nextBefore); assert.deepEqual(p1.sections, w.sections);
+  const p2 = (await call('GET', '/api/points/of?uid=' + wang.id + '&limit=10&before=' + p1.nextBefore, null, key)).json;
+  assert.equal(p2.history.length, w.history.length - 1); assert.equal(p2.nextBefore, null); assert.ok(p2.history.every(h => h.at < p1.nextBefore));
   assert.equal(w.points, (await call('GET', '/api/me/points', null, wang.auth)).json.points, 'wallet balance equals what the teacher sees in 学坊');
   assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 11, ref: 'course-2' }, key)).status, 409, 'quota 0 + points 10 < 11');
   // 再分 20，只用额度扣 5：个人积分不动；园长收回剩下的 15

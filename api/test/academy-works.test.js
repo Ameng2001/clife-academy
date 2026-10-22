@@ -160,7 +160,7 @@ test('adapt chain: adapt only from an approved work that allows it; the adaptati
   assert.equal(sp.status, 200); assert.equal(sp.json.n, 5); assert.equal(sp.json.full, 10); assert.equal(sp.json.note, '改编自《' + WORK.title + '》 5 折 · 联调');
   assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 10, ref: 'course:7:draft', adaptedFrom: 'nope' }, key)).json.code, 'adapt');
   const wh = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json.history.find(h => h.kind === 'spend');
-  assert.equal(wh.n, -5); assert.ok(wh.note.startsWith('改编自《'));
+  assert.equal(wh.n, -5); assert.ok(wh.note.startsWith('改编自《')); assert.equal(wh.adaptedFrom.id, a); assert.equal(wh.adaptedFrom.title, WORK.title); assert.ok(wh.adaptedFrom.url.endsWith('/#/works?id=' + a));
   // 工坊开 ?from=1522&work=<a> 时核对来源（第 9、10 条）：对得上、能改编、不是本人；from 错了 course-mismatch；锁了的 not-allowed；没登录过学坊的 uid 404
   assert.equal((await call('GET', `/api/tools/work?id=${a}`)).status, 403);
   let tw = await call('GET', `/api/tools/work?id=${a}&from=1522&uid=${li.id}`, null, key);

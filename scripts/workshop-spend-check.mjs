@@ -134,6 +134,9 @@ check('9c 每笔流水带 group，工坊的扣减在 tool 栏，从园所额度�
 check('9d 入口链接 links.mall 指向学坊 /#/mall，带 mallHint', typeof W.links?.mall === 'string' && W.links.mall.endsWith('/#/mall') && W.mallHint === '换教学物料', W.links?.mall);
 const me = await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`, null, tools);
 check('9e 钱包页余额与 balance 接口一致（也就是教师在学坊「我的」看到的）', me.json?.points === W.points && me.json?.quota === W.quota?.left);
+check('9f 教师视角的园所额度来龙去脉 quotaLog[]（kind alloc / recall / spend，带 text）、links.paths', Array.isArray(W.quotaLog) && W.quotaLog.every(x => ['alloc', 'recall', 'spend'].includes(x.kind) && typeof x.text === 'string') && typeof W.links?.paths === 'string', W.quotaLog?.slice(0, 2).map(x => x.text).join(' · '));
+const pg = await call('GET', `/api/points/of?uid=${encodeURIComponent(uid)}&limit=1`, null, tools);
+check('9g 翻页 ?limit=1：history 一条、total 全量、nextBefore 给下一页；sections 不变', pg.status === 200 && pg.json?.history?.length === Math.min(1, W.history.length) && pg.json.total === W.history.length && JSON.stringify(pg.json.sections) === JSON.stringify(W.sections) && (W.history.length <= 1 || !!pg.json.nextBefore));
 
 // 10. 报价（待办第 14 条）：学坊算的价与本地 priceOf 一致；改编要有学坊成果 id
 r = await call('GET', '/api/points/quote?pipeline=theme&weeks=3', null, tools);
@@ -152,7 +155,7 @@ if (workId) {
   if (r.status === 200) {
     check('11b 改编扣减：传 pipeline activity + adaptedFrom，学坊算 10 → 扣 5，note 带「改编自《…》 5 折」', r.json.n === 5 && r.json.full === 10 && r.json.adapted?.id === workId && /^改编自《.+》 5 折 · 单节活动 · 联调$/.test(r.json.note), r.json.note);
     const h = (await call('GET', `/api/points/of?uid=${encodeURIComponent(uid)}`, null, tools)).json.history || [];
-    check('11c 流水里这一笔 -5，note 写「改编自《…》 5 折」', h.some(x => x.kind === 'spend' && x.n === -5 && /^改编自《/.test(x.note || '')));
+    check('11c 流水里这一笔 -5，note 写「改编自《…》 5 折」，带 adaptedFrom {id,title,url} 能点到学坊那门成果', h.some(x => x.kind === 'spend' && x.n === -5 && /^改编自《/.test(x.note || '') && x.adaptedFrom?.id === workId && typeof x.adaptedFrom.url === 'string'));
   } else check('11b 改编扣减：账户不够 5 分答 409（给测试账号攒点分再跑）', r.status === 409 && r.json?.code === 'insufficient', `余额 ${bal?.total}`);
   // 12. 开改编课前核对来源（待办第 9、10 条）：?from 与这门成果的 courseId 对不对得上、能不能改编、「改编自」怎么标
   r = await call('GET', `/api/tools/work?id=${encodeURIComponent(workId)}&uid=${encodeURIComponent(uid)}`, null, tools);
