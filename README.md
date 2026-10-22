@@ -13,12 +13,11 @@
 api/        Node 原生 http 服务，无框架。session、GET/PUT /api/data 全量同步、字段级合并、Coach 流水线、提醒
 frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见平台仓库）。src/academy 视图与壳，store 同步引擎，lib 纯函数
 miniprogram/ 微信小程序（原生，16 页；根目录 project.config.json 给微信开发者工具；版式用 scripts/mp-render.mjs 渲成 html 看）
-workshop/   教研工坊引擎（Claude Code 插件形态：workshop-core / 5step / pbl / activity 管线、studio、apps 原型；线上版 jiaoyan.clife.cn 照它做）
-prototype/  早期可点通 H5 原型与课程数据源（src/academy.body.html → gen_mp_data.py 生成 miniprogram/utils/data.js）
+workshop-share/ 教研工坊「分享到幼师学坊」的参考实现（只放与学坊有关的增量：设计、share_academy.py、skill、配置模板、V3 按钮 patch；引擎本身不进本仓库）
 mcp/        只读 MCP 桥：园长、教育局用自己的 LLM 客户端查进度，拿「设置」里建的只读令牌调 GET 接口（见 mcp/README.md）
 web/        nginx：托前端、反代 /api
 docs/       HANDOVER.md 移交文档（接手先读）；MIGRATION.md 迁移方案；WORKSHOP-TODO.md 工坊线上版待办；WALLET-TODO.md 钱包功能点待办（钱包页在工坊，学坊只给接口）；proposal/ 方案正文、三份对客契约、继续教育学时说明、移交文档的 Word/PDF 与导出脚本；upstream/ 上游原文档
-scripts/    mp-render.mjs 小程序页渲 html；import-lessons.py 从大课堂原型导入课程数据；workshop-spend-check.mjs 教研工坊接积分、钱包页与改编来源的联调脚本、workshop-share-check.mjs 工坊分享到学坊的联调脚本（都给工坊服务端的同学；根目录 `npm run check:share` / `check:spend` / `check:workshop` / `price`，用法见 docs/WORKSHOP-TODO.md 第五节；CI 见 .github/workflows/api.yml）
+scripts/    lessons-source.html 课程数据源；gen-mp-data.py 生成小程序课程数据；mp-render.mjs 小程序页渲 html；import-lessons.py 从大课堂原型导入课程数据；workshop-spend-check.mjs 教研工坊接积分、钱包页与改编来源的联调脚本、workshop-share-check.mjs 工坊分享到学坊的联调脚本（都给工坊服务端的同学；根目录 `npm run check:share` / `check:spend` / `check:workshop` / `price`，用法见 docs/WORKSHOP-TODO.md 第五节；CI 见 .github/workflows/api.yml）
 ```
 
 ## 开发
@@ -28,7 +27,7 @@ cd api && npm ci --omit=optional && npm test && DATA_DIR=../data node server.js
 cd frontend && npm ci && npm test && npm run dev
 ```
 
-课程数据：`frontend/src/lib/lessons-data.js` 由 `python3 scripts/import-lessons.py prototype/src/academy.body.html` 生成，小程序的 `miniprogram/utils/data.js` 由 `cd prototype && python3 gen_mp_data.py` 生成，都不手改；课程数据源只有 `prototype/src/academy.body.html` 一份。
+课程数据：`frontend/src/lib/lessons-data.js` 由 `python3 scripts/import-lessons.py scripts/lessons-source.html` 生成，小程序的 `miniprogram/utils/data.js` 由 `python3 scripts/gen-mp-data.py` 生成，都不手改；课程数据源只有 `scripts/lessons-source.html` 一份（早期 H5 原型的数据块）。
 
 ## 状态
 

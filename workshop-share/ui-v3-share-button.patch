@@ -1,0 +1,200 @@
+commit c6b503c2a3756ade533106404ca6df89d30f92de
+Author: Ameng2001 <ameng2001.liu@gmail.com>
+Date:   Thu Oct 22 17:24:11 2026 +0800
+
+    feat(workshop-core): 分享到幼师学坊——share skill 与 share_academy.py（用过再分享门槛、四栏预填、改了什么只能教师写、两开关、提交回写 status.json、署名一句、草稿）；V3 原型交付页按钮与四栏弹层；设计文档；config 模板 academy 段并忽略令牌
+    
+    Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+
+diff --git a/apps/teaching-workshop-ui-v3/README.md b/apps/teaching-workshop-ui-v3/README.md
+index 9e834d5..949a6ae 100644
+--- a/apps/teaching-workshop-ui-v3/README.md
++++ b/apps/teaching-workshop-ui-v3/README.md
+@@ -16,4 +16,4 @@
+ - `week-arrangement.html`：周节奏与缺项主画布
+ - `activity-editor.html`：单活动结构编辑
+ - `hil-confirm.html`：阶段确认 gate
+-- `export-bundle.html`：导出包视图
++- `export-bundle.html`：导出包视图；右上「分享到幼师学坊」按钮与四栏分享表（docs/design/教研工坊-分享到幼师学坊.md）
+diff --git a/apps/teaching-workshop-ui-v3/app.js b/apps/teaching-workshop-ui-v3/app.js
+index d385281..98290be 100644
+--- a/apps/teaching-workshop-ui-v3/app.js
++++ b/apps/teaching-workshop-ui-v3/app.js
+@@ -3,3 +3,46 @@ document.querySelectorAll("[data-page]").forEach((link) => {
+     link.classList.add("active");
+   }
+ });
++
++// 分享到幼师学坊（export-bundle.html）：开关弹层；第四栏空着提交不亮；提示词起一行；提交后署名一句
++(() => {
++  const open = document.getElementById("share-open");
++  const overlay = document.getElementById("share-overlay");
++  if (!open || !overlay) return;
++  // 用过再分享：课程未完成 / 待提交时按钮灰
++  if (!["approved", "used"].includes(open.dataset.courseState)) { open.disabled = true; open.title = "用过再分享：审核通过或标过「已在班里用过」才能分享"; }
++  const changes = document.getElementById("share-changes");
++  const submit = document.getElementById("share-submit");
++  const note = document.getElementById("share-foot-note");
++  const refresh = () => {
++    const filled = [...changes.querySelectorAll("input")].some((i) => i.value.trim());
++    submit.disabled = !filled;
++    note.textContent = filled ? "交了以后园长同意、审核人入库，入库记积分" : "写一条「改了什么」提交按钮才亮";
++  };
++  const addRow = (value = "") => {
++    const i = document.createElement("input");
++    i.placeholder = "再写一条（≤ 120 字）"; i.maxLength = 120; i.value = value;
++    changes.appendChild(i); i.addEventListener("input", refresh); i.focus(); refresh();
++  };
++  changes.addEventListener("input", refresh);
++  document.getElementById("share-add").addEventListener("click", () => addRow());
++  document.querySelectorAll(".share-hint").forEach((b) => b.addEventListener("click", () => {
++    const empty = [...changes.querySelectorAll("input")].find((i) => !i.value.trim());
++    if (empty) { empty.value = b.dataset.hint; empty.focus(); refresh(); } else addRow(b.dataset.hint);
++  }));
++  const show = (on) => { overlay.hidden = !on; document.body.style.overflow = on ? "hidden" : ""; };
++  open.addEventListener("click", () => show(true));
++  ["share-close", "share-cancel"].forEach((id) => document.getElementById(id).addEventListener("click", () => show(false)));
++  overlay.addEventListener("click", (e) => { if (e.target === overlay) show(false); });
++  submit.addEventListener("click", () => {
++    overlay.querySelectorAll(".share-step, .share-switches, .share-foot, .share-lead").forEach((el) => el.hidden = true);
++    document.getElementById("share-done").hidden = false;
++    open.textContent = "已分享 · 在幼师学坊里看"; open.classList.remove("button-primary");
++  });
++  ["share-skip", "share-say"].forEach((id) => document.getElementById(id).addEventListener("click", () => show(false)));
++  overlay.querySelectorAll(".share-chips").forEach((g) => g.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
++    const single = g.closest(".share-switch");
++    if (single) g.querySelectorAll(".chip").forEach((x) => x.classList.remove("on"));
++    c.classList.toggle("on", single ? true : !c.classList.contains("on"));
++  })));
++})();
+diff --git a/apps/teaching-workshop-ui-v3/export-bundle.html b/apps/teaching-workshop-ui-v3/export-bundle.html
+index 4c40ba1..241c468 100644
+--- a/apps/teaching-workshop-ui-v3/export-bundle.html
++++ b/apps/teaching-workshop-ui-v3/export-bundle.html
+@@ -33,6 +33,8 @@
+           <div class="head-actions">
+             <span class="chip">delivery</span>
+             <span class="chip">word-ready</span>
++            <button class="button" type="button">一键导出</button>
++            <button class="button button-primary" id="share-open" type="button" data-course-state="approved" title="用过再分享：未完成 / 待提交时这个按钮是灰的">分享到幼师学坊</button>
+           </div>
+         </section>
+ 
+@@ -107,6 +109,70 @@
+         </section>
+       </main>
+     </div>
++    <!-- 分享到幼师学坊（docs/design/教研工坊-分享到幼师学坊.md）：四栏表，前三栏预填，第四栏「改了什么」只能教师手打；两个开关；提交后署名一句 -->
++    <div class="share-overlay" id="share-overlay" hidden>
++      <section class="share-modal" role="dialog" aria-labelledby="share-title" aria-modal="true">
++        <div class="section-head"><h2 id="share-title">分享到幼师学坊</h2><button class="ghost-link share-close" type="button" id="share-close">关闭</button></div>
++        <p class="muted share-lead">用过的课才分享。前三栏从信息采集与产物带出来，可改；第四栏「在起草稿上改了什么」只能你自己写，工坊不生成。</p>
++
++        <div class="share-step">
++          <div class="share-step-head"><span class="share-no">1</span><strong>标题、管线、年龄班、周数、领域</strong><span class="chip">预填</span></div>
++          <div class="share-grid">
++            <label class="share-field share-span"><span>标题</span><input value="多样的服饰" /></label>
++            <label class="share-field"><span>管线</span><select><option selected>主题式课程</option><option>项目式课程</option><option>单节活动</option></select></label>
++            <label class="share-field"><span>年龄班</span><select><option>小班</option><option selected>中班</option><option>大班</option><option>混龄</option></select></label>
++            <label class="share-field"><span>周数</span><input type="number" value="3" min="1" max="20" /></label>
++            <div class="share-field share-span"><span>领域</span><div class="share-chips"><button type="button" class="chip">语言</button><button type="button" class="chip on">社会</button><button type="button" class="chip">健康</button><button type="button" class="chip on">艺术</button><button type="button" class="chip">科学</button></div></div>
++          </div>
++        </div>
++
++        <div class="share-step">
++          <div class="share-step-head"><span class="share-no">2</span><strong>简介</strong><span class="chip">预填自「主题由来」· 至少 50 字</span></div>
++          <textarea rows="3">中班幼儿换季时对衣服的厚薄、花纹和民族服饰很感兴趣，由此起一个三周主题。第一周认识季节与衣服，第二周看各民族服饰，第三周自己设计一件。</textarea>
++        </div>
++
++        <div class="share-step">
++          <div class="share-step-head"><span class="share-no">3</span><strong>带哪些文件</strong><span class="chip">学坊只存链接</span></div>
++          <div class="share-files">
++            <label class="share-file"><input type="checkbox" checked /><span>主题网络图.docx</span><em class="muted">https://jiaoyan.clife.cn/f/…/network.docx</em></label>
++            <label class="share-file"><input type="checkbox" checked /><span>3周周计划.xlsx</span><em class="muted">https://jiaoyan.clife.cn/f/…/weeks.xlsx</em></label>
++            <label class="share-file"><input type="checkbox" /><span>教案打包.zip</span><em class="muted">30 份 · 太大，默认不带</em></label>
++          </div>
++        </div>
++
++        <div class="share-step share-step-must">
++          <div class="share-step-head"><span class="share-no">4</span><strong>在起草稿上改了什么</strong><span class="chip chip-warn">必须你自己写 · 至少一条</span></div>
++          <div class="share-changes" id="share-changes">
++            <input placeholder="把 ___ 改成 ___，因为 ___（≤ 120 字）" maxlength="120" />
++          </div>
++          <div class="share-hints">
++            <span class="muted">起个头：</span>
++            <button type="button" class="chip share-hint" data-hint="把预设的幼儿应答「___」改成本班孩子真的说过的「___」，因为 ___">幼儿应答</button>
++            <button type="button" class="chip share-hint" data-hint="把材料「___」换成「___」，因为园里 ___">材料</button>
++            <button type="button" class="chip share-hint" data-hint="把 ___ 个环节减成 ___ 个，因为 ___">环节数</button>
++            <button type="button" class="ghost-link" id="share-add">再加一条</button>
++          </div>
++          <p class="muted share-note">工坊不替你写这一栏，也不从修改记录里摘。这是这门课里「你」的部分。</p>
++        </div>
++
++        <div class="share-switches">
++          <label class="share-switch"><input type="checkbox" checked /><span>允许别的老师改编这门课</span><em class="muted">关了只能看，没有「改编这门课」按钮</em></label>
++          <div class="share-switch"><span>文件对谁可见</span><div class="share-chips"><button type="button" class="chip on">全平台</button><button type="button" class="chip">本共同体</button><button type="button" class="chip">本园</button></div><em class="muted">简介与「改了什么」始终全平台可见</em></div>
++        </div>
++
++        <div class="share-foot">
++          <span class="muted" id="share-foot-note">写一条「改了什么」提交按钮才亮</span>
++          <div class="drawer-actions"><button class="button" type="button" id="share-cancel">取消</button><button class="button button-primary" type="button" id="share-submit" disabled>交到幼师学坊</button></div>
++        </div>
++
++        <div class="share-done" id="share-done" hidden>
++          <strong>已分享 · 等园长同意</strong>
++          <p class="muted">在幼师学坊里看：<a href="#" class="ghost-link">/works?tab=mine&amp;id=…</a>。园长同意、审核人入库后记积分。</p>
++          <label class="share-field"><span>给同行留一句话？（可跳过，80 字内）</span><input maxlength="80" placeholder="如：第二周换成本班儿歌以后，幼儿自己会唱着做了" /></label>
++          <div class="drawer-actions"><button class="button" type="button" id="share-skip">跳过</button><button class="button button-primary" type="button" id="share-say">留下这句</button></div>
++        </div>
++      </section>
++    </div>
+     <script src="./app.js"></script>
+   </body>
+ </html>
+diff --git a/apps/teaching-workshop-ui-v3/styles.css b/apps/teaching-workshop-ui-v3/styles.css
+index a55e2ac..4681225 100644
+--- a/apps/teaching-workshop-ui-v3/styles.css
++++ b/apps/teaching-workshop-ui-v3/styles.css
+@@ -603,6 +603,42 @@ button,
+   background: #fff;
+ }
+ 
++/* 分享到幼师学坊弹层 */
++.share-overlay[hidden], .share-done[hidden], .share-modal [hidden] { display: none !important; }
++.share-overlay { position: fixed; inset: 0; background: rgba(20, 21, 26, 0.42); display: grid; place-items: center; padding: 20px; z-index: 50; overflow: auto; }
++.share-modal { width: min(760px, 100%); max-height: calc(100vh - 40px); overflow: auto; background: var(--surface-strong); border-radius: 24px; border: 1px solid var(--line-strong); padding: 22px; display: grid; gap: 16px; }
++.share-lead { margin: 0; line-height: 1.55; }
++.share-step { border: 1px solid var(--line); border-radius: 18px; padding: 14px; background: var(--surface-soft); display: grid; gap: 10px; }
++.share-step-must { border-color: rgba(245, 158, 11, 0.4); background: linear-gradient(180deg, rgba(245, 158, 11, 0.08), var(--surface-soft)); }
++.share-step-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
++.share-no { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 12px; font-family: "Fira Code", monospace; }
++.share-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
++.share-span { grid-column: 1 / -1; }
++.share-field { display: grid; gap: 4px; font-size: 13px; }
++.share-field > span { color: var(--muted); }
++.share-modal input:not([type="checkbox"]), .share-modal select, .share-modal textarea { font: inherit; padding: 9px 11px; border-radius: 12px; border: 1px solid var(--line-strong); background: #fff; width: 100%; box-sizing: border-box; }
++.share-chips { display: flex; gap: 6px; flex-wrap: wrap; }
++.share-chips .chip { cursor: pointer; border: 1px solid var(--line-strong); background: #fff; }
++.share-chips .chip.on { background: var(--accent-soft); color: var(--accent); border-color: rgba(236, 72, 153, 0.3); }
++.share-files { display: grid; gap: 8px; }
++.share-file { display: grid; grid-template-columns: auto auto 1fr; gap: 10px; align-items: center; font-size: 13px; padding: 8px 10px; border-radius: 12px; background: #fff; border: 1px solid var(--line); }
++.share-file em { font-style: normal; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.share-changes { display: grid; gap: 8px; }
++.share-hints { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 13px; }
++.share-hints .chip { cursor: pointer; }
++.chip-warn { background: rgba(245, 158, 11, 0.14); color: #b45309; }
++.share-note { margin: 0; font-size: 12px; }
++.share-switches { display: grid; gap: 10px; }
++.share-switch { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; font-size: 13px; }
++.share-switch em { grid-column: 2; font-style: normal; font-size: 12px; }
++.share-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
++.share-modal .button[disabled] { opacity: 0.45; cursor: not-allowed; }
++.share-done { display: grid; gap: 10px; }
++.share-done p { margin: 0; }
++.head-actions .button { padding: 8px 14px; }
++.head-actions .button[disabled] { opacity: 0.45; cursor: not-allowed; }
++@media (max-width: 720px) { .share-grid { grid-template-columns: 1fr 1fr; } .share-file { grid-template-columns: auto 1fr; } .share-file em { grid-column: 2; } }
++
+ @media (max-width: 1280px) {
+   .canvas-shell {
+     grid-template-columns: 1fr;

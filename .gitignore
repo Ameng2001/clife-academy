@@ -31,5 +31,3 @@ frontend/bundle-size.json
 # Local planning notes
 docs/superpowers/plans/
 .local/
-# 教研工坊运行时配置里有教师本人的投稿令牌
-workshop/.workshop/

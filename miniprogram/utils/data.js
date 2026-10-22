@@ -1,4 +1,4 @@
-// 由 gen_mp_data.py 从 ../src/academy.body.html 生成，不要手改
+// 由 gen_mp_data.py 从 ../scripts/lessons-source.html 生成，不要手改
 const ORG='柳北区示例幼儿园';
 const ROLES={
   nurse:{label:'保健医 · 李老师',short:'李',path:'nurse'},
