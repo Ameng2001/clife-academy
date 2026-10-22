@@ -1,6 +1,8 @@
 /* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
  *
  * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'contest'|'own', submissionId?, levelId?, answerId?, drillId?, contestId?, entryId?, tag?, selected? },
+ * adaptedFrom: { caseId, note } 改编来源链（ROADMAP 第十三节第 3 条）：改自哪条入库案例、改了什么。原作者与改编者都署名；改编案例入库时给原案例记一次「用过，有效」（改编者不是原作者时）。
+ *   链可以多级（改自改编的），对外给 chain（往上最多 5 级）与 adaptations（改自这条的已入库案例）。
  * db.caseUses: { caseId, uid, name, orgName, note, at }  「用过，有效」：别的教师用了这份案例标一次、留一句怎么改的；数只给分享者本人、本园园长与管理员看，不排行。
  * 入库给分享者 +2 学分（honors.js 台账，一条案例只记一次）。
  *             by, byName, org, orgName, status, note, at, consent:{by,byName,at}|null, curated:{by,byName,at}|null }
@@ -38,9 +40,14 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     mine: !!user && c.by === user.id, byTitles: titlesOf(db, c.by).map(t => t.label), ...(c.showcase ? { showcase: c.showcase } : {}),
     canEdit: !!user && c.by === user.id && c.status !== 'approved',
     usedByMe: !!user && usesOf(c.id).some(u => u.uid === user.id),
+    adaptedFrom: adaptedOf(c), chain: chainOf(c), adaptations: db.cases.filter(x => x.status === 'approved' && x.adaptedFrom?.caseId === c.id).map(x => ({ id: x.id, title: x.title, byName: x.byName, orgName: x.orgName, note: x.adaptedFrom.note || '' })),
     ...(seesUses(user, c) ? { used: usesOf(c.id).length, uses: usesOf(c.id).sort((a, b) => b.at - a.at).map(u => ({ name: u.name, orgName: u.orgName, note: u.note, at: u.at })) } : {})
   });
+  // 来源链：改自谁的哪一条（原案例被删了也留标题）
+  const adaptedOf = c => { if (!c.adaptedFrom) return null; const o = db.cases.find(x => x.id === c.adaptedFrom.caseId); return { id: c.adaptedFrom.caseId, title: o ? o.title : c.adaptedFrom.title || '（已删）', byName: o ? o.byName : c.adaptedFrom.byName || '', orgName: o ? o.orgName : null, note: c.adaptedFrom.note || '', available: !!o && o.status === 'approved' }; };
+  const chainOf = c => { const out = []; let cur = c; const seen = new Set([c.id]); while (cur?.adaptedFrom && out.length < 5) { const o = db.cases.find(x => x.id === cur.adaptedFrom.caseId); if (!o || seen.has(o.id)) break; seen.add(o.id); out.push({ id: o.id, title: o.title, byName: o.byName, orgName: o.orgName, available: o.status === 'approved' }); cur = o; } return out; };
   const canSee = (user, c) => c.status === 'approved' || (!!user && (c.by === user.id || isCurator(user, isAdmin) || (isDirector(user, isAdmin) && c.org && c.org === orgKeyOf(user))));
+  const now0 = () => Date.now();
   const filesOf = (body, owner) => (Array.isArray(body.files) ? body.files : []).slice(0, 6)
     .map(f => ({ hash: str(f?.hash, 64), name: str(f?.name, 120), type: str(f?.type, 60), owner })).filter(f => HASH.test(f.hash) && MEDIA.file(owner, f.hash));
 
@@ -122,18 +129,30 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
       }
       source = { kind: 'drill', answerId: a.id, drillId: a.drillId };
     }
+    // 改编来源：{ adaptedFrom: caseId|null, adaptNote? }。只能改自已入库的、不是这条自己的；不带就不动
+    let adaptedFrom = c ? c.adaptedFrom || null : null;
+    if (body.adaptedFrom !== undefined) {
+      const fid = str(body.adaptedFrom, 40);
+      if (!fid) adaptedFrom = null;
+      else {
+        const o = db.cases.find(x => x.id === fid && x.status === 'approved');
+        if (!o) return json(res, 400, { error: 'adapt from an approved case', code: 'adapt' });
+        if (c && o.id === c.id) return json(res, 400, { error: 'cannot adapt from itself', code: 'adapt' });
+        adaptedFrom = { caseId: o.id, title: o.title, byName: o.byName, note: str(body.adaptNote, 300), at: now0() };
+      }
+    } else if (c && body.adaptNote !== undefined && c.adaptedFrom) adaptedFrom = { ...c.adaptedFrom, note: str(body.adaptNote, 300) };
     // 改的时候没带 files：附图不动
     files = (c && !subId && !Array.isArray(body.files)) ? c.files : files.concat(filesOf(body, user.id)).slice(0, 6);
     if (c && ansId && !subId) c.source = source;
     const now = Date.now();
     if (c) {
-      Object.assign(c, { title, domain: body.domain, age, use, text, files, updatedAt: now });
+      Object.assign(c, { title, domain: body.domain, age, use, text, files, adaptedFrom, updatedAt: now });
       if (c.status === 'rejected') { c.status = isDirector(user, isAdmin) ? 'pending' : 'consent'; c.note = null; }
     } else {
       const org = orgKeyOf(author), orgName = author.academy?.org?.name || null;
       const directorSelf = isDirector(user, isAdmin);
       c = { id: crypto.randomBytes(9).toString('base64url'), title, domain: body.domain, age, use, text, files, source,
-        by: author.id, byName: author.name, org, orgName, status: directorSelf ? 'pending' : 'consent', note: null, at: now,
+        by: author.id, byName: author.name, org, orgName, status: directorSelf ? 'pending' : 'consent', note: null, at: now, adaptedFrom,
         consent: directorSelf ? { by: user.id, byName: user.name, at: now } : null, curated: null };
       db.cases.push(c);
     }
@@ -159,6 +178,11 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
       if (body.action === 'reject' && !note) return json(res, 400, { error: 'say why', code: 'note' });
       if (body.action === 'approve') { if (c.status === 'consent') c.consent = c.consent || { by: user.id, byName: user.name, at: now }; c.status = 'approved'; c.curated = { by: user.id, byName: user.name, at: now }; c.note = note || null; if (ledger) ledger.grant(c.by, 'case', c.id, 2, '案例入库：' + c.title); }
       else { c.status = 'rejected'; c.note = note; }
+      // 改编入库：给原案例记一次「用过，有效」（改编者不是原作者、没记过才记）
+      if (body.action === 'approve' && c.adaptedFrom) {
+        const o = db.cases.find(x => x.id === c.adaptedFrom.caseId);
+        if (o && o.by !== c.by && !db.caseUses.some(u => u.caseId === o.id && u.uid === c.by)) db.caseUses.push({ caseId: o.id, uid: c.by, name: c.byName, orgName: c.orgName, note: `改编为《${c.title}》`, at: now });
+      }
     } else return json(res, 400, { error: 'action must be consent, approve or reject', code: 'action' });
     saveDb();
     audit(req, 'case.' + body.action, { user, msg: c.id });

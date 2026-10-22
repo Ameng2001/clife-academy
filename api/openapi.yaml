@@ -712,8 +712,8 @@ paths:
     post:
       tags: [academy]
       operationId: academyCaseSave
-      summary: 自荐一个案例、从已通过的实践关作品推荐，或改自己的
-      description: '`{ id?, title, domain, age?, use, text(≥50 字), files?, submissionId?, answerId? }`。教师自荐进「待园长同意」；园长交的或园长推荐本园教师已通过的作品 / 被精选的研讨作答进「待审核」。退回的改后再交。入库给作者 +2 学分。'
+      summary: 自荐一个案例、从已通过的实践关作品推荐、改编别人的，或改自己的
+      description: '`{ id?, title, domain, age?, use, text(≥50 字), files?, submissionId?, answerId?, adaptedFrom?: caseId|null, adaptNote? }`。教师自荐进「待园长同意」；园长交的或园长推荐本园教师已通过的作品 / 被精选的研讨作答进「待审核」。退回的改后再交。入库给作者 +2 学分。`adaptedFrom` 是改编来源（只能是已入库案例），对外给 `adaptedFrom`、`chain`（往上最多 5 级）、`adaptations`（改自这条的）；改编入库时给原案例记一次「用过，有效」。'
       responses:
         '200': { description: '`{ case }`' }
         '400': { description: 缺标题 / 领域，正文不足 50 字，作品未通过点评 }

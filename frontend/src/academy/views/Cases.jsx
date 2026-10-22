@@ -15,10 +15,10 @@ import { fmtDay } from './common.jsx'
 const STATUS = { consent: ['待园长同意', 'var(--orange)'], pending: ['待审核', 'var(--orange)'], approved: ['已入库', 'var(--green)'], rejected: ['退回', 'var(--red)'] }
 const USE_ORDER = ['direct', 'adapt', 'idea']
 const AGES = ['小班', '中班', '大班', '混龄']
-const EMPTY = { id: null, title: '', domain: 'obs', age: '', use: 'adapt', text: '', files: [] }
+const EMPTY = { id: null, title: '', domain: 'obs', age: '', use: 'adapt', text: '', files: [], adaptedFrom: null, adaptNote: '' }
 const dname = k => DOMAINS.find(d => d.key === k)?.name || k
 
-function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
+function CaseCard({ c, uses, onOpen, open, actions, onUsed, onAdapt }) {
   const nav = useNavigate()
   const [useNote, setUseNote] = useState('')
   const [t, col] = STATUS[c.status] || [c.status, 'var(--label-2)']
@@ -33,6 +33,9 @@ function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
     {open && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{c.text}</div>}
     {open && c.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{c.files.map(f => <a key={f.hash} href={`api/cases/file?id=${c.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/cases/file?id=${c.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {c.note && (c.status === 'rejected' || c.mine) && <div className="small" style={{ marginTop: 8, color: 'var(--label-2)' }}>审核意见：{c.note}</div>}
+    {open && c.adaptedFrom && <div className="small" style={{ marginTop: 8, color: 'var(--label-2)' }}><Icon name="link" /> 改自 {c.adaptedFrom.byName}{c.adaptedFrom.orgName ? '（' + c.adaptedFrom.orgName + '）' : ''}的{c.adaptedFrom.available ? <span className="tap" style={{ textDecoration: 'underline' }} onClick={e => { e.stopPropagation(); nav('/cases?q=' + encodeURIComponent(c.adaptedFrom.title)) }}>《{c.adaptedFrom.title}》</span> : `《${c.adaptedFrom.title}》`}{c.adaptedFrom.note ? ' · 改了：' + c.adaptedFrom.note : ''}{c.chain?.length > 1 && <span className="muted">，再往上：{c.chain.slice(1).map(x => `${x.byName}《${x.title}》`).join(' ← ')}</span>}</div>}
+    {open && c.adaptations?.length > 0 && <div className="small" style={{ marginTop: 6, color: 'var(--label-2)' }}><Icon name="sparkles" /> 被改编：{c.adaptations.map((x, i) => <span key={x.id}>{i ? '；' : ''}{x.byName}{x.orgName ? '（' + x.orgName + '）' : ''}<span className="tap" style={{ textDecoration: 'underline' }} onClick={e => { e.stopPropagation(); nav('/cases?q=' + encodeURIComponent(x.title)) }}>《{x.title}》</span>{x.note ? '，改了：' + x.note : ''}</span>)}</div>}
+    {open && c.status === 'approved' && !c.mine && onAdapt && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={e => { e.stopPropagation(); onAdapt(c) }}><Icon name="pencil" /> 改编这条：按我们园的情况改一版，原作者与你都署名 ›</div>}
     {open && c.status === 'approved' && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={e => { e.stopPropagation(); nav('/forms/' + c.id) }}><Icon name="sparkles" /> 拿来就用：家长会课件 · 改前改后对比卡 · 条文记忆卡 ›</div>}
     {open && c.curated && <div className="small muted" style={{ marginTop: 6 }}>{c.curated.byName} 于 {fmtDay(c.curated.at)} 入库{c.consent ? ` · ${c.consent.byName} 同意` : ''}</div>}
     {open && c.status === 'approved' && !c.mine && onUsed && <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -70,13 +73,15 @@ export default function Cases() {
     setParam('from', null)
   }, [])
   const uses = data?.uses || { direct: '可直接用', adapt: '需改编', idea: '只看思路' }
+  // 改编：预填来源、正文复制一份当底稿，标题自己写
+  const adapt = c => { setForm({ ...EMPTY, domain: c.domain, age: c.age || '', use: 'adapt', text: c.text, adaptedFrom: { id: c.id, title: c.title, byName: c.byName }, adaptNote: '' }); window.scrollTo({ top: 0, behavior: 'smooth' }) }
 
   const save = async () => {
     if (!form.title.trim()) return useUI.getState().toast('写个标题')
     if (form.text.trim().length < 50) return useUI.getState().toast('正文至少 50 字：做了什么、怎么做的、效果如何')
     setBusy(true)
     try {
-      const r = await api('/api/cases', { method: 'POST', body: JSON.stringify({ ...form, age: form.age || undefined, files: form.files.map(({ hash, name, type }) => ({ hash, name, type })) }) })
+      const r = await api('/api/cases', { method: 'POST', body: JSON.stringify({ ...form, age: form.age || undefined, files: form.files.map(({ hash, name, type }) => ({ hash, name, type })), adaptedFrom: form.adaptedFrom ? form.adaptedFrom.id : null, adaptNote: form.adaptNote }) })
       useUI.getState().toast(r.case.status === 'consent' ? '已交，等园长同意' : r.case.status === 'pending' ? '已交，等审核' : '已保存'); setForm(null); await load()
     } catch (e) { useUI.getState().toast('没交成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
@@ -122,6 +127,7 @@ export default function Cases() {
         <select className="ac-sel" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} style={{ flex: 1 }}><option value="">年龄班</option>{AGES.map(a => <option key={a} value={a}>{a}</option>)}</select>
         <select className="ac-sel" value={form.use} onChange={e => setForm({ ...form, use: e.target.value })} style={{ flex: 1 }}>{USE_ORDER.map(u => <option key={u} value={u}>{uses[u]}</option>)}</select>
       </div>
+      {form.adaptedFrom && <div className="card" style={{ marginTop: 8, padding: 10, background: 'color-mix(in srgb,var(--acc) 8%,transparent)' }}><div className="small"><Icon name="link" /> 改自 {form.adaptedFrom.byName} 的《{form.adaptedFrom.title}》<span className="tap muted" style={{ marginInlineStart: 8 }} onClick={() => setForm({ ...form, adaptedFrom: null, adaptNote: '' })}>不是改编 ×</span></div><TextField style={{ marginTop: 6 }} placeholder="改了什么，一句话（班级不同、材料换了、步骤减了）" value={form.adaptNote} onChange={e => setForm({ ...form, adaptNote: e.target.value })} /><div className="small muted" style={{ marginTop: 4 }}>原作者与你都署名；入库后给原案例记一次「用过，有效」。</div></div>}
       <TextArea rows={8} style={{ marginTop: 8 }} placeholder="背景、做了什么、怎么做的、效果如何、别人用时要注意什么。至少 50 字。" value={form.text} onChange={e => setForm({ ...form, text: e.target.value })} />
       <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 8, flexWrap: 'wrap' }}>
         {form.files.map(f => <span key={f.hash} className="chip" onClick={() => setForm({ ...form, files: form.files.filter(x => x.hash !== f.hash) })} title="点一下移除"><Icon name="image" /> {f.name || '图'} ×</span>)}
@@ -145,13 +151,13 @@ export default function Cases() {
         {data?.showcased > 0 && <button className={'chip' + (showcase ? ' on' : '')} onClick={() => setParam('showcase', showcase ? null : '1')}>市级展示</button>}
       </div>
       {data && !data.cases.length && <div className="card small muted">还没有入库的案例。{data.total ? '换个筛选试试。' : '做过的好事值得写下来：点右上角「分享一个」。'}</div>}
-      {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} />)}
+      {data?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)} onUsed={used} onAdapt={adapt} />)}
     </>}
 
     {user && tab === 'mine' && <>
       {mine && !mine.cases.length && <div className="card small muted">还没交过。退回的可以改了再交。</div>}
       {mine?.cases.map(c => <CaseCard key={c.id} c={c} uses={uses} open={openId === c.id} onOpen={() => setOpenId(openId === c.id ? null : c.id)}
-        actions={c.canEdit && <><Button size="sm" onClick={() => setForm({ id: c.id, title: c.title, domain: c.domain, age: c.age || '', use: c.use, text: c.text, files: c.files })}>{c.status === 'rejected' ? '改了再交' : '改'}</Button><Button size="sm" onClick={() => del(c)}>删</Button></>} />)}
+        actions={c.canEdit && <><Button size="sm" onClick={() => setForm({ id: c.id, title: c.title, domain: c.domain, age: c.age || '', use: c.use, text: c.text, files: c.files, adaptedFrom: c.adaptedFrom ? { id: c.adaptedFrom.id, title: c.adaptedFrom.title, byName: c.adaptedFrom.byName } : null, adaptNote: c.adaptedFrom?.note || '' })}>{c.status === 'rejected' ? '改了再交' : '改'}</Button><Button size="sm" onClick={() => del(c)}>删</Button></>} />)}
     </>}
 
     {user && tab === 'queue' && queue && <>

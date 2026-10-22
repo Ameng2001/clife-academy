@@ -49,14 +49,14 @@ export function formDraftOf(c, kind) {
       { h: '为什么做这件事', lines: why.length ? why : ['（案例里没写，开会前补一句）'] }, { h: '我们在园里怎么做', lines: how.length ? how : ['（案例里没写，开会前补一句）'] }, { h: '孩子的变化', lines: change.length ? change : ['（案例里没写，开会前补一句）'] },
       { h: '家长在家可以配合的', lines: home.length ? home : ['在家用同样的说法与孩子聊这件事', '有变化或疑问随时和老师说'] },
       { h: '常见问题', lines: ['会不会耽误学习：这是幼儿园的本分，不是额外任务', '需要家长买东西吗：不需要', '多久能看到变化：因人而异，一般一个月'] }
-    ], footer: `案例来自 ${c.byName}${c.orgName ? '（' + c.orgName + '）' : ''} · 不出现幼儿姓名与正脸` };
+    ], footer: `案例来自 ${c.byName}${c.orgName ? '（' + c.orgName + '）' : ''}${c.adaptedFrom ? '，改自 ' + c.adaptedFrom.byName + ' 的《' + c.adaptedFrom.title + '》' : ''} · 不出现幼儿姓名与正脸` };
   }
   if (kind === 'transition') {
     let before = take(/之前|以前|原来|过去|总是|常常|老是/, 3);
     const why = take(/发现|因为|原因|问题出在/, 1);
     let after = take(/现在|改成|改为|换成|变成|后来|加了|开始|效果/, 3);
     if (!before.length) before = fill([], 2); if (!after.length) after = fill([], 2);
-    return { scene: clip(c.title, 24), before: before.map(s => clip(s, 80)), after: after.map(s => clip(s, 80)), why: why[0] ? clip(why[0], 120) : '', footer: `改自 ${c.byName} 的案例${c.orgName ? ' · ' + c.orgName : ''}` };
+    return { scene: clip(c.title, 24), before: before.map(s => clip(s, 80)), after: after.map(s => clip(s, 80)), why: why[0] ? clip(why[0], 120) : '', footer: `改自 ${c.byName} 的案例${c.orgName ? ' · ' + c.orgName : ''}${c.adaptedFrom ? '，再往上是 ' + c.adaptedFrom.byName + ' 的《' + c.adaptedFrom.title + '》' : ''}` };
   }
   if (kind === 'memo') {
     const g = GUIDE[c.domain] || GUIDE.obs;
