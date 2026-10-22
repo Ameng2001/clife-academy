@@ -1,4 +1,3 @@
-  const brand = useBrand()
 // 证书与认证期次（GET /api/me/certificates、/api/cohorts）：三级——岗位数智应用认证（自动）、领域研修证书（自动＋点评记录）、骨干教师认证（按学期开班，线下答辩）。
 // 只有本人看自己的；证书有编号可核验；没有分数；可打印进发展档案。管理员在这里开班、记答辩结果。
 import { useEffect, useState } from 'react'

@@ -1,4 +1,3 @@
-  const brand = useBrand()
 // 发展档案与学时证明（GET /api/me/portfolio、/api/me/hours）。档案是本人全部学习与作品记录，随人走：这页可打印成 PDF，也可下载 JSON。
 // 学时证明按本地运营方与市教育局谈定的规则与格式出具（管理员在这里改规则），有编号可核验；出具时规则快照随证明保存。
 import { useEffect, useRef, useState } from 'react'
