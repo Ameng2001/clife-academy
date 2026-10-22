@@ -28,7 +28,7 @@ cd api && npm ci --omit=optional && npm test && DATA_DIR=../data node server.js
 cd frontend && npm ci && npm test && npm run dev
 ```
 
-课程数据：`frontend/src/lib/lessons-data.js` 由 `scripts/import-lessons.py` 从大课堂 H5 原型生成，不手改。
+课程数据：`frontend/src/lib/lessons-data.js` 由 `python3 scripts/import-lessons.py prototype/src/academy.body.html` 生成，小程序的 `miniprogram/utils/data.js` 由 `cd prototype && python3 gen_mp_data.py` 生成，都不手改；课程数据源只有 `prototype/src/academy.body.html` 一份。
 
 ## 状态
 
