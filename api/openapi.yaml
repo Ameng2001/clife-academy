@@ -4399,6 +4399,30 @@ paths:
       responses:
         '200': { description: '`{ version, rules:[{ id, title, text, why, where }] }`' }
 
+  /api/collections:
+    get:
+      tags: [academy]
+      operationId: academyCollections
+      summary: 合集：按主题攒案例、关卡、讲堂微课、大讲堂场次、资源（登录可见，按范围过滤；`?id=` 取一份）
+      description: 没有点赞、浏览数；只按更新时间排。条目按看的人再过滤（案例要已入库、资源要看得到）。
+      responses:
+        '200': { description: '`{ collections:[{ id, title, desc, scope, scopeName, where, items:[{kind,id,note,title,sub,to}], total, byName, updatedAt, canEdit }], scopes, kinds, max, community, communities }` 或 `{ collection }`' }
+    post:
+      tags: [academy]
+      operationId: academyCollectionSave
+      summary: 建或改一份合集
+      description: "`{ id?, title, desc?, scope: all|district|community|org, communityId?, items:[{ kind: case|level|clip|lecture|resource, id, note? }] }`（≤ 40 条）。管理员任何范围；区县管理员本区与区内共同体；园长本园与所在共同体；种子教师本园。"
+      responses:
+        '200': { description: '`{ collection }`' }
+        '403': { description: '`code: scope` 范围不是你能建的；`code: who` 不是你的' }
+  /api/collections/delete:
+    post:
+      tags: [academy]
+      operationId: academyCollectionDelete
+      summary: 删一份合集：`{ id }`（本人、管理员、园所范围的本园园长）
+      responses:
+        '200': { description: '`{ ok }`' }
+
 components:
   securitySchemes:
     cookieAuth:

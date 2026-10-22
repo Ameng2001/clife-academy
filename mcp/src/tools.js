@@ -81,6 +81,10 @@ export const TOOLS = [
     handler: async ({ q, kind, domain }) => { const r = await get('/api/resources', { q, kind, domain }); return { kinds: r.kinds, resources: (r.resources || []).slice(0, 40).map(x => ({ id: x.id, kind: x.kind, title: x.title, domain: x.domain, desc: x.desc, url: x.url || null, scope: x.scope })) } }
   },
   {
+    name: 'list_collections', description: '合集：按主题攒的案例、关卡、讲堂微课、大讲堂、资源；按账号能看到的范围给。', schema: { id: z.string().optional().describe('只取一份') },
+    handler: async ({ id }) => { if (id) { const r = await get('/api/collections', { id }); const c = r.collection; return { id: c.id, title: c.title, desc: c.desc, scope: c.scopeName, where: c.where, items: c.items.map(i => ({ kind: i.kind, title: i.title, sub: i.sub, note: i.note || undefined })) } } const r = await get('/api/collections'); return { collections: (r.collections || []).map(c => ({ id: c.id, title: c.title, desc: c.desc, scope: c.scopeName, where: c.where, items: c.items.length, updated: day(c.updatedAt) })) } }
+  },
+  {
     name: 'upcoming', description: '近期安排：将开的园长大讲堂、开着的每周一题、在用的平台公告。', schema: {},
     handler: async () => {
       const [l, d, n] = await Promise.all([get('/api/lectures'), get('/api/drills'), get('/api/notices')])

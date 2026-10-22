@@ -110,7 +110,7 @@ export default function Level() {
         {a != null && <div className="ac-fb">{q.o[a][2]}{q.o[a][1] !== 1 && <> <button className="btn plain" style={{ padding: 0, marginInlineStart: 6, color: 'var(--acc)' }} onClick={() => setDraft(id, x => { const n = { ...x.answers }; delete n[qi]; x.answers = n; x.seg = q.jump || 'jiang' })}>回去看「{q.jump === 'kan' ? '看' : '讲'}」再答</button></>}</div>}
       </div> })}
       <div className="ac-row">
-        <span className="small muted">{answered}/{lv.qs.length} 题 · 对 {right}{lv.needsSubmission && !zuoDone && answered === lv.qs.length ? (lv.type === 'practice' ? ' · 等点评通过后结算' : ' · 先到「做」交回答') : ''}</span>
+        <span className="small muted" style={{ whiteSpace: 'nowrap', flex: 'none' }}>{answered}/{lv.qs.length} 题 · 对 {right}{lv.needsSubmission && !zuoDone && answered === lv.qs.length ? (lv.type === 'practice' ? ' · 等点评通过后结算' : ' · 先到「做」交回答') : ''}</span>
         {st === 'current' ? <Button variant="primary" icon="checkCircle" disabled={!(answered === lv.qs.length && gate.ok)} onClick={pass}>通关</Button> : <Button onClick={() => nav('/paths/' + lv.path)}>返回路径</Button>}
       </div>
     </div>}
