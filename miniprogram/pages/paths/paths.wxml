@@ -1,0 +1,15 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <view class="h1">学习路径</view>
+  <text class="muted small">按岗位分路径闯关，关卡依次解锁。每关看一段微课、在平台上做一遍、答三道以内的情景题，平台记录实操是否完成。</text>
+  <view wx:for="{{paths}}" wx:key="p" class="panel" style="margin-top:24rpx">
+    <view class="between" data-p="{{item.p}}" bindtap="toggle"><view class="h2" style="margin:0">{{item.name}}路径</view><text class="pill {{item.fin ? 'ok' : item.d ? 'hot' : 'idle'}}">{{item.fin ? '已完成' : item.d + '/' + item.tot}}</text></view>
+    <view wx:if="{{item.open}}" style="margin-top:12rpx">
+      <view wx:for="{{item.levels}}" wx:for-item="l" wx:key="i" class="lv" data-p="{{item.p}}" data-i="{{l.i}}" bindtap="goLevel">
+        <text class="ix num">{{l.i < 9 ? '0' : ''}}{{l.i + 1}}</text>
+        <view class="body">{{l.t}}<text class="sub">{{l.scene}} · {{l.dur}}{{l.kind ? " · " + l.kind : ""}}</text></view>
+        <text class="pill {{l.s === 'done' ? 'ok' : l.s === 'current' ? 'hot' : 'idle'}}">{{l.s === 'done' ? '已通过' : l.s === 'current' ? '学习中' : '未解锁'}}</text>
+      </view>
+    </view>
+  </view>
+</view>

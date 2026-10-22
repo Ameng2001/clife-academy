@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V3 · Month Matrix</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="matrix">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Structure-first Copilot Studio</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./month-matrix.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./theme-framing.html">主题方向 thread</a>
+            <a class="thread-link active" href="./month-matrix.html">月矩阵 thread</a>
+            <a class="thread-link" href="./week-arrangement.html">第 2 周 thread</a>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <div class="eyebrow">Month Matrix</div>
+            <h1 class="title">Month Matrix 回到主舞台</h1>
+            <p class="muted">这一页的主对象就是整个月的课程结构。Copilot 只围绕你选中的周次或格子进行局部协作，不再把矩阵压缩成侧边结果窗。</p>
+          </div>
+          <div class="head-actions">
+            <span class="chip">month stage</span>
+            <a class="ghost-link" href="./week-arrangement.html">展开第 2 周</a>
+          </div>
+        </section>
+
+        <section class="context-bar">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node active">Month Matrix</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Week Arrangement</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Activities (N)</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-note">一个格子不是一个任务，而是一个结构位。你可以选中 `Week 2 / 区域活动`，让 Copilot 针对这个结构位给出替代方案。</div>
+            <div class="stage-actions"><span class="ghost-link">当前选中：Week 2 / 区域活动</span></div>
+          </div>
+        </section>
+
+        <section class="canvas-shell">
+          <section class="main-canvas">
+            <section class="canvas-card">
+              <div class="section-head"><h2>4 周递进</h2><span class="chip">progression</span></div>
+              <div class="stack-list">
+                <div class="stack-item"><strong>Week 1</strong><div class="muted">认识服饰</div></div>
+                <div class="stack-item"><strong>Week 2</strong><div class="muted">不同场景的服饰</div></div>
+                <div class="stack-item"><strong>Week 3</strong><div class="muted">我来设计服饰</div></div>
+                <div class="stack-item"><strong>Week 4</strong><div class="muted">分享我的服饰</div></div>
+              </div>
+            </section>
+            <section class="canvas-card matrix-board">
+              <div class="section-head"><h2>月度活动矩阵</h2><span class="chip">full canvas</span></div>
+              <div class="matrix-grid">
+                <div class="matrix-head">周次 / 类型</div>
+                <div class="matrix-head">教学活动</div>
+                <div class="matrix-head">区域活动</div>
+                <div class="matrix-head">户外游戏</div>
+                <div class="matrix-head">生活渗透</div>
+                <div class="matrix-head">家园互动</div>
+
+                <div class="matrix-head">Week 1</div>
+                <div class="matrix-cell">这是谁的衣服</div>
+                <div class="matrix-cell">衣服配对角</div>
+                <div class="matrix-cell">穿衣接力</div>
+                <div class="matrix-cell">看天气穿衣</div>
+                <div class="matrix-cell">观察家人衣服</div>
+
+                <div class="matrix-head">Week 2</div>
+                <div class="matrix-cell active">我会穿什么</div>
+                <div class="matrix-cell active">职业服饰拼图</div>
+                <div class="matrix-cell warning">服饰接力赛</div>
+                <div class="matrix-cell missing">待补</div>
+                <div class="matrix-cell">观察家人的工作服</div>
+
+                <div class="matrix-head">Week 3</div>
+                <div class="matrix-cell">我来设计制服</div>
+                <div class="matrix-cell">布料创作角</div>
+                <div class="matrix-cell">换装障碍赛</div>
+                <div class="matrix-cell">整理穿戴用品</div>
+                <div class="matrix-cell">亲子设计分享</div>
+
+                <div class="matrix-head">Week 4</div>
+                <div class="matrix-cell">我的服饰秀</div>
+                <div class="matrix-cell">展示布置区</div>
+                <div class="matrix-cell">服饰闯关赛</div>
+                <div class="matrix-cell">归纳整理</div>
+                <div class="matrix-cell">家庭展示任务</div>
+              </div>
+            </section>
+          </section>
+
+          <aside class="copilot-drawer">
+            <section class="drawer-header">
+              <h2>Copilot Drawer</h2>
+              <p>当前附着对象：`Week 2 / 区域活动`。Copilot 只围绕这个结构位给建议，而不是重写整个矩阵。</p>
+            </section>
+            <section class="drawer-block">
+              <h3>结构信号</h3>
+              <div class="drawer-list">
+                <div class="drawer-item"><strong>缺项</strong><div class="muted">Week 2 缺 1 个生活渗透。</div></div>
+                <div class="drawer-item"><strong>节奏风险</strong><div class="muted">Week 2 周二与周三偏密。</div></div>
+              </div>
+            </section>
+            <section class="drawer-block">
+              <h3>可直接执行</h3>
+              <div class="drawer-actions">
+                <span class="drawer-action">给 Week 2 补生活渗透</span>
+                <span class="drawer-action">换一个更轻的区域活动</span>
+                <a class="drawer-action" href="./week-arrangement.html">展开 Week 2</a>
+              </div>
+            </section>
+            <section class="drawer-chat">
+              <div class="message user"><h4>你</h4><div>Week 2 的区域活动想更贴近日常场景。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>可以改成“今天我穿什么”搭配角。这样和教学活动形成呼应，也更容易过渡到家园观察。</div></div>
+            </section>
+            <div class="drawer-composer">
+              <input placeholder="例如：把 Week 2 / 区域活动改得更轻、更生活化" />
+              <button class="button button-primary">发送</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

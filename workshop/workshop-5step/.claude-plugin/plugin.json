@@ -1,0 +1,13 @@
+{
+  "name": "workshop-5step",
+  "version": "0.2.0",
+  "description": "Five-Step lesson plan design pipeline — generate learning objectives, scaffold teaching steps, detail teacher scripts, and compile standard lesson plans",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["workshop", "lesson", "five-step", "teacher", "lesson-plan"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

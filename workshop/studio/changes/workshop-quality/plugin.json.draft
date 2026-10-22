@@ -1,0 +1,13 @@
+{
+  "name": "workshop-quality",
+  "version": "0.1.0",
+  "description": "PBL proposal quality assurance — curriculum standards checking, age-appropriateness validation, and multi-expert peer review",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["quality", "validation", "curriculum-standards", "review", "pbl"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

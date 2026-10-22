@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 · HIL Gate</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="hil">
+    <div class="gate-shell">
+      <header class="top-strip" style="margin-bottom:18px;">
+        <div class="search-shell"><span class="muted">HIL 必须显式存在，不能只是一个状态字段</span><input placeholder="搜索审批对象或评论" /></div>
+        <div class="toolbar"><a class="button button-secondary" href="./project-workspace.html">返回项目</a></div>
+      </header>
+      <main class="drawer">
+        <div class="page-header">
+          <div><div class="eyebrow">HIL Gate</div><h1>Project Framing 审核</h1><p class="muted">这里不是普通弹窗，而是一个有责任感的决策界面。用户要清楚地看到：现在确认什么、通过后去哪、退回后回到哪里。</p></div>
+          <div class="hero-strip"><span class="status-pill status-warning">awaiting review</span><span class="status-pill">课研主任</span></div>
+        </div>
+        <div class="split-layout">
+          <section class="surface" style="padding:18px;">
+            <div class="section-head"><h2>当前待确认对象</h2><span class="chip">多样的服饰</span></div>
+            <div class="list">
+              <div class="list-row">
+                <strong>主题分析</strong>
+                <div class="muted">说明“服饰”主题为什么适合中班，和生活经验、社会角色、表达创造如何连接。</div>
+              </div>
+              <div class="list-row">
+                <strong>主题解读</strong>
+                <div class="muted">已经形成 4 周递进叙事，从认识、比较到设计、分享。</div>
+              </div>
+              <div class="list-row">
+                <strong>主题网络</strong>
+                <div class="muted">已将教学、区域、户外、生活、家园五类活动接入同一主题结构。</div>
+              </div>
+            </div>
+          </section>
+          <section class="surface" style="padding:18px;">
+            <div class="section-head"><h2>Copilot Summary</h2><span class="chip">Decision Support</span></div>
+            <div class="list">
+              <div class="list-row">
+                <strong>这次确认什么</strong>
+                <div class="muted">确认主题是否成立，四周递进是否合理，是否足以进入月矩阵和周编排阶段。</div>
+              </div>
+              <div class="list-row">
+                <strong>当前主要风险</strong>
+                <div class="muted">第二周与第三周之间的桥接还可以再强化，但不影响整体方向成立。</div>
+              </div>
+              <div class="list-row">
+                <strong>建议</strong>
+                <div class="muted">建议通过，并在 month matrix 阶段把“职业服饰”作为第 2 周结构锚点补强。</div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section class="surface" style="padding:18px;margin-top:18px;">
+          <div class="section-head"><h2>评论与操作</h2><span class="chip">Governance</span></div>
+          <div class="list-row">
+            <div class="muted">建议在第 2 周和第 3 周之间补一条“从比较到设计”的过渡说明，但整体结构已经成立，可以继续推进。</div>
+          </div>
+          <div class="mini-actions" style="margin-top:16px;">
+            <button class="button button-primary">通过</button>
+            <button class="button button-secondary">退回修改</button>
+            <button class="button button-ghost">补充说明</button>
+            <button class="button button-ghost">指派他人</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

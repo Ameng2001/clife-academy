@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 · Inbox</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="inbox">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div>
+            <div class="brand-title">教研工坊</div>
+            <div class="brand-subtitle">Course CoWork Prototype</div>
+          </div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Workspace</div>
+          <a class="nav-link" data-page="inbox" href="./index.html"><span>Inbox</span><span class="nav-badge">6</span></a>
+          <a class="nav-link" data-page="project" href="./project-workspace.html"><span>Projects</span><span class="nav-badge">3</span></a>
+          <a class="nav-link" data-page="month" href="./month-matrix.html"><span>Plans</span><span class="nav-badge">4</span></a>
+          <a class="nav-link" data-page="activity" href="./activity-editor.html"><span>Knowledge</span><span class="nav-badge">12</span></a>
+          <a class="nav-link" data-page="export" href="./export-bundle.html"><span>Exports</span><span class="nav-badge">2</span></a>
+        </div>
+        <div class="sidebar-card">
+          <div class="eyebrow">Today</div>
+          <h3>先推进 “多样的服饰”</h3>
+          <p class="muted">它已经完成主题网络，当前最值钱的是补齐第 2 周的区域活动和家园互动，然后进入 deliverable-draft。</p>
+          <div class="mini-actions">
+            <a class="button button-primary" href="./project-workspace.html">继续项目</a>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main-column">
+        <header class="top-strip">
+          <div class="search-shell">
+            <span class="muted">搜索项目、周次、活动、客户样例</span>
+            <input aria-label="搜索" placeholder="例如：多样的服饰 / 第2周 / 区域活动" />
+          </div>
+          <div class="toolbar">
+            <span class="chip">课研主任视角</span>
+            <span class="status-pill status-warning">2 个项目待审批</span>
+          </div>
+        </header>
+
+        <main class="surface">
+          <div class="page-header">
+            <div>
+              <div class="eyebrow">Inbox</div>
+              <h1>今天先处理什么，一眼就知道</h1>
+              <p class="muted">不是文件列表，而是待办、风险和下一步动作。这里优先把项目推进，而不是让用户在目录里找文档。</p>
+            </div>
+            <div class="hero-strip">
+              <span class="status-pill status-warning">待我审批 2</span>
+              <span class="status-pill status-danger">退回修改 1</span>
+              <span class="status-pill status-success">可导出 2</span>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <section class="card">
+              <div class="section-head">
+                <h2>待我处理</h2>
+                <span class="chip">High focus</span>
+              </div>
+              <div class="list">
+                <div class="list-row">
+                  <div class="row-split">
+                    <strong>多样的服饰</strong>
+                    <span class="status-pill status-warning">awaiting review</span>
+                  </div>
+                  <div class="muted">Theme framing 已完成，等待你确认第 1-4 周递进是否成立。</div>
+                  <div class="mini-actions">
+                    <a class="action-pill" href="./theme-framing.html">进入 framing</a>
+                    <a class="action-pill" href="./hil-gate.html">审批摘要</a>
+                  </div>
+                </div>
+                <div class="list-row">
+                  <div class="row-split">
+                    <strong>春天的花</strong>
+                    <span class="status-pill status-danger">changes requested</span>
+                  </div>
+                  <div class="muted">第 3 周节奏过密，连续 3 个教学活动，需要重新平衡为“教学 + 区域 + 户外”。</div>
+                  <div class="mini-actions">
+                    <a class="action-pill" href="./week-arrangement.html">改周安排</a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="section-head">
+                <h2>我负责的项目</h2>
+                <span class="chip">3 active</span>
+              </div>
+              <div class="list">
+                <a class="list-row card" href="./project-workspace.html">
+                  <div class="row-split">
+                    <strong>多样的服饰</strong>
+                    <span class="status-pill status-warning">reviewing</span>
+                  </div>
+                  <div class="muted">thematic-curriculum · 9 / 14 skills 完成 · deliverable-draft</div>
+                </a>
+                <a class="list-row card" href="./project-workspace.html">
+                  <div class="row-split">
+                    <strong>春天的花</strong>
+                    <span class="status-pill">designing</span>
+                  </div>
+                  <div class="muted">PBL · inquiry scaffold 已过，正在展开第 3 周活动设计。</div>
+                </a>
+                <a class="list-row card" href="./project-workspace.html">
+                  <div class="row-split">
+                    <strong>我会穿什么</strong>
+                    <span class="status-pill status-success">approved</span>
+                  </div>
+                  <div class="muted">五步法教学活动已通过 approval-gate，可准备导出。</div>
+                </a>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="section-head">
+                <h2>最近更新</h2>
+                <span class="chip">Timeline</span>
+              </div>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <span class="muted">10:42</span>
+                  <div>
+                    <strong>第 2 周区域活动</strong>
+                    <div class="muted">王老师补充了 “衣服配对角” 的材料投放与指导策略。</div>
+                  </div>
+                  <span class="type-tag type-region">区域</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="muted">09:15</span>
+                  <div>
+                    <strong>主题网络更新</strong>
+                    <div class="muted">Copilot 将 “职业服饰” 子主题关联到了家园互动和户外游戏线。</div>
+                  </div>
+                  <span class="type-tag type-teaching">Framing</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+
+      <aside class="copilot-panel">
+        <section class="copilot-block">
+          <div class="eyebrow">Copilot Context</div>
+          <h3>今天最该推进：多样的服饰</h3>
+          <p class="muted">当前处于 deliverable-draft 前夕，最短路径是先过 project-framing，再补齐第 2 周缺失活动。</p>
+        </section>
+        <section class="copilot-block">
+          <div class="section-head">
+            <h3>推荐动作</h3>
+          </div>
+          <div class="mini-actions">
+            <a class="action-pill" href="./theme-framing.html">生成审核摘要</a>
+            <a class="action-pill" href="./week-arrangement.html">补区域活动</a>
+            <a class="action-pill" href="./activity-editor.html">补家园互动</a>
+          </div>
+        </section>
+        <section class="copilot-block">
+          <div class="section-head">
+            <h3>Copilot Feed</h3>
+          </div>
+          <div class="copilot-feed-item">
+            <strong>结构提醒</strong>
+            <div class="muted">第 2 周活动类型仍偏教学活动，建议补区域或户外来拉开节奏。</div>
+          </div>
+          <div class="copilot-feed-item">
+            <strong>审批提醒</strong>
+            <div class="muted">“多样的服饰” 已经具备 project-framing 条件，可以发起人工确认。</div>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

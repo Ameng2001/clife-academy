@@ -1,0 +1,6 @@
+.box { background: #f3f6f4; border-radius: 16rpx; padding: 20rpx; margin-bottom: 12rpx; display: flex; flex-direction: column; gap: 8rpx; }
+.box.best { background: #e2efea; }
+.stars { display: flex; gap: 8rpx; }
+.stars text { font-size: 40rpx; color: #c9d6d1; }
+.stars text.on { color: #e8a33d; }
+.sel { border-left: 6rpx solid #1f6b5c; }

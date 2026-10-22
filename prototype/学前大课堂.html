@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <style>
+    /* 与 Artifact 运行时等价的基础重置，保证独立打开时表现一致 */
+    :root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+    html,body{margin:0}
+    body{font:14px/1.6 system-ui,-apple-system,"Noto Sans SC",sans-serif}
+    img{max-width:100%}
+    [hidden]{display:none!important}
+  </style>
+<title>C-Life 学前大课堂</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 布局：顶栏（品牌 / 主导航 / 身份切换 / 引导演示）→ 单页视图区；手机宽度改为底部标签栏。配色：柳绿主色、紫荆强调 */
+:root{
+  --paper:#f3f6f4; --surface:#ffffff; --ink:#16302b; --muted:#5b716b; --line:#d6e0dc;
+  --willow:#1f6b5c; --willow-soft:#e2efea; --bauhinia:#b0306f; --bauhinia-soft:#f7e3ed;
+  --ok:#2f7d4f; --ok-soft:#e3f2e8; --warn:#a35f00; --warn-soft:#fbefd9; --idle:#7b8a86; --idle-soft:#eceff0;
+  --board:#fbfcfa; --chalk:#2b3a36; --tour:#16302b; --tour-ink:#f3f6f4;
+  --shadow:0 1px 2px rgba(22,48,43,.06),0 6px 20px rgba(22,48,43,.06);
+  --f-body:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1a18;--surface:#16231f;--ink:#e4efeb;--muted:#9db3ac;--line:#2a3c37;
+  --willow:#5fbfa6;--willow-soft:#1d3530;--bauhinia:#ef7fb2;--bauhinia-soft:#3a1f2c;
+  --ok:#6fcf93;--ok-soft:#1c3427;--warn:#f0b357;--warn-soft:#3a2c14;--idle:#8a9995;--idle-soft:#22302c;
+  --board:#1b2a26;--chalk:#dfeae6;--tour:#e4efeb;--tour-ink:#0f1a18;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1a18;--surface:#16231f;--ink:#e4efeb;--muted:#9db3ac;--line:#2a3c37;
+  --willow:#5fbfa6;--willow-soft:#1d3530;--bauhinia:#ef7fb2;--bauhinia-soft:#3a1f2c;
+  --ok:#6fcf93;--ok-soft:#1c3427;--warn:#f0b357;--warn-soft:#3a2c14;--idle:#8a9995;--idle-soft:#22302c;
+  --board:#1b2a26;--chalk:#dfeae6;--tour:#e4efeb;--tour-ink:#0f1a18;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+h1{font-size:26px;font-weight:900}
+h2{font-size:20px;font-weight:900}
+h3{font-size:16px;font-weight:700}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--bauhinia);outline-offset:2px;border-radius:6px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.stack{display:grid;gap:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:9px 16px;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+.btn.primary{background:var(--bauhinia);color:var(--surface)}
+.btn.ghost{background:var(--willow-soft);color:var(--willow)}
+.btn.line{background:var(--surface);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--muted);white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--willow);border-color:var(--willow);color:var(--surface);font-weight:700}
+.chip:hover{border-color:var(--willow)}
+.pill{font-size:12px;padding:2px 10px;border-radius:999px;font-weight:500;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.idle{background:var(--idle-soft);color:var(--idle)}
+.pill.hot{background:var(--bauhinia-soft);color:var(--bauhinia)}
+.link{color:var(--bauhinia);font-weight:700;text-decoration:none;font-size:13px;background:none;border:0;padding:0;white-space:nowrap}
+.link:hover{text-decoration:underline}
+
+/* 顶栏 */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:16px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px;white-space:nowrap;text-decoration:none}
+.brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.04em;line-height:1.2}
+nav.main{display:flex;gap:2px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+nav.main a{text-decoration:none;padding:6px 10px;border-radius:8px;color:var(--muted);font-size:14px;white-space:nowrap}
+nav.main a[aria-current="page"]{color:var(--willow);background:var(--willow-soft);font-weight:700}
+nav.main a:hover{color:var(--ink)}
+.idbox{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.idbox select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--surface);color:var(--ink);max-width:180px}
+.avatar{width:32px;height:32px;flex:none;border-radius:50%;background:var(--willow);color:var(--surface);display:grid;place-items:center;font-weight:700;font-size:14px}
+.tourbtn{border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;background:var(--bauhinia);color:var(--surface);white-space:nowrap}
+.tourbtn.off{background:var(--idle-soft);color:var(--ink)}
+.protoband{background:var(--bauhinia-soft);color:var(--bauhinia);font-size:12px}
+.protoband .wrap{display:flex;justify-content:space-between;gap:12px;padding-block:5px;flex-wrap:wrap}
+.protoband button{background:none;border:0;color:inherit;font-size:12px;text-decoration:underline;padding:0}
+
+main{padding-block:22px 48px}
+.tabbar{display:none}
+
+/* 首页 */
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:20px;align-items:start}
+.greet{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.stats{display:flex;gap:20px}
+.stat b{display:block;font-family:var(--f-num);font-size:22px;color:var(--willow)}
+.stat span{font-size:12px;color:var(--muted)}
+.map-wrap{overflow-x:auto;padding-bottom:6px}
+.map{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(78px,1fr);min-width:100%}
+.node{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;background:none;border:0;padding:4px 2px;text-align:center}
+.node::before{content:"";position:absolute;top:22px;left:-50%;width:100%;height:3px;background:var(--line);z-index:0}
+.node:first-child::before{display:none}
+.node.done::before,.node.current::before{background:var(--willow)}
+.dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-num);font-size:14px;position:relative;z-index:1;border:2px solid var(--line);background:var(--surface);color:var(--idle)}
+.node.done .dot{background:var(--willow);border-color:var(--willow);color:var(--surface)}
+.node.current .dot{border-color:var(--bauhinia);color:var(--bauhinia);box-shadow:0 0 0 5px var(--bauhinia-soft)}
+.node .t{font-size:12px;line-height:1.35;color:var(--muted);max-width:86px}
+.node.current .t{color:var(--ink);font-weight:700}
+.next{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+.segs4{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.seg4{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--paper);color:var(--muted)}
+.seg4.on{background:var(--willow);color:var(--surface)}
+
+.probes{list-style:none;margin:0;padding:0;display:grid}
+.probe{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.probe:first-child{border-top:0}
+.sd{width:10px;height:10px;border-radius:50%;margin-top:6px;display:inline-block}
+.sd.ok{background:var(--ok)}.sd.warn{background:var(--warn)}.sd.idle{background:var(--idle)}
+.probe small,.sub{display:block;color:var(--muted);font-size:12px}
+
+.block{margin-top:28px}
+.block-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.block-head p{font-size:13px;color:var(--muted)}
+.lessons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-width:0;text-align:left;padding:0}
+.lesson:hover{border-color:var(--willow)}
+.thumb{aspect-ratio:16/9;max-width:100%;width:100%;background:var(--willow-soft);display:grid;place-items:center;position:relative}
+.thumb svg{width:58%;height:auto}
+.thumb .dur{position:absolute;right:8px;bottom:8px;font-family:var(--f-num);font-size:11px;background:var(--surface);color:var(--ink);padding:1px 6px;border-radius:6px}
+.thumb .lk{position:absolute;left:8px;top:8px}
+.lesson .body{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1;width:100%}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:6px;background:var(--paper);color:var(--muted)}
+.tag.role{background:var(--willow-soft);color:var(--willow)}
+.lesson h3{font-size:14px}
+.lesson .foot{font-size:12px;color:var(--muted);margin-top:auto}
+.row3{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+.live{background:var(--willow);color:var(--surface);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.live .when{font-family:var(--f-num);font-size:13px;opacity:.85}
+.live h3{font-size:19px;font-weight:900}
+.live p{font-size:14px;opacity:.92}
+.live .btn{background:var(--surface);color:var(--willow);align-self:flex-start}
+.files{list-style:none;padding:0;margin:0;display:grid}
+.file{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
+.file:first-child{border-top:0}
+.ext{width:40px;height:36px;border-radius:8px;display:grid;place-items:center;font-family:var(--f-num);font-size:10px;font-weight:500;background:var(--willow-soft);color:var(--willow)}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{font-weight:500;color:var(--muted);text-align:left;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td.num{text-align:right}
+.scroll{overflow-x:auto}
+
+/* 关卡页 */
+.lv-head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.goal{font-size:14px;color:var(--muted);margin-top:6px;max-width:62ch}
+.rule{font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;max-width:380px}
+.rule b{color:var(--willow)}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:12px}
+.crumb a{text-decoration:none}
+.crumb a:hover{color:var(--ink)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.step{display:flex;gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);min-width:0}
+.step .k{width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;font-weight:900;background:var(--willow-soft);color:var(--willow)}
+.step b{display:block;font-size:14px}
+.step small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step>div{min-width:0}
+.step[aria-selected="true"]{border-color:var(--bauhinia);box-shadow:0 0 0 3px var(--bauhinia-soft)}
+.step.done .k{background:var(--willow);color:var(--surface)}
+.step.lock{opacity:.55}
+.lv-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+.board{background:var(--board);border:1px solid var(--line);border-radius:12px;aspect-ratio:16/9;max-width:100%;position:relative;overflow:hidden}
+.board svg{width:100%;height:100%;display:block}
+.board .sk{fill:none;stroke:var(--chalk);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.board .hl{fill:none;stroke:var(--bauhinia);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.board .gw{fill:none;stroke:var(--willow);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.board .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw var(--dur,1s) ease-out forwards;animation-delay:var(--delay,0s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.board text{fill:var(--chalk);font-family:var(--f-body);font-size:15px}
+.board text.hlt{fill:var(--bauhinia);font-weight:700}
+.subtitle{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:min(92%,640px);text-align:center;background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;box-shadow:var(--shadow)}
+.player{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:140px;height:6px;background:var(--line);border-radius:6px;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--willow);border-radius:6px}
+.scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.scene{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;text-align:left;font-size:13px;min-width:0}
+.scene b{display:block;font-family:var(--f-num);font-size:11px;color:var(--muted);font-weight:500}
+.scene[aria-current="true"]{border-color:var(--willow);background:var(--willow-soft)}
+.screen{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.chrome{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--paper);font-size:12px;color:var(--muted)}
+.chrome i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.app{display:grid;grid-template-columns:170px minmax(0,1fr);min-height:280px;font-size:13px}
+.side{border-right:1px solid var(--line);padding:10px 0;background:var(--paper)}
+.side div{padding:6px 14px;color:var(--muted)}
+.side .grp{color:var(--ink);font-weight:700;margin-top:6px}
+.side .on{color:var(--willow);background:var(--willow-soft);font-weight:700}
+.amain{padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fb{border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12px;background:var(--surface);white-space:nowrap}
+.fb.pri{background:var(--willow);color:var(--surface);border-color:var(--willow)}
+.ftbl{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.ftr{display:grid;grid-template-columns:1.1fr 1fr 1.4fr .9fr;gap:8px;padding:7px 10px;border-top:1px solid var(--line)}
+.ftr:first-child{border-top:0;background:var(--paper);color:var(--muted)}
+.ftr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fform{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fform label{font-size:12px;color:var(--muted)}
+.fform .f{border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:var(--paper);font-size:12px;min-height:26px}
+.ring{outline:3px solid var(--bauhinia);outline-offset:2px;border-radius:6px}
+.chapters{display:grid;gap:6px;margin-top:12px}
+.chap{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px}
+.chap b{font-family:var(--f-num);font-size:12px;color:var(--muted);font-weight:500}
+.chap[aria-current="true"]{border-color:var(--bauhinia);background:var(--bauhinia-soft)}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checklist li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;font-size:14px;padding:10px 12px;background:var(--paper);border-radius:10px}
+.checklist .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-num);font-size:12px;background:var(--willow-soft);color:var(--willow)}
+.verify{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:14px;border-radius:12px;border:1px dashed var(--line)}
+.verify .ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--idle-soft);color:var(--idle);font-weight:900}
+.verify.passed{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.verify.passed .ico{background:var(--ok);color:var(--surface)}
+.verify code{font-family:var(--f-num);font-size:12px;background:var(--surface);padding:1px 6px;border-radius:5px}
+.q{padding:14px;border-radius:12px;background:var(--paper);display:grid;gap:8px}
+.q .t{font-weight:700}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px}
+.opt:hover{border-color:var(--willow)}
+.opt .l{font-family:var(--f-num);color:var(--muted);flex:none}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.explain{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--surface);border-left:3px solid var(--willow)}
+.done-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 18px;border-radius:14px;background:var(--willow);color:var(--surface);margin-top:16px}
+.done-card .big{font-family:var(--f-num);font-size:26px}
+.done-card .btn{background:var(--surface);color:var(--willow)}
+.lockmsg{padding:18px;border-radius:12px;background:var(--paper);font-size:14px;display:grid;gap:10px;justify-items:start}
+.points{margin:0;padding-left:18px;display:grid;gap:8px;font-size:14px}
+.qa{display:grid;gap:12px;font-size:13px}
+.qa .a{background:var(--paper);border-radius:10px;padding:8px 10px;margin-top:4px}
+.ask{display:flex;gap:8px;margin-top:12px}
+.ask input,textarea,.inp{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink)}
+textarea{width:100%;min-height:90px;resize:vertical}
+
+/* 其他页 */
+.page-head{margin-bottom:18px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.page-head p{color:var(--muted);font-size:14px;margin-top:4px;max-width:64ch}
+.filters{display:grid;gap:8px;margin-bottom:16px}
+.filters .row span{font-size:12px;color:var(--muted);min-width:36px}
+.paths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.lvlist{list-style:none;margin:12px 0 0;padding:0;display:grid}
+.lvlist button{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:8px 4px;border:0;border-top:1px solid var(--line);background:none;font-size:14px}
+.lvlist li:first-child button{border-top:0}
+.lvlist .ix{font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.weeks{display:flex;gap:4px}
+.weeks i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.weeks i.ok{background:var(--ok)}.weeks i.warn{background:var(--warn)}.weeks i.idle{background:var(--idle-soft);border:1px solid var(--line)}
+.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.badge{border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center;display:grid;gap:6px;justify-items:center;background:var(--surface)}
+.badge .b{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:18px;background:var(--idle-soft);color:var(--idle)}
+.badge.on .b{background:var(--willow);color:var(--surface)}
+.kv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kv div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0}
+.kv b{display:block;font-family:var(--f-num);font-size:22px;color:var(--willow)}
+.kv span{font-size:12px;color:var(--muted)}
+
+/* 提示与引导条 */
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--tour);color:var(--tour-ink);padding:8px 16px;border-radius:999px;font-size:13px;z-index:80;max-width:calc(100% - 32px);text-align:center}
+.tourbar{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;width:min(760px,calc(100% - 32px));background:var(--tour);color:var(--tour-ink);border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.tourbar .s{font-family:var(--f-num);font-size:12px;opacity:.7;white-space:nowrap}
+.tourbar .x{font-size:13.5px;line-height:1.55}
+.tourbar .nav{display:flex;gap:6px}
+.tourbar button{border:0;border-radius:8px;padding:6px 12px;font-size:13px;background:rgba(127,127,127,.25);color:inherit}
+.tourbar button.pri{background:var(--bauhinia);color:var(--surface);font-weight:700}
+
+@media (max-width:960px){
+  .hero-grid,.row3,.lv-layout{grid-template-columns:minmax(0,1fr)}
+  .lessons{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .badges,.kv{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:720px){
+  nav.main,.idbox .who{display:none}
+  .top .wrap{gap:10px}
+  .brand{flex:1;min-width:0}
+  .brand span{overflow:hidden;text-overflow:ellipsis}
+  .avatar,.tourbtn .tx{display:none}
+  .idbox select{max-width:124px}
+  main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .tabbar a{text-decoration:none;text-align:center;font-size:11px;color:var(--muted);display:grid;justify-items:center;gap:2px;padding:4px 0}
+  .tabbar a svg{width:22px;height:22px}
+  .tabbar a[aria-current="page"]{color:var(--willow);font-weight:700}
+  .tourbar{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .tourbar{grid-template-columns:minmax(0,1fr)}
+  .paths{grid-template-columns:minmax(0,1fr)}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .scenes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .ftr{grid-template-columns:1fr 1fr 1fr}
+  .ftr span:nth-child(3){display:none}
+  .fform{grid-template-columns:minmax(0,1fr)}
+  .done-card,.next{grid-template-columns:minmax(0,1fr)}
+  h1{font-size:22px}
+  .subtitle{font-size:12px}
+}
+@media (max-width:480px){.lessons,.badges{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.board .draw{animation:none;stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="C-Life 学前大课堂首页">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="8" fill="var(--willow)"/><path d="M8 20c3-7 7-10 14-11-3 3-5 7-6 12" fill="none" stroke="var(--surface)" stroke-width="2.4" stroke-linecap="round"/><circle cx="21.5" cy="9.5" r="2.2" fill="var(--bauhinia)"/></svg>
+      <span>C-Life 学前大课堂<small>柳州专区</small></span>
+    </a>
+    <nav class="main" aria-label="主导航" id="nav"></nav>
+    <div class="idbox">
+      <label for="roleSel" class="who muted small">当前身份</label>
+      <select id="roleSel" aria-label="切换演示身份"></select>
+      <span class="avatar" id="avatar" aria-hidden="true">李</span>
+      <button class="tourbtn" id="tourBtn" type="button" aria-label="引导演示">▷<span class="tx"> 引导演示</span></button>
+    </div>
+  </div>
+</header>
+<div class="protoband"><div class="wrap"><span>原型 · 园所、人员与数据均为示例</span><button type="button" id="resetBtn">重置演示进度</button></div></div>
+
+<main class="wrap" id="view" tabindex="-1"></main>
+
+<nav class="tabbar" aria-label="底部导航" id="tabbar"></nav>
+<div class="tourbar" id="tourbar" hidden></div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+/* ════════════════ 数据 ════════════════ */
+const ORG='柳北区示例幼儿园';
+const ROLES={
+  nurse:{label:'保健医 · 李老师',short:'李',path:'nurse'},
+  teacher:{label:'班级教师 · 王老师',short:'王',path:'teacher'},
+  care:{label:'保育员 · 陈老师',short:'陈',path:'care'},
+  it:{label:'信息接口人 · 周老师',short:'周',path:'it'},
+  director:{label:'园长 · 赵园长',short:'赵',path:'director'}
+};
+const PATHN={nurse:'保健医',teacher:'班级教师',care:'保育员',it:'信息接口人',director:'园长'};
+const L=(t,scene,dur,goal,menu,btn,steps,event,qs,extra)=>Object.assign({t,scene,dur,goal,menu,btn,steps,event,qs},extra||{});
+const Q=(t,o,jump)=>({t,o,jump:jump||'jiang'});
+const PATHS={
+ nurse:[
+  L('三端登录','账号','5′10″','能在电脑、小程序、PAD 三端登录本园账号。',['平台登录'],'登录',['电脑浏览器打开平台地址，用手机号和验证码登录','微信搜索「柳州智投」小程序，扫码登录','PAD 安装「教育云pad」应用并登录'],'三端各登录 1 次',
+   [Q('新入职保健医第一次登录平台，用什么方式？',[['本人手机号＋验证码',1,'正确。三端都用本人手机号和验证码登录，账号由园所开通。'],['园所统一的公共账号',0,'不使用公共账号。每人一个账号，权限按岗位配置。'],['身份证号＋密码',0,'平台不用身份证号登录。']])]),
+  L('班级与幼儿信息','基础数据','6′00″','能核对和补充班级、幼儿的基础信息。',['平台管理','班级管理'],'＋ 添加班级',['平台管理 → 基础信息管理 → 班级管理，点击「添加班级」','人员管理 → 幼儿管理，点击「添加幼儿」','填写带红色 * 号的字段并保存'],'新增或核对 1 个班级',
+   [Q('添加幼儿时，哪些字段必须填写？',[['带红色 * 号的字段',1,'正确。必填字段带红色 * 号，其余可后续补充。'],['全部字段',0,'不必一次填完，非必填项可以后续补充。'],['只填姓名',0,'姓名之外，证件、出生日期、监护人等带 * 号的字段也必须填写。']])]),
+  L('出勤调整','出勤与请假','5′30″','能批量调整当日出勤，并修改个别错误记录。',['园务管理','幼儿出勤'],'批量管理',['小程序：应用 → 出勤花名册 → 打开本班','右上角「批量管理」→ 全选 → 调整选中 → 已入园 → 正常入园','电脑端：月度数据中找到错误记录，展开后修改状态'],'完成 1 次批量调整',
+   [Q('当天多名幼儿漏刷脸，最快的处理办法是？',[['小程序批量管理，全选后调整为已入园',1,'正确。批量管理一次完成，个别情况再单独修改。'],['逐个打电话核实后手写登记',0,'手写登记还要再补录。先批量调整，再在月度数据里修改个别记录。'],['等第二天统一处理',0,'当日出勤会影响因病缺勤统计，应当天处理。']],'kan')]),
+  L('请假登记','出勤与请假','4′20″','能代家长登记请假，并撤销已取消的请假。',['园务管理','幼儿请假'],'请假登记',['应用 → 幼儿请假 → 请假登记','选择幼儿，填写请假信息并提交','取消请假：请假记录中找到该条，点击「撤销」'],'提交并撤销 1 条请假',
+   [Q('请假提交后，会自动同步到哪里？',[['当日出勤状态',1,'正确。请假记录自动体现在当日出勤，月度统计支持伙食退费。'],['健康档案',0,'请假不进健康档案。病假会进入因病缺勤统计。'],['不会同步，需要手动改出勤',0,'不需要手动改，系统自动同步。']])]),
+  L('AI 语音晨检','晨午检','5′20″','能用语音快速记录晨检异常，并核对 AI 识别结果。',['保育与安全','晨检记录'],'AI 语音晨检速记',['应用 → 晨检记录 → AI 语音晨检速记','按住说话，逐个说出异常幼儿与症状','一键 AI 识别，核对姓名与症状后确认提交'],'语音录入 1 条晨检异常',
+   [Q('AI 识别出晨检异常后，下一步是？',[['保健医核对姓名与症状，确认后提交',1,'正确。AI 只做整理，保健医核对确认后才归档。'],['系统自动提交，不用处理',0,'不会自动提交。识别结果必须经保健医确认。'],['截图发到班级群',0,'晨检异常不发班级群。确认提交后，园长工作台和班级教师端可以看到。']])]),
+  L('全日观察','健康检查','8′00″','能把晨检之后发现的异常登记在全日观察里，并转入疾病管理，追踪到复课。',['保育与安全','健康检查','全日观察'],'＋ 新增',[],'全日观察·登记疾病 已保存',[],{featured:'obs'}),
+  L('缺勤预警','疾病防控','6′40″','能从因病缺勤数据中发现聚集苗头，并启动班级排查。',['保育与安全','因病缺勤'],'查看预警',['家长在小程序请病假，并上报症状','保健医查看各班病假占比与聚集预警','确认后启动班级健康排查，记录排查结果','参考出勤预警智能体的处置建议，由保健医决定措施'],'标记处理 1 次聚集预警',
+   [Q('中二班连续两天各有 2 名幼儿请病假，症状都是发热、咽痛。平台出现聚集预警，保健医首先做什么？',[['报告园长，启动该班加强晨检与排查',1,'正确。预警是提示，由保健医核实后报告园长并启动排查。'],['等第三天再看',0,'聚集苗头要尽早处置，等待会错过控制时机。'],['直接让全班停课',0,'是否停课由园所按卫生保健规定决定，平台只提供数据与建议。']]),
+    Q('出勤预警智能体给出的处置建议，应该怎么用？',[['作为参考，由保健医结合实际决定',1,'正确。智能体给出依据与建议，决定权在保健医和园长。'],['照单执行，不需要判断',0,'建议需要结合园所实际判断，不能直接照搬。']])]),
+  L('疾病到复课','疾病管理','6′10″','能追踪疾病记录，并在幼儿康复后完成复课登记。',['保育与安全','疾病管理'],'追踪',['保育与安全 → 疾病管理 → 幼儿疾病记录','在操作栏点击「追踪」，填写追踪记录','幼儿康复后点击「康复」，填写康复信息（支持批量）'],'完成 1 条追踪与康复',
+   [Q('幼儿康复返园，疾病记录怎么处理？',[['在同一条记录上点「康复」并填写信息',1,'正确。追踪、康复、复课在同一条记录上完成，看板自动更新。'],['删除这条疾病记录',0,'不要删除。记录保留，用于本学期疾病统计。'],['新建一条复课记录',0,'不必新建，在原记录上点「康复」即可。']])]),
+  L('健康档案','健康档案','6′30″','能批量导入并补充幼儿的过敏史、既往病史与接种信息。',['保育与安全','幼儿健康档案'],'导入',['幼儿健康档案 → 筛选班级 → 导入 → 下载模板','按模板填写过敏史、既往病史、接种信息','上传 Excel 确认导入；个别幼儿可点「编辑」补充'],'批量导入 2 名幼儿档案',
+   [Q('幼儿的食物过敏史，录入后有什么用？',[['食谱自动匹配并提示过敏风险',1,'正确。过敏原清单与食谱关联，发布前会提示涉及的幼儿。'],['只用于存档',0,'不只是存档。过敏信息会参与食谱检查。'],['发给家长确认后删除',0,'过敏史要长期保留，换班、升班不丢失。']])]),
+  L('体弱儿专案','健康档案','6′10″','能为体弱儿、肥胖儿建立专案并持续记录。',['保育与安全','体弱儿专案管理'],'＋ 新增',['体弱儿专案管理 → 新增，填写基本信息与体征','在学生列表点「监测记录」，新增观察','肥胖儿专案 → 新增 → 跟踪录入身高体重'],'新建 1 个专案并录 1 次监测',
+   [Q('肥胖儿专案建立后，日常要做什么？',[['定期跟踪录入身高体重',1,'正确。跟踪数据形成变化趋势，便于调整膳食与运动安排。'],['建立后不用再管',0,'专案需要持续跟踪，否则无法判断干预效果。']])]),
+  L('体检数据','体检','6′50″','能用 AI 导入体检报告，并批量导入身高体重、视力数据。',['保育与安全','幼儿体检'],'新建体检记录',['幼儿体检 → 新建体检记录，选择学期与归档时间','选择「AI 导入报告模板」，识别体检项目和字段','录入或导入数据保存；身高体重、视力同样可批量导入'],'AI 导入 1 份体检报告',
+   [Q('体检机构的报告格式与平台不一致，怎么导入？',[['用 AI 导入报告模板识别项目和字段',1,'正确。AI 识别后由保健医核对字段对应关系，再导入。'],['逐项手工录入',0,'可以手工录入，但 AI 导入模板能省去大部分录入工作。']])]),
+  L('带量食谱','膳食','7′30″','能基于本园菜品库生成周食谱，并完成营养调优。',['膳食营养','智能膳食'],'一键生成',['智能膳食 → 基于本园菜品库一键生成周食谱','查看营养分析，一键营养调优','核对过敏幼儿提示后发布'],'生成 1 周食谱并调优 1 次',
+   [Q('食谱发布前，最后要核对什么？',[['过敏幼儿提示与营养达标情况',1,'正确。发布前确认过敏提示已处理、营养达标。'],['菜名是否好听',0,'菜名不是重点，过敏与营养才是发布前的必查项。']])])
+ ],
+ teacher:[
+  L('班级工作台','账号','4′40″','能在 PAD 和小程序进入本班工作台。',['班级工作台'],'登录',['PAD 打开「教育云pad」，用手机号登录','小程序进入本班工作台，查看今日待办'],'PAD 与小程序各登录 1 次',
+   [Q('班级教师主要在哪些终端使用平台？',[['PAD 与小程序',1,'正确。课中用 PAD，课后与家园沟通用小程序。'],['只能用电脑',0,'教师端以 PAD 和小程序为主，电脑端主要给保健医和园长。']])]),
+  L('出勤与晨检配合','出勤与请假','5′00″','能确认本班出勤，并配合保健医完成晨检。',['园务管理','幼儿出勤'],'确认出勤',['小程序打开本班出勤花名册','核对刷脸入园结果，补正漏刷','查看保健医推送的晨检异常，留意相关幼儿'],'完成 1 次本班出勤确认',
+   [Q('保健医推送了本班一名幼儿的晨检异常，教师要做什么？',[['在一日活动中留意该幼儿，有变化告知保健医',1,'正确。班级教师负责一日中的观察，发现变化及时告知保健医。'],['不用处理，那是保健医的事',0,'晨检之后的观察主要靠班级教师。']])]),
+  L('教研工坊 · 共创','教研','7′50″','能和 AI 一起梳理课案思路，形成课案初稿。',['教研工坊'],'新建课案',['教研工坊 → 新建课案，写下活动主题与目标','与 AI 一问一答，补充幼儿经验与活动环节','生成课案初稿，逐段修改'],'完成 1 篇课案初稿',
+   [Q('AI 生成的课案初稿，应该怎样使用？',[['教师逐段修改，结合本班实际定稿',1,'正确。AI 帮助梳理思路，课案由教师定稿。'],['直接拿去上课',0,'初稿需要教师结合本班幼儿实际修改。']]),
+    Q('和 AI 共创时，教师先要给出什么？',[['活动主题、目标和本班幼儿已有经验',1,'正确。信息越具体，初稿越贴合本班。'],['什么都不用给',0,'不提供背景信息，生成的内容会很空泛。']])]),
+  L('教研工坊 · 归档','教研','5′20″','能把定稿课案归入园本课程库。',['教研工坊','我的课案'],'归档',['我的课案 → 打开定稿课案','选择领域与年龄段，归入园本课程库','在教研活动中引用本课案'],'归档 1 篇课案',
+   [Q('课案归入园本课程库后，有什么用处？',[['园内其他教师可以检索、引用和改编',1,'正确。优质课案沉淀为园本资源。'],['只有自己能看',0,'归档后全园可见，便于教研共享。']])]),
+  L('一体机排课','课中互动','5′10″','能在一体机大屏排好一周教学活动，并调用本园资源。',['一体机','排课'],'排课',['一体机打开排课，安排本周教学活动','上传园所 PPT、图片、视频等资源','把高拍仪等设备编排进活动环节'],'排 1 周教学活动',
+   [Q('一体机里的教学资源从哪里来？',[['园所上传的 PPT、图片、视频，以及平台资源',1,'正确。支持上传园所资源并直接调用。'],['只能用平台自带资源',0,'园所自有资源也可以上传使用。']])]),
+  L('高拍仪作品','课中互动','4′30″','能用高拍仪采集幼儿作品，并分享给家长。',['一体机','高拍仪'],'采集',['课中打开高拍仪，拍摄幼儿作品','作品自动保存至课堂作品库与幼儿相册','选择作品分享给家长'],'上传 1 幅幼儿作品',
+   [Q('高拍仪拍下的作品保存在哪里？',[['课堂作品库与幼儿相册',1,'正确。可以随时分享给家长。'],['只在一体机本地',0,'作品会自动保存到平台，不只存在本地。']])]),
+  L('观察记录审定','观察记录','5′40″','能用口述快速记下观察，由 AI 整理，教师审定后保存。',['观察记录','随手记'],'AI 闪记',['随手记 → AI 闪记，口述观察到的情境','AI 整理成文字记录','教师逐句核对、修改，审定后保存'],'审定 1 篇随手记',
+   [Q('AI 整理好的观察记录，可以直接保存吗？',[['不可以，教师核对修改、审定后才保存',1,'正确。观察与分析由教师完成，AI 只负责整理文字。'],['可以，AI 整理得很准确',0,'不能直接保存。记录必须经教师审定。']])]),
+  L('国体测评','数智体能','6′00″','能按流程组织本班国体测评。',['数智体能','测评'],'开始测评',['数智体能 → 测评，选择本班与测评项目','按项目组织幼儿测试，设备自动记录成绩','测评结束后查看班级结果'],'查看 1 次本班测评结果',
+   [Q('第一次国体测评的主要目的是什么？',[['熟悉流程，建立班级初始体质档案',1,'正确。初测建立基线，后续按薄弱项安排活动。'],['给幼儿排名',0,'测评结果不用于给幼儿排名。']])]),
+  L('薄弱项课案','数智体能','6′20″','能按班级薄弱项匹配体能课案。',['数智体能','课案'],'匹配课案',['查看班级测评结果中的薄弱项','系统推荐对应的游戏化体能课案','选定课案并排入本周活动'],'选定 1 节体能课案',
+   [Q('班级平衡能力偏弱，课案怎么选？',[['选系统针对平衡能力推荐的游戏化课案',1,'正确。课案库按运动素质、年龄、器械场地筛选。'],['随便选一节',0,'按薄弱项匹配，效果更明确。']])]),
+  L('边学边带练','数智体能','5′50″','能在课前预习课案动作示范和教学语言。',['数智体能','AI 私教'],'预习',['打开课案的动作示范动画','学习教学语言范例','带练时对照示范组织幼儿'],'完成 1 节课案预习',
+   [Q('课前预习课案，重点看什么？',[['动作示范与教学语言范例',1,'正确。教师先掌握动作要领，再组织幼儿练习。'],['只看课案标题',0,'需要看动作示范和教学语言，才能带好练习。']])])
+ ],
+ care:[
+  L('睡眠垫铺设','睡眠健康','3′50″','能正确铺设睡眠垫并检查状态灯。',['睡眠健康'],'设备状态',['午睡前按床位铺设睡眠垫与垫套','检查控制盒指示灯是否为绿色','异常时记录床位，告知信息接口人'],'完成 1 次铺设检查',
+   [Q('控制盒指示灯是红色，先做什么？',[['记录床位，告知信息接口人',1,'正确。先记录，再由信息接口人判断是电池还是网络问题。'],['自己拆开控制盒',0,'不要拆开设备，交给信息接口人处理。']])]),
+  L('电池与收纳','睡眠健康','3′10″','能按时更换电池并收纳设备。',['睡眠健康'],'电池提醒',['查看平台的电池电量提醒','按提醒更换 5 号电池','午睡后清洁并收纳睡眠垫'],'完成 1 次电池更换',
+   [Q('什么时候更换睡眠垫电池？',[['按平台电量提醒更换',1,'正确。平台会按电量提示需要更换的床位。'],['每天都换',0,'没有必要每天更换，按提醒更换即可。']])]),
+  L('睡眠数据','睡眠健康','3′40″','能查看本班午睡情况。',['睡眠健康','本班午睡'],'查看',['小程序打开本班午睡','查看入睡与离床情况','有异常及时告知班级教师'],'查看 1 次本班午睡',
+   [Q('发现一名幼儿午睡中频繁离床，怎么办？',[['告知班级教师，共同留意',1,'正确。保育员与教师共同观察，有健康问题告知保健医。'],['不用管',0,'异常情况需要告知班级教师。']])]),
+  L('出勤配合','出勤与请假','3′20″','能协助教师核对本班出勤。',['园务管理','幼儿出勤'],'核对',['打开本班出勤花名册','协助核对未刷脸幼儿','告知教师补正'],'协助核对 1 次出勤',
+   [Q('保育员发现出勤与实际不符，应该？',[['告知班级教师补正',1,'正确。出勤由班级教师确认。'],['不用处理',0,'出勤影响缺勤统计，需要告知教师。']])])
+ ],
+ it:[
+  L('设备在线检查','设备','4′40″','能查看全园设备在线情况，判断离线原因。',['设备管理'],'在线状态',['设备管理 → 查看各类设备在线数量','筛选连续离线设备','按电源、网络、电池顺序排查'],'完成 1 次在线检查',
+   [Q('一台额温枪连续两天离线，先排查什么？',[['电源与电量，再看网络',1,'正确。按电源、网络、设备本身的顺序排查。'],['直接报修',0,'先做简单排查，多数离线是电量或网络问题。']])]),
+  L('报修与巡检','设备','3′30″','能提交报修，并填写日常巡检记录。',['设备管理','报修'],'报修',['排查后仍未恢复，提交报修工单','填写设备、位置与现象','按周填写设备日常巡检记录'],'提交 1 张报修工单',
+   [Q('报修时最需要写清楚的是？',[['设备、位置和故障现象',1,'正确。信息完整，运维才能尽快处理。'],['只写「坏了」',0,'信息不足会延误处理。']])])
+ ],
+ director:[
+  L('工作台总览','园长工作台','4′50″','能登录园长工作台，读懂首页的风险、待办与全园概况。',['园长工作台','首页'],'刷新',['电脑端登录园平台，进入园长工作台','先看风险与待办，按紧急程度从上往下处理','再看今日全园出勤、晨检、膳食概况'],'打开工作台 1 次',
+   [Q('每天打开园长工作台，先看哪一块？',[['风险与待办',1,'正确。告警和待办按紧急程度排好，先处理需要园长决定的事项。'],['全园学习排名',0,'工作台不做排名。先看风险与待办。'],['上月统计报表',0,'日常先看当日风险与待办，月度数据在园务会上使用。']])]),
+  L('风险与待办处置','园长工作台','6′10″','能查看告警依据，把待办指派给对应岗位并设定回执时间。',['园长工作台','风险与待办'],'指派',['在待办列表中点开一条告警，查看触发依据','选择处理人（如保健医）并写明要求','设定回执时间，等待处理结果'],'指派 1 条待办',
+   [Q('工作台出现中二班因病缺勤聚集预警，园长怎么处理？',[['指派保健医核实，设定当天回执',1,'正确。由保健医核实并启动排查，园长根据回执决定是否加强晨检、暂停混班。'],['先放着，月底一起看',0,'聚集预警需要当天处理，拖延会错过控制时机。'],['直接通知全体家长',0,'先由保健医核实情况，再决定是否以及如何告知家长。']]),
+    Q('指派待办时，为什么要设定回执时间？',[['便于跟进进度，到期未回执会提醒',1,'正确。回执让事项有始有终，不靠人工催问。'],['用于考核教师',0,'回执用于跟进事项，不作为考核教师的依据。']])]),
+  L('全园指标','园长工作台','5′40″','能读懂全园出勤、因病缺勤、晨检覆盖、食谱发布等指标，找出需要关注的班级。',['园长工作台','全园指标'],'按班级对比',['打开全园指标，查看本周出勤率、因病缺勤、晨检覆盖、食谱发布','按班级对比，找出数值异常的班级','带着问题在园务会上与班级沟通'],'完成 1 次班级对比',
+   [Q('某班本周因病缺勤明显高于其他班，园长下一步做什么？',[['与保健医、班级教师一起查看原因',1,'正确。指标用于发现问题，再由相关岗位一起找原因。'],['在全园通报该班',0,'指标用于园内改进，不用于通报或排名。'],['不用理会',0,'异常值需要关注，可能是疾病苗头，也可能是记录问题。']])]),
+  L('回执与复盘','园长工作台','5′20″','能查看待办回执，对已完成事项写下复盘结论，沉淀本园做法。',['园长工作台','业务回执'],'写复盘',['查看已指派事项的处理回执','对已完成事项写一句复盘结论','把有效做法收入本园做法库'],'完成 1 条复盘',
+   [Q('一次疱疹性咽峡炎聚集处置完成后，复盘最重要的是什么？',[['记下哪些做法有效，下次照着做',1,'正确。复盘的价值在于形成本园可复用的做法。'],['写一份长篇总结报上级',0,'复盘服务本园改进，一句话结论加有效做法就够用。']])]),
+  L('读体检卡','应用体检','5′00″','能读懂每周的本园应用体检，为需关注项安排补训。',['园长工作台','本园应用体检'],'生成补训通知',['每周一查看本园应用体检的 12 项结果','对需关注项查看推荐关卡与对应岗位','生成补训通知，安排在午睡时段，由种子教师陪练'],'生成 1 次补训通知',
+   [Q('本园应用体检的结果，可以作为教师考核的依据吗？',[['不可以，只用于本园改进与补训安排',1,'正确。体检只看平台使用情况，不评价教师，也不做园所排名。'],['可以，分数越高越好',0,'体检不是评分工具，不能作为考核依据。']]),
+    Q('「疾病管理」连续两周需关注，园长怎么安排？',[['给保健医推送第 8 关，并查看未闭环记录',1,'正确。先补学对应关卡，再一起处理未写康复结论的记录。'],['要求全园教师重学所有关卡',0,'补训要对准岗位和问题，不必全员重学。']])]),
+  L('数据与家长沟通','数据与隐私','5′30″','能按规定组织家长告知与同意，管好各岗位账号权限，回答家长关于数据用途的询问。',['园务管理','账号与权限'],'核对权限',['家长端开通前发放告知书，收集监护人同意','按岗位核对账号权限，只开通工作需要的范围','家长询问数据用途时，按告知书说明采集类别、用途与保护措施'],'核对 1 次岗位权限',
+   [Q('处理不满十四周岁幼儿的个人信息，园所首先要做到什么？',[['取得监护人同意',1,'正确。家长端开通前发放告知书并取得监护人同意。'],['只要园长同意即可',0,'需要取得幼儿父母或其他监护人的同意。'],['先用起来，之后再补',0,'应先告知并取得同意，再开通相关功能。']]),
+    Q('新入职的保育员需要开通哪些权限？',[['只开通保育员岗位需要的功能',1,'正确。按岗位最小权限配置，减少数据暴露。'],['和园长一样的全部权限',0,'权限按岗位配置，不给超出工作需要的范围。']])])
+ ]
+};
+/* 第 6 关（全日观察）的完整内容 */
+const OBS={
+  scenes:[
+   {t:'0:00',end:25,name:'晨检之后',subs:['晨检在入园时做完，但一天里还会出现新的异常。','午睡后发热、户外后咳嗽，都发生在晨检之后。'],
+    draw:[['sk','M120 80a70 70 0 1 0 0.1 0'],['sk','M120 150V105M120 150l30 18'],['hl','M330 70v150a24 24 0 1 0 22 0V70a11 11 0 0 0-22 0z'],['hl','M341 190v-60'],['sk','M440 120h120M440 160h90M440 200h110']]},
+   {t:'0:25',end:52,name:'全日观察',subs:['全日观察是一日里发现异常的记录入口。','入园、午餐、午睡、离园，哪个时段发现，就在哪个时段记。'],
+    draw:[['sk','M70 190h500'],['sk','M110 180v20M250 180v20M390 180v20M530 180v20'],['hl','M390 150l-12-22h24z'],['gw','M360 230h60']],
+    labels:[[90,228,'入园'],[230,228,'午餐'],[370,262,'午睡后'],[510,228,'离园']]},
+   {t:'0:52',end:78,name:'登记疾病',subs:['需要追踪的情况，在记录上点「登记疾病」。','它会自动进入疾病管理，后面追踪到复课。'],
+    draw:[['sk','M60 140h110v60H60z'],['sk','M175 170h50'],['sk','M215 160l12 10-12 10'],['hl','M235 140h110v60H235z'],['sk','M350 170h50'],['sk','M390 160l12 10-12 10'],['sk','M410 140h90v60h-90z'],['gw','M510 170h30'],['gw','M532 160l12 10-12 10'],['gw','M555 150a20 20 0 1 0 0.1 0']],
+    labels:[[78,176,'全日观察'],[250,176,'登记疾病'],[426,176,'追踪'],[548,236,'复课']]},
+   {t:'1:18',end:100,name:'园长看到的',subs:['每一条登记，都汇总到园长工作台的疾病看板。','同一班级连续出现，看板会提示加强晨检和消毒。'],
+    draw:[['sk','M90 280V80M90 280h460'],['sk','M140 280v-40M210 280v-60M280 280v-50'],['hl','M350 280v-110M420 280v-150'],['hl','M330 110l20-20 20 20'],['sk','M490 280v-30']]}
+  ],
+  steps:['电脑端进入 保育与安全 → 健康检查 → 全日观察，点击右上角「新增」','选择观察幼儿与观察老师，填写检查信息，保存','在该记录右侧点击「登记疾病」，填写疾病信息与追踪情况，保存'],
+  chapters:[['0:00','进入 保育与安全 → 健康检查 → 全日观察','menu'],['0:24','点击右上角「新增」','btn'],['0:51','选择幼儿与老师，填写检查信息，保存','form'],['1:22','在记录上点「登记疾病」，填写追踪情况','disease']],
+  qs:[
+   Q('午睡后发现一名幼儿体温 37.8℃、精神差，应在平台哪里登记？',[['晨检记录',0,'晨检记录只覆盖入园时段，午睡后的异常补进晨检会让晨检数据失真。'],['全日观察 → 登记疾病',1,'正确。全日观察是一日中发现异常的入口，登记疾病后自动进入疾病管理。'],['幼儿请假',0,'请假由家长发起，用于记录缺勤原因，不记录园内发现的症状。'],['健康档案',0,'健康档案记录过敏史、既往病史与接种信息，不记录当日症状。']]),
+   Q('全日观察记录保存后，还需要追踪到复课。下一步点哪里？',[['新建一条疾病管理记录',0,'不用新建。在全日观察记录上点「登记疾病」，系统自动生成疾病管理记录。'],['在该记录上点「登记疾病」',1,'正确。登记疾病后，追踪、康复、复课都在同一条记录上完成。'],['导出 Excel 发给园长',0,'园长工作台的疾病看板直接汇总这些记录，不需要另行导出。']],'kan'),
+   Q('幼儿离园后，家长在小程序请病假并上报发热。保健医需要再记一条全日观察吗？',[['需要，补记全日观察',0,'不需要。全日观察记录的是园内发现的情况；家长上报的病假进入因病缺勤，第 7 关会讲。'],['不需要，病假已进入因病缺勤',1,'正确。家长端病假自动进入因病缺勤统计与聚集预警，不必重复记录。']])
+  ],
+  points:['晨检只记录入园时段。入园之后发现的异常，一律记在全日观察。','需要追踪的情况，在全日观察记录上点「登记疾病」，自动进入疾病管理。','追踪、康复、复课都在同一条记录上完成，不用另外补录。','园长工作台的疾病看板，汇总的就是这些记录。']
+};
+const PROBES=[
+  {k:'疾病管理',s:'warn',d:'5 条疾病记录未填写康复结论',w:['ok','warn','warn','warn'],go:['nurse',7],act:'推荐保健医第 8 关'},
+  {k:'工单',s:'warn',d:'本周 4 次咨询「批量调整出勤」',w:['ok','ok','warn','warn'],go:['nurse',2],act:'推荐保健医第 3 关'},
+  {k:'设备在线',s:'warn',d:'2 台额温枪连续离线 2 天',w:['ok','ok','ok','warn'],go:['local'],act:'去报修'},
+  {k:'体能',s:'idle',d:'本学期尚未完成国体测评',w:['idle','idle','idle','idle'],go:['teacher',7],act:'推荐教师第 8 关'},
+  {k:'晨午检',s:'ok',d:'本周 5 个在园日全部有记录',w:['warn','ok','ok','ok']},
+  {k:'膳食',s:'ok',d:'下周带量食谱已发布',w:['ok','ok','ok','ok']},
+  {k:'账号覆盖',s:'ok',d:'31 个岗位账号全部开通',w:['warn','ok','ok','ok']},
+  {k:'基础数据',s:'ok',d:'健康档案字段完整度 96%',w:['warn','warn','ok','ok']},
+  {k:'出勤与请假',s:'ok',d:'出勤当日确认率 98%',w:['ok','ok','ok','ok']},
+  {k:'睡眠',s:'ok',d:'睡眠垫本周 5 天数据回传',w:['ok','ok','ok','ok']},
+  {k:'教研',s:'ok',d:'本月课案 14 篇',w:['idle','ok','ok','ok']},
+  {k:'学习',s:'ok',d:'各岗位路径均已开学',w:['idle','ok','ok','ok']}
+];
+const STAFF={director:[2,'园长、副园长'],nurse:[1,'保健医'],teacher:[18,'班级教师'],care:[9,'保育员'],it:[1,'信息接口人']};
+const FILES=[
+  ['XLSX','幼儿健康档案批量导入模板','保健医','健康档案',412],['XLSX','身高体重批量导入模板','保健医','体检',305],
+  ['PDF','带量食谱样例（冬季四周）','保健医','膳食',268],['课案','学前体育游戏化课案 200 余节','班级教师','数智体能',197],
+  ['PDF','岗位操作手册 · 保健医','保健医','全部场景',233],['PDF','岗位操作手册 · 班级教师','班级教师','全部场景',214],
+  ['PDF','岗位操作手册 · 保育员','保育员','睡眠健康',151],['PDF','设备日常巡检记录表','信息接口人','设备',88],
+  ['DOCX','观察记录模板（五大领域）','班级教师','观察记录',176],['PDF','《托儿所幼儿园卫生保健工作规范》要点摘录','保健医','健康检查',129]
+];
+const LIVES=[
+  {when:'12 月 17 日 周四 14:30—15:30',t:'数智化幼儿园的建设路径：从两个保育场景起步',d:'晨检与膳食怎样在第一学期常态化运行，园长需要定下哪几项制度。特邀专家主讲，答疑 20 分钟。',who:'园长、保健医'},
+  {when:'1 月 14 日 周四 14:30—15:30',t:'试运行复盘：本园体检卡怎么读',d:'用示例园所的体检卡，讲清每一项看什么、需关注时怎么安排补训。',who:'园长、信息接口人'}
+];
+const REPLAYS=[['学前教育数智化转型的底层逻辑','58′','园长'],['试运行第一个月：园长工作台怎么看','41′','园长'],['晨检与因病缺勤：一条数据用几次','36′','保健医']];
+const DRILLS=[
+  {t:'连续三天，中二班出现 3 例疱疹性咽峡炎可疑症状。作为保健医，接下来你会做哪三件事？',role:'保健医',n:32,
+   best:'报告园长并启动加强晨检；患病班级暂停混班；在疾病管理里逐例追踪到复课。处置过程都记在同一条疾病记录上，复课时不用另行补录。',
+   others:[['鱼峰区示例幼儿园 · 保健医','先在疾病看板确认病例数和班级分布，再报告园长，当天下午对中二班做一次全日观察。'],['柳南区示例幼儿园 · 保健医','通知班级教师加强午睡后观察，玩具和餐具当天加做一次消毒。']]},
+  {t:'本班平衡能力测评偏弱。下周的户外活动，你会怎样调整？',role:'班级教师',n:21,
+   best:'从课案库选两节平衡类游戏化课案，排进周二、周四户外时段；课前看动作示范，带练时分组轮换。',others:[]}
+];
+
+/* ════════════════ 状态 ════════════════ */
+const KEY='clife-academy-v1';
+const FRESH=()=>({role:'nurse',prog:{nurse:5,teacher:2,care:1,it:0,director:2},credits:{nurse:5,teacher:2,care:1,it:0,director:2},lv:{},live:{},drill:{},tickets:[{id:'GD-1206',t:'额温枪离线（小一班）',s:'处理中'}],asked:[]});
+let ST=FRESH();
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.prog){const f=FRESH();ST=Object.assign(f,s,{prog:Object.assign(FRESH().prog,s.prog),credits:Object.assign(FRESH().credits,s.credits)});}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+function lvState(p,i){const k=p+'-'+i;return ST.lv[k]||(ST.lv[k]={seg:'jiang',zuo:false,right:[]});}
+const VIEW={seg:null,scene:1,chap:1,libRole:'全部',libScene:'全部',lesRole:'全部'};
+
+/* ════════════════ 工具 ════════════════ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,2400);}
+function myPath(){return ROLES[ST.role].path}
+function status(p,i){const d=ST.prog[p];return i<d?'done':(i===d?'current':'locked');}
+function sceneOf(p,i){const l=PATHS[p][i];return l.featured?OBS.scenes:l.steps.map((s,k)=>({t:'0:'+String(k*25).padStart(2,'0'),end:Math.round((k+1)/l.steps.length*100),name:'第 '+(k+1)+' 步',subs:[s,''],flow:k}));}
+function qsOf(p,i){const l=PATHS[p][i];return l.featured?OBS.qs:l.qs;}
+function stepsOf(p,i){const l=PATHS[p][i];return l.featured?OBS.steps:l.steps;}
+const SK={
+ health:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="12" width="40" height="46" rx="4"/><path d="M24 26h20M24 36h20M24 46h12"/><path d="M70 40h10l6-14 8 28 6-14h8"/></g><circle cx="102" cy="40" r="3" fill="var(--bauhinia)"/></svg>',
+ food:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round"><path d="M22 40a38 18 0 0 0 76 0z"/><path d="M40 30c0-8 6-8 6-16M58 30c0-8 6-8 6-16M76 30c0-8 6-8 6-16"/></g><circle cx="60" cy="48" r="3" fill="var(--bauhinia)"/></svg>',
+ sport:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="54" cy="14" r="6"/><path d="M54 20v20l-10 18M54 40l12 16M40 30l14-4 14 8"/><path d="M84 58h22"/></g><circle cx="95" cy="50" r="3" fill="var(--bauhinia)"/></svg>',
+ teach:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="10" width="64" height="40" rx="3"/><path d="M50 50v10M36 60h28M28 22h20M28 32h34"/><path d="M90 24l14 8-14 8z"/></g><circle cx="70" cy="22" r="3" fill="var(--bauhinia)"/></svg>',
+ sleep:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="36" width="76" height="14" rx="5"/><path d="M14 50v8M90 50v8"/><path d="M80 16a10 10 0 1 0 12 12 8 8 0 0 1-12-12z"/></g><circle cx="38" cy="43" r="3" fill="var(--bauhinia)"/></svg>',
+ dash:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="10" width="92" height="50" rx="4"/><path d="M26 48V36M40 48V28M54 48V32"/><path d="M70 24h24M70 34h18M70 44h22"/></g><circle cx="40" cy="24" r="3" fill="var(--bauhinia)"/></svg>',
+ device:'<svg viewBox="0 0 120 70" aria-hidden="true"><g fill="none" stroke="var(--willow)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M30 34a40 40 0 0 1 60 0M40 44a26 26 0 0 1 40 0M50 54a12 12 0 0 1 20 0"/></g><circle cx="60" cy="60" r="3" fill="var(--bauhinia)"/></svg>'
+};
+const SKMAP={'账号':'device','基础数据':'health','出勤与请假':'health','晨午检':'health','健康检查':'health','疾病防控':'health','疾病管理':'health','健康档案':'health','体检':'health','膳食':'food','教研':'teach','课中互动':'teach','观察记录':'teach','数智体能':'sport','睡眠健康':'sleep','设备':'device','园长工作台':'dash','应用体检':'dash','数据与隐私':'device'};
+const LEARN=[612,488,530,301,904,766,540,688,833,702,96,90,410,377,345,280,512,455,390,365,298,276,260,233,221,198,170,150];
+
+/* ════════════════ 路由 ════════════════ */
+const NAV=[['home','首页'],['paths','学习路径'],['lessons','场景微课'],['checkup','本园体检'],['live','园长大讲堂'],['drill','情景练兵'],['library','资料库'],['local','本地专区'],['me','我的']];
+const TABS=[['home','首页','M4 11l8-7 8 7v9H4z'],['paths','路径','M5 19c4-10 10-14 14-14M5 19h4M19 5v4'],['lessons','微课','M4 6h16v12H4zM10 9l5 3-5 3z'],['checkup','体检','M4 13h4l2-5 4 10 2-5h4'],['me','我的','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c1-4 4-6 8-6s7 2 8 6']];
+let ROUTE=(location.hash||'#home').slice(1)||'home';
+function parse(){const h=ROUTE;const m=h.match(/^level-(nurse|teacher|care|it|director)-(\d+)$/);if(m)return{v:'level',p:m[1],i:+m[2]-1};return{v:NAV.some(n=>n[0]===h)?h:'home'};}
+/* 路由以内存 ROUTE 为准，同步写入地址栏；地址栏不可写的环境（如 data: 预览）也能正常跳转 */
+function go(h){const same=ROUTE===h;ROUTE=h;if(!same){try{history.pushState(null,'','#'+h)}catch(e){}}render();if(!same)window.scrollTo(0,0);}
+function fromUrl(){const h=(location.hash||'#home').slice(1)||'home';if(h!==ROUTE){ROUTE=h;VIEW.seg=null;render();window.scrollTo(0,0);}}
+window.addEventListener('hashchange',fromUrl);window.addEventListener('popstate',fromUrl);
+
+function render(){
+  const r=parse();
+  $('#nav').innerHTML=NAV.map(([k,t])=>`<a href="#${k}" ${(r.v===k||(r.v==='level'&&k==='paths'))?'aria-current="page"':''}>${t}</a>`).join('');
+  $('#tabbar').innerHTML=TABS.map(([k,t,d])=>`<a href="#${k}" ${(r.v===k||(r.v==='level'&&k==='paths'))?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>${t}</a>`).join('');
+  $('#roleSel').innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}" ${k===ST.role?'selected':''}>${v.label}</option>`).join('');
+  $('#avatar').textContent=ROLES[ST.role].short;
+  const V={home:vHome,paths:vPaths,lessons:vLessons,checkup:vCheckup,live:vLive,drill:vDrill,library:vLibrary,local:vLocal,me:vMe,level:vLevel}[r.v];
+  $('#view').innerHTML=V(r);
+  after(r);
+}
+
+/* ════════════════ 视图 ════════════════ */
+function mapHTML(p){
+  return `<div class="map-wrap"><div class="map" role="list">${PATHS[p].map((l,i)=>{const s=status(p,i);
+    return `<button class="node ${s}" role="listitem" data-go="level-${p}-${i+1}" aria-label="第 ${i+1} 关 ${esc(l.t)}，${s==='done'?'已通过':s==='current'?'学习中':'未解锁'}"><span class="dot">${s==='done'?'✓':i+1}</span><span class="t">${esc(l.t)}</span></button>`}).join('')}</div></div>`;
+}
+function probeList(n){
+  return `<ul class="probes">${PROBES.slice(0,n).map(p=>`<li class="probe"><span class="sd ${p.s}"></span><div>${p.k}<small>${p.d}</small></div>${p.go?`<button class="link" data-probe="${PROBES.indexOf(p)}">${p.act}</button>`:'<span></span>'}</li>`).join('')}</ul>`;
+}
+function checkSum(){const c={ok:0,warn:0,idle:0};PROBES.forEach(p=>c[p.s]++);return `<div class="row" style="margin:10px 0 12px"><span class="pill ok">正常 ${c.ok}</span><span class="pill warn">需关注 ${c.warn}</span><span class="pill idle">未开始 ${c.idle}</span></div>`;}
+function lessonCard(p,i){
+  const l=PATHS[p][i],s=status(p,i),idx=Object.keys(PATHS).indexOf(p)*12+i;
+  return `<button class="lesson" data-go="level-${p}-${i+1}"><div class="thumb">${SK[SKMAP[l.scene]]||SK.health}<span class="dur">${l.dur}</span>${s==='done'?'<span class="lk pill ok">已学</span>':s==='current'?'<span class="lk pill hot">学习中</span>':''}</div><div class="body"><div class="tags"><span class="tag role">${PATHN[p]}</span><span class="tag">${l.scene}</span></div><h3>${esc(l.t==='全日观察'?'全日观察与疾病登记':l.t)}</h3><p class="foot num">${LEARN[idx%LEARN.length]} 人已学</p></div></button>`;
+}
+function liveCard(){const x=LIVES[0],on=ST.live[0];
+  return `<div class="live"><p class="eyebrow" style="color:inherit;opacity:.8">园长大讲堂 · 每月一场</p><p class="when">${x.when} · 午睡时段</p><h3>${x.t}</h3><p>${x.d}</p><button class="btn" data-live="0">${on?'已预约 · 开播前提醒':'预约直播'}</button></div>`;}
+
+function pathPanel(p){
+  const d=ST.prog[p],tot=PATHS[p].length,cur=Math.min(d,tot-1),l=PATHS[p][cur],fin=d>=tot;
+  const st=lvState(p,cur),segs=[['jiang','讲'],['kan','看'],['zuo','做'],['ce','测']];
+  const doneSeg=k=>k==='jiang'?st.seg!=='jiang'||st.zuo:k==='kan'?['zuo','ce'].includes(st.seg)||st.zuo:k==='zuo'?st.zuo:st.right.length>=qsOf(p,cur).length;
+  return `<div class="panel">
+      <div class="greet"><div><p class="eyebrow">${ORG} · ${ROLES[ST.role].label}</p><h1>${fin?PATHN[p]+'路径已完成':PATHN[p]+'路径 · 第 '+(d+1)+' 关'}</h1></div>
+        <div class="stats"><div class="stat"><b>${d}/${tot}</b><span>已通过关卡</span></div><div class="stat"><b>${ST.credits[p]}</b><span>学分</span></div><div class="stat"><b>${fin?1:0}/1</b><span>岗位徽章</span></div></div></div>
+      ${mapHTML(p)}
+      <div class="next">${fin?`<div><h3>全部 ${tot} 关已通过</h3><p class="muted small">可在「我的」查看徽章，春季学期可报名初级岗位认证。</p></div><a class="btn primary" href="#me">查看徽章</a>`:
+        `<div><p class="eyebrow">下一关 · ${l.dur}</p><h3>${esc(l.featured?'全日观察与疾病登记':l.t)}</h3><p class="muted small">${esc(l.goal)}</p><div class="segs4">${segs.map(([k,t])=>`<span class="seg4 ${doneSeg(k)?'on':''}">${t}</span>`).join('')}</div></div><button class="btn primary" data-go="level-${p}-${d+1}" id="continueBtn">继续学习</button>`}</div>
+    </div>`;
+}
+function vHome(){
+  if(ST.role==='director')return vDirectorHome();
+  const p=myPath();
+  const recs=PROBES.filter(x=>x.go&&x.go[0]===p).map(x=>`<li>${x.k}需关注 → <button class="link" data-probe="${PROBES.indexOf(x)}">${x.act}</button></li>`).join('');
+  const ls=[];Object.keys(PATHS).forEach(q=>PATHS[q].forEach((_,i)=>ls.push([q,i])));
+  const mine=ls.filter(([q])=>q===p).slice(0,4),other=ls.filter(([q])=>q!==p).slice(0,4);
+  return `
+  <div class="hero-grid">
+    ${pathPanel(p)}
+    <aside class="panel">
+      <div class="block-head" style="margin:0"><h2>本园应用体检</h2><span class="eyebrow num">12 月 14 日 · 第 3 周</span></div>
+      <p class="muted small">每周一自动生成，只看平台使用情况，不含幼儿个人数据。</p>
+      ${checkSum()}
+      ${probeList(5)}
+      ${recs?`<p class="small" style="margin-top:10px">推送给你的关卡：</p><ul class="small" style="margin:4px 0 0;padding-left:18px">${recs}</ul>`:''}
+      <p style="margin-top:12px"><a class="link" href="#checkup">查看完整体检卡</a></p>
+    </aside>
+  </div>
+  <section class="block"><div class="block-head"><div><h2>场景微课</h2><p>每关 8 分钟以内：白板微课讲流程，录屏讲操作</p></div><a class="link" href="#lessons">全部微课</a></div>
+    <div class="lessons">${mine.concat(other).slice(0,8).map(([q,i])=>lessonCard(q,i)).join('')}</div></section>
+  <section class="block"><div class="row3">
+    ${liveCard()}
+    <div class="panel stack"><div class="block-head" style="margin:0"><h2>情景练兵</h2><span class="eyebrow">本周一题 · ${DRILLS[0].n} 人作答</span></div><p style="font-weight:700">${DRILLS[0].t}</p><a class="btn ghost" href="#drill" style="justify-self:start">去作答</a></div>
+    <div class="panel"><div class="block-head" style="margin-bottom:6px"><h2>资料库</h2><a class="link" href="#library">全部资料</a></div>
+      <ul class="files">${FILES.slice(0,4).map(f=>`<li><button class="file" data-file="${esc(f[1])}"><span class="ext">${f[0]}</span><span>${f[1]}<span class="sub">${f[2]} · ${f[3]}</span></span><span class="muted num small">${f[4]} 次</span></button></li>`).join('')}</ul></div>
+  </div></section>`;
+}
+function vDirectorHome(){
+  const rows=Object.entries(STAFF).map(([p,[n,name]])=>{
+    const tot=PATHS[p].length;const base={director:[0,2,0],nurse:[0,1,0],teacher:[2,12,4],care:[3,5,1],it:[0,1,0]}[p];
+    let [fin,ing,no]=base;if(ST.prog[p]>=tot){fin=Math.min(n,fin+1);ing=Math.max(0,ing-1);}
+    return `<tr><td>${name}</td><td class="num">${n}</td><td class="num">${fin}</td><td class="num">${ing}</td><td class="num">${no?`<span class="pill warn">${no}</span>`:'0'}</td><td>${p==='director'?'<span class="muted small">本人所在岗位</span>':`<button class="link" data-viewas="${p}">以该岗位查看</button>`}</td></tr>`}).join('');
+  return `
+  <div class="hero-grid">
+    ${pathPanel('director')}
+    <aside class="panel"><div class="block-head" style="margin:0"><h2>本园应用体检</h2><span class="eyebrow num">12 月 14 日</span></div>${checkSum()}${probeList(4)}<p style="margin-top:12px"><a class="link" href="#checkup">查看完整体检卡</a></p></aside>
+  </div>
+  <section class="block"><div class="block-head"><div><h2>本园学习概况</h2><p>各岗位路径完成情况。学习与体检数据只用于本园改进与补训安排，不做园所排名。</p></div></div>
+  <div class="hero-grid">
+    <div class="panel"><h2 style="margin-bottom:10px">岗位路径完成情况</h2>
+      <div class="scroll"><table class="tbl"><thead><tr><th>岗位</th><th style="text-align:right">人数</th><th style="text-align:right">已完成</th><th style="text-align:right">学习中</th><th style="text-align:right">未开始</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="lockmsg" style="margin-top:14px"><b>补训建议</b><span class="small">4 名班级教师、1 名保育员尚未开始。建议下周三午睡时段集中学习前两关，由种子教师陪练。</span><button class="btn ghost" data-toast="已生成补训通知（原型演示）">生成补训通知</button></div>
+    </div>
+    <div class="stack">${liveCard()}</div>
+  </div></section>
+  <section class="block"><div class="row3">
+    <div class="panel stack"><h2>回放</h2><ul class="files">${REPLAYS.map(r=>`<li><button class="file" data-toast="原型：回放播放器"><span class="ext">回放</span><span>${r[0]}<span class="sub">${r[2]}</span></span><span class="muted num small">${r[1]}</span></button></li>`).join('')}</ul></div>
+    <div class="panel stack"><h2>情景练兵</h2><p style="font-weight:700">${DRILLS[0].t}</p><p class="muted small">本周 ${DRILLS[0].n} 人作答，本园保健医已提交。</p><a class="link" href="#drill">查看点评</a></div>
+    <div class="panel stack"><h2>岗位认证</h2><p class="muted small">初级：完成本岗位路径、测验正确率 80% 以上。中级：初级通过，提交本园场景应用案例并答辩。春季学期第一期 3 月开班。</p><a class="link" href="#me">查看认证要求</a></div>
+  </div></section>`;
+}
+function vPaths(){
+  return `<div class="page-head"><div><h1>学习路径</h1><p>按岗位分路径闯关，关卡依次解锁。每关看一段微课、在平台上做一遍、答三道以内的情景题，平台记录实操是否完成。</p></div></div>
+  <div class="paths">${Object.keys(PATHS).map(p=>{const d=ST.prog[p],tot=PATHS[p].length;
+    return `<div class="panel"><div class="block-head" style="margin:0"><h2>${PATHN[p]}路径</h2><span class="pill ${d>=tot?'ok':d?'hot':'idle'}">${d>=tot?'已完成':d+'/'+tot}</span></div>
+    <ul class="lvlist">${PATHS[p].map((l,i)=>{const s=status(p,i);return `<li><button data-go="level-${p}-${i+1}"><span class="ix">${String(i+1).padStart(2,'0')}</span><span>${esc(l.featured?'全日观察与疾病登记':l.t)}<span class="sub">${l.scene} · ${l.dur}</span></span><span class="pill ${s==='done'?'ok':s==='current'?'hot':'idle'}">${s==='done'?'已通过':s==='current'?'学习中':'未解锁'}</span></button></li>`}).join('')}</ul></div>`}).join('')}
+    <div class="panel"><div class="block-head" style="margin:0"><h2>区县管理员路径</h2><span class="pill idle">寒假上线</span></div><p class="muted small" style="margin-top:8px">市平台区县汇总口径与园所服务跟进。</p></div>
+  </div>`;
+}
+function vLessons(){
+  const scenes=['全部',...new Set(Object.values(PATHS).flat().map(l=>l.scene))];
+  const roles=['全部','园长','保健医','班级教师','保育员','信息接口人'];
+  const items=[];Object.keys(PATHS).forEach(p=>PATHS[p].forEach((l,i)=>{if((VIEW.lesRole==='全部'||PATHN[p]===VIEW.lesRole)&&(VIEW.libScene==='全部'||l.scene===VIEW.libScene))items.push([p,i])}));
+  return `<div class="page-head"><div><h1>场景微课</h1><p>全部关卡按场景浏览，不受解锁限制。未解锁的关卡可以先看微课和录屏，实操与测验在解锁后开放。</p></div></div>
+  <div class="filters"><div class="row"><span>岗位</span>${roles.map(r=>`<button class="chip" data-lesrole="${r}" aria-pressed="${VIEW.lesRole===r}">${r}</button>`).join('')}</div>
+  <div class="row"><span>场景</span>${scenes.map(r=>`<button class="chip" data-scene="${r}" aria-pressed="${VIEW.libScene===r}">${r}</button>`).join('')}</div></div>
+  ${items.length?`<div class="lessons">${items.map(([p,i])=>lessonCard(p,i)).join('')}</div>`:'<div class="panel muted">这个组合下暂无微课，换一个岗位或场景试试。</div>'}`;
+}
+function vCheckup(){
+  return `<div class="page-head"><div><p class="eyebrow">${ORG}</p><h1>本园应用体检</h1><p>每周一自动生成，共 12 项。同一项连续两周需关注，系统向对应岗位推送关卡。体检只看平台使用情况，不出现单个幼儿数据，不做园所排名，不作为教师考核依据。</p></div><span class="eyebrow num">12 月 14 日 · 试运行第 3 周</span></div>
+  ${checkSum()}
+  <div class="panel scroll"><table class="tbl"><thead><tr><th>检查项</th><th>本周情况</th><th>近 4 周</th><th>状态</th><th>处理</th></tr></thead><tbody>
+  ${PROBES.map((p,i)=>`<tr><td><b>${p.k}</b></td><td>${p.d}</td><td><span class="weeks" aria-label="近 4 周：${p.w.map(x=>({ok:'正常',warn:'需关注',idle:'未开始'}[x])).join('、')}">${p.w.map(x=>`<i class="${x}"></i>`).join('')}</span></td><td><span class="pill ${p.s}">${{ok:'正常',warn:'需关注',idle:'未开始'}[p.s]}</span></td><td>${p.go?`<button class="link" data-probe="${i}">${p.act}</button>`:'<span class="muted small">—</span>'}</td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="muted small" style="margin-top:12px">新上线园所前两周只开账号覆盖、基础数据、设备在线三项。区县教育局只看到汇总口径。</p>`;
+}
+function vLive(){
+  return `<div class="page-head"><div><h1>园长大讲堂</h1><p>每月一场，安排在午睡时段。直播结束后提供回放与讲义。</p></div></div>
+  <div class="row3">${LIVES.map((x,i)=>`<div class="${i?'panel stack':'live'}">${i?'':`<p class="eyebrow" style="color:inherit;opacity:.8">下一场</p>`}<p class="${i?'eyebrow num':'when'}">${x.when}</p><h3>${x.t}</h3><p class="${i?'muted small':''}">${x.d}</p><p class="${i?'small':''}" style="${i?'':'opacity:.85;font-size:13px'}">适合：${x.who}</p><button class="btn ${i?'ghost':''}" data-live="${i}" style="justify-self:start">${ST.live[i]?'已预约 · 开播前提醒':'预约直播'}</button></div>`).join('')}
+    <div class="panel"><h2 style="margin-bottom:8px">回放</h2><ul class="files">${REPLAYS.map(r=>`<li><button class="file" data-toast="原型：回放播放器"><span class="ext">回放</span><span>${r[0]}<span class="sub">${r[2]}</span></span><span class="muted num small">${r[1]}</span></button></li>`).join('')}</ul></div>
+  </div>`;
+}
+function vDrill(){
+  return `<div class="page-head"><div><h1>情景练兵</h1><p>每周一道业务情景题。作答后可以看到讲师点评与其他园所的做法，优秀作答额外得 2 学分。</p></div></div>
+  <div class="stack">${DRILLS.map((x,i)=>{const mine=ST.drill[i];return `<div class="panel stack"><div class="block-head" style="margin:0"><span class="pill hot">${x.role}</span><span class="eyebrow">${x.n+(mine?1:0)} 人作答</span></div><p style="font-weight:700;font-size:16px">${x.t}</p>
+    ${mine?`<div class="lockmsg"><b>我的作答</b><span class="small">${esc(mine)}</span></div><div class="lockmsg" style="background:var(--willow-soft)"><b>讲师点评精选</b><span class="small">${x.best}</span></div>${x.others.map(o=>`<div class="small"><span class="muted">${o[0]}</span><br>${o[1]}</div>`).join('')}`:
+    `<form class="stack" data-drill="${i}"><label for="drill-${i}" class="muted small">写下你的做法（200 字以内）</label><textarea id="drill-${i}" maxlength="200" placeholder="例如：先在疾病看板确认……"></textarea><button class="btn primary" type="submit" style="justify-self:start">提交作答</button></form>`}</div>`}).join('')}</div>`;
+}
+function vLibrary(){
+  const roles=['全部','保健医','班级教师','保育员','信息接口人'];
+  const list=FILES.filter(f=>VIEW.libRole==='全部'||f[2]===VIEW.libRole);
+  return `<div class="page-head"><div><h1>资料库</h1><p>导入模板、操作手册、课案与规范摘录，按岗位筛选。</p></div></div>
+  <div class="filters"><div class="row"><span>岗位</span>${roles.map(r=>`<button class="chip" data-librole="${r}" aria-pressed="${VIEW.libRole===r}">${r}</button>`).join('')}</div></div>
+  <div class="panel"><ul class="files">${list.map(f=>`<li><button class="file" data-file="${esc(f[1])}"><span class="ext">${f[0]}</span><span>${f[1]}<span class="sub">${f[2]} · ${f[3]}</span></span><span class="muted num small">${f[4]} 次</span></button></li>`).join('')}</ul></div>`;
+}
+function vLocal(){
+  return `<div class="page-head"><div><h1>本地专区</h1><p>本地讲师值守、技术支持与本园工单。</p></div></div>
+  <div class="kv"><div><span>本地讲师值守</span><p style="margin-top:4px">工作日 12:30—14:30、16:30—18:00</p></div><div><span>技术支持电话</span><p class="num" style="margin-top:4px"><span id="tel">400-636-6396</span> <button class="link" data-copy="400-636-6396">复制</button></p></div><div><span>本园工单</span><p style="margin-top:4px">${ST.tickets.filter(t=>t.s==='处理中').length} 张处理中</p></div><div><span>岗位认证</span><p style="margin-top:4px">春季第一期 3 月开班</p></div></div>
+  <div class="hero-grid" style="margin-top:20px">
+    <div class="panel"><h2 style="margin-bottom:8px">本园工单</h2><div class="scroll"><table class="tbl"><thead><tr><th>编号</th><th>内容</th><th>状态</th></tr></thead><tbody>${ST.tickets.map(t=>`<tr><td class="num">${t.id}</td><td>${esc(t.t)}</td><td><span class="pill ${t.s==='已关闭'?'ok':'warn'}">${t.s}</span></td></tr>`).join('')}<tr><td class="num">GD-1129</td><td>批量调整出勤操作咨询</td><td><span class="pill ok">已关闭</span></td></tr></tbody></table></div></div>
+    <div class="panel"><h2 style="margin-bottom:8px">提交报修</h2><form class="stack" id="ticketForm"><label for="tkDev" class="muted small">设备与位置</label><input class="inp" id="tkDev" placeholder="例如：额温枪 · 小一班" maxlength="40"><label for="tkTxt" class="muted small">故障现象</label><textarea id="tkTxt" maxlength="120" placeholder="例如：连续两天离线，已更换电池"></textarea><button class="btn primary" type="submit" style="justify-self:start">提交报修</button></form></div>
+  </div>`;
+}
+function vMe(){
+  if(false)return `<div class="page-head"><div><h1>我的</h1><p>园长路径将于寒假研修上线。可以切换到其他岗位身份，体验对应路径。</p></div></div><div class="panel row">${['nurse','teacher','care','it'].map(p=>`<button class="btn ghost" data-viewas="${p}">以${PATHN[p]}查看</button>`).join('')}</div>`;
+  const p=myPath(),d=ST.prog[p],tot=PATHS[p].length,fin=d>=tot;
+  const recs=Object.entries(ST.lv).filter(([k,v])=>k.startsWith(p+'-')&&v.passedAt).map(([k,v])=>[+k.split('-')[1]+1,v.passedAt]);
+  return `<div class="page-head"><div><p class="eyebrow">${ORG} · ${ROLES[ST.role].label}</p><h1>我的</h1></div></div>
+  <div class="kv"><div><b>${ST.credits[p]}</b><span>学分</span></div><div><b>${d}/${tot}</b><span>已通过关卡</span></div><div><b>${fin?1:0}</b><span>岗位徽章</span></div><div><b>${fin?'可报名':'未达到'}</b><span>初级岗位认证</span></div></div>
+  <section class="block"><h2 style="margin-bottom:12px">岗位徽章</h2><div class="badges">${Object.keys(PATHS).map(q=>{const on=ST.prog[q]>=PATHS[q].length;return `<div class="badge ${on?'on':''}"><span class="b">${PATHN[q][0]}</span><b class="small">${PATHN[q]}</b><span class="muted small">${on?'已获得':ST.prog[q]+'/'+PATHS[q].length}</span></div>`}).join('')}</div></section>
+  <section class="block"><h2 style="margin-bottom:12px">学习记录</h2><div class="panel scroll"><table class="tbl"><thead><tr><th>关卡</th><th>状态</th><th>时间</th></tr></thead><tbody>
+  ${PATHS[p].slice(0,Math.min(d,tot)).map((l,i)=>{const r=recs.find(x=>x[0]===i+1);return `<tr><td>第 ${i+1} 关 · ${esc(l.featured?'全日观察与疾病登记':l.t)}</td><td><span class="pill ok">已通过</span></td><td class="muted small">${r?r[1]:'11 月'}</td></tr>`}).join('')||'<tr><td colspan="3" class="muted">还没有通过的关卡。</td></tr>'}
+  </tbody></table></div></section>
+  <section class="block"><div class="panel"><h2 style="margin-bottom:8px">岗位认证</h2><p class="small">初级：完成本岗位路径，测验正确率 80% 以上，线上完成。中级：初级通过，提交一份本园场景应用案例，线下答辩。按学期开班，春季学期第一期 3 月开班。</p></div></section>`;
+}
+
+/* ── 关卡页 ── */
+function vLevel(r){
+  const {p,i}=r;if(!PATHS[p]||!PATHS[p][i])return '<div class="panel">没有找到这个关卡。<a class="link" href="#paths">返回学习路径</a></div>';
+  const l=PATHS[p][i],s=status(p,i),st=lvState(p,i),qs=qsOf(p,i),tot=PATHS[p].length;
+  if(VIEW.seg){st.seg=VIEW.seg;VIEW.seg=null;}
+  const seg=st.seg,locked=s==='locked',title=l.featured?'全日观察与疾病登记':l.t;
+  const sc=sceneOf(p,i),stepsN=stepsOf(p,i).length;
+  const tab=(k,ttl,sub,done)=>`<button class="step ${done?'done':''} ${locked&&(k==='zuo'||k==='ce')?'lock':''}" role="tab" aria-selected="${seg===k}" data-seg="${k}"><span class="k">${{jiang:'讲',kan:'看',zuo:'做',ce:'测'}[k]}</span><div><b>${ttl}</b><small>${sub}</small></div></button>`;
+  const okN=st.right.length;
+  return `
+  <p class="crumb"><a href="#paths">学习路径</a> / ${PATHN[p]}路径 / 第 ${i+1} 关</p>
+  <div class="lv-head"><div><p class="eyebrow">${PATHN[p]}路径 · 第 ${i+1} 关 / 共 ${tot} 关 · ${l.dur}</p><h1>${esc(title)}</h1><p class="goal">学完本关，你能${esc(l.goal.replace(/^能/,''))}</p></div>
+    <p class="rule">${s==='done'?'<b>已通过</b>　复习模式，可随时回看。':locked?`<b>未解锁</b>　完成第 ${ST.prog[p]+1} 关后解锁实操与测验，微课和录屏可以先看。`:`<b>通关条件</b>　平台回传实操记录，${qs.length} 道测验全部答对（答错可重答）。通关得 1 学分${i+1<tot?'，解锁第 '+(i+2)+' 关':''}。`}</p></div>
+  <div class="steps" role="tablist" aria-label="本关四段">
+    ${tab('jiang','白板微课',sc.length+' 幕',seg!=='jiang'||st.zuo||s==='done')}
+    ${tab('kan','操作录屏',stepsN+' 步',['zuo','ce'].includes(seg)||st.zuo||s==='done')}
+    ${tab('zuo','平台实操',s==='done'||st.zuo?'已通过':locked?'解锁后开放':'等待回传',s==='done'||st.zuo)}
+    ${tab('ce','即时测验',(s==='done'?qs.length:okN)+'/'+qs.length,s==='done'||okN>=qs.length)}
+  </div>
+  <div class="lv-layout"><div id="stage">${stage(p,i,seg,s)}</div>
+  <aside class="stack">
+    <div class="panel"><h3 style="margin-bottom:10px">本关要点</h3><ol class="points">${(l.featured?OBS.points:stepsOf(p,i).map(x=>x)).map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>
+    <div class="panel"><h3 style="margin-bottom:10px">答疑</h3><div class="qa">
+      ${l.featured?`<div><p class="sub">鱼峰区示例幼儿园 · 保健医</p><p>幼儿离园后家长才说孩子发烧，记在哪里？</p><p class="a"><span class="sub">种子教师</span>家长在小程序请假时选「病假」并上报症状，系统进因病缺勤，不用记全日观察。</p></div>`:''}
+      ${ST.asked.filter(a=>a.k===p+'-'+i).map(a=>`<div><p class="sub">${ROLES[ST.role].label}</p><p>${esc(a.q)}</p><p class="a"><span class="sub">待回复</span>值守时段内由本地讲师或种子教师回复。</p></div>`).join('')||(l.featured?'':'<p class="muted">暂时没有提问。</p>')}
+    </div><form class="ask" id="askForm" data-k="${p}-${i}"><label for="askInput" hidden>提问</label><input id="askInput" placeholder="对本关有疑问？写下来" maxlength="120"><button class="btn ghost" type="submit">提问</button></form></div>
+    <div class="panel"><h3 style="margin-bottom:10px">相关资料</h3><ul class="files">${FILES.filter(f=>f[2]===PATHN[p]).slice(0,2).map(f=>`<li><button class="file" data-file="${esc(f[1])}"><span class="ext">${f[0]}</span><span>${f[1]}</span><span></span></button></li>`).join('')}${i+1<tot?`<li><button class="file" data-go="level-${p}-${i+2}"><span class="ext">下一关</span><span>第 ${i+2} 关 ${esc(PATHS[p][i+1].t)}</span><span></span></button></li>`:''}</ul></div>
+  </aside></div>`;
+}
+function stage(p,i,seg,s){
+  const l=PATHS[p][i],st=lvState(p,i),locked=s==='locked';
+  if(seg==='jiang'){const sc=sceneOf(p,i);
+    return `<section class="panel"><div class="board"><svg viewBox="0 0 640 360" id="boardSvg" role="img" aria-label="白板微课画面"></svg><p class="subtitle" id="subtitle" aria-live="polite"></p></div>
+    <div class="player"><button class="btn ghost" id="playBtn" type="button">▶ 播放本幕</button><div class="bar" aria-hidden="true"><i id="barFill"></i></div><span class="num muted small" id="timeLbl"></span></div>
+    <div class="scenes">${sc.map((x,k)=>`<button type="button" class="scene" data-scene-i="${k}"><b>第 ${k+1} 幕 · ${x.t}</b>${esc(x.name)}</button>`).join('')}</div>
+    <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn primary" data-seg="kan">下一段：操作录屏</button></div></section>`;}
+  if(seg==='kan'){const ch=l.featured?OBS.chapters:l.steps.map((x,k)=>['0:'+String(k*25).padStart(2,'0'),x,k===0?'menu':k===1?'btn':'form']);
+    return `<section class="panel"><div class="screen"><div class="chrome"><i></i><i></i><i></i><span class="num" style="margin-left:8px">campus.lzpreschool.cn · 演示园</span></div>
+      <div class="app"><div class="side">${(l.menu.length>1?[l.menu[0]]:['常用']).map(g=>`<div class="grp">${esc(g)}</div>`).join('')}${l.menu.slice(1).map((m,k)=>`<div id="m-${k}" class="${k===l.menu.length-2?'on':''}" ${k>0?'style="padding-left:28px"':''}>${esc(m)}</div>`).join('')||`<div id="m-0" class="on">${esc(l.menu[0])}</div>`}<div>其他功能</div></div>
+      <div class="amain"><div class="toolbar"><b>${esc(l.menu[l.menu.length-1])}</b><span class="fb pri" id="sBtn">${esc(l.btn)}</span></div>
+        <div class="ftbl" id="sTbl"><div class="ftr"><span>对象</span><span>班级</span><span>情况</span><span>操作</span></div><div class="ftr"><span>示例幼儿 A</span><span>中二班</span><span>${l.featured?'午餐进食少':'待处理'}</span><span>${l.featured?'登记疾病':'查看'}</span></div><div class="ftr"><span>示例幼儿 B</span><span>大一班</span><span>${l.featured?'户外后咳嗽':'已完成'}</span><span>${l.featured?'登记疾病':'查看'}</span></div></div>
+        <div class="fform" id="sForm" hidden><div><label>${l.featured?'观察幼儿':'对象'}</label><div class="f">示例幼儿 C · 小一班</div></div><div><label>${l.featured?'观察老师':'填写人'}</label><div class="f">${ROLES[ST.role].label.split(' · ')[0]}</div></div><div><label>时间</label><div class="f num">14:40</div></div><div><label>${l.featured?'检查信息':'内容'}</label><div class="f">${l.featured?'体温 37.8℃，精神差':'按页面提示填写'}</div></div>
+          <div id="sDis" style="grid-column:1/-1" hidden><label>登记疾病 · 追踪情况</label><div class="f">发热待查；已通知家长，16:00 复测</div></div><div style="grid-column:1/-1;display:flex;justify-content:flex-end"><span class="fb pri" id="sSave">保存</span></div></div>
+      </div></div></div>
+      <div class="chapters">${ch.map((c,k)=>`<button type="button" class="chap" data-chap="${k}" data-target="${c[2]}"><b>${c[0]}</b><span>${k+1}. ${esc(c[1])}</span></button>`).join('')}</div>
+      <p class="muted small" style="margin-top:10px">录屏使用演示园与虚构数据，不含真实幼儿信息。</p>
+      <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn primary" data-seg="zuo">下一段：平台实操</button></div></section>`;}
+  if(locked&&(seg==='zuo'||seg==='ce'))return `<section class="panel"><div class="lockmsg"><b>实操与测验在解锁后开放</b><span class="small">当前进度：第 ${ST.prog[p]+1} 关。先完成前面的关卡，或继续看本关的微课与录屏。</span><button class="btn primary" data-go="level-${p}-${ST.prog[p]+1}">去第 ${ST.prog[p]+1} 关</button></div></section>`;
+  if(seg==='zuo'){const done=st.zuo||s==='done',steps=stepsOf(p,i);
+    return `<section class="panel stack"><div><p class="eyebrow">实操任务</p><h2 style="font-size:18px">在本园账号完成：${esc(l.event)}</h2></div>
+      <ul class="checklist">${steps.map((x,k)=>`<li><span class="n">${k+1}</span><div>${esc(x)}</div></li>`).join('')}</ul>
+      <div class="verify ${done?'passed':''}"><span class="ico">${done?'✓':'…'}</span><div><b>${done?'已收到平台回传'+(st.zuoAt?' · '+st.zuoAt:''):'等待平台回传'}</b><p class="muted small">${done?'本段已通过。':`完成上面 ${steps.length} 步后，平台回传 <code>${esc(l.event)}</code>，本段自动通过。`}</p></div></div>
+      <div class="row">${done?'':`<a class="btn line" href="https://campus.lzpreschool.cn/ulogin" target="_blank" rel="noopener">打开平台</a><button class="btn ghost" id="simBtn" type="button">模拟平台回传（原型演示）</button>`}<button class="btn primary" data-seg="ce">下一段：即时测验</button></div>
+      <p class="muted small">本园暂无可操作的数据，或尚未分班？可以在演示园完成，结果同样计入。</p></section>`;}
+  const qs=qsOf(p,i),done=s==='done';
+  return `<section class="panel stack" id="quiz">${qs.map((q,qi)=>`<div class="q"><p class="eyebrow">第 ${qi+1} 题</p><p class="t">${esc(q.t)}</p>${q.o.map((o,oi)=>`<button type="button" class="opt ${done&&o[1]?'right':''}" data-q="${qi}" data-o="${oi}"><span class="l">${'ABCD'[oi]}</span><span>${esc(o[0])}</span></button>`).join('')}<div class="explain" id="ex-${qi}" ${done?'':'hidden'}>${done?esc(q.o.find(o=>o[1])[2]):''}</div></div>`).join('')}
+    <div id="doneSlot">${passCard(p,i)}</div></section>`;
+}
+function passCard(p,i){
+  const st=lvState(p,i),tot=PATHS[p].length;
+  if(!st.passedAt)return '';
+  return `<div class="done-card"><span class="big">+1</span><div><b>第 ${i+1} 关通过</b><p class="small" style="opacity:.9">${PATHN[p]}路径 ${Math.min(ST.prog[p],tot)}/${tot}${i+1<tot?' · 第 '+(i+2)+' 关「'+esc(PATHS[p][i+1].t)+'」已解锁':' · 岗位徽章已获得'}</p></div>${i+1<tot?`<button class="btn" data-go="level-${p}-${i+2}">进入第 ${i+2} 关</button>`:`<a class="btn" href="#me">查看徽章</a>`}</div>`;
+}
+function tryPass(p,i){
+  const st=lvState(p,i),qs=qsOf(p,i);
+  if(st.zuo&&st.right.length>=qs.length&&!st.passedAt&&status(p,i)==='current'){
+    const d=new Date();st.passedAt=`${d.getMonth()+1} 月 ${d.getDate()} 日`;
+    ST.prog[p]=i+1;ST.credits[p]+=1;save();
+    toast(`第 ${i+1} 关通过，学分 +1`);return true;}
+  return false;
+}
+
+/* ════════════════ 交互绑定 ════════════════ */
+const NS='http://www.w3.org/2000/svg';let bTimer=null;
+function drawScene(p,i,k,anim){
+  const svg=$('#boardSvg');if(!svg)return;const sc=sceneOf(p,i),x=sc[k];VIEW.scene=k;clearTimeout(bTimer);
+  svg.innerHTML='';
+  let draws=x.draw,labels=x.labels||[];
+  if(!draws){ // 通用分镜：按步骤画流程，高亮当前步
+    const n=sc.length,w=Math.min(150,520/n-20),gap=(600-n*w)/(n+1);draws=[];labels=[];
+    for(let j=0;j<n;j++){const x0=gap+j*(w+gap);draws.push([j===k?'hl':'sk',`M${x0} 120h${w}v70h-${w}z`]);if(j<n-1)draws.push(['sk',`M${x0+w+6} 155h${gap-12}M${x0+w+gap-14} 148l8 7-8 7`]);labels.push([x0+w/2-10,162,String(j+1),j===k]);}
+    draws.push(['gw',`M${gap+k*(w+gap)+w/2-30} 220h60`]);
+  }
+  const per=anim?2.2/draws.length:0;
+  draws.forEach(([c,d],j)=>{const e=document.createElementNS(NS,'path');e.setAttribute('d',d);e.setAttribute('class',c+(anim?' draw':''));svg.appendChild(e);
+    if(anim){const L=Math.ceil(e.getTotalLength());e.style.setProperty('--len',L);e.style.setProperty('--delay',(j*per)+'s');e.style.setProperty('--dur',Math.max(.4,per*1.4)+'s');}});
+  labels.forEach(([lx,ly,t,h])=>{const e=document.createElementNS(NS,'text');e.setAttribute('x',lx);e.setAttribute('y',ly);if(h)e.setAttribute('class','hlt');e.textContent=t;svg.appendChild(e);});
+  const sub=$('#subtitle');sub.textContent=x.subs[0];if(anim&&x.subs[1])bTimer=setTimeout(()=>sub.textContent=x.subs[1],1800);
+  const total=l=>l.featured?100:sc.length*25;const T=total(PATHS[p][i]);const end=x.end*T/100;
+  $('#barFill').style.width=x.end+'%';$('#timeLbl').textContent=`${Math.floor(end/60)}:${String(Math.round(end%60)).padStart(2,'0')} / ${Math.floor(T/60)}:${String(T%60).padStart(2,'0')}`;
+  document.querySelectorAll('.scene').forEach((b,j)=>b.setAttribute('aria-current',j===k));
+}
+function setChap(k,target){
+  document.querySelectorAll('.chap').forEach((b,j)=>b.setAttribute('aria-current',j===k));
+  document.querySelectorAll('.ring').forEach(e=>e.classList.remove('ring'));
+  const form=target==='form'||target==='disease';$('#sForm').hidden=!form;$('#sTbl').hidden=form;$('#sDis').hidden=target!=='disease';
+  const el=target==='menu'?document.querySelector('.side .on'):target==='btn'?$('#sBtn'):target==='form'?$('#sSave'):$('#sDis');
+  if(el)el.classList.add('ring');VIEW.chap=k;
+}
+function after(r){
+  if(r.v==='level'){const {p,i}=r,st=lvState(p,i);
+    if(st.seg==='jiang'){const n=sceneOf(p,i).length;drawScene(p,i,Math.min(VIEW.scene,n-1),false);}
+    if(st.seg==='kan'){const b=document.querySelectorAll('.chap'),k=Math.min(VIEW.chap,b.length-1);setChap(k,b[k].dataset.target);}
+  }
+  if(TOUR.on)paintTour();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,a');if(!t)return;const r=parse();
+  if(t.tagName==='A'){const h=t.getAttribute('href')||'';if(h.startsWith('#')){e.preventDefault();VIEW.seg=null;go(h.slice(1)||'home');}return;}
+  if(t.dataset.go){e.preventDefault();VIEW.seg=null;go(t.dataset.go);return;}
+  if(t.dataset.seg&&r.v==='level'){const st=lvState(r.p,r.i);st.seg=t.dataset.seg;VIEW.seg=null;VIEW.scene=0;VIEW.chap=0;save();render();$('#stage').scrollIntoView({block:'nearest'});return;}
+  if(t.dataset.sceneI!==undefined){drawScene(r.p,r.i,+t.dataset.sceneI,true);return;}
+  if(t.id==='playBtn'){drawScene(r.p,r.i,VIEW.scene,true);return;}
+  if(t.dataset.chap!==undefined){setChap(+t.dataset.chap,t.dataset.target);return;}
+  if(t.id==='simBtn'){const st=lvState(r.p,r.i);st.zuo=true;const d=new Date();st.zuoAt=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;tryPass(r.p,r.i);save();render();return;}
+  if(t.dataset.q!==undefined){const qi=+t.dataset.q,oi=+t.dataset.o,q=qsOf(r.p,r.i)[qi],o=q.o[oi],st=lvState(r.p,r.i);
+    t.parentElement.querySelectorAll('.opt').forEach(x=>x.classList.remove('right','wrong'));t.classList.add(o[1]?'right':'wrong');
+    const ex=$('#ex-'+qi);ex.hidden=false;ex.innerHTML=esc(o[2])+(o[1]?'':` <button class="link" data-seg="${q.jump}">回看${q.jump==='kan'?'录屏':'微课'}</button>`);
+    st.right=st.right.filter(x=>x!==qi);if(o[1])st.right.push(qi);
+    const passed=tryPass(r.p,r.i);save();
+    if(passed){render();setTimeout(()=>{const d=$('#doneSlot');d&&d.scrollIntoView({block:'nearest'})},30);}
+    else{const n=qsOf(r.p,r.i).length;const tab=document.querySelector('.step[data-seg="ce"] small');if(tab)tab.textContent=st.right.length+'/'+n;
+      if(st.right.length>=n&&!st.zuo){ex.insertAdjacentHTML('beforeend','<br><b>测验全部答对。</b>完成平台实操后即可通关。');}}
+    return;}
+  if(t.dataset.probe!==undefined){const pr=PROBES[+t.dataset.probe];if(pr.go[0]==='local'){go('local');return;}
+    const [p,i]=pr.go;if(ROLES[ST.role].path!==p&&ST.role!=='director'){toast(`该关卡推送给${PATHN[p]}，已切换到对应身份查看`);ST.role=Object.keys(ROLES).find(k=>ROLES[k].path===p);save();}
+    go(`level-${p}-${i+1}`);return;}
+  if(t.dataset.viewas){ST.role=Object.keys(ROLES).find(k=>ROLES[k].path===t.dataset.viewas);save();toast('已切换为'+ROLES[ST.role].label);go('home');return;}
+  if(t.dataset.live!==undefined){const k=+t.dataset.live;ST.live[k]=!ST.live[k];save();toast(ST.live[k]?'已预约，开播前 30 分钟提醒':'已取消预约');render();return;}
+  if(t.dataset.lesrole){VIEW.lesRole=t.dataset.lesrole;render();return;}
+  if(t.dataset.scene){VIEW.libScene=t.dataset.scene;render();return;}
+  if(t.dataset.librole){VIEW.libRole=t.dataset.librole;render();return;}
+  if(t.dataset.file){toast('原型：「'+t.dataset.file+'」预览');return;}
+  if(t.dataset.toast){toast(t.dataset.toast);return;}
+  if(t.dataset.copy){const v=t.dataset.copy;try{navigator.clipboard.writeText(v).then(()=>toast('已复制 '+v),()=>sel());}catch(err){sel();}
+    function sel(){const s=window.getSelection(),rg=document.createRange();rg.selectNodeContents($('#tel'));s.removeAllRanges();s.addRange(rg);toast('已选中号码，可手动复制');}return;}
+});
+document.addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==='askForm'){const i=$('#askInput');if(!i.value.trim())return;const [p,ix]=f.dataset.k.split('-');ST.asked.push({k:p+'-'+ix,q:i.value.trim()});save();toast('已提交，值守时段内回复');render();return;}
+  if(f.dataset.drill!==undefined){const k=+f.dataset.drill,v=$('#drill-'+k).value.trim();if(!v){toast('先写下你的做法再提交');return;}ST.drill[k]=v;save();toast('已提交，讲师点评后可能获得 2 学分');render();return;}
+  if(f.id==='ticketForm'){const d=$('#tkDev').value.trim(),x=$('#tkTxt').value.trim();if(!d){toast('请填写设备与位置');return;}ST.tickets.unshift({id:'GD-'+(1300+ST.tickets.length),t:d+(x?'：'+x:''),s:'处理中'});save();toast('报修已提交，24 小时内协调处理');render();return;}
+});
+$('#roleSel').addEventListener('change',e=>{ST.role=e.target.value;save();toast('已切换为'+ROLES[ST.role].label);if(parse().v==='level')go('home');else render();});
+$('#resetBtn').addEventListener('click',()=>{const r=ST.role;ST=FRESH();ST.role=r;save();toast('演示进度已重置');tstop();go('home');});
+
+/* ════════════════ 引导演示 ════════════════ */
+const TOUR={on:false,i:0,steps:[
+ {h:'home',role:'nurse',x:'这是<b>保健医李老师</b>登录后的首页：左边是本岗位的 12 关路径和下一关，右边是本园应用体检，体检发现的问题会推送对应关卡。'},
+ {h:'checkup',role:'nurse',x:'体检每周一自动生成，共 12 项。<b>疾病管理</b>连续需关注，系统推荐保健医第 8 关；<b>设备离线</b>直接引到报修。'},
+ {h:'level-nurse-6',role:'nurse',seg:'jiang',x:'进入第 6 关。每关分<b>讲、看、做、测</b>四段。白板微课按字幕顺序出画，点「播放本幕」可以看到效果。'},
+ {h:'level-nurse-6',role:'nurse',seg:'kan',x:'操作录屏用演示园和虚构数据。点右边的章节，界面切到对应步骤，红框标出要点的位置。'},
+ {h:'level-nurse-6',role:'nurse',seg:'zuo',x:'实操在真实平台完成，平台回传后本段自动通过。原型里点<b>「模拟平台回传」</b>。'},
+ {h:'level-nurse-6',role:'nurse',seg:'ce',x:'三道情景题，答错立即解释并可回看。实操回传和测验都完成后通关，学分 +1，下一关解锁。'},
+ {h:'home',role:'nurse',pass:['nurse',5],x:'回到首页，路径进度、学分和下一关都已更新。'},
+ {h:'home',role:'director',x:'切换为<b>园长</b>：上面是园长自己的 6 关路径，下面是各岗位路径完成情况与体检汇总，可以据此生成补训通知。'},
+ {h:'level-director-3',role:'director',seg:'jiang',x:'园长路径第 3 关「全园指标」：读懂出勤、因病缺勤、晨检覆盖、食谱发布，找出需要关注的班级。指标只用于园内改进，不做排名。'}
+]};
+function tstart(){TOUR.on=true;TOUR.i=0;$('#tourBtn').innerHTML='◼<span class="tx"> 退出引导</span>';$('#tourBtn').classList.add('off');tgo();}
+function tstop(){TOUR.on=false;$('#tourbar').hidden=true;$('#tourBtn').innerHTML='▷<span class="tx"> 引导演示</span>';$('#tourBtn').classList.remove('off');}
+function tgo(){const s=TOUR.steps[TOUR.i];if(ST.role!==s.role){ST.role=s.role;save();}
+  if(s.pass){const [p,i]=s.pass,st=lvState(p,i);if(status(p,i)==='current'){st.zuo=true;st.right=qsOf(p,i).map((_,k)=>k);tryPass(p,i);}}
+  if(s.seg){const m=s.h.match(/level-(\w+)-(\d+)/);lvState(m[1],+m[2]-1).seg=s.seg;VIEW.seg=s.seg;VIEW.scene=0;VIEW.chap=0;}
+  go(s.h);}
+function paintTour(){const s=TOUR.steps[TOUR.i],n=TOUR.steps.length,b=$('#tourbar');b.hidden=false;
+  b.innerHTML=`<span class="s">${TOUR.i+1} / ${n}</span><span class="x">${s.x}</span><span class="nav"><button type="button" id="tPrev" ${TOUR.i?'':'disabled'}>上一步</button>${TOUR.i<n-1?'<button type="button" class="pri" id="tNext">下一步</button>':'<button type="button" class="pri" id="tEnd">完成</button>'}</span>`;
+  const pv=$('#tPrev');if(pv)pv.onclick=()=>{TOUR.i--;tgo();};const nx=$('#tNext');if(nx)nx.onclick=()=>{TOUR.i++;tgo();};const en=$('#tEnd');if(en)en.onclick=tstop;}
+$('#tourBtn').addEventListener('click',()=>TOUR.on?tstop():tstart());
+
+render();
+</script>
+
+</body>
+</html>

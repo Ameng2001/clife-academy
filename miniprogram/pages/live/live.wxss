@@ -1,0 +1,2 @@
+.first { background: #1f6b5c; color: #fff; border-color: #1f6b5c; }
+.first .h3 { color: #fff; }

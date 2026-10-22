@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V2.4 · Active Thread</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="thread">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="top-nav">
+          <a class="nav-link" href="./index.html">＋ New session</a>
+          <a class="nav-link" href="./index.html">⌕ Search</a>
+          <a class="nav-link active" href="./studio-thread.html">◷ Plans</a>
+          <a class="nav-link" href="./studio-thread.html">⤴ Exports</a>
+          <a class="nav-link" href="./studio-thread.html">⚙ Customize</a>
+        </div>
+        <section class="sidebar-section">
+          <div class="sidebar-label"><span>All projects</span><span>▾</span></div>
+          <a class="project-chip active" href="./studio-thread.html"><div class="project-title">多样的服饰</div><div class="project-meta">thematic-curriculum · Week Arrangement</div></a>
+          <a class="project-chip" href="./studio-thread.html"><div class="project-title">春天的花</div><div class="project-meta">PBL · Proposal Draft</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <a class="thread-item" href="./studio-thread.html"><div class="project-title">继续主题 framing</div><div class="thread-meta">已完成主题解读与网络</div></a>
+          <a class="thread-item active" href="./studio-thread.html"><div class="project-title">调整第 2 周结构</div><div class="thread-meta">当前 thread · 周二偏密，缺生活渗透</div></a>
+          <a class="thread-item" href="./studio-thread.html"><div class="project-title">重写教学活动第 2 环节</div><div class="thread-meta">活动稿细化</div></a>
+        </section>
+        <div class="user-card"><div class="avatar">A</div><div><div class="project-title">ameng</div><div class="project-meta">Pro plan</div></div></div>
+      </aside>
+
+      <main class="main">
+        <section class="two-col">
+          <div class="conversation-surface">
+            <div class="message user"><h3>你</h3><p>第 2 周我不想连续两个高强度教学活动，帮我松一松节奏。</p></div>
+            <div class="message ai"><h3>教研 Copilot</h3><p>我建议保留周二上午的教学活动，把周二下午改成更轻的区域活动，并把生活渗透补到周三下午。这样既保留主题连续性，也能缓和本周节奏。</p></div>
+
+            <section class="render-card">
+              <h3>Stage Summary</h3>
+              <div class="render-list">
+                <div class="render-item"><strong>当前阶段</strong><div class="project-meta">Week Arrangement</div></div>
+                <div class="render-item"><strong>当前问题</strong><div class="project-meta">周二偏密，缺 1 个生活渗透活动。</div></div>
+                <div class="render-item"><strong>建议下一步</strong><div class="project-meta">先调整一周节奏，再从这个 week 展开具体活动稿。</div></div>
+              </div>
+            </section>
+
+            <section class="render-card">
+              <h3>Week Rhythm Block</h3>
+              <table class="table-like">
+                <thead><tr><th>Day</th><th>Rhythm</th><th>Signal</th></tr></thead>
+                <tbody>
+                  <tr><td>Mon</td><td>教学 + 轻量活动</td><td>平稳</td></tr>
+                  <tr><td>Tue</td><td>教学 + 教学</td><td>偏密</td></tr>
+                  <tr><td>Wed</td><td>户外 + 待补</td><td>缺项</td></tr>
+                  <tr><td>Thu</td><td>教学 + 区域</td><td>平稳</td></tr>
+                  <tr><td>Fri</td><td>家园互动</td><td>收束</td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="render-card">
+              <h3>Month Matrix Block</h3>
+              <table class="table-like">
+                <thead><tr><th>Week</th><th>Teaching</th><th>Region</th><th>Outdoor</th><th>Life</th><th>Home</th></tr></thead>
+                <tbody>
+                  <tr><td>Week 1</td><td>这是谁的衣服</td><td>衣服配对角</td><td>穿衣接力</td><td>看天气穿衣</td><td>观察家人衣服</td></tr>
+                  <tr><td>Week 2</td><td>我会穿什么</td><td>职业服饰拼图</td><td>服饰接力赛</td><td>待补</td><td>观察家人的工作服</td></tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="confirm-card">
+              <div class="confirm-title">Ready to confirm this week structure?</div>
+              <div class="project-meta">这版周结构已经稳定。你可以接受这版、继续细化，或换一个方向。</div>
+              <div class="prompt-actions">
+                <span class="ghost-button">接受这版</span>
+                <span class="ghost-button">继续细化</span>
+                <span class="ghost-button">换一个方向</span>
+              </div>
+            </section>
+
+            <section class="composer-card" style="margin:0;">
+              <textarea class="composer-textarea" placeholder="继续当前 thread，例如：把周二下午改成更轻的区域活动，并补一个生活渗透建议。"></textarea>
+              <div class="composer-controls">
+                <span class="select-pill">▣ Working in 多样的服饰 ▾</span>
+                <button class="cta-button">Reply →</button>
+              </div>
+            </section>
+          </div>
+
+          <aside class="rail">
+            <div class="rail-card">
+              <h3>Stage Progress</h3>
+              <div class="progress-steps">
+                <div class="step done">✓</div><div class="path"></div>
+                <div class="step done">✓</div><div class="path"></div>
+                <div class="step active">3</div><div class="path"></div>
+                <div class="step">4</div><div class="path"></div>
+                <div class="step">5</div>
+              </div>
+              <div class="project-meta">Theme Framing ✓ · Month Matrix ✓ · Week Arrangement ● · Activities ○ · Export ○</div>
+              <div class="project-meta" style="margin-top:10px;">2 / 5 activities drafted</div>
+            </div>
+
+            <div class="rail-card">
+              <h3>Working Project</h3>
+              <div class="source-list">
+                <div class="source-item"><strong>Project</strong><div class="project-meta">多样的服饰</div></div>
+                <div class="source-item"><strong>Pipeline</strong><div class="project-meta">thematic-curriculum</div></div>
+                <div class="source-item"><strong>Current object</strong><div class="project-meta">Week 2 / Week Arrangement</div></div>
+                <div class="source-item"><strong>Workspace</strong><div class="project-meta">.workshop/projects/duoyang-de-fushi/</div></div>
+              </div>
+            </div>
+
+            <div class="rail-card">
+              <h3>Context Sources</h3>
+              <div class="source-list">
+                <div class="source-item"><strong>theme-narrative.md</strong><div class="project-meta">主题解读</div></div>
+                <div class="source-item"><strong>month-plan.md</strong><div class="project-meta">月矩阵</div></div>
+                <div class="source-item"><strong>week-2-plan.md</strong><div class="project-meta">第 2 周安排</div></div>
+                <div class="source-item"><strong>client template</strong><div class="project-meta">教学活动模板</div></div>
+                <div class="source-item"><strong>KB sample</strong><div class="project-meta">多样的服饰终版样例</div></div>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

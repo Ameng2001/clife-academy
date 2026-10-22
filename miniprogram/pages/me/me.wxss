@@ -1,0 +1,12 @@
+.kv { display: flex; flex-wrap: wrap; justify-content: space-between; margin: 20rpx 0 8rpx; }
+.kv .k { width: 48%; box-sizing: border-box; display: flex; flex-direction: column; padding: 28rpx; }
+.kv .v { font-size: 44rpx; font-weight: 700; color: #1f6b5c; }
+.badges { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.badge { width: 48%; box-sizing: border-box; background: #fff; border: 1rpx solid #d6e0dc; border-radius: 20rpx; padding: 24rpx; display: flex; flex-direction: column; align-items: center; gap: 8rpx; margin-bottom: 16rpx; }
+.badge .b { width: 96rpx; height: 96rpx; border-radius: 50%; background: #eceff0; color: #7b8a86; font-size: 34rpx; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.badge.on .b { background: #1f6b5c; color: #fff; }
+/* 最近几笔：日期 · 一句话 · 进出数 */
+.ql { display: flex; align-items: baseline; gap: 16rpx; padding: 12rpx 0; border-top: 1rpx solid #d6e0dc; }
+.ql .body { flex: 1; min-width: 0; }
+.ql .num { flex: none; font-weight: 700; color: #5b716b; }
+.ql .num.in { color: #1f6b5c; }

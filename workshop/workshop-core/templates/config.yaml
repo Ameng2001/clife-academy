@@ -1,0 +1,33 @@
+# Course Workshop Runtime Configuration
+# Schema: course-workshop — Multi-methodology course runtime
+
+schema: course-workshop
+
+defaults:
+  # Default teaching methodology for the next deliverable in a project workspace
+  methodology: pbl-huamei
+  # Where promoted course deliverables are placed (relative to project root)
+  target_collection: courses
+  # Governance: who approves project deliverables before promote
+  governance:
+    approval_required: true
+    approver_role: curriculum-director
+
+# 幼师学坊（教师发展平台）：/workshop-core:share 把用过的课作为课程成果分享过去
+academy:
+  # 学坊地址，如 https://xueshe.example.cn
+  url:
+  # 投稿令牌：教师在学坊「设置 → 接口令牌 → 新建一枚投稿令牌」建，标签写「教研工坊」，cla_ 开头，只显示一次
+  # 这是教师本人的令牌，署名是教师；不要提交到 git
+  token:
+
+# Lifecycle phases for project workspaces
+# Each active project in .workshop/projects/ progresses through these phases
+lifecycle:
+  phases:
+    - planning      # Ideation, theme exploration, domain analysis
+    - designing     # Detailed course structure, lesson design, material planning
+    - reviewing     # Expert review, curriculum alignment check, team review
+    - approved      # Ready to promote/ship
+    - shipped       # Promoted to target directory and archived
+  initial_phase: planning

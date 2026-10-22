@@ -1,0 +1,139 @@
+{
+  "sceneId": "scene-01",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "storyBasis": "每天早上，保健医在园门口测体温、看手口眼，这是晨检。；可晨检只管入园那一刻。；午睡起来发烧了，户外回来一直咳嗽，；这些情况都发生在晨检之后，晨检记录里看不到。",
+  "sceneDurationMs": 20858,
+  "elements": [
+    {
+      "id": "e1",
+      "label": "晨检",
+      "sequence": 1,
+      "narrativeRole": "晨检场景铺垫",
+      "subtitle": "每天早上，保健医在园门口测体温、看手口眼，这是晨检。",
+      "type": "object",
+      "region": {
+        "x": 51,
+        "y": 231,
+        "width": 382,
+        "height": 497
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 400,
+        "durationMs": 6966,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          51,
+          479
+        ],
+        "end": [
+          433,
+          479
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e2",
+      "label": "入园那一刻",
+      "sequence": 2,
+      "narrativeRole": "晨检只覆盖入园时点",
+      "subtitle": "可晨检只管入园那一刻。",
+      "type": "object",
+      "region": {
+        "x": 506,
+        "y": 166,
+        "width": 267,
+        "height": 332
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 7466,
+        "durationMs": 2924,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          506,
+          332
+        ],
+        "end": [
+          773,
+          332
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e3",
+      "label": "午睡后与户外",
+      "sequence": 3,
+      "narrativeRole": "晨检之后出现的异常",
+      "subtitle": "午睡起来发烧了，户外回来一直咳嗽，",
+      "type": "object",
+      "region": {
+        "x": 791,
+        "y": 262,
+        "width": 472,
+        "height": 406
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 10491,
+        "durationMs": 4180,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          791,
+          465
+        ],
+        "end": [
+          1263,
+          465
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e4",
+      "label": "晨检记录",
+      "sequence": 4,
+      "narrativeRole": "晨检记录里缺少这些情况",
+      "subtitle": "这些情况都发生在晨检之后，晨检记录里看不到。",
+      "type": "object",
+      "region": {
+        "x": 1311,
+        "y": 193,
+        "width": 277,
+        "height": 526
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 14771,
+        "durationMs": 5386,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1311,
+          456
+        ],
+        "end": [
+          1588,
+          456
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

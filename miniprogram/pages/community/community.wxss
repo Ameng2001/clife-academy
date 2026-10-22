@@ -1,0 +1,22 @@
+/* 教研共同体：tab 条、本期大卡、动动手两列、作品卡两列。封面按类型底色，和网页端精品微课的四种一致 */
+.tabs { display: flex; background: #e6ece9; border-radius: 18rpx; padding: 6rpx; margin: 24rpx 0 20rpx; }
+.tabs .tab { flex: 1; text-align: center; font-size: 26rpx; font-weight: 700; color: #5b716b; padding: 12rpx 0; border-radius: 14rpx; }
+.tabs .tab.on { background: #fff; color: #16302b; box-shadow: 0 2rpx 6rpx rgba(22,48,43,.12); }
+.cover { aspect-ratio: 16 / 9; border-radius: 16rpx; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 16rpx; color: #fff; }
+.cover.big { aspect-ratio: 2 / 1; }
+.cover .lb { font-size: 22rpx; font-weight: 700; text-shadow: 0 1rpx 2rpx rgba(0,0,0,.25); }
+.cover.case { background: linear-gradient(135deg, #2f4f9b, #5b8def); }
+.cover.work { background: linear-gradient(135deg, #8a4b1f, #d98a3c); }
+.cover.collection { background: linear-gradient(135deg, #1f6b5c, #3aa17e); }
+.cover.lecture { background: linear-gradient(135deg, #5a3a8a, #9b6fd1); }
+.feat .clamp2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 6rpx; }
+.hands { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
+.hand { background: #f3f6f4; border-radius: 16rpx; padding: 20rpx; }
+.hand .ht { display: block; font-weight: 700; font-size: 28rpx; margin-bottom: 4rpx; }
+.cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
+.ccard { background: #fff; border: 1rpx solid #d6e0dc; border-radius: 20rpx; padding: 16rpx; display: flex; flex-direction: column; gap: 10rpx; }
+.ccard .cm { font-size: 22rpx; color: #5b716b; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ccard .tag { margin-right: 8rpx; }
+.ccard .ct { font-weight: 700; font-size: 28rpx; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ccard .cf { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+.ccard .ell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

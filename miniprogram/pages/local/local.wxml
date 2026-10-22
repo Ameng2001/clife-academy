@@ -1,0 +1,18 @@
+<view class="wrap">
+  <view class="h1">本地专区</view>
+  <text class="muted small">本地讲师值守、技术支持与本园工单。</text>
+  <view class="kv">
+    <view class="panel k"><text class="eyebrow">本地讲师值守</text><text>工作日 12:30—14:30、16:30—18:00</text></view>
+    <view class="panel k"><text class="eyebrow">技术支持电话</text><view class="row"><text class="num" selectable>400-636-6396</text><text class="link" bindtap="copy">复制</text></view></view>
+    <view class="panel k"><text class="eyebrow">本园工单</text><text>{{open}} 张处理中</text></view>
+    <view class="panel k"><text class="eyebrow">岗位认证</text><text>春季第一期 3 月开班</text></view>
+  </view>
+  <view class="panel"><view class="h2">本园工单</view>
+    <view wx:for="{{tickets}}" wx:key="id" class="file"><view class="ext num" style="font-size:18rpx">{{item.id}}</view><view class="body">{{item.t}}</view><text class="pill {{item.s === '已关闭' ? 'ok' : 'warn'}}">{{item.s}}</text></view>
+  </view>
+  <view class="panel"><view class="h2">提交报修</view>
+    <text class="eyebrow">设备与位置</text><input class="inp" placeholder="例如：额温枪 · 小一班" maxlength="40" value="{{devv}}" bindinput="dev"/>
+    <text class="eyebrow" style="display:block;margin-top:16rpx">故障现象</text><textarea class="ta" placeholder="例如：连续两天离线，已更换电池" maxlength="120" value="{{txtv}}" bindinput="txt"></textarea>
+    <button class="btn primary" style="margin-top:16rpx" bindtap="submit">提交报修</button>
+  </view>
+</view>

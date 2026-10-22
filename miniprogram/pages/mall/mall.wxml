@@ -1,0 +1,26 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">用积分换</text>
+  <view class="h1">教学物料商城</view>
+  <text class="muted small">教具、绘本、耗材、名额，本地运营方上架，寄到园。不是钱，不可转赠、不排行。</text>
+  <view class="panel" wx:if="{{!signedIn}}"><text class="small">登录后在这里换。</text><button class="btn primary" style="margin-top:16rpx" bindtap="goMe">去登录</button></view>
+  <block wx:if="{{signedIn}}">
+    <view class="panel between"><view><text class="eyebrow">我的积分</text><view class="h2" style="margin:0">{{points === null ? '—' : points}}</view></view><text class="muted small">明细在教研工坊的钱包页看</text></view>
+    <view class="h2">物料</view>
+    <view class="panel" wx:if="{{!items.length}}"><text class="muted small">还没有上架的物料。</text></view>
+    <view wx:for="{{items}}" wx:key="id" class="panel">
+      <view class="between"><view class="h3" style="margin:0">{{item.title}}</view><text class="eyebrow num" style="color:#1f6b5c">{{item.points}} 积分</text></view>
+      <text class="muted small" style="display:block;margin-top:4rpx">{{item.meta}}</text>
+      <text wx:if="{{item.desc}}" class="small" style="display:block;margin-top:8rpx">{{item.desc}}</text>
+      <text wx:if="{{item.deliver === 'pickup' && item.pickupNote}}" class="muted small" style="display:block;margin-top:4rpx">领取：{{item.pickupNote}}</text>
+      <button wx:if="{{item.available}}" class="btn {{item.enough ? 'primary' : 'line'}}" style="margin-top:12rpx" data-id="{{item.id}}" bindtap="redeem" disabled="{{busy || !item.enough}}">{{item.enough ? '换' : '积分不够'}}</button>
+    </view>
+    <view class="h2">我换的</view>
+    <view class="panel" wx:if="{{!orders.length}}"><text class="muted small">还没换过。</text></view>
+    <view wx:for="{{orders}}" wx:key="id" class="panel">
+      <view class="between"><view class="h3" style="margin:0">{{item.title}}</view><text class="pill {{item.status === 'done' ? 'ok' : item.status === 'cancelled' ? 'idle' : 'warn'}}">{{item.statusName}}</text></view>
+      <text class="muted small" style="display:block;margin-top:4rpx">{{item.at}} · {{item.points}} 积分 · {{item.deliverName}}{{item.note ? ' · ' + item.note : ''}}</text>
+      <button wx:if="{{item.status === 'placed'}}" class="btn line" style="margin-top:12rpx" data-id="{{item.id}}" bindtap="cancel" disabled="{{busy}}">取消，退回积分</button>
+    </view>
+  </block>
+</view>

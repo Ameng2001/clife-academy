@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Week Arrangement</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="week">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./week-arrangement.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./month-matrix.html">month matrix thread</a>
+            <a class="thread-link active" href="./week-arrangement.html">week 2 expansion thread</a>
+            <a class="thread-link" href="./activity-editor.html">activity writing thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Week Arrangement</div><div class="title">Week 是容器阶段，会展开成多个活动</div><p class="muted">这里不应该被理解成“一个 week = 一个 activity”。你在这里调整的是一整周结构，接下来才会从这一周拆出多个活动稿。</p></div><div class="head-actions"><span class="chip">week-stage</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node active">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate">Stage Confirm</span>
+          </div>
+          <div class="stage-notes">
+            <div class="stage-note">当前处理的是第 2 周这个容器，右侧会同时显示本周展开出的多个活动项。</div>
+          </div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message user"><h3>你</h3><div>周二我不想连续两个高强度教学活动，帮我松一松节奏。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>我建议把周二下午替换成区域活动“职业服饰拼图”，并把家园互动放到周五，形成前松后收的结构。</div><div class="bubble-actions" style="margin-top:12px;"><span class="bubble-action">采纳建议</span><span class="bubble-action">再保守一点</span></div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>右侧的周安排已经更新。接下来可以选择从这个 week 展开某个具体活动，进入 activity writing thread。</div><div class="bubble-actions" style="margin-top:12px;"><a class="bubble-action" href="./activity-editor.html">打开教学活动</a><a class="bubble-action" href="./activity-editor.html">打开区域活动</a></div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：把周三上午变成户外活动，并保留主题连贯性" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">第 2 周安排</div></div><span class="chip">1 week → N activities</span></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Focus Canvas · 线性周安排</h2><span class="chip">Container</span></div>
+              <div class="stack-list">
+                <div class="stack-item"><strong>周一上午</strong><div class="muted">教学活动 · 这是谁的衣服</div></div>
+                <div class="stack-item"><strong>周二上午</strong><div class="muted">教学活动 · 我会穿什么</div></div>
+                <div class="stack-item"><strong>周二下午</strong><div class="muted">区域活动 · 职业服饰拼图</div></div>
+                <div class="stack-item"><strong>周三上午</strong><div class="muted">户外游戏 · 服饰接力赛</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>本周展开的活动</h2><span class="chip">Activities</span></div>
+              <div class="stack-list">
+                <div class="stack-item"><strong>教学活动</strong><div class="muted">已生成稿件</div></div>
+                <div class="stack-item"><strong>区域活动</strong><div class="muted">已生成稿件</div></div>
+                <div class="stack-item"><strong>生活渗透</strong><div class="muted">尚未生成</div></div>
+              </div>
+            </section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">rhythm + gaps</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><a class="mini-link" href="./month-matrix.html">回看 month</a></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot active">T</div><div class="mini-slot active">R</div><div class="mini-slot active">O</div><div class="mini-slot missing">-</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Week Rhythm Mini</h2><span class="chip">W2</span></div>
+              <div class="rhythm-list">
+                <div class="rhythm-row"><div class="mini-week-label">Mon</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Tue</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar warning"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Wed</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot missing"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Thu</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar active"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Fri</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Missing / Coverage</h2><span class="chip">signals</span></div>
+              <div class="hint-list">
+                <div class="hint-item"><strong>缺项</strong><div class="muted">本周还缺 1 个生活渗透活动。</div></div>
+                <div class="hint-item"><strong>节奏</strong><div class="muted">周二偏密，周三可再补一个轻量环节平衡节奏。</div></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

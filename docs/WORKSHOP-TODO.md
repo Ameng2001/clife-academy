@@ -1,6 +1,6 @@
 # 教研工坊线上版（jiaoyan.clife.cn）待办清单
 
-2026-10-22。幼师学坊这头的接口全部就绪（契约 docs/WORKSHOP-SHARE.md、docs/POINTS-DESIGN.md、api/openapi.yaml）。下面是工坊线上版要做的事，按先后排。参考实现与界面规格在插件仓库 courses-workshop-plugins（`workshop-core/scripts/share_academy.py`、`apps/teaching-workshop-ui-v3/export-bundle.html`、`docs/design/教研工坊-分享到幼师学坊.md`），线上版照着做即可，不必照搬代码。
+2026-10-22。幼师学坊这头的接口全部就绪（契约 docs/WORKSHOP-SHARE.md、docs/POINTS-DESIGN.md、api/openapi.yaml）。下面是工坊线上版要做的事，按先后排。参考实现与界面规格在本仓库 `workshop/`（`workshop-core/scripts/share_academy.py`、`apps/teaching-workshop-ui-v3/export-bundle.html`、`docs/design/教研工坊-分享到幼师学坊.md`），线上版照着做即可，不必照搬代码。
 
 每条后面的「验收」是学坊这边能看到的结果。
 

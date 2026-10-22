@@ -16,7 +16,7 @@
 
 ## 二、A 路：工坊内置按钮（工坊仓库做）
 
-> 线上版（jiaoyan.clife.cn）**先不实现**，待办清单在 docs/WORKSHOP-TODO.md。插件仓库里的参考实现（2026-10-22，courses-workshop-plugins）：插件 skill `/workshop-core:share` 与脚本 `workshop-core/scripts/share_academy.py` 是可运行的参考实现（用过再分享门槛、四栏预填、「改了什么」只能教师写、两开关、提交回写 `status.json`、署名一句、`--draft`）；V3 原型 `apps/teaching-workshop-ui-v3/export-bundle.html` 交付页有按钮与四栏弹层；设计见该仓库 `docs/design/教研工坊-分享到幼师学坊.md`。线上版 jiaoyan.clife.cn 照这两样做。
+> 线上版（jiaoyan.clife.cn）**先不实现**，待办清单在 docs/WORKSHOP-TODO.md。本仓库 `workshop/` 里的参考实现（2026-10-22）：插件 skill `/workshop-core:share` 与脚本 `workshop-core/scripts/share_academy.py` 是可运行的参考实现（用过再分享门槛、四栏预填、「改了什么」只能教师写、两开关、提交回写 `status.json`、署名一句、`--draft`）；V3 原型 `apps/teaching-workshop-ui-v3/export-bundle.html` 交付页有按钮与四栏弹层；设计见 `workshop/docs/design/教研工坊-分享到幼师学坊.md`。线上版 jiaoyan.clife.cn 照这两样做。
 
 **按钮在哪**：课程工作台「交付」页，和「一键导出」并排。课程状态是「未完成 / 待提交」时按钮灰，鼠标放上去说「用过再分享」；「审核通过」或教师自己标过「已在班里用过」才亮。
 

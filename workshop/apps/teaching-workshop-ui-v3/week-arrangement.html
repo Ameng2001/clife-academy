@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V3 · Week Arrangement</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="week">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Structure-first Copilot Studio</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./week-arrangement.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./month-matrix.html">月矩阵 thread</a>
+            <a class="thread-link active" href="./week-arrangement.html">第 2 周 thread</a>
+            <a class="thread-link" href="./activity-editor.html">教学活动 thread</a>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <div class="eyebrow">Week Arrangement</div>
+            <h1 class="title">节奏与缺项回到主舞台</h1>
+            <p class="muted">这里的主对象是整周节奏，而不是单个活动。先把一周排顺，再从这一周向下展开多个活动稿。</p>
+          </div>
+          <div class="head-actions">
+            <span class="chip">week stage</span>
+            <a class="ghost-link" href="./activity-editor.html">打开教学活动</a>
+          </div>
+        </section>
+
+        <section class="context-bar">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Month Matrix</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node active">Week Arrangement</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Activities (N)</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node ready">Ready to Confirm</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-note">`Week` 是容器，不是单稿。你在这里调整的是一整周的密度、轻重、缺项和锚点活动，之后才会拆分成多个 activity thread。</div>
+            <div class="stage-actions"><span class="ghost-link">当前选中：周二节奏</span></div>
+          </div>
+        </section>
+
+        <section class="canvas-shell">
+          <section class="main-canvas">
+            <section class="canvas-card rhythm-board">
+              <div class="section-head"><h2>本周节奏条</h2><span class="chip">primary object</span></div>
+              <div class="day-rhythm">
+                <div class="day-label">Mon</div>
+                <div class="rhythm-track"><span class="rhythm-segment active"></span><span class="rhythm-segment light"></span><span class="rhythm-segment"></span></div>
+                <div class="signal"><span class="signal-dot success"></span>平稳</div>
+              </div>
+              <div class="day-rhythm">
+                <div class="day-label">Tue</div>
+                <div class="rhythm-track"><span class="rhythm-segment active"></span><span class="rhythm-segment warning"></span><span class="rhythm-segment light"></span></div>
+                <div class="signal"><span class="signal-dot warning"></span>偏密</div>
+              </div>
+              <div class="day-rhythm">
+                <div class="day-label">Wed</div>
+                <div class="rhythm-track"><span class="rhythm-segment active"></span><span class="rhythm-segment"></span><span class="rhythm-segment"></span></div>
+                <div class="signal"><span class="signal-dot danger"></span>缺轻量活动</div>
+              </div>
+              <div class="day-rhythm">
+                <div class="day-label">Thu</div>
+                <div class="rhythm-track"><span class="rhythm-segment active"></span><span class="rhythm-segment light"></span><span class="rhythm-segment"></span></div>
+                <div class="signal"><span class="signal-dot success"></span>平稳</div>
+              </div>
+              <div class="day-rhythm">
+                <div class="day-label">Fri</div>
+                <div class="rhythm-track"><span class="rhythm-segment active"></span><span class="rhythm-segment"></span><span class="rhythm-segment light"></span></div>
+                <div class="signal"><span class="signal-dot success"></span>收束</div>
+              </div>
+            </section>
+
+            <section class="canvas-card">
+              <div class="section-head"><h2>第 2 周活动清单</h2><span class="chip">container → children</span></div>
+              <div class="stack-list">
+                <div class="stack-item"><strong>周一上午</strong><div class="muted">教学活动 · 这是谁的衣服</div></div>
+                <div class="stack-item"><strong>周二上午</strong><div class="muted">教学活动 · 我会穿什么</div></div>
+                <div class="stack-item"><strong>周二下午</strong><div class="muted">区域活动 · 职业服饰拼图</div></div>
+                <div class="stack-item"><strong>周三上午</strong><div class="muted">户外游戏 · 服饰接力赛</div></div>
+                <div class="stack-item"><strong>周三下午</strong><div class="muted">生活渗透 · 待补</div></div>
+                <div class="stack-item"><strong>周五</strong><div class="muted">家园互动 · 观察家人的工作服</div></div>
+              </div>
+            </section>
+          </section>
+
+          <aside class="copilot-drawer">
+            <section class="drawer-header">
+              <h2>Copilot Drawer</h2>
+              <p>当前附着对象：周二节奏。它会围绕这一天的轻重搭配和缺项修复给出建议，而不是直接替你改完整周。</p>
+            </section>
+            <section class="drawer-block">
+              <h3>周节奏信号</h3>
+              <div class="drawer-list">
+                <div class="drawer-item"><strong>过密</strong><div class="muted">周二有两个高认知负荷环节，建议其中一个换成更轻的区域活动。</div></div>
+                <div class="drawer-item"><strong>缺项</strong><div class="muted">周三缺一个生活渗透，导致节奏断裂。</div></div>
+              </div>
+            </section>
+            <section class="drawer-block">
+              <h3>可直接执行</h3>
+              <div class="drawer-actions">
+                <span class="drawer-action">把周二下午改轻</span>
+                <span class="drawer-action">补周三生活渗透</span>
+                <a class="drawer-action" href="./activity-editor.html">从周二展开教学活动</a>
+              </div>
+            </section>
+            <section class="drawer-chat">
+              <div class="message user"><h4>你</h4><div>周二我不想连续两个重活动。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>建议保留上午教学，把下午改成“今天我穿什么”搭配角。这样仍保持主题连续，但负荷明显下降。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>如果接受，我再帮你补周三的生活渗透，把这一周真正排顺。</div></div>
+            </section>
+            <div class="drawer-composer">
+              <input placeholder="例如：周三上午户外活动保留，但周三下午补一个轻量生活渗透" />
+              <button class="button button-primary">发送</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

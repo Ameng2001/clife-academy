@@ -1,0 +1,14 @@
+{
+  "name": "workshop-pbl",
+  "version": "0.1.0",
+  "description": "PBL course design pipeline — driving question, network map, inquiry scaffolding, activity design, and proposal generation for kindergarten curriculum directors",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["pbl", "curriculum", "kindergarten", "course-design", "inquiry"],
+  "dependencies": ["workshop-core"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

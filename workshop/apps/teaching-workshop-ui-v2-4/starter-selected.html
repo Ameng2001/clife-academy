@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V2.4 · Starter Selected</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="starter">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="top-nav">
+          <a class="nav-link active" href="./index.html">＋ New session</a>
+          <a class="nav-link" href="./index.html">⌕ Search</a>
+          <a class="nav-link" href="./index.html">◷ Plans</a>
+          <a class="nav-link" href="./index.html">⤴ Exports</a>
+          <a class="nav-link" href="./index.html">⚙ Customize</a>
+        </div>
+        <section class="sidebar-section">
+          <div class="sidebar-label"><span>Projects</span><span>＋</span></div>
+          <a class="thread-item" href="./create-project.html">
+            <div class="project-title">Create your first project</div>
+            <div class="thread-meta">先建一个 project，再让这条 starter 变成正式 thread。</div>
+          </a>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="hero">
+          <h1>启动草稿态</h1>
+          <p>你选中了一个 starter。系统已经帮你起好一版 prompt 草稿，现在你可以补充目标、约束和 project 上下文，再正式开始。</p>
+        </section>
+
+        <section class="composer-card">
+          <textarea class="composer-textarea">帮我创建一个新的主题课程项目。
+
+请先帮我完成：
+- 主题分析
+- 主题解读
+- 四周递进建议
+
+开始前请确认：
+- 主题名称
+- 年龄段 / 班级
+- 是否对齐客户模板
+- 希望采用哪种课程 pipeline</textarea>
+          <div class="composer-controls">
+            <span class="select-pill">▣ Work in a project ▾</span>
+            <a class="ghost-button" href="./create-project.html">Create your first project</a>
+            <a class="ghost-button" href="./studio-thread.html">Use sample project</a>
+            <button class="cta-button">Let’s go →</button>
+          </div>
+        </section>
+      </main>
+
+      <aside class="rail">
+        <div class="rail-card">
+          <h3>Starter Context</h3>
+          <div class="source-list">
+            <div class="source-item"><strong>starter</strong><div class="project-meta">创建一个主题课程项目</div></div>
+            <div class="source-item"><strong>recommended next step</strong><div class="project-meta">先建 project，再进入第一个 thread。</div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 · Export Bundle</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="export">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Export Bundle</div></div></div>
+        <div class="nav-group">
+          <div class="nav-label">Delivery</div>
+          <a class="nav-link" data-page="project" href="./project-workspace.html"><span>Workspace</span></a>
+          <a class="nav-link" data-page="hil" href="./hil-gate.html"><span>HIL Gate</span></a>
+          <a class="nav-link" data-page="export" href="./export-bundle.html"><span>Export</span><span class="nav-badge">Bundle</span></a>
+        </div>
+      </aside>
+      <div class="main-column">
+        <header class="top-strip"><div class="search-shell"><span class="muted">Export 不是黑盒导出，而是交付包检查页</span><input placeholder="搜索导出目标或交付文件" /></div><div class="toolbar"><span class="status-pill status-success">word-ready</span><span class="status-pill">pdf-ready</span></div></header>
+        <main class="surface">
+          <div class="page-header">
+            <div><div class="eyebrow">Export Bundle</div><h1>把项目工程变成可交付包</h1><p class="muted">这里要让用户明确区分 project workspace、release bundle 和 export bundle，不把导出做成神秘的一键按钮。</p></div>
+            <div class="hero-strip"><span class="chip">Word-ready</span><span class="chip">PDF-ready</span><span class="chip">Remote-ready</span></div>
+          </div>
+          <div class="split-layout">
+            <section class="surface" style="padding:18px;">
+              <div class="section-head"><h2>Bundle Tree</h2><span class="chip">Release</span></div>
+              <div class="bundle-tree">
+                <div class="list">
+                  <div class="list-row"><strong>lesson-plan.md</strong><div class="muted">最终教学活动稿</div></div>
+                  <div class="list-row"><strong>resource-plan.md</strong><div class="muted">资源准备说明</div></div>
+                  <div class="list-row"><strong>review-comments.md</strong><div class="muted">审批与修改摘要</div></div>
+                </div>
+              </div>
+            </section>
+            <section class="surface" style="padding:18px;">
+              <div class="section-head"><h2>Manifest Preview</h2><span class="chip">word-ready-bundle</span></div>
+              <div class="manifest-preview">
+                <div class="list">
+                  <div class="list-row"><strong>target</strong><div class="muted">word-ready-bundle</div></div>
+                  <div class="list-row"><strong>renderer</strong><div class="muted">docx-placeholder</div></div>
+                  <div class="list-row"><strong>layout</strong><div class="muted">dual-column teaching format with support notes</div></div>
+                  <div class="list-row"><strong>naming</strong><div class="muted">客户主题包-多样的服饰.docx</div></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+      <aside class="copilot-panel">
+        <section class="copilot-block">
+          <div class="eyebrow">Context Summary</div>
+          <h3>当前在检查交付包是否完整</h3>
+          <p class="muted">这页的关键不是渲染 docx/pdf，而是确认 release bundle 和 export bundle 是否满足客户模板与交付条件。</p>
+        </section>
+        <section class="copilot-block">
+          <h3>Suggested Actions</h3>
+          <div class="mini-actions">
+            <span class="action-pill">检查缺失项</span>
+            <span class="action-pill">生成导出说明</span>
+            <span class="action-pill">准备 PDF-ready</span>
+          </div>
+        </section>
+        <section class="copilot-block">
+          <h3>Export Hints</h3>
+          <div class="copilot-feed-item"><strong>当前状态</strong><div class="muted">Word-ready manifest 已存在，PDF-ready 还缺封面和页眉页脚策略说明。</div></div>
+          <div class="copilot-feed-item"><strong>交付提醒</strong><div class="muted">在 approval-gate 通过前，导出包可预览但不应标记为 final。</div></div>
+        </section>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

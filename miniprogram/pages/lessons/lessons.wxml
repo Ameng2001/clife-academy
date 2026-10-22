@@ -1,0 +1,25 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <view class="h1">精品微课</view>
+  <text class="muted small">遇到事查一下：按场景查，不受解锁限制，点开直接看微课和录屏；要走关去学习路径。</text>
+  <view class="search" style="margin-top:16rpx;display:flex;align-items:center;gap:12rpx">
+    <input class="field" style="flex:1" placeholder="搜标题、操作步骤、平台菜单，如「批量管理」" value="{{q}}" confirm-type="search" bindinput="onSearch" />
+    <text wx:if="{{q}}" class="chip" bindtap="clearSearch">清除</text>
+  </view>
+  <view wx:if="{{!q}}" style="margin:20rpx 0 8rpx"><text class="eyebrow">视图</text><view class="row"><text wx:for="{{views}}" wx:key="*this" class="chip {{view === item[0] ? 'on' : ''}}" data-v="{{item[0]}}" bindtap="setView">{{item[1]}}</text></view></view>
+  <view style="margin:12rpx 0 8rpx"><text class="eyebrow">岗位</text><view class="row"><text wx:for="{{roles}}" wx:key="*this" class="chip {{role === item ? 'on' : ''}}" data-v="{{item}}" bindtap="setRole">{{item}}</text></view></view>
+  <view wx:if="{{view !== 'day' || q}}" style="margin-bottom:16rpx"><text class="eyebrow">场景</text><scroll-view scroll-x style="white-space:nowrap"><text wx:for="{{scenes}}" wx:key="*this" class="chip {{scene === item ? 'on' : ''}}" data-v="{{item}}" bindtap="setScene">{{item}}</text></scroll-view></view>
+  <text wx:if="{{recentHint}}" class="muted small" style="display:block;margin-bottom:12rpx">{{recentHint}}</text>
+  <view wx:if="{{!items.length && !groups.length}}" class="panel muted">没有匹配的微课。换个词，或者去掉岗位、场景筛选。</view>
+  <block wx:for="{{groups}}" wx:key="part" wx:for-item="g">
+    <view class="h2" style="margin:8rpx 0 12rpx">{{g.part}} <text class="muted small">· {{g.items.length}} 关</text></view>
+    <view wx:for="{{g.items}}" wx:key="t" class="lesson" data-p="{{item.p}}" data-i="{{item.i}}" bindtap="goLevel">
+      <view class="thumb">{{item.ico}}<text class="dur">{{item.dur}}</text><text wx:if="{{item.s === 'done'}}" class="lk pill ok">已学</text><text wx:elif="{{item.s === 'current'}}" class="lk pill hot">学习中</text></view>
+      <view class="body"><text class="tag role">{{item.role}}</text><text class="tag">{{item.scene}}</text><view class="h3" style="margin-top:8rpx">{{item.t}}</view><text class="muted small">{{item.goal}}</text></view>
+    </view>
+  </block>
+  <view wx:for="{{items}}" wx:key="t" class="lesson" data-p="{{item.p}}" data-i="{{item.i}}" bindtap="goLevel">
+    <view class="thumb">{{item.ico}}<text class="dur">{{item.dur}}</text><text wx:if="{{item.s === 'done'}}" class="lk pill ok">已学</text><text wx:elif="{{item.s === 'current'}}" class="lk pill hot">学习中</text></view>
+    <view class="body"><text class="tag role">{{item.role}}</text><text class="tag">{{item.scene}}</text><view class="h3" style="margin-top:8rpx">{{item.t}}</view><text class="muted small">{{item.hit || item.goal}}</text></view>
+  </view>
+</view>

@@ -1,0 +1,5 @@
+.lv { display: flex; align-items: center; gap: 20rpx; padding: 18rpx 0; border-top: 1rpx solid #d6e0dc; }
+.lv:first-child { border-top: 0; }
+.ix { font-size: 22rpx; color: #5b716b; width: 48rpx; }
+.lv .body { flex: 1; min-width: 0; font-size: 28rpx; }
+.lv .sub { display: block; font-size: 22rpx; color: #5b716b; }

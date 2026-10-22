@@ -1,0 +1,50 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">{{d.district ? d.district.name : '区县'}}{{demo ? ' · 演示数据' : ''}}</text>
+  <view class="h1">区县看板</view>
+  <text class="muted small">只看汇总：园所数、各领域覆盖率中位数、认证人数、共同体活动。不列任何一所园的数，不排名，不导出，无测验分。</text>
+  <view wx:if="{{noDistrict}}" class="panel"><text class="muted small">这个账号没有区县归属。平台账号由平台给区县字段。</text></view>
+  <view class="panel" style="margin-top:20rpx">
+    <view class="row stats">
+      <view class="stat"><text class="v num">{{d.orgCount}}</text><text class="k">园所</text></view>
+      <view class="stat"><text class="v num">{{d.members_total}}</text><text class="k">在学人数</text></view>
+      <view class="stat"><text class="v num">{{d.finished}}</text><text class="k">走完岗位路径</text></view>
+      <view class="stat"><text class="v num">{{d.certified}}</text><text class="k">领域认证人次</text></view>
+    </view>
+    <text class="muted small">本周全区通关 {{d.passes7d}} 关</text>
+  </view>
+  <view class="panel">
+    <view class="h2">各领域覆盖率 · 中位数</view>
+    <text wx:if="{{!d.medians}}" class="muted small">辖区不足 3 所园，不显示中位数：两所园的中位数等于暴露单园的数。</text>
+    <block wx:else>
+      <view class="kv"><view style="flex:1"><text class="small">岗位路径完成率</text><view class="bar"><i style="width:{{d.rateMedian}}%"></i></view></view><text class="num small" style="margin-left:20rpx">{{d.rateMedian}}%</text></view>
+      <view wx:for="{{d.domains}}" wx:key="name" class="kv"><view style="flex:1"><text class="small">{{item.name}}</text><view class="bar"><i style="width:{{item.median}}%"></i></view></view><text class="num small" style="margin-left:20rpx">{{item.median}}%</text></view>
+      <text class="muted small">覆盖率是一所园里该领域至少有一条证据的教师占比；这里是 {{d.orgCount}} 所园的中位数，不是任何一所园。</text>
+    </block>
+  </view>
+  <view class="panel" wx:if="{{d.activity}}">
+    <view class="h2">共同体活动</view>
+    <view class="kv"><text class="small">斗课园内赛</text><text class="muted small num">{{d.activity.contests.total}} 场 · 进行中 {{d.activity.contests.open}} · 已收官 {{d.activity.contests.done}}</text></view>
+    <view class="kv"><text class="small">研讨关作答</text><text class="muted small num">{{d.activity.drillAnswers}} 条</text></view>
+    <view class="kv"><text class="small">入库案例</text><text class="muted small num">{{d.activity.cases}} 条</text></view>
+    <view class="kv"><text class="small">名师讲堂预约</text><text class="muted small num">{{d.activity.lectureBookings}} 人次</text></view>
+  </view>
+  <view class="panel">
+    <view class="h2">跨园共同体 <text class="muted small">{{comm.length}} 组 · 组内共享专家案例与联合研讨题</text></view>
+    <view wx:for="{{comm}}" wx:key="id" class="kv"><view><text class="small">{{item.name}}</text><text class="muted small" style="display:block">{{item.orgText}}</text></view></view>
+    <text wx:if="{{!comm.length}}" class="muted small">还没有共同体。</text>
+    <text class="muted small" style="display:block;margin-top:8rpx">建组、改组在网页端区县看板里做；联合研讨题在「每周一题」里出。</text>
+  </view>
+  <view class="panel">
+    <view class="h2">体检汇总</view>
+    <view class="kv"><text class="small">接通平台回传的园</text><text class="muted small num">{{d.checkup.pushed}} / {{d.orgCount}}</text></view>
+    <view class="kv"><text class="small">本周有需关注项的园</text><text class="muted small num">{{d.checkup.warn}} 所</text></view>
+    <text class="muted small">不列哪所园、哪一项。体检卡是园长自用的工具，区县在园长例会上提醒即可。</text>
+  </view>
+  <view class="panel">
+    <view class="h2">本区园所 <text class="muted small">{{d.orgCount}} 所 · 按名称 · 无数字</text></view>
+    <view wx:for="{{d.orgs}}" wx:key="name" class="kv"><text class="small">{{item.name}}</text></view>
+    <view class="row" style="margin-top:16rpx;gap:12rpx"><input class="input" style="flex:1" placeholder="园所名称，与账号园名一致" value="{{name}}" bindinput="onName"/><button class="btn line" bindtap="attach">挂接</button></view>
+  </view>
+  <text class="link" bindtap="goPath" style="display:block;margin-top:8rpx">区县管理员路径 · 6 关</text>
+</view>

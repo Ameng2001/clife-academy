@@ -1,0 +1,13 @@
+{
+  "name": "workshop-planner",
+  "version": "0.2.0",
+  "description": "Hierarchical curriculum planning — create semester theme calendars, break into monthly sub-themes, and generate weekly daily activity schedules",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["workshop", "planner", "semester", "month", "week", "curriculum"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

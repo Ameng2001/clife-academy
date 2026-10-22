@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V3 · Activity Editor</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="activity">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Structure-first Copilot Studio</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./activity-editor.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./week-arrangement.html">第 2 周 thread</a>
+            <a class="thread-link active" href="./activity-editor.html">教学活动 thread</a>
+            <a class="thread-link" href="./activity-editor.html">区域活动 thread</a>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <div class="eyebrow">Activity Editor</div>
+            <h1 class="title">活动稿仍然沉浸，但不脱离结构位置</h1>
+            <p class="muted">Activity 是最适合强对话的阶段，但上方路径和左侧 thread 会始终提醒它属于哪个 week、哪个结构位。</p>
+          </div>
+          <div class="head-actions">
+            <span class="chip">activity stage</span>
+            <a class="ghost-link" href="./week-arrangement.html">回到 Week 2</a>
+          </div>
+        </section>
+
+        <section class="context-bar">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Month Matrix</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Week Arrangement</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node active">Activities (N)</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node ready">Ready to Confirm</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-note">路径：多样的服饰 > Week 2 > 教学活动 > 这是谁的衣服。这里允许深度对话，但不会丢掉它在整体课程里的位置。</div>
+            <div class="stage-actions"><span class="ghost-link">当前对象：过程第 2 环节</span></div>
+          </div>
+        </section>
+
+        <section class="canvas-shell">
+          <section class="main-canvas">
+            <section class="canvas-card activity-layout">
+              <aside class="section-card">
+                <h3>文稿结构</h3>
+                <div class="outline-list">
+                  <div class="outline-link">核心发展目标</div>
+                  <div class="outline-link">活动目标</div>
+                  <div class="outline-link active">活动过程 · 第 2 环节</div>
+                  <div class="outline-link">活动延伸</div>
+                </div>
+              </aside>
+              <div class="section-list">
+                <div class="section-card">
+                  <h3>核心发展目标</h3>
+                  <div class="muted">SE-4 / SE-8：在具体场景中辨认服饰特征，形成情境判断与表达。</div>
+                </div>
+                <div class="section-card">
+                  <h3>活动过程 · 第 2 环节</h3>
+                  <div class="section-list">
+                    <div class="section-item"><strong>教师动作</strong><div class="muted">比较医生服、厨师服、雨衣，引导幼儿说出“这件衣服适合在哪里穿、为什么”。</div></div>
+                    <div class="section-item"><strong>幼儿动作</strong><div class="muted">描述衣服的用途，尝试用“因为……所以……”组织表达。</div></div>
+                    <div class="section-item"><strong>观察与支持</strong><div class="muted">若幼儿只关注颜色，教师追问其功能和场景，并用二选一提示帮助组织语言。</div></div>
+                  </div>
+                </div>
+                <div class="section-card">
+                  <h3>活动延伸</h3>
+                  <div class="muted">回家继续观察家人服饰，说说“为什么要这样穿”。</div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <aside class="copilot-drawer">
+            <section class="drawer-header">
+              <h2>Copilot Drawer</h2>
+              <p>当前附着对象：过程第 2 环节。它知道这节活动属于 Week 2 的教学活动，会优先保持与周节奏和月主题的连续性。</p>
+            </section>
+            <section class="drawer-block">
+              <h3>上下文锚点</h3>
+              <div class="drawer-list">
+                <div class="drawer-item"><strong>所在 week</strong><div class="muted">Week 2 · 场景服饰</div></div>
+                <div class="drawer-item"><strong>当前角色</strong><div class="muted">这一稿是 Week 2 的认知锚点活动。</div></div>
+              </div>
+            </section>
+            <section class="drawer-chat">
+              <div class="message user"><h4>你</h4><div>只重写第 2 环节，让它更像客户模板。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>我保留了“功能与场景”的主线，只收紧教师话术，并补了观察与支持要点。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>这样改完后，这节活动仍然适合作为 Week 2 的结构锚点。</div></div>
+            </section>
+            <section class="drawer-block">
+              <h3>可直接执行</h3>
+              <div class="drawer-actions">
+                <span class="drawer-action">再正式一点</span>
+                <span class="drawer-action">更适合中班</span>
+                <a class="drawer-action" href="./hil-confirm.html">作为可确认成果</a>
+              </div>
+            </section>
+            <div class="drawer-composer">
+              <input placeholder="例如：只改第二环节，不动第一和第三环节" />
+              <button class="button button-primary">发送</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

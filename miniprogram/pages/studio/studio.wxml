@@ -1,0 +1,29 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">市级{{demo ? ' · 演示数据' : ''}}</text>
+  <view class="h1">名师工作室</view>
+  <text class="muted small">专家讲师主持，骨干教师参加，产出园本课程案例。每年一次市级展示：各共同体赛的入选作品上台，名师点评；没有分数与名次。</text>
+  <view wx:for="{{studios}}" wx:key="id" class="panel">
+    <view class="h2">{{item.name}}</view>
+    <text class="muted small">{{item.meta}}</text>
+    <text wx:if="{{item.intro}}" class="small" style="display:block;margin-top:8rpx">{{item.intro}}</text>
+    <view wx:if="{{item.cases.length}}" style="margin-top:8rpx"><text class="muted small">产出：</text><text wx:for="{{item.cases}}" wx:for-item="c" wx:key="*this" class="small" style="display:block">· {{c}}</text></view>
+    <button wx:if="{{item.canApply}}" class="btn line" style="margin-top:12rpx" data-id="{{item.id}}" bindtap="apply">申请加入</button>
+  </view>
+  <text wx:if="{{!studios.length}}" class="muted small">还没有工作室。</text>
+  <text wx:if="{{!demo && !eligible}}" class="muted small" style="display:block;margin-top:8rpx">申请加入要有骨干教师认证。</text>
+  <view class="h2" style="margin-top:28rpx">市级展示</view>
+  <view wx:for="{{shows}}" wx:key="id" class="panel">
+    <view class="h3">{{item.title}}</view>
+    <text class="muted small">{{item.meta}}</text>
+    <view wx:for="{{item.entries}}" wx:for-item="c" wx:key="title" class="kv" style="display:block">
+      <text class="small" style="display:block">{{c.title}}</text>
+      <text class="muted small" style="display:block">{{c.who}}</text>
+      <text wx:if="{{c.comment}}" class="small" style="display:block;margin-top:6rpx;color:#1f6b5c">名师点评：{{c.comment}}</text>
+    </view>
+    <text wx:if="{{!item.entries.length}}" class="muted small">主持人还没定上台作品。</text>
+  </view>
+  <text wx:if="{{!shows.length}}" class="muted small">还没有市级展示。</text>
+  <text class="link small" style="display:block;margin-top:16rpx" bindtap="goLibrary">上台案例在专家案例标「市级展示」 →</text>
+  <text class="muted small" style="display:block;margin-top:16rpx">建室、办展、上台、点评在网页端。三级赛制：园内赛 → 共同体赛 → 市级展示。</text>
+</view>

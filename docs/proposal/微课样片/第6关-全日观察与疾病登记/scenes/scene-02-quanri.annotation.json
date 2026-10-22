@@ -1,0 +1,139 @@
+{
+  "sceneId": "scene-02",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "storyBasis": "一天当中发现的异常，平台上有一个固定入口，叫全日观察。；入园、午餐、午睡、离园，；在哪个时段发现，就在哪个时段记。；记的时候选好幼儿和观察老师，写清体温和精神状态。",
+  "sceneDurationMs": 21960,
+  "elements": [
+    {
+      "id": "e1",
+      "label": "全日观察入口",
+      "sequence": 1,
+      "narrativeRole": "一天中记录异常的固定入口",
+      "subtitle": "一天当中发现的异常，平台上有一个固定入口，叫全日观察。",
+      "type": "object",
+      "region": {
+        "x": 81,
+        "y": 181,
+        "width": 297,
+        "height": 377
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 650,
+        "durationMs": 6688,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          81,
+          369
+        ],
+        "end": [
+          378,
+          369
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e2",
+      "label": "一日四个时段",
+      "sequence": 2,
+      "narrativeRole": "入园、午餐、午睡、离园",
+      "subtitle": "入园、午餐、午睡、离园，",
+      "type": "object",
+      "region": {
+        "x": 401,
+        "y": 555,
+        "width": 1208,
+        "height": 248
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 7438,
+        "durationMs": 3706,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          401,
+          679
+        ],
+        "end": [
+          1609,
+          679
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e3",
+      "label": "发现时段",
+      "sequence": 3,
+      "narrativeRole": "在发现的时段记录",
+      "subtitle": "在哪个时段发现，就在哪个时段记。",
+      "type": "object",
+      "region": {
+        "x": 1023,
+        "y": 413,
+        "width": 113,
+        "height": 154
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 11244,
+        "durationMs": 3999,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1023,
+          490
+        ],
+        "end": [
+          1136,
+          490
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e4",
+      "label": "记录内容",
+      "sequence": 4,
+      "narrativeRole": "选幼儿与观察老师，写体温与精神状态",
+      "subtitle": "记的时候选好幼儿和观察老师，写清体温和精神状态。",
+      "type": "object",
+      "region": {
+        "x": 441,
+        "y": 61,
+        "width": 577,
+        "height": 357
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 15343,
+        "durationMs": 5917,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          441,
+          239
+        ],
+        "end": [
+          1018,
+          239
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

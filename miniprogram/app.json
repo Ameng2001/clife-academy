@@ -1,0 +1,57 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/paths/paths",
+    "pages/level/level",
+    "pages/lessons/lessons",
+    "pages/checkup/checkup",
+    "pages/district/district",
+    "pages/studio/studio",
+    "pages/live/live",
+    "pages/drill/drill",
+    "pages/contest/contest",
+    "pages/library/library",
+    "pages/local/local",
+    "pages/me/me",
+    "pages/growth/growth",
+    "pages/community/community",
+    "pages/mall/mall"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "C-Life 学前大课堂",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f3f6f4"
+  },
+  "tabBar": {
+    "color": "#5b716b",
+    "selectedColor": "#1f6b5c",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/paths/paths",
+        "text": "路径"
+      },
+      {
+        "pagePath": "pages/lessons/lessons",
+        "text": "微课"
+      },
+      {
+        "pagePath": "pages/community/community",
+        "text": "共同体"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

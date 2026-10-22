@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "plugin": "workshop-5step",
+  "domain": "course-workshop",
+  "target_collection": "courses",
+  "phase": "designing",
+  "created_at": "2026-03-29T10:00:00+08:00",
+  "skills": {
+    "lesson-objective": "draft",
+    "lesson-scaffold": "draft",
+    "lesson-detail": "draft",
+    "lesson-generate": "draft"
+  }
+}

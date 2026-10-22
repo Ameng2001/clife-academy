@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V3 · Studio</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="studio">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="studio-mark"></div>
+          <div>
+            <div class="brand-title">教研工坊</div>
+            <div class="brand-subtitle">Structure-first Copilot Studio</div>
+          </div>
+        </div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./index.html">
+            <div class="project-title">多样的服饰</div>
+            <div class="project-meta">thematic-curriculum · 中班 · 本月进行中</div>
+          </a>
+          <a class="project-card" href="./index.html">
+            <div class="project-title">春天的花</div>
+            <div class="project-meta">PBL · 主题预案草稿</div>
+          </a>
+          <a class="project-card" href="./index.html">
+            <div class="project-title">我会穿什么</div>
+            <div class="project-meta">5step · 单活动</div>
+          </a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link active" href="./index.html">课程总览 thread</a>
+            <a class="thread-link" href="./month-matrix.html">第 2 周结构调整</a>
+            <a class="thread-link" href="./activity-editor.html">教学活动重写</a>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <div class="eyebrow">Studio</div>
+            <h1 class="title">先看课程结构，再围绕结构对话</h1>
+            <p class="muted">V3 不再把对话当主对象。当前项目的结构地图是主舞台，Copilot 围绕被选中的结构块推进设计。</p>
+          </div>
+          <div class="head-actions">
+            <span class="chip">single-user</span>
+            <span class="chip">project / thread</span>
+            <a class="ghost-link" href="./theme-framing.html">进入当前项目</a>
+          </div>
+        </section>
+
+        <section class="context-bar">
+          <div class="stage-flow">
+            <span class="stage-node active">Theme Framing</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Month Matrix</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Week Arrangement</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Activities (N)</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node ready">Ready to Confirm</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Export</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-note">这里展示的是课程地图，不是任务看板。`Week -> Activities` 是展开关系；Confirm 是附着在阶段上的 gate，而不是平行内容阶段。</div>
+            <div class="stage-actions">
+              <a class="ghost-link" href="./month-matrix.html">打开月矩阵</a>
+              <a class="ghost-link" href="./week-arrangement.html">打开第 2 周</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="canvas-shell">
+          <section class="main-canvas">
+            <section class="canvas-card">
+              <div class="section-head">
+                <h2>课程结构地图</h2>
+                <div class="mini-tabs">
+                  <span class="mini-tab">Structure View</span>
+                  <span class="chip">live project</span>
+                </div>
+              </div>
+              <div class="overview-map">
+                <div class="map-row">
+                  <div class="map-label">Theme Framing</div>
+                  <div class="map-children">
+                    <a class="map-chip active" href="./theme-framing.html">主题分析</a>
+                    <a class="map-chip active" href="./theme-framing.html">主题解读</a>
+                    <a class="map-chip active" href="./theme-framing.html">主题网络</a>
+                  </div>
+                </div>
+                <div class="map-row">
+                  <div class="map-label">Month Matrix</div>
+                  <div class="map-children">
+                    <a class="map-chip active" href="./month-matrix.html">Week 1 · 认识服饰</a>
+                    <a class="map-chip active" href="./month-matrix.html">Week 2 · 场景服饰</a>
+                    <a class="map-chip" href="./month-matrix.html">Week 3 · 设计服饰</a>
+                    <a class="map-chip" href="./month-matrix.html">Week 4 · 分享服饰</a>
+                  </div>
+                </div>
+                <div class="map-row">
+                  <div class="map-label">Week 2</div>
+                  <div class="map-children">
+                    <a class="map-chip active" href="./week-arrangement.html">周安排容器</a>
+                    <a class="map-chip active" href="./activity-editor.html">教学活动</a>
+                    <a class="map-chip active" href="./activity-editor.html">区域活动</a>
+                    <a class="map-chip" href="./activity-editor.html">户外游戏</a>
+                    <a class="map-chip" href="./activity-editor.html">生活渗透</a>
+                    <a class="map-chip" href="./activity-editor.html">家园互动</a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="canvas-card">
+              <div class="section-head">
+                <h2>当前项目信号</h2>
+                <span class="chip">signals</span>
+              </div>
+              <div class="signal-list">
+                <div class="signal-item"><strong>结构成熟度</strong><div class="muted">Theme Framing 已稳定，Month Matrix 已生成，Week 2 正在打磨节奏。</div></div>
+                <div class="signal-item"><strong>当前风险</strong><div class="muted">第 2 周周二偏密，且缺 1 个生活渗透活动。</div></div>
+                <div class="signal-item"><strong>最短下一步</strong><div class="muted">先打开 Week Arrangement 调整节奏，再决定是否补活动稿。</div></div>
+              </div>
+            </section>
+          </section>
+
+          <aside class="copilot-drawer">
+            <section class="drawer-header">
+              <h2>Copilot Drawer</h2>
+              <p>它不再单独占一个结果区，而是附着在当前结构对象上工作。此刻它围绕整个课程地图给出推进建议。</p>
+            </section>
+            <section class="drawer-block">
+              <h3>当前上下文</h3>
+              <div class="drawer-list">
+                <div class="drawer-item"><strong>project</strong><div class="muted">多样的服饰</div></div>
+                <div class="drawer-item"><strong>selected object</strong><div class="muted">课程结构地图 / Week 2</div></div>
+              </div>
+            </section>
+            <section class="drawer-chat">
+              <div class="message ai"><h4>教研 Copilot</h4><div>我建议你先从 Week 2 切入。它既能保留主题主线，又能最快暴露节奏问题。</div></div>
+              <div class="message user"><h4>你</h4><div>先帮我看第 2 周结构是不是失衡。</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>是的。周二偏密，生活渗透缺失。你可以直接打开周安排，我会围绕那一周继续协助。</div></div>
+            </section>
+            <section class="drawer-block">
+              <h3>可直接执行</h3>
+              <div class="drawer-actions">
+                <a class="drawer-action" href="./week-arrangement.html">打开 Week 2</a>
+                <a class="drawer-action" href="./month-matrix.html">查看 Month Matrix</a>
+              </div>
+            </section>
+            <div class="drawer-composer">
+              <input placeholder="例如：先分析第 2 周为什么会偏密" />
+              <button class="button button-primary">发送</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

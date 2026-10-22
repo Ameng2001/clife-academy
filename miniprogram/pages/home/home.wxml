@@ -1,0 +1,108 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <!-- 我的路径 -->
+  <view class="panel">
+    <text class="eyebrow">{{org}} · {{roleLabel}}</text>
+    <view class="h1">{{fin ? pathName + '路径已完成' : pathName + '路径 · 第 ' + (d + 1) + ' 关'}}</view>
+    <view class="row stats"><view class="stat"><text class="v num">{{d}}/{{tot}}</text><text class="k">已通过关卡</text></view><view class="stat" bindtap="goMall"><text class="v num">{{points === null || points === undefined ? '—' : points}}</text><text class="k">积分 · 换物料</text></view><view class="stat"><text class="v num">{{fin ? 1 : 0}}/1</text><text class="k">岗位徽章</text></view></view>
+    <scroll-view scroll-x class="mapwrap"><view class="map">
+      <view wx:for="{{map}}" wx:key="i" class="node {{item.s}}" data-p="{{p}}" data-i="{{item.i}}" bindtap="goLevel"><view class="dot">{{item.s === 'done' ? '✓' : item.i + 1}}</view><text class="t">{{item.t}}</text></view>
+    </view></scroll-view>
+    <view class="next" wx:if="{{!fin}}">
+      <text class="eyebrow">下一关 · {{next.dur}}</text>
+      <view class="h3">{{next.t}}</view>
+      <text class="muted small">{{next.goal}}</text>
+      <view class="row segs"><text wx:for="{{segs}}" wx:key="k" class="seg {{item.on ? 'on' : ''}}">{{item.k}}</text></view>
+      <button class="btn primary block" data-p="{{p}}" data-i="{{next.i}}" bindtap="goLevel">继续学习</button>
+    </view>
+    <view class="next" wx:else><view class="h3">全部 {{tot}} 关已通过</view><text class="muted small">可在「我的」查看徽章，春季学期可报名初级岗位认证。</text></view>
+  </view>
+
+  <!-- 园长：岗位完成情况 -->
+  <view class="panel" wx:if="{{director}}">
+    <view class="h2">本园学习概况</view>
+    <view class="trow head"><text class="c1">岗位</text><text class="c2">人数</text><text class="c2">完成</text><text class="c2">学习中</text><text class="c2">未开始</text></view>
+    <view wx:for="{{staff}}" wx:key="q" class="trow"><text class="c1">{{item.name}}</text><text class="c2 num">{{item.n}}</text><text class="c2 num">{{item.f}}</text><text class="c2 num">{{item.ing}}</text><text class="c2 num {{item.no ? 'warn' : ''}}">{{item.no}}</text></view>
+    <view class="row" style="margin-top:16rpx"><text wx:for="{{staff}}" wx:key="q" wx:if="{{!item.self}}" class="chip" data-p="{{item.q}}" bindtap="viewAs">以{{item.name}}查看</text></view>
+    <view class="lockmsg"><text class="h3">补训建议</text><text class="small">{{advice || '正在取数…'}}</text><button class="btn ghost" bindtap="notice">生成补训通知</button></view>
+    <text class="small muted" wx:if="{{orgTotal !== undefined}}">本园在学 {{orgTotal}} 人 · 本周通关 {{orgWeek}} 关。只看岗位汇总，不看个人测验分，不排名。</text>
+    <text class="small" wx:if="{{wk}}" style="display:block;margin-top:8rpx">上周：{{wk}}</text>
+    <text class="small" wx:if="{{cohort}}" style="display:block;margin-top:8rpx">全市其他园（{{cohort.cityN}} 所）：{{cohort.city || '不足 3 所，不显示中位数'}}{{cohort.dName ? '；' + cohort.dName + '其他园（' + cohort.dN + ' 所）：' + (cohort.district || '不足 3 所') : ''}}。只给中位数，不排名、不点名。</text>
+    <text class="small" wx:if="{{rs}}" style="display:block;margin-top:8rpx">点评时效：待点评 {{rs.pending}}{{rs.overdue ? "，超两个工作日 " + rs.overdue : ""}}{{rs.median !== null ? " · 近 30 天中位 " + rs.median + " 小时" : ""}} · 答疑开放 {{rs.qOpen}}{{rs.qEsc ? "（转讲师 " + rs.qEsc + "）" : ""}}。每周看一次，不排名。</text>
+    <view class="row" wx:if="{{queueTmpl}}" style="margin-top:12rpx"><button class="btn line" bindtap="subscribeQueue">{{queueGrants ? '新提交提醒：还能收 ' + queueGrants + ' 条' : '接收本园实践关新提交的提醒'}}</button></view>
+  </view>
+
+  <!-- 园长：园所额度池 -->
+  <view class="panel" wx:if="{{director && quota}}">
+    <view class="between"><view class="h2" style="margin:0">园所额度</view><text class="muted small">池子剩 {{quota.pool}} · 已分在手 {{quota.allocated}} · 已用 {{quota.used}}</text></view>
+    <text class="muted small" style="display:block;margin-top:8rpx">运营方按合同充给本园，共 {{quota.topup}}。分给谁、分多少由你定；教师只能把它用在教研工坊等工具上，不进商城、不能转。点一个人分或收。</text>
+    <block wx:if="{{quota.members.length}}">
+      <view wx:for="{{quota.members}}" wx:key="id" class="file" data-id="{{item.id}}" bindtap="quotaMember">
+        <view class="body">{{item.name}}<text class="sub">{{item.role}} · 已用 {{item.used}}</text></view>
+        <text class="{{item.left ? 'num' : 'muted small'}}">{{item.left ? '剩 ' + item.left : '没有额度'}}</text>
+        <text class="link">分 / 收</text>
+      </view>
+    </block>
+    <text wx:else class="muted small" style="display:block;margin-top:12rpx">还没有本园教师登录过大课堂，没人可分。</text>
+    <text wx:if="{{quota.empty}}" class="small" style="display:block;margin-top:8rpx">池子还没充值。要给老师们工具额度，联系本地运营方按合同充。</text>
+    <block wx:if="{{quota.log.length}}">
+      <view class="between" style="margin-top:20rpx"><view class="h3" style="margin:0">流水</view><text class="muted small">池子视角：充值、收回为进，分出、用掉为出</text></view>
+      <view wx:for="{{quota.logShown}}" wx:key="id" class="ql"><text class="muted small">{{item.at}}</text><text class="small body">{{item.text}}</text><text class="num {{item.kind === 'topup' || item.kind === 'recall' ? 'in' : ''}}">{{item.n}}</text></view>
+      <text wx:if="{{quota.logMore}}" class="link" style="display:block;margin-top:12rpx" bindtap="toggleQuotaLog">{{quotaLogAll ? '收起' : '看全部 ' + quota.log.length + ' 条'}}</text>
+    </block>
+  </view>
+
+  <!-- 区县管理员：区县看板入口 -->
+  <view class="panel" wx:if="{{district}}">
+    <view class="between"><view class="h2" style="margin:0">区县看板</view><text class="link" data-u="/pages/district/district" bindtap="go">打开</text></view>
+    <text class="muted small">园所数、各领域覆盖率中位数、认证人数、共同体活动。只看汇总，不列单园，不排名。</text>
+  </view>
+
+  <!-- 市级：名师工作室与市级展示 -->
+  <view class="panel">
+    <view class="between"><view class="h2" style="margin:0">名师工作室 · 市级展示</view><text class="link" data-u="/pages/studio/studio" bindtap="go">打开</text></view>
+    <text class="muted small">专家讲师主持，骨干教师参加；每年一次市级展示，各共同体赛入选作品上台，名师点评，没有分数与名次。</text>
+  </view>
+
+  <!-- 跨园共同体 -->
+  <view class="panel" wx:if="{{community}}">
+    <view class="between"><view class="h2" style="margin:0">跨园共同体 · {{community.name}}</view><text class="link" data-u="/pages/community/community" bindtap="go">教研共同体</text></view>
+    <text class="muted small">{{community.orgText}} · 共同体案例 {{community.cases}} 条{{community.drills ? ' · 联合研讨题 ' + community.drills : ''}}</text>
+  </view>
+
+  <!-- 体检 -->
+  <view class="panel">
+    <view class="between"><view class="h2" style="margin:0">本园应用体检</view><text class="eyebrow num">12 月 14 日 · 第 3 周</text></view>
+    <text class="muted small">每周一自动生成，只看平台使用情况，不含幼儿个人数据。</text>
+    <view class="row" style="margin:16rpx 0"><text class="pill ok">正常 {{sum.ok}}</text><text class="pill warn">需关注 {{sum.warn}}</text><text class="pill idle">未开始 {{sum.idle}}</text></view>
+    <view wx:for="{{probes}}" wx:key="k" class="probe"><view class="sd {{item.s}}"></view><view class="body">{{item.k}}<text class="sub">{{item.d}}</text></view><text wx:if="{{item.go}}" class="link" data-i="{{item.i}}" bindtap="goProbe">{{item.act}}</text></view>
+    <view wx:if="{{apiRecs && apiRecs.length}}" style="margin-top:12rpx"><text class="small">本园体检推给你的关：</text><view wx:for="{{apiRecs}}" wx:key="levelId" class="small">· {{item.why}} → <text class="link" data-p="{{item.p}}" data-i="{{item.i}}" bindtap="goRec">「{{item.title}}」</text></view></view>
+    <view wx:if="{{!apiRecs && recs.length}}" style="margin-top:12rpx"><text class="small">推送给你的关卡：</text><view wx:for="{{recs}}" wx:key="k" class="small">· {{item.k}}需关注 → <text class="link" data-i="{{item.i}}" bindtap="goProbe">{{item.act}}</text></view></view>
+    <text class="link" data-u="/pages/checkup/checkup" bindtap="go" style="display:block;margin-top:16rpx">查看完整体检卡</text>
+  </view>
+
+  <!-- 微课 -->
+  <view class="between" style="margin-bottom:16rpx"><view class="h2" style="margin:0">精品微课</view><text class="link" data-u="/pages/lessons/lessons" bindtap="go">全部微课</text></view>
+  <view class="grid2">
+    <view wx:for="{{lessons}}" wx:key="t" class="lesson" data-p="{{item.p}}" data-i="{{item.i}}" bindtap="goLevel">
+      <view class="thumb">{{item.ico}}<text class="dur">{{item.dur}}</text><text wx:if="{{item.s === 'done'}}" class="lk pill ok">已学</text><text wx:elif="{{item.s === 'current'}}" class="lk pill hot">学习中</text></view>
+      <view class="body"><text class="tag role">{{item.role}}</text><text class="tag">{{item.scene}}</text><view class="h3" style="font-size:26rpx;margin-top:8rpx">{{item.t}}</view><text class="muted small">{{item.goal}}</text></view>
+    </view>
+  </view>
+
+  <!-- 名师讲堂 -->
+  <view wx:if="{{live}}" class="live" data-u="/pages/live/live" bindtap="go">
+    <text class="eyebrow" style="color:#e2efea">名师讲堂 · 每月一场</text>
+    <text class="when num">{{live.when}}</text>
+    <view class="h3" style="font-size:32rpx;color:#fff">{{live.t}}</view>
+    <text class="small" style="opacity:.9">{{live.d}}</text>
+    <button class="btn" style="background:#fff;color:#1f6b5c;align-self:flex-start" catchtap="toggleLive">{{liveOn ? '已预约 · 开播前提醒' : '预约直播'}}</button>
+  </view>
+
+  <view wx:if="{{contest}}" class="panel"><view class="between"><view class="h2" style="margin:0">斗课</view><text class="eyebrow">{{contest.n}} 人应战</text></view><view style="font-weight:700;margin:12rpx 0">{{contest.t}}</view><button class="btn ghost" data-u="/pages/contest/contest?id={{contest.id}}" bindtap="go">{{contest.state}}</button></view>
+  <view wx:if="{{drill}}" class="panel"><view class="between"><view class="h2" style="margin:0">每周一题</view><text class="eyebrow">{{drill.n}} 人作答</text></view><view style="font-weight:700;margin:12rpx 0">{{drill.t}}</view><button class="btn ghost" data-u="/pages/drill/drill" bindtap="go">{{drill.state}}</button></view>
+  <view class="panel"><view class="between"><view class="h2" style="margin:0">资料库</view><text class="link" data-u="/pages/library/library" bindtap="go">全部资料</text></view>
+    <view wx:for="{{files}}" wx:key="*this" class="file" data-n="{{item[1]}}" bindtap="file"><view class="ext">{{item[0]}}</view><view class="body">{{item[1]}}<text class="sub">{{item[2]}} · {{item[3]}}</text></view><text class="muted small num">{{item[4]}} 次</text></view>
+  </view>
+  <view class="panel" data-u="/pages/local/local" bindtap="go"><view class="between"><view class="h3">本地专区</view><text class="link">进入</text></view><text class="muted small">本地讲师值守、技术支持电话、本园工单与报修</text></view>
+</view>

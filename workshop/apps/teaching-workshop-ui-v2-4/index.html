@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V2.4 · Empty State</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="empty">
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="top-nav">
+          <a class="nav-link active" href="./index.html">＋ New session</a>
+          <a class="nav-link" href="./index.html">⌕ Search</a>
+          <a class="nav-link" href="./index.html">◷ Plans</a>
+          <a class="nav-link" href="./index.html">⤴ Exports</a>
+          <a class="nav-link" href="./index.html">⚙ Customize</a>
+        </div>
+        <section class="sidebar-section">
+          <div class="sidebar-label"><span>Projects</span><span>＋</span></div>
+          <a class="thread-item" href="./create-project.html">
+            <div class="project-title">Create your first project</div>
+            <div class="thread-meta">从零开始、导入已有资料，或连接已有课程工作区。</div>
+          </a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Recents</div>
+          <div class="thread-item">
+            <div class="project-title">No sessions yet</div>
+            <div class="thread-meta">创建 project 后，thread 会在这里持续积累。</div>
+          </div>
+        </section>
+        <div class="app-panel">
+          <div class="app-badge">✦</div>
+          <div style="text-align:center;">
+            <div class="project-title">教研工坊</div>
+            <div class="project-meta">Project / Thread / Copilot</div>
+          </div>
+        </div>
+        <div class="user-card"><div class="avatar">A</div><div><div class="project-title">ameng</div><div class="project-meta">Pro plan</div></div></div>
+      </aside>
+
+      <main class="main">
+        <section class="hero">
+          <h1>把一个主题想法变成课程结构</h1>
+          <p>从主题 framing 到月矩阵、周安排、活动稿，Copilot 会陪你一步步推进。先创建一个 project，或直接从推荐起点开始。</p>
+        </section>
+
+        <section class="composer-card">
+          <textarea class="composer-textarea" placeholder="例如：帮我设计一个中班‘多样的服饰’主题课程，先给我主题解读和四周递进建议。"></textarea>
+          <div class="composer-controls">
+            <span class="select-pill">▣ Work in a project ▾</span>
+            <a class="ghost-button" href="./create-project.html">Create your first project</a>
+            <button class="cta-button">Let’s go →</button>
+          </div>
+        </section>
+
+        <section class="starter-grid">
+          <a class="starter-card" href="./starter-selected.html"><div class="starter-icon">✦</div><div><div class="project-title">创建一个主题课程项目</div><div class="project-meta">新建 project，从主题 framing 开始。</div></div></a>
+          <a class="starter-card" href="./starter-selected.html"><div class="starter-icon">↺</div><div><div class="project-title">继续一个课程 thread</div><div class="project-meta">回到已有 project，继续未完成的设计线索。</div></div></a>
+          <a class="starter-card" href="./starter-selected.html"><div class="starter-icon">▦</div><div><div class="project-title">从月矩阵开始排结构</div><div class="project-meta">适合课研主任，先排月度活动矩阵与四周递进。</div></div></a>
+          <a class="starter-card" href="./starter-selected.html"><div class="starter-icon">✎</div><div><div class="project-title">补一节活动稿</div><div class="project-meta">适合教师，快速进入单个活动稿的打磨。</div></div></a>
+        </section>
+      </main>
+
+      <aside class="rail">
+        <div class="rail-card">
+          <h3>Course Context Rail</h3>
+          <div class="project-meta">在正式进入工作态后，这里会持续显示阶段进度、当前 project，以及本次生成所依赖的上下文来源。</div>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

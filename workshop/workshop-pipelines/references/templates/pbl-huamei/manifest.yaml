@@ -1,0 +1,69 @@
+# 华美 PBL 五步法模板
+id: pbl-huamei
+name: "华美 PBL 五步法"
+name_en: "Huamei PBL Five-Section Method"
+description: "基于项目式学习的月度课程预案设计，三阶段九要素，产出完整的五节预案"
+version: "1.0.0"
+
+target_roles:
+  - curriculum-director
+target_age_groups:
+  - prek-3
+  - prek-4
+  - k
+time_scope: month
+
+pipeline:
+  plugin: workshop-pbl
+  stages:
+    - id: driving-question
+      name: "驱动性问题设计"
+      description: "生成并评分驱动性问题候选"
+      optional: false
+    - id: network-map
+      name: "主题网络图"
+      description: "从驱动问题展开子问题和探究方向"
+      optional: false
+    - id: inquiry-scaffold
+      name: "探究线索脚手架"
+      description: "将网络图拆分为3条递进探究线索"
+      optional: false
+    - id: activity-design
+      name: "活动设计"
+      description: "为每条线索设计完整活动序列"
+      optional: false
+    - id: proposal-generate
+      name: "预案生成"
+      description: "汇编所有产物为五节完整预案"
+      optional: false
+
+output:
+  document_type: proposal
+  sections:
+    - id: overview
+      title: "项目概览"
+      title_en: "Project Overview"
+      required: true
+    - id: standards
+      title: "项目标准"
+      title_en: "Project Standard"
+      required: true
+    - id: launch
+      title: "项目启动"
+      title_en: "Project Launch"
+      required: true
+    - id: inquiry
+      title: "项目探究"
+      title_en: "Project Inquiry"
+      required: true
+    - id: products
+      title: "项目展示"
+      title_en: "Project Products"
+      required: true
+
+coding:
+  prefix: "PBL"
+  format: "{prefix}-C{unit}-{seq}"
+  unit_name: "探究线索"
+  unit_count: 3
+  unit_labels: ["线索一 / Clue 1", "线索二 / Clue 2", "线索三 / Clue 3"]

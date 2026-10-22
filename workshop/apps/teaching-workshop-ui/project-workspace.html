@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 · Project Workspace</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="project">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark"></div>
+          <div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project-first workspace</div></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Project</div>
+          <a class="nav-link" data-page="project" href="./project-workspace.html"><span>Workspace</span><span class="nav-badge">Core</span></a>
+          <a class="nav-link" data-page="framing" href="./theme-framing.html"><span>Theme Framing</span><span class="nav-badge">3</span></a>
+          <a class="nav-link" data-page="month" href="./month-matrix.html"><span>Month Matrix</span><span class="nav-badge">4w</span></a>
+          <a class="nav-link" data-page="week" href="./week-arrangement.html"><span>Week Arrangement</span><span class="nav-badge">17</span></a>
+          <a class="nav-link" data-page="activity" href="./activity-editor.html"><span>Activities</span><span class="nav-badge">12</span></a>
+          <a class="nav-link" data-page="hil" href="./hil-gate.html"><span>HIL Gate</span><span class="nav-badge">1</span></a>
+          <a class="nav-link" data-page="export" href="./export-bundle.html"><span>Export</span><span class="nav-badge">2</span></a>
+        </div>
+      </aside>
+      <div class="main-column">
+        <header class="top-strip">
+          <div class="search-shell"><span class="muted">项目总控页不是文件树，而是工作模块驾驶舱</span><input aria-label="搜索" placeholder="搜索当前项目动作和产物" /></div>
+          <div class="toolbar">
+            <span class="chip">thematic-curriculum</span>
+            <span class="status-pill status-warning">deliverable-draft</span>
+          </div>
+        </header>
+        <main class="surface">
+          <div class="page-header">
+            <div>
+              <div class="eyebrow">Project Workspace</div>
+              <h1>多样的服饰</h1>
+              <p class="muted">这里是项目的核心驾驶舱。用户不应该在一堆 markdown 文件里找路，而应该看到项目阶段、模块完成度和下一步动作。</p>
+            </div>
+            <div class="hero-strip">
+              <span class="status-pill">中班 · 第二个月</span>
+              <span class="status-pill status-warning">awaiting review</span>
+              <span class="status-pill status-success">linked to 2026-sep-week-2</span>
+            </div>
+          </div>
+
+          <section class="surface" style="padding:18px;margin-bottom:18px;">
+            <div class="section-head"><h2>HIL Rail</h2><a class="action-pill" href="./hil-gate.html">查看 gate</a></div>
+            <div class="phase-rail">
+              <div class="phase-step approved">
+                <strong>Project Framing</strong>
+                <div class="muted">主题分析、解读、网络已就绪</div>
+              </div>
+              <div class="phase-step current">
+                <strong>Design Scaffold</strong>
+                <div class="muted">月矩阵、周安排、活动框架已形成</div>
+              </div>
+              <div class="phase-step">
+                <strong>Deliverable Draft</strong>
+                <div class="muted">正在补齐最终教学和区域活动稿</div>
+              </div>
+              <div class="phase-step">
+                <strong>Approval Gate</strong>
+                <div class="muted">通过后进入导出与发布</div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="section-head">
+              <h2>Deliverables Overview</h2>
+              <span class="chip">Project core, not file tree</span>
+            </div>
+            <div class="grid-3">
+              <a class="card" href="./theme-framing.html">
+                <div class="row-split"><h3>Theme Framing</h3><span class="status-pill status-success">ready</span></div>
+                <p class="muted">theme-analysis / theme-narrative / theme-network 都已存在。</p>
+                <div class="mini-actions"><span class="action-pill">进入模块</span></div>
+              </a>
+              <a class="card" href="./month-matrix.html">
+                <div class="row-split"><h3>Month Matrix</h3><span class="status-pill">in progress</span></div>
+                <p class="muted">4 周递进已生成，活动类型覆盖仍需补 1 个家园互动。</p>
+                <div class="mini-actions"><span class="action-pill">补结构</span></div>
+              </a>
+              <a class="card" href="./week-arrangement.html">
+                <div class="row-split"><h3>Week Arrangement</h3><span class="status-pill">17 items</span></div>
+                <p class="muted">第 2 周已展开，当前待补 2 个活动稿。</p>
+                <div class="mini-actions"><span class="action-pill">展开周视图</span></div>
+              </a>
+              <a class="card" href="./activity-editor.html">
+                <div class="row-split"><h3>Activities</h3><span class="status-pill status-warning">2 missing</span></div>
+                <p class="muted">教学活动已完成，区域活动与家园互动需要补齐最终稿。</p>
+                <div class="mini-actions"><span class="action-pill">去补活动</span></div>
+              </a>
+              <a class="card" href="./hil-gate.html">
+                <div class="row-split"><h3>Review</h3><span class="status-pill status-warning">awaiting</span></div>
+                <p class="muted">当前最关键的是把 framing 审核通过，避免后续返工。</p>
+                <div class="mini-actions"><span class="action-pill">看审批摘要</span></div>
+              </a>
+              <a class="card" href="./export-bundle.html">
+                <div class="row-split"><h3>Export</h3><span class="status-pill">not ready</span></div>
+                <p class="muted">导出层已定义，但仍需要过 approval-gate 后再生成 bundle。</p>
+                <div class="mini-actions"><span class="action-pill">看 bundle</span></div>
+              </a>
+            </div>
+          </section>
+        </main>
+      </div>
+      <aside class="copilot-panel">
+        <section class="copilot-block">
+          <div class="eyebrow">Context Summary</div>
+          <h3>当前项目健康度良好</h3>
+          <p class="muted">framing 已完成，矩阵和周安排可用，风险主要集中在第 2 周缺失活动稿和 deliverable-draft 审核前的结构一致性。</p>
+        </section>
+        <section class="copilot-block">
+          <h3>Suggested Actions</h3>
+          <div class="mini-actions">
+            <a class="action-pill" href="./theme-framing.html">发起 framing 审核</a>
+            <a class="action-pill" href="./week-arrangement.html">补第 2 周缺项</a>
+            <a class="action-pill" href="./activity-editor.html">重写家园互动</a>
+          </div>
+        </section>
+        <section class="copilot-block">
+          <h3>Warnings</h3>
+          <div class="copilot-feed-item">
+            <strong>结构提醒</strong>
+            <div class="muted">第 2 周教学活动和区域活动的联动关系还不够强，建议把“职业服饰”作为共用子主题锚点。</div>
+          </div>
+          <div class="copilot-feed-item">
+            <strong>治理提醒</strong>
+            <div class="muted">如果直接继续写活动稿而不先过 project-framing，后续返工风险较高。</div>
+          </div>
+        </section>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

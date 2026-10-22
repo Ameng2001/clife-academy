@@ -1,0 +1,22 @@
+<view class="wrap">
+  <view class="h1">每周一题</view>
+  <text class="muted small">一道情景题。答了能看同园老师怎么答，园长给一句意见；没有分数、没有排名。</text>
+  <view wx:if="{{hint}}" class="panel" style="margin-top:20rpx"><text class="muted small">{{hint}}</text></view>
+  <view wx:for="{{drills}}" wx:key="id" class="panel" style="margin-top:20rpx{{item.past ? ';opacity:.8' : ''}}">
+    <view class="between"><text class="pill hot">{{item.role}}</text><text class="eyebrow">{{item.past ? '往期 · ' : ''}}{{item.n}} 人作答</text></view>
+    <view class="h3" style="font-size:30rpx;margin:12rpx 0">{{item.t}}</view>
+    <text wx:if="{{item.ctx}}" class="muted small" style="display:block;margin-bottom:12rpx">{{item.ctx}}</text>
+    <block wx:if="{{item.mine && !item.editing}}">
+      <view class="box"><text class="h3" style="font-size:26rpx">我的作答{{item.review && item.review.featured ? ' · 精选' : ''}}</text><text class="small">{{item.mine}}</text><text wx:if="{{item.review}}" class="muted small" style="display:block;margin-top:8rpx">{{item.review.byName}} 的点评：{{item.review.comment}}</text><text wx:if="{{item.review && !demo}}" class="link small" style="display:block;margin-top:6rpx" data-i="{{index}}" bindtap="markHelpful">{{item.review.helpful ? '✓ 已标「有帮助」' : '这条点评有帮助'}}</text></view>
+      <view wx:if="{{item.best}}" class="box best"><text class="h3" style="font-size:26rpx">讲师点评精选</text><text class="small">{{item.best}}</text></view>
+      <view wx:if="{{!item.others.length}}" class="muted small" style="margin-top:12rpx">还没有别人答。</view>
+      <view wx:for="{{item.others}}" wx:for-item="o" wx:key="name" class="small" style="margin-top:12rpx"><text class="muted">{{o.name}}{{o.featured ? ' · 精选' : ''}}</text><text style="display:block">{{o.text}}</text><text wx:if="{{o.review}}" class="muted" style="display:block">{{o.review.byName}}：{{o.review.comment}}</text></view>
+      <button wx:if="{{!item.demo}}" class="btn ghost" style="margin-top:16rpx" data-i="{{index}}" bindtap="edit">再写一版</button>
+    </block>
+    <block wx:else>
+      <textarea class="ta" maxlength="2000" value="{{item.editing ? item.mine : ''}}" placeholder="先写你会怎么做或怎么说，再写为什么。50–150 字" data-i="{{index}}" bindinput="input"></textarea>
+      <button class="btn primary" style="margin-top:16rpx" data-i="{{index}}" bindtap="submit">提交作答</button>
+      <button wx:if="{{item.editing}}" class="btn ghost" style="margin-top:12rpx" data-i="{{index}}" bindtap="cancel">取消</button>
+    </block>
+  </view>
+</view>

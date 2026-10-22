@@ -1,0 +1,139 @@
+{
+  "sceneId": "scene-03",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "storyBasis": "如果这个情况还要继续跟，比如发热待查，；就在这条记录上点「登记疾病」。；它会自动进入疾病管理，；之后的追踪、康复、复课，都接在同一条记录上，不用另外补录。",
+  "sceneDurationMs": 19485,
+  "elements": [
+    {
+      "id": "e1",
+      "label": "发热待查",
+      "sequence": 1,
+      "narrativeRole": "需要继续跟进的情况",
+      "subtitle": "如果这个情况还要继续跟，比如发热待查，",
+      "type": "object",
+      "region": {
+        "x": 71,
+        "y": 201,
+        "width": 380,
+        "height": 450
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 650,
+        "durationMs": 4681,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          71,
+          426
+        ],
+        "end": [
+          451,
+          426
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e2",
+      "label": "登记疾病",
+      "sequence": 2,
+      "narrativeRole": "在记录上点登记疾病",
+      "subtitle": "就在这条记录上点「登记疾病」。",
+      "type": "object",
+      "region": {
+        "x": 480,
+        "y": 290,
+        "width": 283,
+        "height": 348
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 5431,
+        "durationMs": 3472,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          480,
+          464
+        ],
+        "end": [
+          763,
+          464
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e3",
+      "label": "疾病管理",
+      "sequence": 3,
+      "narrativeRole": "自动进入疾病管理",
+      "subtitle": "它会自动进入疾病管理，",
+      "type": "object",
+      "region": {
+        "x": 751,
+        "y": 301,
+        "width": 387,
+        "height": 267
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 9003,
+        "durationMs": 2740,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          751,
+          434
+        ],
+        "end": [
+          1138,
+          434
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e4",
+      "label": "一条记录到底",
+      "sequence": 4,
+      "narrativeRole": "追踪、康复、复课接在同一条记录上",
+      "subtitle": "之后的追踪、康复、复课，都接在同一条记录上，不用另外补录。",
+      "type": "object",
+      "region": {
+        "x": 1289,
+        "y": 109,
+        "width": 239,
+        "height": 641
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 11843,
+        "durationMs": 6942,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1289,
+          429
+        ],
+        "end": [
+          1528,
+          429
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

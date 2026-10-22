@@ -1,0 +1,2 @@
+.box { background: #f3f6f4; border-radius: 16rpx; padding: 20rpx; margin-bottom: 12rpx; display: flex; flex-direction: column; gap: 8rpx; }
+.box.best { background: #e2efea; }

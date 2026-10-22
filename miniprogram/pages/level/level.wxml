@@ -1,0 +1,111 @@
+<view class="wrap">
+  <text class="eyebrow">{{pathName}}路径 · 第 {{i + 1}} 关 / 共 {{tot}} 关 · {{dur}}</text>
+  <view class="h1">{{title}}</view>
+  <text class="muted small">学完本关，你能{{goal}}</text>
+  <view class="rule">
+    <block wx:if="{{done}}"><text class="b">已通过</text>　复习模式，可随时回看。</block>
+    <block wx:elif="{{locked}}"><text class="b">未解锁</text>　完成第 {{nextProg}} 关后解锁实操与测验，微课和录屏可以先看。</block>
+    <block wx:else><text class="b">通关条件</text>　平台回传实操记录，{{nq}} 道测验全部答对（答错可重答）。通关记积分{{hasNext ? '，解锁第 ' + (i + 2) + ' 关' : ''}}。</block>
+  </view>
+
+  <view class="steps">
+    <view wx:for="{{tabs}}" wx:key="k" class="step {{seg === item.k ? 'sel' : ''}} {{item.done ? 'done' : ''}} {{item.lock ? 'lock' : ''}}" data-k="{{item.k}}" bindtap="setSeg">
+      <view class="k">{{item.k === 'jiang' ? '讲' : item.k === 'kan' ? '看' : item.k === 'zuo' ? '做' : '测'}}</view><view class="body"><text class="t">{{item.t}}</text><text class="sub">{{item.sub}}</text></view>
+    </view>
+  </view>
+
+  <!-- 讲 -->
+  <view class="panel" wx:if="{{seg === 'jiang'}}">
+    <video wx:if="{{featured}}" class="video" src="/assets/lesson6.mp4" poster="" controls show-center-play-btn object-fit="contain"></video>
+    <view wx:else class="board"><text class="boardnum">{{scene + 1}}</text><text class="boardsub">{{sub}}</text></view>
+    <view class="scenes">
+      <view wx:for="{{scenes}}" wx:key="t" class="scene {{scene === index ? 'on' : ''}}" data-k="{{index}}" bindtap="pickScene"><text class="st num">第 {{index + 1}} 幕 · {{item.t}}</text><text>{{item.name}}</text></view>
+    </view>
+    <text wx:if="{{featured}}" class="muted small">样片旁白为系统语音，正式版换配音。</text>
+    <button class="btn primary block" style="margin-top:20rpx" data-k="kan" bindtap="setSeg">下一段：操作录屏</button>
+  </view>
+
+  <!-- 看 -->
+  <view class="panel" wx:if="{{seg === 'kan'}}">
+    <!-- 演示园的假界面只给有平台入口的工具关；领域、阶段路径的关没有 menu，只列步骤 -->
+    <view class="screen" wx:if="{{menu.length}}">
+      <view class="chrome num">campus.lzpreschool.cn · 演示园</view>
+      <view class="amain">
+        <view class="between"><text class="h3">{{menu[menu.length - 1]}}</text><text class="fb pri {{chapters[chap].target === 'btn' ? 'ring' : ''}}">{{btn}}</text></view>
+        <view wx:if="{{chapters[chap].target === 'menu' || chapters[chap].target === 'btn'}}" class="ftbl">
+          <view class="ftr head"><text>对象</text><text>班级</text><text>操作</text></view>
+          <view class="ftr"><text>示例幼儿 A</text><text>中二班</text><text>{{featured ? '登记疾病' : '查看'}}</text></view>
+          <view class="ftr"><text>示例幼儿 B</text><text>大一班</text><text>{{featured ? '登记疾病' : '查看'}}</text></view>
+        </view>
+        <view wx:else class="fform">
+          <view class="f"><text class="lab">{{featured ? '观察幼儿' : '对象'}}</text>示例幼儿 C · 小一班</view>
+          <view class="f"><text class="lab">{{featured ? '观察老师' : '填写人'}}</text>{{roleLabel}}</view>
+          <view class="f"><text class="lab">{{featured ? '检查信息' : '内容'}}</text>{{featured ? '体温 37.8℃，精神差' : '按页面提示填写'}}</view>
+          <view wx:if="{{chapters[chap].target === 'disease'}}" class="f ring"><text class="lab">登记疾病 · 追踪情况</text>发热待查；已通知家长，16:00 复测</view>
+          <view style="text-align:right"><text class="fb pri {{chapters[chap].target === 'form' ? 'ring' : ''}}">保存</text></view>
+        </view>
+      </view>
+    </view>
+    <view wx:for="{{chapters}}" wx:key="t" class="chap {{chap === index ? 'on' : ''}}" data-k="{{index}}" bindtap="pickChap"><text class="num ct">{{item.t}}</text><text>{{index + 1}}. {{item.text}}</text></view>
+    <text class="muted small">{{menu.length ? '录屏使用演示园与虚构数据，不含真实幼儿信息。' : '这一关没有平台操作，按上面的步骤在班里做。'}}</text>
+    <button class="btn primary block" style="margin-top:20rpx" data-k="zuo" bindtap="setSeg">下一段：{{tabs[2].t}}</button>
+  </view>
+
+  <!-- 做 -->
+  <view class="panel" wx:if="{{seg === 'zuo' && subType}}">
+    <text class="eyebrow">{{subType === 'practice' ? '实践任务' : '情景研讨'}}</text>
+    <view class="h3" style="font-size:30rpx;margin-bottom:12rpx;line-height:1.5">{{subNote}}</view>
+    <text class="eyebrow">{{subType === 'practice' ? '点评看这几条' : '好回答的样子'}}</text>
+    <view wx:for="{{rubric}}" wx:key="*this" class="ck"><text class="n num">{{index + 1}}</text><text>{{item}}</text></view>
+    <text wx:if="{{subType === 'practice'}}" class="muted small">素材里不出现幼儿姓名与正脸。记录是你写的，不用数字工具代写。照片请在网页端上传，小程序先交文字。</text>
+    <view wx:if="{{!signedIn}}" class="explain">登录后在这里提交。</view>
+    <view wx:if="{{mine && !subEditing}}" class="verify {{mine.status === 'pass' ? 'passed' : ''}}"><view class="ico">{{mine.status === 'pass' ? '✓' : mine.status === 'revise' ? '!' : '…'}}</view><view class="body"><text class="h3" style="font-size:28rpx">我的提交 · {{mine.statusText}} · {{mine.atText}}</text><text class="small" style="white-space:pre-wrap">{{mine.text}}</text><text wx:if="{{mine.review}}" class="small muted" style="margin-top:8rpx">{{mine.review.byName}} 的点评 · {{mine.reviewAt}}：{{mine.review.comment || '（无文字意见）'}}</text><text wx:if="{{mine.review}}" class="link small" style="display:block;margin-top:6rpx" bindtap="markHelpful">{{mine.review.helpful ? '✓ 已标「有帮助」' : '这条点评有帮助'}}</text></view></view>
+    <view class="row" wx:if="{{mine && !subEditing && status === 'current' && mine.status !== 'pass'}}"><button class="btn line" bindtap="editSub">{{mine.status === 'revise' ? '按意见改一版再交' : '再写一版'}}</button></view>
+    <view wx:if="{{mine && mine.status === 'pending' && status === 'current'}}" class="explain">等点评期间可以先去「测」。点评通过后这一关才能结算。</view>
+    <block wx:if="{{canSubmit}}">
+      <textarea class="inp" style="width:100%;height:280rpx;box-sizing:border-box;margin-top:12rpx" maxlength="4000" placeholder="{{subType === 'practice' ? '事实一段、推断一段，200–400 字' : '先写你会说的话，再写为什么这样说，50–150 字'}}" value="{{subVal}}" bindinput="subInput"></textarea>
+      <view class="row" style="margin-top:12rpx"><button class="btn primary" bindtap="submitSub">提交</button></view>
+    </block>
+    <block wx:if="{{subType === 'seminar' && others.length}}">
+      <text class="eyebrow" style="margin-top:16rpx">同园老师的回答（交了才能看）</text>
+      <view wx:for="{{others}}" wx:key="id" class="qa"><text class="sub">{{item.name}} · {{item.atText}}</text><text>{{item.text}}</text><view wx:if="{{item.review && item.review.comment}}" class="a"><text class="sub">点评</text>{{item.review.comment}}</view></view>
+    </block>
+    <button class="btn primary block" style="margin-top:20rpx" data-k="ce" bindtap="setSeg">下一段：即时测验</button>
+  </view>
+  <view class="panel" wx:if="{{seg === 'zuo' && !subType}}">
+    <text class="eyebrow">实操任务</text>
+    <view class="h3" style="font-size:32rpx;margin-bottom:16rpx">在本园账号完成：{{event}}</view>
+    <view wx:for="{{steps}}" wx:key="*this" class="ck"><text class="n num">{{index + 1}}</text><text>{{item}}</text></view>
+    <view class="verify {{zuo ? 'passed' : ''}}"><view class="ico">{{zuo ? '✓' : '…'}}</view><view class="body"><text class="h3" style="font-size:28rpx">{{zuo ? '已收到平台回传' + (zuoAt ? ' · ' + zuoAt : '') : '等待平台回传'}}</text><text class="small muted">{{zuo ? '本段已通过。' : '完成上面 ' + steps.length + ' 步后，平台回传「' + event + '」，本段自动通过。'}}</text></view></view>
+    <view class="row" wx:if="{{!zuo}}"><button class="btn line" bindtap="openPlatform">打开平台</button><button class="btn ghost" bindtap="simulate">模拟平台回传（原型演示）</button></view>
+    <text class="muted small">本园暂无可操作的数据，或尚未分班？可以在演示园完成，结果同样计入。</text>
+    <button class="btn primary block" style="margin-top:20rpx" data-k="ce" bindtap="setSeg">下一段：即时测验</button>
+  </view>
+
+  <!-- 测 -->
+  <view class="panel" wx:if="{{seg === 'ce'}}">
+    <view wx:for="{{quiz}}" wx:for-item="q" wx:for-index="qi" wx:key="t" class="q">
+      <text class="eyebrow">第 {{qi + 1}} 题</text>
+      <view class="h3" style="margin:8rpx 0 12rpx">{{q.t}}</view>
+      <view wx:for="{{q.o}}" wx:for-item="o" wx:for-index="oi" wx:key="l" class="opt {{q.picked === oi ? (o.ok ? 'right' : 'wrong') : ''}}" data-q="{{qi}}" data-o="{{oi}}" bindtap="pick"><text class="l num">{{o.l}}</text><text>{{o.t}}</text></view>
+      <view wx:if="{{q.picked !== undefined && q.picked !== null}}" class="explain">{{q.o[q.picked].why}} <text wx:if="{{!q.o[q.picked].ok}}" class="link" data-k="{{q.jump}}" bindtap="jump">回看{{q.jump === 'kan' ? '录屏' : '微课'}}</text></view>
+    </view>
+    <view wx:if="{{passedAt}}" class="donecard"><text class="big num">+1</text><view class="body"><text class="h3" style="color:#fff">第 {{i + 1}} 关通过</text><text class="small" style="opacity:.9">{{hasNext ? '第 ' + (i + 2) + ' 关「' + nextTitle + '」已解锁' : '岗位徽章已获得'}}</text></view><button wx:if="{{hasNext}}" class="btn" style="background:#fff;color:#1f6b5c" bindtap="goNext">进入第 {{i + 2}} 关</button><button wx:else class="btn" style="background:#fff;color:#1f6b5c" bindtap="goMe">查看徽章</button></view>
+    <view wx:elif="{{okN >= nq && !zuo && !done}}" class="explain"><text class="h3">测验全部答对。</text>{{subType === 'practice' ? '证据点评通过后即可通关。' : subType === 'seminar' ? '到「做」交了回答即可通关。' : '完成平台实操后即可通关。'}}</view>
+  </view>
+
+  <view class="panel"><view class="h2">本关要点</view><view wx:for="{{points}}" wx:key="*this" class="pt"><text class="num">{{index + 1}}.</text><text>{{item}}</text></view></view>
+  <view class="panel"><view class="h2">答疑</view>
+    <view wx:if="{{featured}}" class="qa"><text class="sub">鱼峰区示例幼儿园 · 保健医</text><text>幼儿离园后家长才说孩子发烧，记在哪里？</text><view class="a"><text class="sub">种子教师</text>家长在小程序请假时选「病假」并上报症状，系统进因病缺勤，不用记全日观察。</view></view>
+    <view wx:for="{{asked}}" wx:key="q" class="qa"><text class="sub">{{item.who || '我的提问'}}</text><text>{{item.q}}</text>
+      <view class="a"><text class="sub">{{item.status}}</text><block wx:if="{{!apiQa}}">值守时段内由本地讲师或种子教师回复。</block><block wx:else>{{item.note}}</block></view>
+      <view wx:for="{{item.ans}}" wx:for-item="an" wx:key="id" class="a"><text class="sub">{{an.by}}{{an.accepted ? ' · 已采纳' : ''}}</text>{{an.text}}<text wx:if="{{item.mine && !an.accepted}}" class="link" data-id="{{item.id}}" data-a="{{an.id}}" bindtap="acceptAnswer" style="margin-left:12rpx">采纳</text></view>
+      <text wx:if="{{item.mine && item.id && item.status !== '已采纳' && item.status !== '已解决'}}" class="link small" data-id="{{item.id}}" bindtap="closeQ">已解决</text>
+    </view>
+    <view class="row" style="margin-top:12rpx;flex-wrap:nowrap"><input class="inp" placeholder="对本关有疑问？写具体一点" maxlength="300" value="{{askVal}}" bindinput="askInput"/><button class="btn ghost" bindtap="submitAsk">提问</button></view>
+  </view>
+  <view class="panel"><view class="h2">相关资料</view>
+    <view wx:for="{{files}}" wx:key="*this" class="file" data-n="{{item[1]}}" bindtap="file"><view class="ext">{{item[0]}}</view><view class="body">{{item[1]}}</view></view>
+    <view wx:if="{{hasNext}}" class="file" bindtap="goNext"><view class="ext">下一关</view><view class="body">第 {{i + 2}} 关 {{nextTitle}}</view></view>
+  </view>
+</view>

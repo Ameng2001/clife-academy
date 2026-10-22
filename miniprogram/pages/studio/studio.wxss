@@ -1,0 +1,4 @@
+.kv { display: flex; justify-content: space-between; align-items: center; padding: 14rpx 0; border-bottom: 1rpx solid #eef2f0; }
+.kv:last-child { border-bottom: none; }
+.bar { height: 10rpx; background: #eceff0; border-radius: 6rpx; margin-top: 8rpx; overflow: hidden; }
+.bar i { display: block; height: 100%; background: #1f6b5c; border-radius: 6rpx; }

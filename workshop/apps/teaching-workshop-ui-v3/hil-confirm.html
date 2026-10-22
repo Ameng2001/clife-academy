@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教研工坊 V3 · Ready to Confirm</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body data-page="confirm">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Structure-first Copilot Studio</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./hil-confirm.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./week-arrangement.html">第 2 周 thread</a>
+            <a class="thread-link active" href="./hil-confirm.html">确认 thread</a>
+          </div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="topbar">
+          <div>
+            <div class="eyebrow">Ready to Confirm</div>
+            <h1 class="title">Confirm 是附着 gate，不是内容阶段</h1>
+            <p class="muted">这里不是新的生产阶段，而是对当前结构成果的接受或退回。它应该显式可见，但不和 Theme / Month / Week / Activity 同权。</p>
+          </div>
+          <div class="head-actions">
+            <span class="chip">gate</span>
+            <a class="ghost-link" href="./export-bundle.html">通过后看导出</a>
+          </div>
+        </section>
+
+        <section class="context-bar">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Month Matrix</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Week Arrangement</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Activities (N)</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node gate active">Ready to Confirm</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage-node">Export</span>
+          </div>
+          <div class="context-grid">
+            <div class="context-note">Confirm 附着在当前成果上：当前要确认的是 `Theme + Month + Week 2 + 两份核心活动稿` 是否足够稳定，可以继续进入导出准备。</div>
+            <div class="stage-actions"><span class="ghost-link">缺项：1 个生活渗透</span></div>
+          </div>
+        </section>
+
+        <section class="canvas-shell">
+          <section class="main-canvas">
+            <section class="gate-card">
+              <h2>当前确认对象</h2>
+              <div class="section-list">
+                <div class="section-item"><strong>已完成</strong><div class="muted">Theme Framing、Month Matrix、Week 2 周安排、教学活动稿、区域活动稿。</div></div>
+                <div class="section-item"><strong>待补但不阻塞</strong><div class="muted">Week 2 生活渗透活动稿。</div></div>
+                <div class="section-item"><strong>决策重点</strong><div class="muted">是否接受当前周节奏和活动结构，并允许后续以轻量补稿的方式收尾。</div></div>
+              </div>
+            </section>
+          </section>
+
+          <aside class="copilot-drawer">
+            <section class="drawer-header">
+              <h2>Copilot Drawer</h2>
+              <p>这里不再继续生产内容，而是帮助你理解“为什么可以过 / 为什么该退回”。</p>
+            </section>
+            <section class="drawer-chat">
+              <div class="message ai"><h4>教研 Copilot</h4><div>这版结构已经稳定。唯一缺项是生活渗透，但它不会改变整周节奏主线。</div></div>
+              <div class="message user"><h4>你</h4><div>如果通过，会不会影响最终交付质量？</div></div>
+              <div class="message ai"><h4>教研 Copilot</h4><div>不会影响结构质量，只会影响 completeness。更适合在通过结构后，用轻量方式补足。</div></div>
+            </section>
+            <section class="drawer-block">
+              <h3>可直接执行</h3>
+              <div class="drawer-actions">
+                <span class="drawer-action">接受当前结构</span>
+                <span class="drawer-action">退回继续调周节奏</span>
+                <span class="drawer-action">仅补生活渗透后再看</span>
+              </div>
+            </section>
+            <div class="drawer-composer">
+              <input placeholder="例如：整体接受，但补完生活渗透后再导出" />
+              <button class="button button-primary">发送</button>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

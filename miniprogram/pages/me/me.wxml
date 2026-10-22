@@ -1,0 +1,69 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">{{org}} · {{roleLabel}}</text>
+  <view class="h1">我的</view>
+  <view class="panel between" wx:if="{{signedIn}}">
+    <view><view class="h3">{{userName}}</view><text class="muted small">{{roleName}}{{orgName ? ' · ' + orgName : ''}}{{source ? ' · ' + source : ''}}</text></view>
+    <button class="btn line" bindtap="logout">退出登录</button>
+  </view>
+  <view class="panel between" wx:else>
+    <view><view class="h3">还没登录</view><text class="muted small">进度只在这台手机上，登录后记到账号里</text></view>
+    <button class="btn primary" bindtap="login" disabled="{{busy}}">微信登录</button>
+  </view>
+  <view class="kv">
+    <view class="panel k"><text class="v num">{{points ? points.points : '—'}}</text><text class="eyebrow">积分</text></view>
+    <view class="panel k"><text class="v num">{{d}}/{{tot}}</text><text class="eyebrow">已通过关卡</text></view>
+    <view class="panel k"><text class="v num">{{fin ? 1 : 0}}</text><text class="eyebrow">岗位徽章</text></view>
+    <view class="panel k"><text class="v">{{fin ? '可报名' : '未达到'}}</text><text class="eyebrow">初级岗位认证</text></view>
+  </view>
+  <view class="panel between" wx:if="{{signedIn}}" bindtap="goMall"><view><view class="h3">积分 {{points ? points.points : '—'}}</view><text class="muted small">{{points.quota && (points.quota.left > 0 || points.quota.used > 0) ? '园所额度 ' + points.quota.left + '（园长分的，只能用在教研工坊等工具上，先扣它再扣积分' + (points.quota.used ? '，已用 ' + points.quota.used : '') + '）；' : '过关、入库、互动都自动记；'}}明细在教研工坊的钱包页</text></view><text class="link" style="white-space:nowrap;flex:none;margin-left:16rpx">换物料 →</text></view>
+  <view class="panel" wx:if="{{signedIn && points && points.recent.length}}">
+    <view class="h3" style="margin:0">最近几笔</view>
+    <text class="muted small" style="display:block;margin-bottom:8rpx">{{points.quota && points.quota.used ? '正是进，负是出；标「园所额度」的是园长分的额度，不动你的积分' : '正是进，负是出'}}</text>
+    <view wx:for="{{points.recent}}" wx:key="at" class="ql"><text class="muted small">{{item.at}}</text><text class="small body">{{item.text}}</text><text class="num {{item.pos ? 'in' : ''}}">{{item.n}}</text></view>
+    <text class="muted small" style="display:block;margin-top:12rpx">{{points.more ? '只给最近 6 笔；' : ''}}完整明细与花销在教研工坊的钱包页，和这里是同一本账。</text>
+  </view>
+  <view class="panel" wx:if="{{mentor || mentees}}"><view class="h2">带教</view>
+    <text wx:if="{{mentor}}" class="small" style="display:block">带教教师：{{mentor}}。你的实践关作品由 {{mentor}} 点评。</text>
+    <text wx:if="{{mentees}}" class="small" style="display:block">带着 {{mentees}}。他们的实践关作品在网页端点评。</text>
+  </view>
+  <view class="panel between" bindtap="goCheckup"><view><view class="h3">本园应用体检</view><text class="muted small">12 项探针、近 4 周状态、推课入口；只看平台使用情况</text></view><text class="link">去 →</text></view>
+  <view class="panel between" bindtap="goGrowth"><view><view class="h3">专业发展</view><text class="muted small">Coach 排一学期与周回顾 · 本学期自评 · 教研任务 · 练习营 · 研修项目 · 分享日</text></view><text class="link">去 →</text></view>
+  <view class="h2">能力地图 <text class="muted small">七个领域 · {{evidenced}} 个有证据</text></view>
+  <view class="panel">
+    <view wx:for="{{domains}}" wx:key="key" class="file"><view class="body">{{item.name}}<text class="muted small" style="display:block">{{item.sub}}</text></view><text class="pill {{item.pill}}">{{item.label}}</text></view>
+    <view class="file"><view class="body">平台工具（账号、设备、工作台）<text class="muted small" style="display:block">不属于专业领域，单独记：通过 {{toolsDone}}/{{toolsTotal}} 关</text></view></view>
+    <text class="muted small">只给本人看。证据是关卡通过、作品被点评通过、研讨作答三类；不是分数，不和别人比。</text>
+  </view>
+  <view class="panel" wx:if="{{certs}}">
+    <view class="h2">证书与认证 <text class="muted small">三级 · 没有分数</text></view>
+    <view wx:for="{{certs.list}}" wx:key="id" class="file"><view class="body">{{item.label}}<text class="muted small" style="display:block">{{item.at}} · 编号 {{item.no}}</text></view></view>
+    <view wx:for="{{certs.rows}}" wx:key="k" class="file"><view class="body">{{item.name}}{{item.ok ? ' · 已获得' : ''}}<text class="muted small" style="display:block">{{item.txt}}</text></view></view>
+    <view wx:for="{{certs.cohorts}}" wx:key="id" class="file"><view class="body">认证期次 · {{item.name}}<text class="muted small" style="display:block">{{item.when}}{{item.mine ? ' · 我已报名' : ''}}</text></view><text wx:if="{{item.canApply}}" class="link" data-id="{{item.id}}" bindtap="applyCohort">报名</text></view>
+  </view>
+  <view class="panel" wx:if="{{hours}}">
+    <view class="h2">发展档案与学时 <text class="muted small">{{hours.label}}</text></view>
+    <text class="small">本学年 {{hours.minutes}} 分钟 · {{hours.hours}} 学时<text class="muted small">（每 {{hours.per}} 分钟 1 学时）</text></text>
+    <view wx:for="{{hours.certs}}" wx:key="id" class="file"><view class="body">学时证明 · {{item.hours}} 学时<text class="muted small" style="display:block">{{item.when}} · 编号 {{item.no}}</text></view></view>
+    <text class="muted small" style="display:block;margin-top:8rpx">发展档案打印、下载 JSON 与出具学时证明在网页端「我的 → 发展档案」。</text>
+  </view>
+  <view class="panel" wx:if="{{honors && honors.titles.length}}"><view class="h2">荣誉称号</view>
+    <view wx:for="{{honors.titles}}" wx:key="id" class="file"><view class="body">{{item.label}}<text class="muted small" style="display:block">{{item.by}} 授 · {{item.at}} · {{item.reason}}</text></view></view>
+  </view>
+  <view class="h2" style="margin-top:24rpx">勋章 <text class="muted small">{{honors ? honors.on.length + ' 枚' : ''}}</text></view>
+  <view class="badges" wx:if="{{honors}}">
+    <view wx:for="{{honors.on}}" wx:key="key" class="badge on"><view class="b">{{item.name[0]}}</view><text class="h3" style="font-size:26rpx">{{item.name}}</text><text class="muted small">{{item.at}}</text></view>
+    <view wx:for="{{honors.off}}" wx:key="key" class="badge"><view class="b">{{item.name[0]}}</view><text class="h3" style="font-size:26rpx">{{item.name}}</text><text class="muted small">{{item.txt}}</text></view>
+  </view>
+  <text wx:if="{{honors}}" class="muted small" style="display:block;margin-bottom:16rpx">成长勋章看路径完成；贡献勋章看案例被采纳、作答被精选、给同事写意见、带出一个人。不按在线时长、登录天数发任何东西。</text>
+  <view class="h2" style="margin-top:24rpx" wx:if="{{!honors}}">岗位徽章</view>
+  <view class="badges" wx:if="{{!honors}}">
+    <view wx:for="{{badges}}" wx:key="q" class="badge {{item.on ? 'on' : ''}}"><view class="b">{{item.ico}}</view><text class="h3" style="font-size:26rpx">{{item.name}}</text><text class="muted small">{{item.txt}}</text></view>
+  </view>
+  <view class="h2" style="margin-top:24rpx">学习记录</view>
+  <view class="panel">
+    <view wx:if="{{!recs.length}}" class="muted small">还没有通过的关卡。</view>
+    <view wx:for="{{recs}}" wx:key="i" class="file"><view class="body">第 {{item.i + 1}} 关 · {{item.t}}</view><text class="pill ok">已通过</text><text class="muted small">{{item.at}}</text></view>
+  </view>
+  <view class="panel"><view class="h2">岗位认证</view><text class="small">初级：完成本岗位路径，测验正确率 80% 以上，线上完成。中级：初级通过，提交一份本园场景应用案例，线下答辩。按学期开班，春季学期第一期 3 月开班。</text></view>
+</view>

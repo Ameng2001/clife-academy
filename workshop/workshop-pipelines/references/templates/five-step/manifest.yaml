@@ -1,0 +1,92 @@
+# 五步教学法管线
+id: five-step
+name: "五步教学法教案"
+name_en: "Five-Step Lesson Plan"
+description: "基于导入→探究→操作→总结→延伸的单课时教学活动设计，适合一线教师日常备课，也可作为主题课程中的教学活动子管线"
+version: "1.0.0"
+
+target_roles:
+  - classroom-teacher
+target_age_groups:
+  - prek-3
+  - prek-4
+  - k
+time_scope: lesson
+
+pipeline:
+  plugin: workshop-5step
+  stages:
+    - id: lesson-objective
+      name: "教学目标设计"
+      description: "基于主题和年龄组生成可观察学习目标"
+      optional: false
+    - id: lesson-scaffold
+      name: "教学环节架构"
+      description: "设计五步教学流程结构"
+      optional: false
+    - id: lesson-detail
+      name: "环节细化"
+      description: "为每个环节撰写具体话术和材料清单"
+      optional: false
+    - id: lesson-generate
+      name: "教案生成"
+      description: "编译为标准教案格式"
+      optional: false
+
+output:
+  document_type: lesson-plan
+  sections:
+    - id: info
+      title: "基本信息"
+      title_en: "Basic Info"
+      required: true
+    - id: core-goals
+      title: "核心发展目标"
+      title_en: "Core Development Goals"
+      required: false
+    - id: objective
+      title: "教学目标"
+      title_en: "Learning Objectives"
+      required: true
+    - id: preparation
+      title: "教学准备"
+      title_en: "Preparation"
+      required: true
+    - id: process
+      title: "教学过程"
+      title_en: "Teaching Process"
+      required: true
+      substeps:
+        - "导入 / Introduction"
+        - "探究 / Exploration"
+        - "操作 / Practice"
+        - "总结 / Summary"
+        - "延伸 / Extension"
+    - id: observation-support
+      title: "教师观察与支持要点"
+      title_en: "Observation and Support Notes"
+      required: true
+    - id: differentiation
+      title: "分层指导"
+      title_en: "Differentiation"
+      required: false
+    - id: reflection
+      title: "教学反思"
+      title_en: "Reflection"
+      required: true
+
+compatibility:
+  thematic_curriculum:
+    supported: true
+    role: "teaching-activity"
+    notes:
+      - "适合作为主题课程中的集体教学活动子产物"
+      - "应与月活动矩阵和周活动安排中的活动名称保持一致"
+      - "当客户模板要求时，应携带核心发展目标、活动重点 / 难点和教师观察与支持要点"
+
+coding:
+  prefix: "FS"
+  format: "{prefix}-S{unit}-{seq}"
+  unit_name: "教学环节"
+  unit_count: 5
+  unit_labels: ["导入 / Introduction", "探究 / Exploration", "操作 / Practice", "总结 / Summary", "延伸 / Extension"]

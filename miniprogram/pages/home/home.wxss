@@ -1,0 +1,30 @@
+.stats { margin: 20rpx 0 24rpx; gap: 0; }
+.mapwrap { white-space: nowrap; }
+.map { display: inline-flex; padding: 8rpx 0 16rpx; }
+.node { display: inline-flex; flex-direction: column; align-items: center; width: 150rpx; position: relative; }
+.node::before { content: ""; position: absolute; top: 34rpx; left: -50%; width: 100%; height: 6rpx; background: #d6e0dc; }
+.node:first-child::before { display: none; }
+.node.done::before, .node.current::before { background: #1f6b5c; }
+.dot { width: 72rpx; height: 72rpx; border-radius: 50%; border: 4rpx solid #d6e0dc; background: #fff; color: #7b8a86; display: flex; align-items: center; justify-content: center; font-size: 26rpx; position: relative; z-index: 1; }
+.node.done .dot { background: #1f6b5c; border-color: #1f6b5c; color: #fff; }
+.node.current .dot { border-color: #b0306f; color: #b0306f; box-shadow: 0 0 0 8rpx #f7e3ed; }
+.node .t { font-size: 22rpx; color: #5b716b; margin-top: 8rpx; white-space: normal; text-align: center; line-height: 1.3; }
+.node.current .t { color: #16302b; font-weight: 700; }
+.next { border-top: 1rpx solid #d6e0dc; padding-top: 24rpx; margin-top: 8rpx; }
+.segs { margin: 12rpx 0 20rpx; }
+.seg { font-size: 22rpx; padding: 2rpx 16rpx; border-radius: 10rpx; background: #f3f6f4; color: #5b716b; }
+.seg.on { background: #1f6b5c; color: #fff; }
+.trow { display: flex; padding: 12rpx 0; border-bottom: 1rpx solid #d6e0dc; font-size: 26rpx; }
+.trow.head { color: #5b716b; font-size: 22rpx; }
+.c1 { flex: 2; } .c2 { flex: 1; text-align: right; }
+.c2.warn { color: #a35f00; font-weight: 700; }
+.lockmsg { background: #f3f6f4; border-radius: 20rpx; padding: 24rpx; margin-top: 20rpx; display: flex; flex-direction: column; gap: 12rpx; align-items: flex-start; }
+.grid2 { display: flex; flex-wrap: wrap; justify-content: space-between; }
+.grid2 .lesson { width: 48%; }
+.live { background: #1f6b5c; color: #fff; border-radius: 24rpx; padding: 32rpx; display: flex; flex-direction: column; gap: 14rpx; margin-bottom: 24rpx; }
+.live .when { font-size: 24rpx; opacity: .85; }
+/* 园所额度流水：日期 · 一句话 · 进出数 */
+.ql { display: flex; align-items: baseline; gap: 16rpx; padding: 12rpx 0; border-top: 1rpx solid #d6e0dc; }
+.ql .body { flex: 1; min-width: 0; }
+.ql .num { flex: none; font-weight: 700; color: #5b716b; }
+.ql .num.in { color: #1f6b5c; }

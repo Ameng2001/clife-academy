@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Theme Framing</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="framing">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./theme-framing.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+          <a class="project-card" href="./index.html"><div class="project-title">春天的花</div><div class="project-meta">另一个项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link active" href="./theme-framing.html">主题方向 thread</a>
+            <a class="thread-link" href="./month-matrix.html">月矩阵探索 thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Theme Framing</div><div class="title">在同一项目里，通过 thread 推进当前阶段</div><p class="muted">左侧保留 project / thread 切换，顶部显示阶段地图，中间依然是对话推进。这样既沉浸，也不会丢失项目感。</p></div><div class="head-actions"><span class="chip">current stage</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node active">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate">Stage Confirm</span>
+          </div>
+          <div class="stage-notes"><div class="stage-note">当前 thread 只负责 framing；确认通过后，项目会进入 month 级阶段。</div></div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message user"><h3>你</h3><div>“多样的服饰”这个主题，我想要它既贴近生活，又能走到创作和表达。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>我建议四周递进是：认识服饰、比较场景服饰、我来设计服饰、分享我的服饰。这样能从观察走到创造，再回到表达。</div><div class="bubble-actions" style="margin-top:12px;"><span class="bubble-action">把递进讲得更像客户样例</span><span class="bubble-action">补主题价值</span></div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>我已经把主题分析、主题解读和主题网络汇到右侧。你确认这版后，项目将进入 Month Matrix 阶段。</div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：第二周和第三周之间加一个更自然的过渡" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">Theme Framing</div></div><a class="ghost-link" href="./hil-confirm.html">确认当前阶段</a></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card"><h2>Focus Canvas · 主题分析</h2><p class="muted">服饰主题天然连接生活经验、角色认知和材料创造，适合作为中班的整月主题包。</p></section>
+            <section class="canvas-card"><h2>主题解读</h2><p class="muted">从认识到比较，再到设计和分享，形成一条完整的观察-创造-表达链。</p></section>
+            <section class="canvas-card"><h2>主题网络</h2><div class="stack-list"><div class="stack-item"><strong>观察线</strong><div class="muted">认识、比较、分类</div></div><div class="stack-item"><strong>创造线</strong><div class="muted">搭配、设计、制作</div></div><div class="stack-item"><strong>表达线</strong><div class="muted">展示、分享、家园延伸</div></div></div></section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">future structure</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><a class="mini-link" href="./month-matrix.html">预览 month</a></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot active">观察</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">-</div><div class="mini-slot">-</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot">比较</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">创造</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">分享</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">-</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Coverage Hints</h2><span class="chip">guided</span></div>
+              <div class="hint-list">
+                <div class="hint-item"><strong>当前阶段提醒</strong><div class="muted">Framing 通过后，右侧灰态建议会正式转成月矩阵结构。</div></div>
+                <div class="hint-item"><strong>潜在风险</strong><div class="muted">如果 Week 3 的创造线过重，后续 week rhythm 会偏密。</div></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

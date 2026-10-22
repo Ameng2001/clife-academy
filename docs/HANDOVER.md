@@ -22,33 +22,23 @@
 
 ## 二、仓库与目录
 
-| 仓库 | 放什么 | 地址 |
-|---|---|---|
-| `clife-academy` | 学坊全部代码：api、网页前端、MCP 桥、文档、联调脚本 | github.com/Ameng2001/clife-academy（私有） |
-| `hundredscity-millionsgarden-proj` | 方案、原型、**微信小程序**，路径 `deals/06 柳州-徐明/本地运营/学前大课堂/` | github.com/Ameng2001/hundredscity-millionsgarden-proj |
-| `courses-workshop-plugins` | 教研工坊的引擎（Claude Code 插件形态），线上版 jiaoyan.clife.cn 是另一支团队在做 | github.com/Ameng2001/courses-workshop-plugins |
-
-`clife-academy` 内部：
+只有一个仓库：`clife-academy`，github.com/Ameng2001/clife-academy（私有）。学坊代码、微信小程序、教研工坊引擎、方案与契约、原型全在里面。
 
 ```
 api/            Node 原生 http，无框架。server.js 装路由；api/academy/ 42 个业务模块，每个导出 'METHOD /path' 映射
 api/test/       36 个 academy 测试文件（node --test）
 api/openapi.yaml  232 条接口，每加一条接口同步一条
 frontend/       React 19 + Vite + Zustand。src/academy/views 40 个页面，src/lib 纯函数（带测试）
+miniprogram/    微信小程序，原生，16 页（home paths level lessons checkup district studio live drill contest library local me growth community mall）
+                utils/ 每个业务一个文件，config.js 里是 API_BASE；根目录 project.config.json 给微信开发者工具
+workshop/       教研工坊引擎（Claude Code 插件形态）：workshop-core、workshop-5step、workshop-pbl、workshop-activity 管线，studio，apps 原型，docs 设计文档。
+                线上版 jiaoyan.clife.cn 是另一支团队照它做；分享到学坊的参考实现在 workshop-core/scripts/share_academy.py
+prototype/      早期可点通 H5 原型（src/academy.body.html 是课程数据源，gen_mp_data.py 生成 miniprogram/utils/data.js）
 mcp/            只读 MCP 桥，园长与教育局用自己的 LLM 客户端查看板
 web/            nginx，托前端、反代 /api
-scripts/        dev.sh / local.sh 本地启停；import-lessons.py 课程数据导入；两个工坊联调脚本
-docs/           见第十节文档索引
+scripts/        dev.sh / local.sh 本地启停；mp-render.mjs 小程序页渲 html；import-lessons.py 课程数据导入；两个工坊联调脚本
+docs/           见第十节文档索引；docs/proposal/ 方案正文、对客契约、继续教育学时说明、本移交文档的 Word 与 PDF、导出脚本
 data/           本地开发数据（db.json、state-<uid>.json、uploads/、audit.log、secret），不进 git
-```
-
-小程序目录（hundredscity 仓库 `学前大课堂/app/`）：
-
-```
-miniprogram/    原生小程序，16 页（home paths level lessons checkup district studio live drill contest library local me growth community mall）
-                utils/ 每个业务一个文件，config.js 里是 API_BASE
-mp-render.mjs   把一页渲成 html 看效果：node mp-render.mjs "$PWD/miniprogram" <页名> out.html '<登录 json>'
-src/、build.py  早期可点通原型，已被小程序取代，留作参考
 ```
 
 基底是开源项目 openGym（AGPL-3.0），健身业务已剥离，保留的是账号、同步、Coach 流水线、管理台。为什么选它、哪些模块保留重写：`docs/MIGRATION.md` 一到四节。许可证义务见该文第七节，上线前法务过一眼。
@@ -65,7 +55,7 @@ sh scripts/local.sh start      # api :3000 + vite :5173 后台跑，日志在 .l
 
 `local.sh` 默认开 `DEV_LOGIN=1`（名字加岗位直接进，只许本机）、`ALLOW_GUEST=1`，两个本地管理员，`TOOLS_API_KEY=dev-tools-key`。开发数据在 `./data`。
 
-小程序：微信开发者工具打开 `app/project.config.json`，勾掉「校验合法域名」，`utils/config.js` 指向本机 3000。还没有 AppID，`WX_APPID` 一到手先做真机联调（见第十一节）。
+小程序：微信开发者工具打开仓库根目录的 `project.config.json`，勾掉「校验合法域名」，`utils/config.js` 指向本机 3000。还没有 AppID，`WX_APPID` 一到手先做真机联调（见第十一节）。
 
 部署：`docker-compose.yml` 两容器（api 与 nginx），`.env` 从 `.env.example` 抄，`./data` 就是全部数据，备份它即可。`secret` 丢了所有人下线。配置项全部在 `.env.example` 里带注释，学坊自己加的那一段在文件末尾（微信、平台登录、事件回传、订阅消息、积分、工坊、答疑模型）。
 
@@ -168,7 +158,8 @@ npm run check:workshop
 | `docs/KNOWLEDGE-TREE-DESIGN.md` | 教师发展树设计稿（未做，待定四件事） |
 | `docs/upstream/` | openGym 原文档 |
 | `mcp/README.md` | MCP 桥怎么接 |
-| hundredscity 仓库 `学前大课堂/` | 方案正文、原型、继续教育学时回填说明、三份契约的对客版 |
+| `docs/proposal/` | 方案正文、三份契约的对客版、继续教育学时回填说明、微课样片、本文的 Word 与 PDF |
+| `workshop/docs/` | 教研工坊的产品方案、页面方案、分享到学坊的设计 |
 
 ## 十一、现状与待办
 
@@ -194,18 +185,18 @@ npm run check:workshop
 
 ## 十二、已知问题与坑
 
-- `mp-render.mjs` 第二个参数是页名（`home`）不是路径，小程序目录要传绝对路径。它是看版式用的近似渲染，真机为准。
+- `scripts/mp-render.mjs` 第二个参数是页名（`home`）不是路径，小程序目录要传绝对路径：`node scripts/mp-render.mjs "$PWD/miniprogram" home out.html '<登录 json>'`。它是看版式用的近似渲染，真机为准。
 - 网页 860 宽以下走窄屏布局带底部 tab，1100 是桌面布局；查版式先列路由再批量截图。
 - `DEV_LOGIN` 只能本机开；生产 `.env` 不要有它。
 - 本地 `data/` 里有演示数据（赵园长、王老师等），不是真实用户。
 - api 全量测试的 17 个失败见第九节。
-- 工坊投稿令牌放在工坊侧 gitignore 的 `.workshop/config.yaml`，两边仓库都不能提交令牌。
+- 工坊投稿令牌放在 `workshop/.workshop/config.yaml`（已 gitignore），不能提交令牌。
 
 ## 十三、移交清单
 
 | 项 | 现持有 | 交给 |
 |---|---|---|
-| 三个 GitHub 仓库的权限 | Ameng2001 | 技术负责人加协作者 |
+| GitHub 仓库 clife-academy 的权限 | Ameng2001 | 技术负责人加协作者 |
 | `TOOLS_API_KEY` | 本机开发值，生产未生成（`openssl rand -hex 32`） | 技术，学坊与工坊各配一份 |
 | `WX_APPID` / `WX_SECRET` / 订阅消息模板 ID | 未申请 | 运营方申请，技术配置 |
 | 平台登录与事件回传密钥 | 未交换 | 平台接口人与技术 |

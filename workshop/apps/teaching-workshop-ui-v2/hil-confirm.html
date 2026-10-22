@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Stage Confirm</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="hil">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./hil-confirm.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./activity-editor.html">teaching activity thread</a>
+            <a class="thread-link active" href="./hil-confirm.html">stage confirm thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Stage Confirm</div><div class="title">Confirm 是显式 gate，但不是普通内容阶段</div><p class="muted">这里确认的是“AI 已完成当前阶段，你是否接受”。它应该在阶段地图中显式存在，但视觉上与内容阶段不同。</p></div><div class="head-actions"><span class="chip">gate</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate active">Stage Confirm</span><span class="stage-arrow">→</span><span class="stage-node">Export</span>
+          </div>
+          <div class="stage-notes"><div class="stage-note">通过后项目进入 Export；退回后回到对应内容阶段继续修改。</div></div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message ai"><h3>教研 Copilot</h3><div>我已经完成了当前阶段：第 2 周周安排、教学活动稿、区域活动稿的第一版，并把缺项控制到 1 个生活渗透活动。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>建议你现在确认是否接受这版结构。如果接受，我会继续帮你生成导出包摘要；如果不接受，我可以只针对“周内节奏”或“教学活动语言”继续重写。</div><div class="bubble-actions" style="margin-top:12px;"><span class="bubble-action">接受并继续</span><span class="bubble-action">只调整周节奏</span><span class="bubble-action">只重写教学活动</span></div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：整体接受，但把第二周和第三周的衔接再加强一点" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">阶段快照</div></div><span class="chip">confirm target</span></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card"><div class="confirm-banner"><strong>AI 已完成：</strong> Theme framing、Month matrix、第 2 周安排、教学活动稿、区域活动稿。</div></section>
+            <section class="canvas-card"><div class="warning-banner"><strong>仍待补：</strong> 第 2 周生活渗透活动稿。其余内容已经足以进入导出准备。</div></section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">confirm in context</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><span class="chip">W2 highlighted</span></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot active">T</div><div class="mini-slot active">R</div><div class="mini-slot active">O</div><div class="mini-slot missing">-</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Missing / Coverage</h2><span class="chip">1 issue</span></div>
+              <div class="hint-list">
+                <div class="hint-item"><strong>唯一缺项</strong><div class="muted">第 2 周还缺 1 个生活渗透活动，不影响先确认主体结构。</div></div>
+                <div class="hint-item"><strong>阶段建议</strong><div class="muted">先通过结构，再回到该 week 补轻量活动，成本更低。</div></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

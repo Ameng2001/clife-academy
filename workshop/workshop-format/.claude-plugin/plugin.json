@@ -1,0 +1,14 @@
+{
+  "name": "workshop-format",
+  "version": "0.1.0",
+  "description": "Course export and formatting plugin — normalize client-facing deliverables and prepare release bundles for Word/PDF or remote publishing",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["format", "export", "release-bundle", "word", "pdf", "client-delivery"],
+  "dependencies": ["workshop-core", "workshop-pipelines"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

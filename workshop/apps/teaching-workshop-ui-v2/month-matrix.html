@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Month Matrix</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="matrix">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./month-matrix.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./theme-framing.html">framing thread</a>
+            <a class="thread-link active" href="./month-matrix.html">month matrix thread</a>
+            <a class="thread-link" href="./week-arrangement.html">week expansion thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Month Matrix</div><div class="title">月矩阵是阶段，不是最终对象列表</div><p class="muted">在这个 thread 里，你和 AI 讨论的是“整个月怎么排”。下一步会从 month 阶段展开到各个 week，而不是直接只生成一个活动。</p></div><div class="head-actions"><span class="chip">month-stage</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node active">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate">Stage Confirm</span>
+          </div>
+          <div class="stage-notes"><div class="stage-note">Month Matrix 之后，不是直接进入单个活动，而是先按 week 展开。</div></div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message user"><h3>你</h3><div>第 2 周我想更突出职业服饰，但不要让教学活动过密。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>可以。我会把第 2 周的锚点活动放在“我会穿什么”，再配一个区域活动和一个家园互动，减少连续高强度教学。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>右侧月矩阵已经更新。下一步你可以选择直接展开第 2 周，进入周安排 thread。</div><div class="bubble-actions" style="margin-top:12px;"><a class="bubble-action" href="./week-arrangement.html">展开第 2 周</a></div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：第3周加一个户外游戏，把创作和运动结合起来" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">月度活动矩阵</div></div><a class="ghost-link" href="./week-arrangement.html">进入 Week</a></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card"><div class="section-head"><h2>Focus Canvas · 4 周递进</h2><span class="chip">Progression</span></div><div class="stack-list"><div class="stack-item"><strong>Week 1</strong><div class="muted">认识服饰</div></div><div class="stack-item"><strong>Week 2</strong><div class="muted">不同场景的服饰</div></div><div class="stack-item"><strong>Week 3</strong><div class="muted">我来设计服饰</div></div><div class="stack-item"><strong>Week 4</strong><div class="muted">分享我的服饰</div></div></div></section>
+            <section class="canvas-card"><div class="section-head"><h2>第 2 周矩阵快照</h2><span class="chip">Live</span></div><div class="matrix-lite"><div class="matrix-row"><div class="matrix-cell"><strong>教学</strong></div><div class="matrix-cell">我会穿什么</div><div class="matrix-cell"><strong>区域</strong></div><div class="matrix-cell">职业服饰拼图</div><div class="matrix-cell"><strong>家园</strong></div><div class="matrix-cell">观察家人的工作服</div></div></div></section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">month → week</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><span class="chip">W2 active</span></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot active">T</div><div class="mini-slot active">R</div><div class="mini-slot warning">O</div><div class="mini-slot missing">-</div><div class="mini-slot active">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Week Rhythm Mini</h2><a class="mini-link" href="./week-arrangement.html">展开第 2 周</a></div>
+              <div class="rhythm-list">
+                <div class="rhythm-row"><div class="mini-week-label">Mon</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Tue</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar warning"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Wed</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot missing"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Thu</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar active"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Fri</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

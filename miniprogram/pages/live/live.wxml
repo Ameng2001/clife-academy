@@ -1,0 +1,24 @@
+<view class="wrap">
+  <view class="h1">名师讲堂</view>
+  <text class="muted small">每月一场，安排在午睡时段。直播结束后提供回放与讲义。{{demo ? '（演示场次）' : ''}}</text>
+  <view wx:if="{{!lives.length}}" class="panel" style="margin-top:20rpx"><text class="muted small">下一场还没排，排上了会出现在这里和首页。</text></view>
+  <view wx:for="{{lives}}" wx:key="id" class="panel {{index === 0 ? 'first' : ''}}" style="margin-top:20rpx">
+    <text class="eyebrow num" style="{{index === 0 ? 'color:#e2efea' : ''}}">{{index === 0 ? '下一场 · ' : ''}}{{item.when}}</text>
+    <view class="h3" style="font-size:32rpx;margin:8rpx 0">{{item.t}}</view>
+    <text class="small" style="{{index === 0 ? 'opacity:.9' : 'color:#5b716b'}}">{{item.d}}</text>
+    <text class="small" style="display:block;margin:8rpx 0 16rpx;{{index === 0 ? 'opacity:.85' : 'color:#5b716b'}}">适合：{{item.who}}{{item.n ? ' · ' + item.n + ' 人预约' : ''}}</text>
+    <view wx:if="{{item.points.length}}" style="margin:0 0 16rpx"><text class="small" style="display:block;font-weight:600;{{index === 0 ? 'opacity:.95' : 'color:#1f6b5c'}}">讲前先看</text><text wx:for="{{item.points}}" wx:for-item="pt" wx:for-index="pi" wx:key="pi" class="small" style="display:block;line-height:1.6;{{index === 0 ? 'opacity:.9' : 'color:#5b716b'}}">{{pi + 1}}. {{pt}}</text></view>
+    <button class="btn {{index === 0 ? '' : 'ghost'}}" style="{{index === 0 ? 'background:#fff;color:#1f6b5c' : ''}}" data-i="{{index}}" bindtap="toggle">{{item.on ? '已预约 · 开播前提醒' : '预约直播'}}</button>
+    <button wx:if="{{item.liveUrl && (item.live || item.on)}}" class="btn ghost" style="margin-top:12rpx;{{index === 0 ? 'border-color:#fff;color:#fff' : ''}}" data-u="{{item.liveUrl}}" bindtap="copy">{{item.live ? '复制直播链接，去开' : '复制直播链接'}}</button>
+    <button wx:if="{{item.slides}}" class="btn ghost" style="margin-top:12rpx;{{index === 0 ? 'border-color:#fff;color:#fff' : ''}}" data-u="{{item.slides}}" bindtap="copy">复制讲义链接</button>
+  </view>
+  <view class="panel"><view class="h2">回放</view>
+    <view wx:if="{{!replays.length}}" class="muted small">还没有回放。</view>
+    <block wx:for="{{replays}}" wx:key="id">
+      <view class="file" data-u="{{item.url}}" bindtap="copy"><view class="ext">回放</view><view class="body">{{item.t}}<text class="sub num">{{item.when}} · {{item.who}}{{item.notes ? ' · ' + item.notes : ''}}</text></view></view>
+      <view wx:if="{{item.clips.length}}" style="padding:0 0 12rpx 24rpx"><text class="muted small" style="display:block">微课切片 · {{item.clips.length}} 条</text><text wx:for="{{item.clips}}" wx:for-item="c" wx:key="id" class="small" style="display:block;line-height:1.6;color:#5b716b">· {{c.title}}{{c.desc ? '：' + c.desc : ''}}</text></view>
+      <view wx:if="{{item.poster}}" style="margin:0 0 16rpx;border-radius:20rpx;padding:20rpx 24rpx;background:#1f6b5c;color:#fff"><text class="small" style="display:block;opacity:.8">知识海报</text><text style="display:block;font-weight:700;font-size:32rpx;margin:6rpx 0 10rpx">{{item.poster.headline}}</text><text wx:for="{{item.poster.lines}}" wx:for-item="ln" wx:for-index="li" wx:key="li" class="small" style="display:block;line-height:1.6">· {{ln}}</text></view>
+    </block>
+    <text wx:if="{{!demo && replays.length}}" class="muted small" style="display:block;margin-top:12rpx">点一条复制回放链接，到浏览器打开。讲义在网页端名师讲堂页。</text>
+  </view>
+</view>

@@ -1,0 +1,51 @@
+<view class="wrap">
+  <block wx:if="{{!cur}}">
+    <view class="h1">斗课</view>
+    <text class="muted small">同课异构擂台 · 园内赛与共同体赛 · 自愿参加，评作品不评人；票数与分数不公开，只公布入选作品与点评。</text>
+    <view wx:if="{{hint}}" class="panel" style="margin-top:20rpx"><text class="muted small">{{hint}}</text></view>
+    <view wx:for="{{items}}" wx:key="id" class="panel" style="margin-top:20rpx" data-id="{{item.id}}" bindtap="open">
+      <view class="between"><text class="eyebrow">{{item.level === 'community' ? '共同体赛 · ' + item.communityName + ' · ' : ''}}{{item.month}} · {{item.phaseText}}</text><text class="eyebrow">{{item.entries}} 人应战</text></view>
+      <view class="h3" style="font-size:30rpx;margin:12rpx 0">{{item.title}}</view>
+      <text class="muted small">{{item.phase === 'open' ? item.dueText + ' 截止' : ''}}{{item.selectedCount ? ' · 入选 ' + item.selectedCount : ''}}</text>
+    </view>
+  </block>
+  <block wx:else>
+    <text class="eyebrow" bindtap="back">‹ 全部擂台</text>
+    <view class="h1" style="font-size:36rpx">{{cur.title}}</view>
+    <text class="muted small">{{cur.month}} · {{cur.age}} · {{cur.phaseText}} · {{cur.entries}} 人应战</text>
+    <view class="panel" style="margin-top:20rpx"><text class="small" style="display:block">活动：{{cur.activity}}</text><text class="small" style="display:block">目标：{{cur.goal}}</text><text wx:if="{{cur.guide}}" class="muted small" style="display:block">《指南》：{{cur.guide}}</text></view>
+
+    <block wx:if="{{cur.phase === 'open'}}">
+      <view wx:if="{{cur.mine && !editing}}" class="panel"><view class="between"><text class="h3" style="font-size:26rpx">我的作品</text><text class="eyebrow" bindtap="edit">改</text></view><text class="small">{{cur.mine.design}}</text><text wx:if="{{cur.mine.note}}" class="muted small" style="display:block;margin-top:8rpx">反思：{{cur.mine.note}}</text><text class="muted small" style="display:block;margin-top:8rpx">实施片段（≤3 分钟，幼儿不露脸）在网页端传。</text></view>
+      <view wx:else class="panel">
+        <text class="muted small">应战：一份活动设计（目标、环节、材料，≥100 字）。截止前别人看不到你的设计。</text>
+        <textarea class="ta" maxlength="8000" value="{{design}}" placeholder="活动设计" data-k="design" bindinput="input" style="margin-top:12rpx"></textarea>
+        <input class="ta" style="height:72rpx;margin-top:12rpx" value="{{note}}" placeholder="一句反思（可不填）" data-k="note" bindinput="input" />
+        <button class="btn primary" style="margin-top:16rpx" bindtap="enter">{{cur.mine ? '保存' : '应战'}}</button>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view wx:for="{{cur.groups}}" wx:for-item="g" wx:for-index="gi" wx:key="n">
+        <view wx:if="{{g.n}}" class="h2" style="margin-top:20rpx">第 {{g.n}} 组 · {{g.entries.length}} 份</view>
+        <view wx:for="{{g.entries}}" wx:key="id" class="panel {{item.selected ? 'sel' : ''}}" style="margin-top:12rpx">
+          <view class="between" data-g="{{gi}}" data-i="{{index}}" bindtap="toggle"><text class="h3" style="font-size:28rpx">{{item.name}}{{item.orgName ? ' · ' + item.orgName : ''}}{{item.mine ? ' · 我的' : ''}}{{item.selected ? ' · 入选' : ''}}</text><text class="eyebrow">{{item.ratingsCount ? item.ratingsCount + ' 人评' : ''}} {{item.open ? '收起' : '展开'}}</text></view>
+          <block wx:if="{{item.open}}">
+            <text class="small" style="display:block;margin-top:8rpx;white-space:pre-wrap">{{item.design}}</text>
+            <text wx:if="{{item.note}}" class="muted small" style="display:block;margin-top:8rpx">反思：{{item.note}}</text>
+            <text wx:if="{{item.video}}" class="muted small" style="display:block;margin-top:8rpx">有实施片段，网页端看。</text>
+            <view wx:if="{{item.mine && item.ratingRows.length}}" class="box" style="margin-top:12rpx"><text class="h3" style="font-size:26rpx">同事的评价（只有你看得到）</text><view wx:for="{{item.ratingRows}}" wx:for-item="r" wx:key="byName" class="small"><text>{{r.byName}}：{{r.line}}</text><text class="muted" style="display:block">{{r.comment}}</text></view></view>
+            <view wx:if="{{item.canRate}}" class="box" style="margin-top:12rpx">
+              <text class="h3" style="font-size:26rpx">{{item.myRating ? '我的评价（可改）' : '评这份作品 · 每一项对作品不对人 · 实名'}}</text>
+              <view wx:for="{{cur.rubric}}" wx:for-item="k" wx:for-index="j" wx:key="*this" class="between"><text class="small">{{k}}</text><view class="stars"><text wx:for="{{[1,2,3,4,5]}}" wx:for-item="n" wx:key="*this" class="{{n <= item.scores[j] ? 'on' : ''}}" data-g="{{gi}}" data-i="{{index}}" data-j="{{j}}" data-n="{{n}}" bindtap="star">★</text></view></view>
+              <input class="ta" style="height:72rpx" value="{{item.comment}}" placeholder="一句话：好在哪、可以怎么调" data-g="{{gi}}" data-i="{{index}}" bindinput="comment" />
+              <button class="btn primary" data-g="{{gi}}" data-i="{{index}}" bindtap="rate">交</button>
+            </view>
+          </block>
+        </view>
+        <view wx:if="{{g.review}}" class="box best" style="margin-top:12rpx"><text class="h3" style="font-size:26rpx">同课异构对照 · {{g.review.byName}}</text><text class="small" style="white-space:pre-wrap">{{g.review.text}}</text></view>
+      </view>
+      <text wx:if="{{cur.summary}}" class="muted small" style="display:block;margin-top:16rpx">收官：{{cur.summary}}</text>
+    </block>
+  </block>
+</view>

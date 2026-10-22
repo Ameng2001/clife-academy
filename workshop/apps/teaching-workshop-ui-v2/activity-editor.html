@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Activity Editor</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="activity">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./activity-editor.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./week-arrangement.html">week 2 expansion thread</a>
+            <a class="thread-link active" href="./activity-editor.html">teaching activity thread</a>
+            <a class="thread-link" href="./activity-editor.html">region activity thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Activity Editor</div><div class="title">像和 Codex 写代码一样，和 AI 结对写活动稿</div><p class="muted">这里保留最强的 Co-pilot 感，但不会丢掉 project / thread 管理。一个 project 可以有多个 activity thread，每个 thread 聚焦一份稿件。</p></div><div class="head-actions"><span class="chip">teaching activity</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node active">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate">Stage Confirm</span>
+          </div>
+          <div class="stage-notes"><div class="stage-note">当前 thread 是某个 activity 的工作会话；完成多个活动后，项目才会进入阶段确认。</div></div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message user"><h3>你</h3><div>只重写第 2 环节，让它更像客户模板，而且补上“教师观察与支持要点”。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>我已经只修改第 2 环节，并把“观察与支持”补进右侧过程表。重点是让教师追问不只是“为什么好看”，而是回到服饰的功能与场景。</div><div class="bubble-actions" style="margin-top:12px;"><span class="bubble-action">再正式一点</span><span class="bubble-action">更适合中班</span></div></div>
+          <div class="message user"><h3>你</h3><div>很好，再把活动延伸缩短一些。</div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：保留第一环节，只把第二环节改得更适合中班" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">这是谁的衣服</div></div><span class="chip">activity draft</span></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card"><h2>Focus Canvas · 核心发展目标</h2><p class="muted">SE-4 / SE-8：在具体场景中辨认服饰特征，形成情境判断与表达。</p></section>
+            <section class="canvas-card"><div class="section-head"><h2>活动过程 · 第 2 环节</h2><span class="chip">updated</span></div><div class="section-item"><strong>教师动作</strong><div class="muted">比较医生服、厨师服、雨衣，引导幼儿说出“这件衣服适合在哪里穿、为什么”。</div></div><div class="section-item"><strong>观察与支持</strong><div class="muted">若幼儿只关注颜色或好看，教师追问其功能和场景，并提供二选一提示帮助组织表达。</div></div></section>
+            <section class="canvas-card"><h2>活动延伸</h2><p class="muted">回家继续观察家人服饰，说说“为什么要这样穿”。</p></section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">activity in context</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><span class="chip">W2 · Teaching</span></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot active">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot missing">-</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Week Rhythm Mini</h2><a class="mini-link" href="./week-arrangement.html">回到 week</a></div>
+              <div class="rhythm-list">
+                <div class="rhythm-row"><div class="mini-week-label">Mon</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Tue</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar warning"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Wed</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot missing"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Thu</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar active"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+                <div class="rhythm-row"><div class="mini-week-label">Fri</div><div class="rhythm-bars"><span class="rhythm-bar active"></span><span class="rhythm-bar"></span><span class="rhythm-bar"></span></div><span class="rhythm-dot"></span></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

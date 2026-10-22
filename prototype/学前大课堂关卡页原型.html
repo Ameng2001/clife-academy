@@ -1,0 +1,457 @@
+<title>学前大课堂关卡页</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 布局：关卡头 + 四段步骤条（讲 / 看 / 做 / 测）→ 左侧当前段落舞台，右侧本关要点与答疑；手机宽度单列 */
+:root{
+  --paper:#f3f6f4; --surface:#ffffff; --ink:#16302b; --muted:#5b716b; --line:#d6e0dc;
+  --willow:#1f6b5c; --willow-soft:#e2efea; --bauhinia:#b0306f; --bauhinia-soft:#f7e3ed;
+  --ok:#2f7d4f; --ok-soft:#e3f2e8; --warn:#a35f00; --warn-soft:#fbefd9; --idle:#7b8a86; --idle-soft:#eceff0;
+  --board:#fbfcfa; --chalk:#2b3a36;
+  --shadow:0 1px 2px rgba(22,48,43,.06),0 6px 20px rgba(22,48,43,.06);
+  --f-body:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0f1a18;--surface:#16231f;--ink:#e4efeb;--muted:#9db3ac;--line:#2a3c37;
+  --willow:#5fbfa6;--willow-soft:#1d3530;--bauhinia:#ef7fb2;--bauhinia-soft:#3a1f2c;
+  --ok:#6fcf93;--ok-soft:#1c3427;--warn:#f0b357;--warn-soft:#3a2c14;--idle:#8a9995;--idle-soft:#22302c;
+  --board:#1b2a26;--chalk:#dfeae6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0f1a18;--surface:#16231f;--ink:#e4efeb;--muted:#9db3ac;--line:#2a3c37;
+  --willow:#5fbfa6;--willow-soft:#1d3530;--bauhinia:#ef7fb2;--bauhinia-soft:#3a1f2c;
+  --ok:#6fcf93;--ok-soft:#1c3427;--warn:#f0b357;--warn-soft:#3a2c14;--idle:#8a9995;--idle-soft:#22302c;
+  --board:#1b2a26;--chalk:#dfeae6;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--bauhinia);outline-offset:2px;border-radius:6px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:500}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);min-width:0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:9px 16px;font-weight:700;cursor:pointer;font-size:14px;text-decoration:none}
+.btn.primary{background:var(--bauhinia);color:var(--surface)}
+.btn.ghost{background:var(--willow-soft);color:var(--willow)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.pill{font-size:12px;padding:2px 10px;border-radius:999px;font-weight:500;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.idle{background:var(--idle-soft);color:var(--idle)}
+
+/* 顶栏 */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.back{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:14px}
+.back:hover{color:var(--ink)}
+.crumb{font-size:13px;color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb b{color:var(--ink);font-weight:500}
+.proto{font-size:12px;color:var(--bauhinia);background:var(--bauhinia-soft);padding:2px 8px;border-radius:999px;white-space:nowrap}
+
+/* 关卡头 */
+.head{padding-block:22px 14px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:flex-end}
+.head h1{font-size:26px;font-weight:900}
+.goal{font-size:14px;color:var(--muted);margin-top:6px;max-width:62ch}
+.rule{font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;max-width:360px}
+.rule b{color:var(--willow)}
+
+/* 步骤条 */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.step{display:flex;gap:10px;align-items:center;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;min-width:0}
+.step .k{width:32px;height:32px;flex:none;border-radius:9px;display:grid;place-items:center;font-weight:900;background:var(--willow-soft);color:var(--willow)}
+.step b{display:block;font-size:14px}
+.step small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step[aria-selected="true"]{border-color:var(--bauhinia);box-shadow:0 0 0 3px var(--bauhinia-soft)}
+.step.done .k{background:var(--willow);color:var(--surface)}
+.step>div{min-width:0}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start;padding-bottom:40px}
+
+/* 讲：白板 */
+.board{background:var(--board);border:1px solid var(--line);border-radius:12px;aspect-ratio:16/9;max-width:100%;position:relative;overflow:hidden}
+.board svg{width:100%;height:100%;display:block}
+.board .sk{fill:none;stroke:var(--chalk);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.board .hl{fill:none;stroke:var(--bauhinia);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.board .gw{fill:none;stroke:var(--willow);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.board .draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:draw var(--dur,1.2s) ease-out forwards;animation-delay:var(--delay,0s)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.board text{fill:var(--chalk);font-family:var(--f-body);font-size:15px}
+.subtitle{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:min(92%,640px);text-align:center;background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px;box-shadow:var(--shadow)}
+.player{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.bar{flex:1;min-width:160px;height:6px;background:var(--line);border-radius:6px;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--willow);border-radius:6px;width:0}
+.scenes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+.scene{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;text-align:left;cursor:pointer;font-size:13px;min-width:0}
+.scene b{display:block;font-family:var(--f-num);font-size:11px;color:var(--muted);font-weight:500}
+.scene[aria-current="true"]{border-color:var(--willow);background:var(--willow-soft)}
+
+/* 看：录屏 */
+.screen{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.chrome{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--paper);font-size:12px;color:var(--muted)}
+.chrome i{width:9px;height:9px;border-radius:50%;background:var(--line);display:inline-block}
+.app{display:grid;grid-template-columns:170px minmax(0,1fr);min-height:300px;font-size:13px}
+.side{border-right:1px solid var(--line);padding:10px 0;background:var(--paper)}
+.side div{padding:6px 14px;color:var(--muted)}
+.side .grp{color:var(--ink);font-weight:700;margin-top:6px}
+.side .on{color:var(--willow);background:var(--willow-soft);font-weight:700}
+.main{padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fake-btn{border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-size:12px;background:var(--surface)}
+.fake-btn.pri{background:var(--willow);color:var(--surface);border-color:var(--willow)}
+.tbl{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tr{display:grid;grid-template-columns:1.1fr 1fr 1.4fr .9fr;gap:8px;padding:7px 10px;border-top:1px solid var(--line)}
+.tr:first-child{border-top:0;background:var(--paper);color:var(--muted)}
+.tr span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.form{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.form label{font-size:12px;color:var(--muted)}
+.form .f{border:1px solid var(--line);border-radius:6px;padding:4px 8px;background:var(--paper);color:var(--ink);font-size:12px;min-height:26px}
+.ring{outline:3px solid var(--bauhinia);outline-offset:2px;border-radius:6px;position:relative}
+.chapters{display:grid;gap:6px;margin-top:12px}
+.chap{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px}
+.chap b{font-family:var(--f-num);font-size:12px;color:var(--muted);font-weight:500}
+.chap[aria-current="true"]{border-color:var(--bauhinia);background:var(--bauhinia-soft)}
+
+/* 做 */
+.task{display:grid;gap:14px}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checklist li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;font-size:14px;padding:10px 12px;background:var(--paper);border-radius:10px}
+.checklist .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-num);font-size:12px;background:var(--willow-soft);color:var(--willow)}
+.verify{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center;padding:14px;border-radius:12px;border:1px dashed var(--line)}
+.verify .ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--idle-soft);color:var(--idle);font-weight:900}
+.verify.passed{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.verify.passed .ico{background:var(--ok);color:var(--surface)}
+.verify code{font-family:var(--f-num);font-size:12px;background:var(--surface);padding:1px 6px;border-radius:5px}
+.alt{font-size:13px;color:var(--muted)}
+
+/* 测 */
+.qs{display:grid;gap:14px}
+.q{padding:14px;border-radius:12px;background:var(--paper);display:grid;gap:8px}
+.q .t{font-weight:700}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:14px}
+.opt:hover{border-color:var(--willow)}
+.opt .l{font-family:var(--f-num);color:var(--muted);flex:none}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+.explain{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--surface);border-left:3px solid var(--willow)}
+.explain a{color:var(--bauhinia);font-weight:700;cursor:pointer;text-decoration:none}
+
+.done-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 18px;border-radius:14px;background:var(--willow);color:var(--surface);margin-top:16px}
+.done-card .big{font-family:var(--f-num);font-size:26px}
+.done-card .btn{background:var(--surface);color:var(--willow)}
+
+/* 右栏 */
+.rail{display:grid;gap:16px}
+.rail h2{font-size:16px;font-weight:900;margin-bottom:10px}
+.points{margin:0;padding-left:18px;display:grid;gap:8px;font-size:14px}
+.points b{color:var(--willow)}
+.qa{display:grid;gap:12px;font-size:13px}
+.qa .who{font-size:12px;color:var(--muted)}
+.qa .a{background:var(--paper);border-radius:10px;padding:8px 10px;margin-top:4px}
+.ask{display:flex;gap:8px;margin-top:12px}
+.ask input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+.res{list-style:none;padding:0;margin:0;display:grid;gap:8px;font-size:14px}
+.res li{display:flex;justify-content:space-between;gap:10px}
+
+@media (max-width:960px){.layout{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .scenes{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .tr{grid-template-columns:1fr 1fr 1fr}
+  .tr span:nth-child(3){display:none}
+  .form{grid-template-columns:minmax(0,1fr)}
+  .done-card{grid-template-columns:minmax(0,1fr)}
+  .head h1{font-size:22px}
+  .subtitle{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){.board .draw{animation:none;stroke-dashoffset:0}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="back" href="#top">‹ 返回首页</a>
+    <span class="crumb">学习路径 / 保健医路径 / <b>第 6 关 全日观察与疾病登记</b></span>
+    <span class="proto">原型 · 示例数据</span>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <div class="head">
+    <div>
+      <p class="eyebrow">保健医路径 · 第 6 关 / 共 12 关 · 约 8 分钟</p>
+      <h1>全日观察与疾病登记</h1>
+      <p class="goal">学完本关，你能把晨检之后发现的异常登记在全日观察里，并转入疾病管理，追踪到复课。</p>
+    </div>
+    <p class="rule"><b>通关条件</b>　平台回传实操记录，3 道测验全部答对（答错可重答）。通关得 1 学分，解锁第 7 关「缺勤预警」。</p>
+  </div>
+
+  <div class="steps" role="tablist" aria-label="本关四段">
+    <button class="step done" role="tab" id="tab-jiang" aria-controls="p-jiang" aria-selected="true" data-p="jiang"><span class="k">讲</span><div><b>白板微课</b><small class="num">4 幕 · 1′40″</small></div></button>
+    <button class="step" role="tab" id="tab-kan" aria-controls="p-kan" aria-selected="false" data-p="kan"><span class="k">看</span><div><b>操作录屏</b><small class="num">4 步 · 1′50″</small></div></button>
+    <button class="step" role="tab" id="tab-zuo" aria-controls="p-zuo" aria-selected="false" data-p="zuo"><span class="k">做</span><div><b>平台实操</b><small id="zuoState">等待回传</small></div></button>
+    <button class="step" role="tab" id="tab-ce" aria-controls="p-ce" aria-selected="false" data-p="ce"><span class="k">测</span><div><b>即时测验</b><small id="ceState" class="num">0/3</small></div></button>
+  </div>
+
+  <div class="layout">
+    <div>
+      <!-- 讲 -->
+      <section class="panel" id="p-jiang" role="tabpanel" aria-labelledby="tab-jiang">
+        <div class="board" id="board" aria-label="白板微课画面">
+          <svg viewBox="0 0 640 360" id="boardSvg" role="img" aria-labelledby="sceneTitle"><title id="sceneTitle">白板微课</title></svg>
+          <p class="subtitle" id="subtitle" aria-live="polite"></p>
+        </div>
+        <div class="player">
+          <button class="btn ghost" id="playBtn" type="button">▶ 播放本幕</button>
+          <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+          <span class="num muted" id="timeLbl" style="font-size:13px">0:00 / 1:40</span>
+        </div>
+        <div class="scenes" id="scenes"></div>
+      </section>
+
+      <!-- 看 -->
+      <section class="panel" id="p-kan" role="tabpanel" aria-labelledby="tab-kan" hidden>
+        <div class="screen" aria-label="操作录屏画面">
+          <div class="chrome"><i></i><i></i><i></i><span style="margin-left:8px" class="num">campus.lzpreschool.cn · 演示园</span></div>
+          <div class="app">
+            <div class="side">
+              <div class="grp">保育与安全</div>
+              <div id="m-health" class="on">健康检查</div>
+              <div style="padding-left:28px" id="m-obs">全日观察</div>
+              <div>疾病管理</div>
+              <div>幼儿体检</div>
+              <div class="grp">园务管理</div>
+              <div>幼儿管理</div>
+            </div>
+            <div class="main">
+              <div class="toolbar"><b id="screenTitle">全日观察</b><span class="fake-btn pri" id="btnNew">＋ 新增</span></div>
+              <div class="tbl" id="tbl">
+                <div class="tr"><span>幼儿</span><span>班级</span><span>观察情况</span><span>操作</span></div>
+                <div class="tr"><span>示例幼儿 A</span><span>中二班</span><span>午餐进食少</span><span>登记疾病</span></div>
+                <div class="tr"><span>示例幼儿 B</span><span>大一班</span><span>户外后咳嗽</span><span id="opReg">登记疾病</span></div>
+              </div>
+              <div class="form" id="formBox" hidden>
+                <div><label>观察幼儿</label><div class="f">示例幼儿 C · 小一班</div></div>
+                <div><label>观察老师</label><div class="f">班级教师</div></div>
+                <div><label>观察时间</label><div class="f num">14:40 午睡后</div></div>
+                <div><label>检查信息</label><div class="f">体温 37.8℃，精神差</div></div>
+                <div id="diseaseRow" style="grid-column:1/-1" hidden><label>登记疾病 · 追踪情况</label><div class="f">发热待查；已通知家长，16:00 复测</div></div>
+                <div style="grid-column:1/-1;display:flex;justify-content:flex-end"><span class="fake-btn pri" id="btnSave">保存</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chapters" id="chapters"></div>
+        <p class="alt" style="margin-top:10px">录屏使用演示园与虚构数据，不含真实幼儿信息。</p>
+      </section>
+
+      <!-- 做 -->
+      <section class="panel task" id="p-zuo" role="tabpanel" aria-labelledby="tab-zuo" hidden>
+        <div>
+          <p class="eyebrow">实操任务</p>
+          <h2 style="font-size:18px;font-weight:900">在本园账号登记一名全日观察幼儿，并登记疾病</h2>
+        </div>
+        <ul class="checklist">
+          <li><span class="n">1</span><div>电脑端进入 保育与安全 → 健康检查 → 全日观察，点击右上角「新增」</div></li>
+          <li><span class="n">2</span><div>选择观察幼儿与观察老师，填写检查信息，保存</div></li>
+          <li><span class="n">3</span><div>在该记录右侧点击「登记疾病」，填写疾病信息与追踪情况，保存</div></li>
+        </ul>
+        <div class="verify" id="verify">
+          <span class="ico" id="vIco">…</span>
+          <div>
+            <b id="vTitle">等待平台回传</b>
+            <p class="muted" style="font-size:13px" id="vText">完成上面三步后，平台回传 <code>全日观察·登记疾病 已保存</code>，本段自动通过。</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn primary" href="#p-zuo">打开平台</a>
+          <button class="btn ghost" id="simBtn" type="button">模拟平台回传（原型演示）</button>
+        </div>
+        <p class="alt">本园暂无可登记的幼儿，或尚未分班？可改在演示园完成，结果同样计入。</p>
+      </section>
+
+      <!-- 测 -->
+      <section class="panel" id="p-ce" role="tabpanel" aria-labelledby="tab-ce" hidden>
+        <div class="qs" id="qs"></div>
+        <div class="done-card" id="doneCard" hidden>
+          <span class="big">+1</span>
+          <div><b>第 6 关通过</b><p style="font-size:13px;opacity:.9">保健医路径 6/12 · 第 7 关「因病缺勤与聚集预警」已解锁</p></div>
+          <a class="btn" href="#top">进入第 7 关</a>
+        </div>
+      </section>
+    </div>
+
+    <aside class="rail">
+      <div class="panel">
+        <h2>本关要点</h2>
+        <ol class="points">
+          <li>晨检只记录入园时段。<b>入园之后</b>发现的异常，一律记在全日观察。</li>
+          <li>需要追踪的情况，在全日观察记录上点<b>登记疾病</b>，自动进入疾病管理。</li>
+          <li>追踪、康复、复课都在<b>同一条记录</b>上完成，不用另外补录。</li>
+          <li>园长工作台的疾病看板，汇总的就是这些记录。</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h2>答疑</h2>
+        <div class="qa">
+          <div><p class="who">鱼峰区示例幼儿园 · 保健医</p><p>幼儿离园后家长才说孩子发烧，记在哪里？</p><p class="a"><span class="who">种子教师</span><br>家长在小程序请假时选「病假」并上报症状，系统进因病缺勤，不用记全日观察。</p></div>
+          <div><p class="who">柳南区示例幼儿园 · 保健医</p><p>登记疾病后能改成康复吗？</p><p class="a"><span class="who">本地讲师</span><br>能。在疾病管理里点「康复」，填写康复信息即可，第 8 关会讲。</p></div>
+        </div>
+        <form class="ask" id="askForm">
+          <label for="askInput" class="muted" hidden>提问</label>
+          <input id="askInput" placeholder="对本关有疑问？写下来" maxlength="120">
+          <button class="btn ghost" type="submit">提问</button>
+        </form>
+        <p class="alt" id="askMsg" style="margin-top:6px" hidden>已提交，值守时段内由本地讲师或种子教师回复。</p>
+      </div>
+      <div class="panel">
+        <h2>相关资料</h2>
+        <ul class="res">
+          <li><span>岗位操作手册 · 保健医 第 3 章</span><span class="muted">PDF</span></li>
+          <li><span>《托儿所幼儿园卫生保健工作规范》全日观察条目</span><span class="muted">摘录</span></li>
+          <li><span>第 8 关 疾病追踪到复课</span><span class="muted">下一步</span></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+/* ---------- 四段切换 ---------- */
+const tabs=[...document.querySelectorAll('.step')];
+function show(p){
+  tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.p===p));
+  ['jiang','kan','zuo','ce'].forEach(k=>document.getElementById('p-'+k).hidden=k!==p);
+}
+tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
+
+/* ---------- 讲：白板四幕，字幕驱动出场顺序 ---------- */
+const SCENES=[
+  {t:'0:00',end:25,name:'晨检之后',subs:['晨检在入园时做完，但一天里还会出现新的异常。','午睡后发热、户外后咳嗽，都发生在晨检之后。'],
+   draw:[
+     ['sk','M120 80a70 70 0 1 0 0.1 0'],['sk','M120 150V105M120 150l30 18'],
+     ['hl','M330 70v150a24 24 0 1 0 22 0V70a11 11 0 0 0-22 0z'],['hl','M341 190v-60'],
+     ['sk','M440 120h120M440 160h90M440 200h110']]},
+  {t:'0:25',end:52,name:'全日观察',subs:['全日观察是一日里发现异常的记录入口。','入园、午餐、午睡、离园，哪个时段发现，就在哪个时段记。'],
+   draw:[
+     ['sk','M70 190h500'],['sk','M110 180v20M250 180v20M390 180v20M530 180v20'],
+     ['hl','M390 150l-12-22h24z'],['gw','M360 230h60']],
+   labels:[[90,228,'入园'],[230,228,'午餐'],[370,262,'午睡后'],[510,228,'离园']]},
+  {t:'0:52',end:78,name:'登记疾病',subs:['需要追踪的情况，在记录上点「登记疾病」。','它会自动进入疾病管理，后面追踪到复课。'],
+   draw:[
+     ['sk','M60 140h110v60H60z'],['sk','M175 170h50'],['sk','M215 160l12 10-12 10'],
+     ['hl','M235 140h110v60H235z'],['sk','M350 170h50'],['sk','M390 160l12 10-12 10'],
+     ['sk','M410 140h90v60h-90z'],['gw','M510 170h30'],['gw','M532 160l12 10-12 10'],['gw','M555 150a20 20 0 1 0 0.1 0']],
+   labels:[[78,176,'全日观察'],[250,176,'登记疾病'],[426,176,'追踪'],[548,236,'复课']]},
+  {t:'1:18',end:100,name:'园长看到的',subs:['每一条登记，都汇总到园长工作台的疾病看板。','同一班级连续出现，看板会提示加强晨检和消毒。'],
+   draw:[
+     ['sk','M90 280V80M90 280h460'],['sk','M140 280v-40M210 280v-60M280 280v-50'],
+     ['hl','M350 280v-110M420 280v-150'],['hl','M330 110l20-20 20 20'],['sk','M490 280v-30']]}
+];
+const svg=document.getElementById('boardSvg'),sub=document.getElementById('subtitle');
+const scenesBox=document.getElementById('scenes'),bar=document.getElementById('barFill'),tl=document.getElementById('timeLbl');
+let cur=0,timer=null;
+const NS='http://www.w3.org/2000/svg';
+function fmt(s){return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')}
+function drawScene(i,animate){
+  cur=i;clearTimeout(timer);
+  [...svg.querySelectorAll('path,text')].forEach(n=>n.remove());
+  const sc=SCENES[i],n=sc.draw.length,per=animate?2.4/n:0;
+  sc.draw.forEach(([cls,d],k)=>{
+    const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class',cls+(animate?' draw':''));
+    svg.appendChild(p);
+    if(animate){const L=Math.ceil(p.getTotalLength());p.style.setProperty('--len',L);p.style.setProperty('--delay',(k*per)+'s');p.style.setProperty('--dur',Math.max(.5,per*1.4)+'s');}
+  });
+  (sc.labels||[]).forEach(([x,y,t])=>{const e=document.createElementNS(NS,'text');e.setAttribute('x',x);e.setAttribute('y',y);e.textContent=t;svg.appendChild(e);});
+  sub.textContent=sc.subs[0];
+  if(animate) timer=setTimeout(()=>{sub.textContent=sc.subs[1]},1800);
+  const start=i?SCENES[i-1].end:0;
+  bar.style.width=(sc.end/100*100)+'%';tl.textContent=fmt(sc.end)+' / 1:40';
+  [...scenesBox.children].forEach((b,k)=>b.setAttribute('aria-current',k===i));
+}
+SCENES.forEach((s,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='scene';
+  b.innerHTML=`<b>第 ${i+1} 幕 · ${s.t}</b>${s.name}`;
+  b.addEventListener('click',()=>drawScene(i,true));scenesBox.appendChild(b);
+});
+document.getElementById('playBtn').addEventListener('click',()=>drawScene(cur,true));
+drawScene(1,false);
+
+/* ---------- 看：录屏章节，高亮点击位置 ---------- */
+const CH=[
+  ['0:00','进入 保育与安全 → 健康检查 → 全日观察',()=>{ring('m-obs');form(false)}],
+  ['0:24','点击右上角「新增」',()=>{ring('btnNew');form(false)}],
+  ['0:51','选择幼儿与老师，填写检查信息，保存',()=>{form(true,false);ring('btnSave')}],
+  ['1:22','在记录上点「登记疾病」，填写追踪情况',()=>{form(true,true);ring('diseaseRow')}]
+];
+function ring(id){document.querySelectorAll('.ring').forEach(e=>e.classList.remove('ring'));document.getElementById(id).classList.add('ring')}
+function form(on,dis){document.getElementById('formBox').hidden=!on;document.getElementById('tbl').hidden=on;document.getElementById('diseaseRow').hidden=!dis}
+const chBox=document.getElementById('chapters');
+CH.forEach(([t,txt,fn],i)=>{
+  const b=document.createElement('button');b.type='button';b.className='chap';
+  b.innerHTML=`<b>${t}</b><span>${i+1}. ${txt}</span>`;
+  b.addEventListener('click',()=>{[...chBox.children].forEach(x=>x.setAttribute('aria-current',x===b));fn()});
+  chBox.appendChild(b);
+});
+chBox.children[1].click();
+
+/* ---------- 做：模拟平台回传 ---------- */
+let zuoDone=false;
+document.getElementById('simBtn').addEventListener('click',()=>{
+  zuoDone=true;
+  document.getElementById('verify').classList.add('passed');
+  document.getElementById('vIco').textContent='✓';
+  document.getElementById('vTitle').textContent='已收到平台回传 · 14:52';
+  document.getElementById('vText').textContent='全日观察记录 1 条，已登记疾病并填写追踪情况。本段通过。';
+  document.getElementById('zuoState').textContent='已通过';
+  document.getElementById('tab-zuo').classList.add('done');
+  checkDone();
+});
+
+/* ---------- 测：三道题，答错立即解释 ---------- */
+const QS=[
+  {t:'午睡后发现一名幼儿体温 37.8℃、精神差，应在平台哪里登记？',jump:'jiang',
+   o:[['晨检记录',0,'晨检记录只覆盖入园时段，午睡后的异常补进晨检会让晨检数据失真。'],['全日观察 → 登记疾病',1,'正确。全日观察是一日中发现异常的入口，登记疾病后自动进入疾病管理。'],['幼儿请假',0,'请假由家长发起，用于记录缺勤原因，不记录园内发现的症状。'],['健康档案',0,'健康档案记录过敏史、既往病史与接种信息，不记录当日症状。']]},
+  {t:'全日观察记录保存后，还需要追踪到复课。下一步点哪里？',jump:'kan',
+   o:[['新建一条疾病管理记录',0,'不用新建。在全日观察记录上点「登记疾病」，系统自动生成疾病管理记录，避免重复录入。'],['在该记录上点「登记疾病」',1,'正确。登记疾病后，追踪、康复、复课都在同一条记录上完成。'],['导出 Excel 发给园长',0,'园长工作台的疾病看板直接汇总这些记录，不需要另行导出。']]},
+  {t:'幼儿离园后，家长在小程序请病假并上报发热。保健医需要再记一条全日观察吗？',jump:'jiang',
+   o:[['需要，补记全日观察',0,'不需要。全日观察记录的是园内发现的情况；家长上报的病假会进入因病缺勤，第 7 关会讲。'],['不需要，病假已进入因病缺勤',1,'正确。家长端病假自动进入因病缺勤统计与聚集预警，不必重复记录。']]}
+];
+const qsBox=document.getElementById('qs');const right=new Set();
+QS.forEach((q,qi)=>{
+  const box=document.createElement('div');box.className='q';
+  box.innerHTML=`<p class="eyebrow">第 ${qi+1} 题</p><p class="t">${q.t}</p>`;
+  const ex=document.createElement('div');ex.className='explain';ex.hidden=true;ex.setAttribute('aria-live','polite');
+  q.o.forEach(([txt,ok,why],oi)=>{
+    const b=document.createElement('button');b.type='button';b.className='opt';
+    b.innerHTML=`<span class="l">${'ABCD'[oi]}</span><span>${txt}</span>`;
+    b.addEventListener('click',()=>{
+      box.querySelectorAll('.opt').forEach(x=>x.classList.remove('right','wrong'));
+      b.classList.add(ok?'right':'wrong');ex.hidden=false;
+      ex.innerHTML=why+(ok?'':` <a data-j="${q.jump}">回看${q.jump==='kan'?'录屏':'微课'}</a>`);
+      const a=ex.querySelector('a');if(a)a.addEventListener('click',()=>show(a.dataset.j));
+      ok?right.add(qi):right.delete(qi);
+      document.getElementById('ceState').textContent=right.size+'/3';
+      if(right.size===3)document.getElementById('tab-ce').classList.add('done');
+      checkDone();
+    });
+    box.appendChild(b);
+  });
+  box.appendChild(ex);qsBox.appendChild(box);
+});
+function checkDone(){document.getElementById('doneCard').hidden=!(zuoDone&&right.size===3)}
+
+/* ---------- 提问 ---------- */
+document.getElementById('askForm').addEventListener('submit',e=>{
+  e.preventDefault();const i=document.getElementById('askInput');
+  if(!i.value.trim())return;i.value='';document.getElementById('askMsg').hidden=false;
+});
+</script>

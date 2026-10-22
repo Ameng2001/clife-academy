@@ -1,0 +1,70 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">我的{{demo ? ' · 演示数据' : ''}}</text>
+  <view class="h1">专业发展</view>
+  <text class="muted small">Coach 只读学习记录；自评不合成总分；教研任务先交再看；练习营不打卡；都不排名、不与考核挂钩。</text>
+
+  <view class="h2" style="margin-top:24rpx">Coach <text class="muted small">{{coach ? coach.stage + '阶段 · ' + (coach.model ? '接了模型' : '规则草稿') : ''}}</text></view>
+  <view class="panel">
+    <view wx:if="{{coach && coach.plan}}"><text class="small" style="display:block">采用中的学期计划 · 第 {{coach.plan.week}}/{{coach.plan.weeks}} 周</text>
+      <text wx:for="{{coach.plan.levels}}" wx:key="id" class="link small" style="display:block;margin-top:4rpx" data-id="{{item.id}}" bindtap="goLevel">{{item.passed ? '✓ ' : ''}}{{item.title}}{{item.type === 'practice' ? '（实践）' : ''}}</text>
+    </view>
+    <view class="kv" style="margin-top:12rpx"><button class="btn line" bindtap="coachPlan" disabled="{{busy}}">排一学期</button><button class="btn line" bindtap="coachReview" disabled="{{busy}}">周回顾</button></view>
+    <view wx:for="{{cards}}" wx:key="id" class="file" style="display:block;margin-top:12rpx">
+      <text class="muted small" style="display:block">{{item.kindName}} · {{item.at}}{{item.accepted === true ? ' · 已采用' : ''}}</text>
+      <text class="small" style="display:block;margin-top:4rpx">{{item.summary}}</text>
+      <text wx:for="{{item.changes}}" wx:for-item="c" wx:key="why" class="small" style="display:block;margin-top:4rpx;color:#1f6b5c">{{c.label}}：{{c.why}}</text>
+      <button wx:if="{{item.kind !== 'debrief' && item.accepted !== true}}" class="btn line" style="margin-top:8rpx" data-id="{{item.id}}" bindtap="coachAccept">采用</button>
+    </view>
+    <text wx:if="{{!cards.length}}" class="muted small" style="display:block;margin-top:8rpx">还没有卡片。采用不采用你定，配对园长定。</text>
+  </view>
+
+  <view class="h2" style="margin-top:24rpx">本学期自评 <text class="muted small">{{sr ? sr.term.label : ''}}</text></view>
+  <view class="panel" wx:if="{{sr}}">
+    <view wx:for="{{sr.items}}" wx:key="key" style="margin-top:8rpx">
+      <text class="small" style="display:block">{{item.name}}</text>
+      <view class="kv"><text wx:for="{{sr.scale}}" wx:for-item="s" wx:for-index="n" wx:key="*this" class="pill {{levels[item.key] === n ? 'ok' : 'idle'}}" data-key="{{item.key}}" data-n="{{n}}" bindtap="pick">{{s}}</text></view>
+    </view>
+    <input class="input" style="margin-top:12rpx" placeholder="下学期想练的一件事" value="{{focus}}" bindinput="onFocus"/>
+    <textarea class="input" style="margin-top:8rpx;height:160rpx" placeholder="这学期的反思（不写幼儿姓名）" value="{{reflection}}" bindinput="onReflection"/>
+    <button class="btn primary" style="margin-top:12rpx" bindtap="saveSelfReview" disabled="{{busy}}">{{sr.mine ? '改' : '交'}}</button>
+    <view wx:for="{{sr.comments}}" wx:key="at" class="file" style="display:block;margin-top:8rpx"><text class="muted small" style="display:block">{{item.who}} · {{item.at}}</text><text class="small">{{item.text}}</text></view>
+  </view>
+  <text wx:else class="muted small">登录后在这里填。</text>
+
+  <view class="h2" style="margin-top:24rpx">园内教研组</view>
+  <view wx:for="{{tasks}}" wx:key="id" class="panel">
+    <view class="h3">{{item.title}}</view><text class="muted small">{{item.meta}}</text>
+    <text class="small" style="display:block;margin-top:6rpx">{{item.prompt}}</text>
+    <block wx:if="{{item.open && !item.mine}}"><textarea class="input" style="margin-top:8rpx;height:200rpx" placeholder="写你的反思（≥ {{minReply}} 字）" data-id="{{item.id}}" bindinput="onReply"/><button class="btn primary" style="margin-top:8rpx" data-id="{{item.id}}" bindtap="reply" disabled="{{busy}}">交</button></block>
+    <text wx:if="{{item.mine}}" class="small" style="display:block;margin-top:8rpx">我的反思：{{item.mine}}</text>
+    <text wx:for="{{item.others}}" wx:for-item="o" wx:key="name" class="small" style="display:block;margin-top:6rpx;color:#555">{{o.name}}：{{o.text}}</text>
+  </view>
+  <text wx:if="{{!tasks.length}}" class="muted small">还没有任务。</text>
+
+  <view class="h2" style="margin-top:24rpx">练习营</view>
+  <view wx:for="{{camps}}" wx:key="id" class="panel">
+    <view class="h3">{{item.title}}</view><text class="muted small">{{item.meta}}</text>
+    <button wx:if="{{!item.mine && item.canJoin}}" class="btn line" style="margin-top:8rpx" data-id="{{item.id}}" bindtap="campJoin" disabled="{{busy}}">报名</button>
+    <block wx:if="{{item.mine && item.phase === 'running'}}"><text class="small" style="display:block;margin-top:8rpx">第 {{item.today + 1}} 天：{{item.task}}</text><textarea class="input" style="margin-top:8rpx;height:160rpx" placeholder="写下你今天做的（用 A、B 代替幼儿）" data-id="{{item.id}}" bindinput="onCampText"/><view class="kv" style="margin-top:8rpx"><button class="btn primary" data-id="{{item.id}}" data-day="{{item.today}}" bindtap="campPost" disabled="{{busy}}">发</button><button class="btn line" data-id="{{item.id}}" bindtap="campLeave">退营</button></view></block>
+    <text wx:for="{{item.posts}}" wx:for-item="p" wx:key="id" class="small" style="display:block;margin-top:6rpx;color:#555">第 {{p.day + 1}} 天 · {{p.name}}：{{p.text}}</text>
+    <text wx:if="{{item.summary}}" class="small" style="display:block;margin-top:8rpx;color:#1f6b5c">总评：{{item.summary}}</text>
+  </view>
+  <text wx:if="{{!camps.length}}" class="muted small">还没有练习营。</text>
+
+  <view class="h2" style="margin-top:24rpx">研修项目</view>
+  <view wx:for="{{programs}}" wx:key="id" class="panel">
+    <view class="h3">{{item.title}}</view><text class="muted small">{{item.meta}}</text>
+    <button wx:if="{{item.canApply}}" class="btn line" style="margin-top:8rpx" data-id="{{item.id}}" bindtap="programApply" disabled="{{busy}}">报名</button>
+    <text wx:if="{{item.status}}" class="pill ok" style="margin-top:8rpx">{{item.status}}</text>
+  </view>
+  <text wx:if="{{!programs.length}}" class="muted small">还没有期次。</text>
+
+  <view class="h2" style="margin-top:24rpx">园所分享日</view>
+  <view wx:for="{{sharedays}}" wx:key="id" class="panel">
+    <view class="h3">{{item.title}}</view><text class="muted small">{{item.meta}}</text>
+    <view wx:for="{{item.pages}}" wx:for-item="p" wx:key="orgName" style="margin-top:8rpx"><text class="small" style="display:block">{{p.orgName}}：{{p.note}}</text><text class="muted small">{{p.cases}}</text></view>
+  </view>
+  <text wx:if="{{!sharedays.length}}" class="muted small">还没有分享日。</text>
+  <text class="muted small" style="display:block;margin-top:16rpx">发任务、办营、建期次、办分享日、写三方评在网页端。</text>
+</view>

@@ -1,0 +1,15 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <text class="eyebrow">{{org}}</text>
+  <view class="h1">本园应用体检</view>
+  <text class="muted small">每周一自动生成，共 12 项。同一项连续两周需关注，系统向对应岗位推送关卡。只看平台使用情况，不出现单个幼儿数据，不做园所排名，不作为教师考核依据。</text>
+  <view class="row" style="margin:20rpx 0"><text class="eyebrow num">{{when}}</text><text class="pill ok">正常 {{sum.ok}}</text><text class="pill warn">需关注 {{sum.warn}}</text><text class="pill idle">未开始 {{sum.idle}}</text></view>
+  <view wx:if="{{note}}" class="panel"><text class="muted small">{{note}}</text></view>
+  <view wx:if="{{recs.length}}" class="panel"><text class="h3" style="font-size:26rpx">连续两周需关注，推荐对应岗位学</text><view wx:for="{{recs}}" wx:key="levelId" class="small" style="margin-top:8rpx">· {{item.why}} → <text class="link" data-id="{{item.levelId}}" bindtap="goRec">「{{item.title}}」</text></view></view>
+  <view wx:for="{{probes}}" wx:key="k" class="panel pr">
+    <view class="between"><text class="h3">{{item.k}}</text><text class="pill {{item.s}}">{{item.sn}}</text></view>
+    <text class="small">{{item.d}}</text>
+    <view class="between" style="margin-top:12rpx"><view class="weeks"><view wx:for="{{item.w}}" wx:for-item="w" wx:key="*this" class="wk {{w}}"></view><text class="muted small" style="margin-left:12rpx">近 4 周</text></view><text wx:if="{{item.go}}" class="link" data-i="{{item.i}}" bindtap="goProbe">{{item.act}}</text></view>
+  </view>
+  <text class="muted small">新上线园所前两周只开账号覆盖、基础数据、设备在线三项。区县教育局只看到汇总口径。</text>
+</view>

@@ -1,0 +1,42 @@
+<topbar bind:change="reload"/>
+<view class="wrap">
+  <view class="h1">教研共同体</view>
+  <text class="muted small">教师在园里做过的事、在教研工坊做出来的课。实名共享，评作品不评人，不计人数、不排行。</text>
+  <view class="panel between" wx:if="{{!signedIn}}" style="margin-top:24rpx"><text class="muted small">{{hint}}</text><button class="btn primary" style="flex:none;white-space:nowrap" bindtap="login">去登录</button></view>
+  <block wx:if="{{signedIn}}">
+    <view class="tabs"><text wx:for="{{tabs}}" wx:key="k" wx:if="{{item.k !== 'community' || community}}" class="tab {{tab === item.k ? 'on' : ''}}" data-k="{{item.k}}" bindtap="setTab">{{item.t}}</text></view>
+
+    <view wx:if="{{featured}}" class="panel feat" bindtap="openFeatured">
+      <view class="cover big {{featured.kind}}"><text class="lb">{{featured.label}}</text></view>
+      <text class="muted small" style="display:block;margin-top:12rpx">{{featured.over}}</text>
+      <view class="h2" style="margin:4rpx 0 0">{{featured.title}}</view>
+      <text class="muted small clamp2">{{featured.text}}</text>
+      <view class="between" style="margin-top:8rpx"><text class="muted small">{{featured.foot}}</text><text class="link">{{featured.go}}</text></view>
+    </view>
+
+    <view class="panel">
+      <view class="h2" style="margin-bottom:12rpx">动动手</view>
+      <view class="hands">
+        <view class="hand" data-k="case" bindtap="goKind"><text class="ht">分享一个案例</text><text class="muted small">园里真实做过的一件事，标明怎么用</text></view>
+        <view class="hand" data-k="work" bindtap="goKind"><text class="ht">分享一门课</text><text class="muted small">在教研工坊做、班里用过，写明改了什么</text></view>
+        <view class="hand" bindtap="goCollections"><text class="ht">看合集</text><text class="muted small">按主题攒的案例、关卡、讲堂微课</text></view>
+        <view class="hand" bindtap="goStudio"><text class="ht">名师工作室</text><text class="muted small">专家主持，骨干参加，每年一次市级展示</text></view>
+      </view>
+      <text class="muted small" style="display:block;margin-top:12rpx">分享、建合集在网页端；在教研工坊点「分享到幼师学坊」也能直接投过来（先在网页端「设置 → 接口令牌」建一枚）。{{community ? '本共同体：' + community.name + '。' : ''}}</text>
+    </view>
+
+    <view class="between" style="margin-bottom:12rpx"><view class="h2" style="margin:0">{{tab === 'collections' ? '合集' : '全部作品'}}</view></view>
+    <input class="inp" placeholder="搜标题、分享人、园所、领域" value="{{q}}" bindinput="qInput"/>
+    <view wx:if="{{tab !== 'collections'}}" class="row" style="margin:12rpx 0 4rpx"><text class="chip {{!domain ? 'on' : ''}}" data-k="" bindtap="setDomain">全部领域</text><text wx:for="{{domains}}" wx:key="k" class="chip {{domain === item.k ? 'on' : ''}}" data-k="{{item.k}}" bindtap="setDomain">{{item.t}}</text></view>
+    <view wx:if="{{!cards.length}}" class="panel"><text class="muted small">{{hint}}</text></view>
+    <view class="cgrid">
+      <view wx:for="{{cards}}" wx:key="id" class="ccard" data-i="{{index}}" bindtap="open">
+        <view class="cover {{item.type}}"><text class="lb">{{item.label}}</text></view>
+        <view class="cm"><text class="tag">{{item.typeName}}</text>{{item.sub}}</view>
+        <view class="ct">{{item.title}}</view>
+        <view class="cf"><text class="muted small ell">{{item.by}}{{item.org ? ' · ' + item.org : ''}}</text><text class="muted small" style="flex:none;margin-left:8rpx">{{item.when}}</text></view>
+      </view>
+    </view>
+    <text class="muted small" style="display:block;margin-top:8rpx">入库的案例与成果是下一轮路径与讲堂的素材。不显示浏览与点赞数，「用过，有效」只给分享者看。</text>
+  </block>
+</view>

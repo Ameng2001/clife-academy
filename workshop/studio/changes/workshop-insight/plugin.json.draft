@@ -1,0 +1,13 @@
+{
+  "name": "workshop-insight",
+  "version": "0.1.0",
+  "description": "PBL course analysis toolkit — theme analysis, prior knowledge assessment, and 4C competency mapping for kindergarten curriculum development",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["pbl", "analysis", "4c-skills", "curriculum-standards", "kindergarten"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

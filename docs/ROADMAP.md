@@ -255,7 +255,7 @@
 定位见 docs/POSITIONING.md：教研工坊是课程研究工具，幼师学坊是教师发展平台（PGC 路径）兼工坊的 UGC 社区。闭环：学坊学→学分→积分→工坊做→课程成果分享回学坊。
 
 1. **课程成果**（已做，夜 50）：`api/academy/works.js`，`/works` 页，投稿令牌可投，必填「改了什么」，入库 +3 学分，用过有效只给分享者看。
-2. **工坊侧「分享到幼师学坊」按钮**（工坊线上版先不实现，10-22 定）：契约 docs/WORKSHOP-SHARE.md，功能设计 docs/WORKSHOP-SHARE-DESIGN.md。学坊侧全部已做（夜 55–73：message / allowAdapt / filesScope、draft 状态与 `/api/works/draft`、公开 Skill `/skill/share-work.md` 与 `/works/agent` 页、`adaptedFrom` 改编链、令牌自检、四栏表词表、署名一句、开改编课前核对来源 `/api/tools/work`、配 `WORKSHOP_ADAPT_URL` 后「改编这门课」跳工坊）。工坊线上版的 15 条待办在 docs/WORKSHOP-TODO.md，钱包页 14 个功能点在 docs/WALLET-TODO.md，两个联调脚本 `npm run check:share` / `check:spend`。插件仓库 courses-workshop-plugins 里只留参考实现。
+2. **工坊侧「分享到幼师学坊」按钮**（工坊线上版先不实现，10-22 定）：契约 docs/WORKSHOP-SHARE.md，功能设计 docs/WORKSHOP-SHARE-DESIGN.md。学坊侧全部已做（夜 55–73：message / allowAdapt / filesScope、draft 状态与 `/api/works/draft`、公开 Skill `/skill/share-work.md` 与 `/works/agent` 页、`adaptedFrom` 改编链、令牌自检、四栏表词表、署名一句、开改编课前核对来源 `/api/tools/work`、配 `WORKSHOP_ADAPT_URL` 后「改编这门课」跳工坊）。工坊线上版的 15 条待办在 docs/WORKSHOP-TODO.md，钱包页 14 个功能点在 docs/WALLET-TODO.md，两个联调脚本 `npm run check:share` / `check:spend`。工坊引擎与参考实现在本仓库 `workshop/`。
 3. **PGC 补「用教研工坊做课」路径**（已做，夜 52）：`workshop` 五关（工坊起草教师定稿 / 信息采集目标怎么填才过 / 周计划三个模板怎么选（研讨关）/ 教案先改三处（实践关）/ 用过了分享回学坊），阶段「骨干」；小程序资料页「课程成果」分类已做。
 4. **名师讲堂每月一场讲课程成果**（待做，运营动作，不改代码）。
 5. **积分与园所额度**（已做，夜 59–81）：只有积分一种资产，工具扣减、报价与改编半价都由学坊算，园所额度池先扣后扣积分，钱包页在工坊、学坊只给接口（docs/POINTS-DESIGN.md、docs/WALLET-TODO.md）。

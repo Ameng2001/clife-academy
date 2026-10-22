@@ -1,0 +1,2 @@
+.kv { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 20rpx; }
+.kv .k { width: 48%; box-sizing: border-box; display: flex; flex-direction: column; gap: 6rpx; padding: 24rpx; }

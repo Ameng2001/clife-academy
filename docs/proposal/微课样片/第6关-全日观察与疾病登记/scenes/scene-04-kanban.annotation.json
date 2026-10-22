@@ -1,0 +1,139 @@
+{
+  "sceneId": "scene-04",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "storyBasis": "每一条登记，都会汇总到园长工作台的疾病看板。；同一个班连着几天出现相似症状，；看板会提示加强晨检和消毒。；保健医记得及时，园长才能看得早。",
+  "sceneDurationMs": 18527,
+  "elements": [
+    {
+      "id": "e1",
+      "label": "疾病看板",
+      "sequence": 1,
+      "narrativeRole": "每条登记汇总到看板",
+      "subtitle": "每一条登记，都会汇总到园长工作台的疾病看板。",
+      "type": "object",
+      "region": {
+        "x": 71,
+        "y": 131,
+        "width": 577,
+        "height": 472
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 650,
+        "durationMs": 5388,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          71,
+          367
+        ],
+        "end": [
+          648,
+          367
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e2",
+      "label": "连续几天",
+      "sequence": 2,
+      "narrativeRole": "同一个班连续出现相似症状",
+      "subtitle": "同一个班连着几天出现相似症状，",
+      "type": "object",
+      "region": {
+        "x": 661,
+        "y": 221,
+        "width": 447,
+        "height": 237
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 6138,
+        "durationMs": 3794,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          661,
+          339
+        ],
+        "end": [
+          1108,
+          339
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e3",
+      "label": "加强晨检和消毒",
+      "sequence": 3,
+      "narrativeRole": "看板提示处置措施",
+      "subtitle": "看板会提示加强晨检和消毒。",
+      "type": "object",
+      "region": {
+        "x": 1097,
+        "y": 182,
+        "width": 492,
+        "height": 246
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 10033,
+        "durationMs": 3692,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1097,
+          305
+        ],
+        "end": [
+          1589,
+          305
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "e4",
+      "label": "及时与看早",
+      "sequence": 4,
+      "narrativeRole": "保健医及时记录，园长及早发现",
+      "subtitle": "保健医记得及时，园长才能看得早。",
+      "type": "object",
+      "region": {
+        "x": 1135,
+        "y": 528,
+        "width": 419,
+        "height": 282
+      },
+      "reveal": {
+        "direction": "left_to_right",
+        "startMs": 13825,
+        "durationMs": 4001,
+        "maskPaddingPx": 18,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1135,
+          669
+        ],
+        "end": [
+          1554,
+          669
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}

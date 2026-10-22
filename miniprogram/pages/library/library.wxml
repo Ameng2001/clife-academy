@@ -1,0 +1,19 @@
+<view class="wrap">
+  <view class="h1">资料库</view>
+  <text class="muted small">文献与政策、模板与工具。文档类资源是链接，复制后在浏览器打开；上传在网页端。</text>
+  <block wx:if="{{!demo}}">
+    <input class="inp" style="margin-top:16rpx" placeholder="搜书名、模板名，如「评估指南」" value="{{q}}" bindinput="qInput"/>
+    <view class="row" style="margin:16rpx 0 8rpx"><text wx:for="{{kinds}}" wx:key="v" class="chip {{kind === item.v ? 'on' : ''}}" data-v="{{item.v}}" bindtap="setKind">{{item.t}}</text></view>
+    <view class="panel">
+      <view wx:if="{{!items.length}}" class="muted small">{{caseHint || '没有匹配的资源。'}}</view>
+      <view wx:for="{{items}}" wx:key="id" class="file" data-i="{{index}}" bindtap="open"><view class="ext">{{item.ext}}</view><view class="body">{{item.title}}<text class="sub">{{item.meta}}</text><text wx:if="{{item.desc && (!item.isCase || item.open)}}" class="muted small" style="display:block;margin-top:4rpx;white-space:pre-wrap">{{item.desc}}</text><text wx:if="{{item.isCase && !item.open}}" class="muted small" style="display:block;margin-top:4rpx">点开看全文</text><text wx:if="{{item.open && item.link}}" class="link small" style="display:block;margin-top:8rpx" data-u="{{item.link}}" catchtap="copyLink">在教研工坊里打开这门课 →</text></view></view>
+    </view>
+  </block>
+  <block wx:else>
+    <text class="muted small" style="display:block;margin-top:12rpx">连不上服务端，先看演示资料。</text>
+    <view class="row" style="margin:20rpx 0 8rpx"><text wx:for="{{roles}}" wx:key="*this" class="chip {{role === item ? 'on' : ''}}" data-v="{{item}}" bindtap="setRole">{{item}}</text></view>
+    <view class="panel">
+      <view wx:for="{{files}}" wx:key="*this" class="file" data-n="{{item[1]}}" bindtap="file"><view class="ext">{{item[0]}}</view><view class="body">{{item[1]}}<text class="sub">{{item[2]}} · {{item[3]}}</text></view><text class="muted small num">{{item[4]}} 次</text></view>
+    </view>
+  </block>
+</view>

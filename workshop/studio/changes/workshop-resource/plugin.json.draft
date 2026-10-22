@@ -1,0 +1,14 @@
+{
+  "name": "workshop-resource",
+  "version": "0.1.0",
+  "description": "PBL activity resource management — automated resource matching, categorization (PBL Box / Journal / self-prepared), and completeness validation",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["resources", "materials", "pbl-box", "procurement", "kindergarten"],
+  "dependencies": ["workshop-core"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

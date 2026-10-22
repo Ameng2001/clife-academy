@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 V2 · Export Bundle</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="export">
+    <div class="studio-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="studio-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Project / Thread first</div></div></div>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Projects</div>
+          <a class="project-card active" href="./export-bundle.html"><div class="project-title">多样的服饰</div><div class="project-meta">当前项目</div></a>
+        </section>
+        <section class="sidebar-section">
+          <div class="sidebar-label">Threads</div>
+          <div class="thread-list">
+            <a class="thread-link" href="./hil-confirm.html">stage confirm thread</a>
+            <a class="thread-link active" href="./export-bundle.html">export thread</a>
+          </div>
+        </section>
+      </aside>
+      <main class="conversation">
+        <div class="panel-head"><div><div class="eyebrow">Export Bundle</div><div class="title">导出仍然是项目的一部分，不脱离 project / thread 体系</div><p class="muted">这一页保留对话驱动，但左侧仍是 project / thread，顶部阶段地图已经走到 Export。不会再把用户丢进一个脱离上下文的导出后台。</p></div><div class="head-actions"><span class="chip">export</span></div></div>
+        <div class="stage-map">
+          <div class="stage-flow">
+            <span class="stage-node">Theme Framing</span><span class="stage-arrow">→</span><span class="stage-node">Month Matrix</span><span class="stage-arrow">→</span><span class="stage-node">Week Arrangement</span><span class="stage-arrow">→</span><span class="stage-node">Activities (N)</span><span class="stage-arrow">→</span><span class="stage-node gate">Stage Confirm</span><span class="stage-arrow">→</span><span class="stage-node active">Export</span>
+          </div>
+        </div>
+        <div class="conversation-scroll">
+          <div class="message user"><h3>你</h3><div>这次先导出给客户看的 Word-ready bundle，只保留主稿和资源说明。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>可以。我会输出 lesson-plan 和 resource-plan，并保留 review comments 作为内部附带说明，不放进主交付包。</div></div>
+          <div class="message ai"><h3>教研 Copilot</h3><div>右侧已经生成 bundle tree 和 manifest 预览。你确认后，我再为你准备交付说明文字。</div></div>
+        </div>
+        <div class="composer"><div class="composer-shell"><input placeholder="例如：PDF-ready 也准备一份，但 review comments 不进正式包" /><button class="button button-primary">发送</button></div></div>
+      </main>
+      <aside class="canvas">
+        <div class="panel-head"><div><div class="eyebrow">Right Canvas</div><div class="title" style="font-size:22px;">Word-ready Bundle</div></div><span class="chip">delivery</span></div>
+        <div class="canvas-scroll">
+          <section class="canvas-focus">
+            <section class="canvas-card"><h2>Focus Canvas · Bundle Tree</h2><div class="stack-list"><div class="stack-item"><strong>lesson-plan.md</strong><div class="muted">最终教学活动稿</div></div><div class="stack-item"><strong>resource-plan.md</strong><div class="muted">资源准备说明</div></div><div class="stack-item"><strong>export-note.txt</strong><div class="muted">交付说明</div></div></div></section>
+            <section class="canvas-card"><h2>Manifest</h2><div class="section-list"><div class="section-item"><strong>target</strong><div class="muted">word-ready-bundle</div></div><div class="section-item"><strong>layout</strong><div class="muted">client teaching format with support notes column</div></div><div class="section-item"><strong>exclude</strong><div class="muted">review-comments.md from final delivery</div></div></div></section>
+          </section>
+          <div class="canvas-divider"><h3>Project Minimap</h3><span class="chip">delivery context</span></div>
+          <section class="project-minimap">
+            <section class="canvas-card">
+              <div class="section-head"><h2>Month Matrix Mini</h2><span class="chip">fully covered</span></div>
+              <div class="minimap-grid">
+                <div class="mini-week-row"><div class="mini-week-label">W1</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W2</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot missing">-</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W3</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+                <div class="mini-week-row"><div class="mini-week-label">W4</div><div class="mini-slot">T</div><div class="mini-slot">R</div><div class="mini-slot">O</div><div class="mini-slot">L</div><div class="mini-slot">H</div></div>
+              </div>
+            </section>
+            <section class="canvas-card">
+              <div class="section-head"><h2>Export Notes</h2><span class="chip">final checks</span></div>
+              <div class="hint-list">
+                <div class="hint-item"><strong>结构状态</strong><div class="muted">月矩阵与第 2 周节奏已经冻结，当前导出不会再改主结构。</div></div>
+                <div class="hint-item"><strong>待决策</strong><div class="muted">是否把 review comments 作为内部附带文件保留在 bundle 外部。</div></div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

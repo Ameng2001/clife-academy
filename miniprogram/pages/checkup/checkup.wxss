@@ -1,0 +1,4 @@
+.pr { padding: 24rpx 28rpx; margin-bottom: 16rpx; }
+.weeks { display: flex; align-items: center; gap: 8rpx; }
+.wk { width: 26rpx; height: 26rpx; border-radius: 6rpx; }
+.wk.ok { background: #2f7d4f; } .wk.warn { background: #a35f00; } .wk.idle { background: #eceff0; border: 1rpx solid #d6e0dc; }

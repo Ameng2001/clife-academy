@@ -1,0 +1,5 @@
+<view class="top">
+  <view class="brand"><image class="logo" src="/assets/logo.svg" mode="aspectFit" /><view><text class="name">{{brand.name}}</text><text class="sub">{{brand.region || brand.tagline}}</text></view></view>
+  <picker range="{{labels}}" value="{{idx}}" bindchange="onRole"><view class="who">{{labels[idx]}} ▾</view></picker>
+</view>
+<view class="band"><text>{{signedIn ? '已登录 · 进度随账号同步' : '未登录 · 园所、人员与数据均为示例'}}</text><text class="reset" bindtap="onReset">{{signedIn ? '清本机草稿' : '重置演示进度'}}</text></view>

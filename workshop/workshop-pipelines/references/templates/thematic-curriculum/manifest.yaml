@@ -1,0 +1,87 @@
+# 幼儿园主题式课程管线
+id: thematic-curriculum
+name: "幼儿园主题式课程"
+name_en: "Thematic Curriculum Package"
+description: "面向月度主题课程交付，覆盖主题解读、主题网络图、月活动矩阵、周编排和多活动类型设计"
+version: "1.0.0"
+
+target_roles:
+  - curriculum-director
+  - classroom-teacher
+target_age_groups:
+  - prek-3
+  - prek-4
+  - k
+time_scope: month
+
+pipeline:
+  plugin: workshop-planner
+  stages:
+    - id: theme-analysis
+      name: "主题解读"
+      description: "分析主题教育价值、幼儿经验基础和主题递进逻辑"
+      optional: false
+    - id: month-plan
+      name: "月主题活动矩阵"
+      description: "生成按周与活动类型组织的月度主题活动列表"
+      optional: false
+    - id: week-plan
+      name: "周活动安排"
+      description: "生成一周多活动类型的完整编排与准备清单"
+      optional: false
+    - id: lesson-generate
+      name: "教学活动稿"
+      description: "使用五步法链路生成主题教学活动稿"
+      optional: true
+    - id: region-activity
+      name: "区域活动稿"
+      description: "生成区域活动稿"
+      optional: false
+    - id: outdoor-game
+      name: "户外游戏稿"
+      description: "生成户外游戏稿"
+      optional: false
+    - id: life-routine
+      name: "生活渗透稿"
+      description: "生成生活渗透活动稿"
+      optional: false
+    - id: home-school
+      name: "家园互动稿"
+      description: "生成家园互动任务稿"
+      optional: false
+
+output:
+  document_type: thematic-package
+  sections:
+    - id: theme-narrative
+      title: "主题解读"
+      title_en: "Theme Narrative"
+      required: true
+    - id: theme-network
+      title: "主题网络图"
+      title_en: "Theme Network"
+      required: true
+    - id: monthly-matrix
+      title: "主题活动列表"
+      title_en: "Monthly Activity Matrix"
+      required: true
+    - id: weekly-arrangement
+      title: "周活动安排"
+      title_en: "Weekly Arrangement"
+      required: true
+    - id: activity-deliverables
+      title: "活动稿"
+      title_en: "Activity Deliverables"
+      required: true
+
+coding:
+  prefix: "TC"
+  format: "{prefix}-{category}-{week}-{seq}"
+  unit_name: "活动类型"
+  unit_count: 5
+  unit_labels:
+    - "教学活动 / Teaching Activity"
+    - "区域活动 / Region Activity"
+    - "户外游戏 / Outdoor Game"
+    - "生活渗透 / Life Routine"
+    - "家园互动 / Home-School"

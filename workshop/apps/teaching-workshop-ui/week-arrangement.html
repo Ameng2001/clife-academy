@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>教研工坊 · Week Arrangement</title><link rel="stylesheet" href="./styles.css" /></head>
+  <body data-page="week">
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><div class="brand-mark"></div><div><div class="brand-title">教研工坊</div><div class="brand-subtitle">Week Arrangement</div></div></div>
+        <div class="nav-group">
+          <div class="nav-label">Project</div>
+          <a class="nav-link" data-page="month" href="./month-matrix.html"><span>Month Matrix</span></a>
+          <a class="nav-link" data-page="week" href="./week-arrangement.html"><span>Week Arrangement</span><span class="nav-badge">17</span></a>
+          <a class="nav-link" data-page="activity" href="./activity-editor.html"><span>Activity Editor</span></a>
+        </div>
+      </aside>
+      <div class="main-column">
+        <header class="top-strip"><div class="search-shell"><span class="muted">Week Arrangement 是另一个亮点页，重点表现节奏与缺项</span><input placeholder="搜索活动名称、时间位、子主题" /></div><div class="toolbar"><span class="status-pill status-warning">2 missing drafts</span></div></header>
+        <main class="surface">
+          <div class="page-header">
+            <div><div class="eyebrow">Week Arrangement</div><h1>第 2 周：不同场景的服饰</h1><p class="muted">这里的重点是排兵布阵。用户要看到一周 15-17 项活动怎么排、哪里冲突、哪里需要补稿，而不是一篇篇打开文档拼起来。</p></div>
+            <div class="hero-strip"><span class="chip">17 项活动</span><span class="chip">周二偏密</span><span class="chip">周三缺生活渗透</span></div>
+          </div>
+          <div class="split-layout">
+            <section class="surface" style="padding:18px;">
+              <div class="section-head"><h2>线性活动列表</h2><span class="chip">Primary View</span></div>
+              <div class="timeline">
+                <div class="timeline-item">
+                  <span class="muted">01</span>
+                  <div><strong>这是谁的衣服</strong><div class="muted">周一上午 · 教学活动 · 已有活动稿</div></div>
+                  <span class="type-tag type-teaching">teaching</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="muted">02</span>
+                  <div><strong>职业服饰拼图</strong><div class="muted">周一下午 · 区域活动 · 需补观察支持</div></div>
+                  <span class="type-tag type-region">region</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="muted">09</span>
+                  <div><strong>服饰接力赛</strong><div class="muted">周三上午 · 户外游戏 · 已排入周表</div></div>
+                  <span class="type-tag type-outdoor">outdoor</span>
+                </div>
+                <div class="timeline-item">
+                  <span class="muted">12</span>
+                  <div><strong>收纳换季衣物</strong><div class="muted">周三下午 · 生活渗透 · 尚未生成稿件</div></div>
+                  <span class="type-tag type-life">life</span>
+                </div>
+              </div>
+            </section>
+            <section class="surface" style="padding:18px;">
+              <div class="section-head"><h2>按天视图与冲突</h2><span class="chip">Secondary View</span></div>
+              <div class="list">
+                <div class="list-row">
+                  <strong>周一</strong>
+                  <div class="muted">教学活动 + 区域活动，节奏良好。</div>
+                </div>
+                <div class="list-row">
+                  <strong>周二</strong>
+                  <div class="muted">连续两个高强度活动，建议插入生活渗透或家园互动。</div>
+                </div>
+                <div class="list-row">
+                  <strong>周三</strong>
+                  <div class="muted">户外活动已排，但生活渗透缺稿，需要补齐以维持主题延展。</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+      <aside class="copilot-panel">
+        <section class="copilot-block">
+          <div class="eyebrow">Context Summary</div>
+          <h3>当前在做周内节奏调整</h3>
+          <p class="muted">这页的价值在于发现“活动怎么排更顺”，不是单纯生成第 N 个活动。Copilot 应该像编排助手，而不是文案生成器。</p>
+        </section>
+        <section class="copilot-block">
+          <h3>Suggested Actions</h3>
+          <div class="mini-actions">
+            <span class="action-pill">补周三生活渗透</span>
+            <span class="action-pill">把周二调松一点</span>
+            <a class="action-pill" href="./activity-editor.html">生成活动稿</a>
+          </div>
+        </section>
+        <section class="copilot-block">
+          <h3>Conflict Panel</h3>
+          <div class="copilot-feed-item"><strong>节奏提醒</strong><div class="muted">周二上午与下午都是高认知强度活动，建议替换其中一个为区域活动或家园互动。</div></div>
+          <div class="copilot-feed-item"><strong>缺项提醒</strong><div class="muted">第 12 项“收纳换季衣物”还没有活动稿，影响 deliverable-draft 完整度。</div></div>
+        </section>
+      </aside>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

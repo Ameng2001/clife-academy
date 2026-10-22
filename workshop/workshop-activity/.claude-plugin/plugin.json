@@ -1,0 +1,14 @@
+{
+  "name": "workshop-activity",
+  "version": "0.1.0",
+  "description": "Thematic curriculum activity plugin — region activities, outdoor games, life routines, and home-school tasks for kindergarten monthly theme packages",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["thematic-curriculum", "region-activity", "outdoor-game", "life-routine", "home-school"],
+  "dependencies": ["workshop-core", "workshop-pipelines"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

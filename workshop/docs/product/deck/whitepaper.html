@@ -1,0 +1,3306 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>教研工坊 · 产品白皮书</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      word-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+  :root{
+    --bg:#ffffff;--surface-2:#eef7f1;--bg-soft:#f3faf6;
+    --border:rgba(20,80,55,.14);--text-1:#13241c;--text-2:#3c544b;--text-3:#7a948a;
+    --accent:#1b6e4b;--accent-2:#22a866;
+    --font-sans:'Geist','Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'Geist Mono','JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0!important;max-width:none!important;padding:0!important;
+    background:var(--bg);color:var(--text-1);
+    font-family:var(--font-sans);font-size:16px;line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wp-wrap{max-width:860px;margin:0 auto;padding:64px 28px 120px}
+  .wp-bar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:saturate(160%) blur(8px);
+    border-bottom:1px solid var(--border);margin:-64px -28px 40px;padding:14px 28px;display:flex;justify-content:space-between;align-items:center}
+  .wp-bar .brand{font-family:var(--font-mono);font-size:12.5px;letter-spacing:.08em;color:var(--accent-2);font-weight:600}
+  .wp-bar a{font-size:13px;color:var(--accent);text-decoration:none;font-weight:600}
+  .wp-bar a:hover{text-decoration:underline}
+  h1,h2,h3,h4{font-family:var(--font-sans);color:var(--text-1);font-weight:700;letter-spacing:-.02em;line-height:1.3}
+  h1{font-size:38px;margin:8px 0 18px;padding-bottom:0;border:none}
+  h2{font-size:27px;margin:54px 0 16px;padding-top:22px;border-top:1px solid var(--border)}
+  h3{font-size:20px;margin:34px 0 12px;color:var(--accent)}
+  h4{font-size:16.5px;margin:24px 0 8px;color:var(--text-2)}
+  p{margin:14px 0}
+  a{color:var(--accent)}
+  strong,b{color:var(--text-1);font-weight:700}
+  hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+  blockquote{margin:18px 0;padding:12px 20px;background:var(--surface-2);border-left:3px solid var(--accent-2);
+    border-radius:0 8px 8px 0;color:var(--text-2)}
+  blockquote p{margin:6px 0}
+  ul,ol{padding-left:26px;margin:14px 0}
+  li{margin:6px 0}
+  li::marker{color:var(--accent-2)}
+  code{font-family:var(--font-mono);font-size:.88em;background:var(--surface-2);color:var(--accent);
+    padding:2px 6px;border-radius:5px}
+  pre{background:#0f1c16;color:#d9f2e6;padding:18px 20px;border-radius:10px;overflow:auto;
+    font-family:var(--font-mono);font-size:13.5px;line-height:1.65;margin:18px 0}
+  pre code{background:none;color:inherit;padding:0;font-size:inherit}
+  table{border-collapse:collapse;width:100%;margin:20px 0;font-size:14.5px;display:block;overflow-x:auto}
+  th,td{border:1px solid var(--border);padding:10px 14px;text-align:left;vertical-align:top;line-height:1.6}
+  thead th{background:var(--surface-2);color:var(--accent);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even){background:var(--bg-soft)}
+  img{max-width:100%}
+  .title{font-family:var(--font-sans)}
+  @media (max-width:640px){.wp-wrap{padding:48px 18px 80px}h1{font-size:30px}h2{font-size:23px}}
+  </style>
+</head>
+<body>
+<div class="wp-wrap">
+<div class="wp-bar"><span class="brand">教研工坊 · COURSE WORKSHOP · C-Life</span><a href="index.html">← 返回演示 Deck</a></div>
+<header id="title-block-header">
+<h1 class="title">教研工坊 · 产品白皮书</h1>
+</header>
+<h1 id="course-workshopai-驱动的幼儿园课程研发工作台">Course Workshop：AI 驱动的幼儿园课程研发工作台</h1>
+<p><strong>从学期规划到课堂教案 —— 多方法论驱动的课程设计流程</strong></p>
+<blockquote>
+<p>Version 0.2.0 | 2026 年 3 月</p>
+</blockquote>
+<hr />
+<h2 id="目录">目录</h2>
+<ol type="1">
+<li><a href="#1-概述">概述</a></li>
+<li><a href="#2-设计思想">设计思想</a></li>
+<li><a href="#3-方法论基础">方法论基础</a></li>
+<li><a href="#4-适用人群与场景">适用人群与场景</a></li>
+<li><a href="#5-架构总览">架构总览</a></li>
+<li>快速上手</li>
+<li>设计流水线详解</li>
+<li>领域专家体系</li>
+<li>完整案例：果汁店 PBL 项目</li>
+<li>最佳实践</li>
+<li>附录</li>
+</ol>
+<hr />
+<h2 id="1-概述">1. 概述</h2>
+<h3 id="11-问题pbl-预案设计的痛点">1.1 问题：PBL 预案设计的痛点</h3>
+<p>幼儿园 PBL（项目式学习）课程已被广泛认可为促进儿童深度学习的有效教学模式。然而在实际课研工作中，<strong>从月度主题到一份可执行的课堂预案</strong>的过程，仍然高度依赖个人经验，缺乏系统化的工具支持。</p>
+<p>课研主任在日常工作中面临以下典型痛点：</p>
+<table>
+<thead>
+<tr class="header">
+<th>痛点</th>
+<th>具体表现</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>驱动问题设计反复</strong></td>
+<td>从选题到确定驱动性问题，通常需要 3-5 轮修改。问题太封闭、太抽象、不适合年龄段是最常见的返工原因</td>
+<td>占选题阶段 40% 时间</td>
+</tr>
+<tr class="even">
+<td><strong>活动编排耗时</strong></td>
+<td>活动设计占据整个预案编写 70% 的时间。每个活动需要明确步骤、教师话术、资源清单、4C 映射</td>
+<td>一份完整预案平均耗时 3-5 个工作日</td>
+</tr>
+<tr class="odd">
+<td><strong>4C 能力映射不准</strong></td>
+<td>"小组讨论"被标注为 Collaboration（实际是 Communication），"制作手工"被标注为 Critical Thinking（实际是 Creativity）</td>
+<td>导致预案评审时反复修改</td>
+</tr>
+<tr class="even">
+<td><strong>资源清单遗漏</strong></td>
+<td>活动所需材料描述不具体（"水果若干"而非"苹果 5 个、橙子 5 个"），PBL Box 采购项与自备材料界限不清</td>
+<td>教学执行时缺材料、临时更换</td>
+</tr>
+<tr class="odd">
+<td><strong>质量标准不一致</strong></td>
+<td>不同课研人员产出的预案格式、深度、规范性差异大，缺乏统一的检查清单</td>
+<td>跨园区课程一致性难以保障</td>
+</tr>
+<tr class="even">
+<td><strong>新人上手周期长</strong></td>
+<td>新入职课研人员需 3-6 个月才能独立完成一份合格的 PBL 预案</td>
+<td>团队扩展困难</td>
+</tr>
+</tbody>
+</table>
+<p><strong>核心矛盾</strong>：PBL 课程设计有成熟的方法论（华美 PBL 项目路径图、三阶段九要素），但这些方法论存在于经验丰富的课研主任的头脑中，没有被工具化为可执行的流程。</p>
+<h3 id="12-解决方案course-workshop">1.2 解决方案：Course Workshop</h3>
+<p>Course Workshop 是一套 <strong>AI 驱动的课程研发工具集</strong>，将多种教学方法论内置为可执行的设计流水线。</p>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│                    Course Workshop                       │
+│                                                         │
+│   输入：主题/课题 + 年龄段                                 │
+│                   ↓                                     │
+│   ┌──────────────────────────────────────────┐          │
+│   │  11 个插件 · 39 个技能 · 3 位领域专家      │          │
+│   │                                          │          │
+│   │  PBL:  主题分析 → 驱动问题 → 网络图       │          │
+│   │        → 线索拆分 → 活动设计 ×3 → 预案生成 │          │
+│   │  五步: 教学目标 → 环节设计 → 详细话术      │          │
+│   │        → 教案编译                         │          │
+│   │  规划: 学期计划 → 月度计划 → 周计划        │          │
+│   └──────────────────────────────────────────┘          │
+│                   ↓                                     │
+│   输出：完整课堂预案或五步法教案                             │
+│        （含 4C 映射、资源清单、质量报告）                    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘</code></pre>
+<p>Course Workshop 做的事情，用一句话总结：</p>
+<blockquote>
+<p><strong>把课研主任和一线教师头脑中的方法论经验，变成 AI 可以执行的设计流水线 —— 只需确认和调整，而不是从白纸开始。</strong></p>
+</blockquote>
+<h3 id="13-有-course-workshop-vs-没有-course-workshop">1.3 有 Course Workshop vs 没有 Course Workshop</h3>
+<table>
+<thead>
+<tr class="header">
+<th>对比维度</th>
+<th>没有 Course Workshop</th>
+<th>有 Course Workshop</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>驱动问题设计</strong></td>
+<td>凭经验拟写，反复修改 3-5 轮</td>
+<td>AI 生成 5 个候选问题，按开放性/可探究性/年龄适切/多维度四维度打分，课程专家 Agent 审核后推荐最优方案</td>
+</tr>
+<tr class="even">
+<td><strong>活动编排</strong></td>
+<td>从空白文档开始，逐个活动手写步骤和资源</td>
+<td>自动生成活动骨架（PBL-Cx-y 编码、3-4 步骤、教师提示、资源分类），课研主任填充创意细节</td>
+</tr>
+<tr class="odd">
+<td><strong>4C 映射</strong></td>
+<td>凭直觉标注，常出现误分类</td>
+<td>内置 4C 误分类检测表（如"小组讨论 ≠ Collaboration"），心理学家 Agent 自动审核每个映射</td>
+</tr>
+<tr class="even">
+<td><strong>资源管理</strong></td>
+<td>手工列写，容易遗漏，格式不统一</td>
+<td>自动按 PBL Box / 探索足迹袋 / 自备材料 / 多媒体四类归类，标注具体数量，生成采购汇总</td>
+</tr>
+<tr class="odd">
+<td><strong>质量保障</strong></td>
+<td>依赖个人自查和同事互审</td>
+<td>8 项自动检查（课标覆盖、动词适切性、4C 准确性、时长合理性、线索递进性、编码连续性、资源完整性、双语一致性）+ 3 位专家 Agent 联合评审</td>
+</tr>
+<tr class="even">
+<td><strong>新人培训</strong></td>
+<td>跟师学习 3-6 个月</td>
+<td>方法论内置于工具流程中，新人沿流水线操作即可，首份预案 1-2 周可完成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-course-workshop-不做什么">1.4 Course Workshop 不做什么</h3>
+<p>明确工具的边界，与明确工具的功能同样重要：</p>
+<ul>
+<li><strong>不替代教师的创造性判断</strong> —— Course Workshop 生成的是"骨架"和"建议"，最终的教学创意决策由课研主任做出。AI 提供候选方案和评分依据，人类专家做取舍。</li>
+<li><strong>不做 PDF 排版</strong> —— 产出物是结构化的 Markdown 文档，可导入任何排版工具进行视觉美化。Course Workshop 关注的是内容质量，不是视觉呈现。</li>
+<li><strong>不做课堂执行</strong> —— Course Workshop 的职责止于"预案设计"（课前阶段）。课堂中的教学观察、随机应变、学习评价不在工具范围内。</li>
+<li><strong>不做跨学年课程体系设计</strong> —— 工具处理的是学期内的课程规划和单个课题的设计，跨学年的课程体系战略规划不在工具范围内。</li>
+<li><strong>不自动发布或提交</strong> —— 所有产出物需要课研主任确认后才能进入审批流程。工具不会跳过人工审核环节。</li>
+</ul>
+<hr />
+<h2 id="2-设计思想">2. 设计思想</h2>
+<p>Course Workshop 的架构设计遵循六项核心原则。理解这些原则有助于理解工具为什么以这样的方式工作。</p>
+<h3 id="21-plugin-first插件优先">2.1 Plugin-first：插件优先</h3>
+<p>Course Workshop 不是一个单体应用，而是 <strong>9 个独立插件的组合</strong>。每个插件可以单独安装、独立使用。</p>
+<pre><code>可以只装 workshop-insight，用于主题分析和 4C 映射
+可以只装 workshop-5step，用于五步法教案设计
+可以只装 workshop-planner + workshop-kb，用于学期规划
+也可以全部安装，获得完整的设计流水线</code></pre>
+<p><strong>为什么这样设计？</strong> 因为不同园所的课研流程不同。有的园所已经有成熟的驱动问题设计流程，只需要活动设计和质量检查的辅助；有的园所需要全流程支持。插件化让每个团队按需组合，避免"全有或全无"的困境。</p>
+<h3 id="22-方法论驱动不是-ai-自由发挥">2.2 方法论驱动：不是 AI 自由发挥</h3>
+<p>Course Workshop 最核心的设计决策是：<strong>AI 的每一步操作都受方法论约束</strong>。</p>
+<pre><code>┌─────────────────────────────────────────────────────────┐
+│                    方法论层（规则）                        │
+│                                                         │
+│  华美 PBL 五步路径 ← 控制设计流程的阶段和产出物             │
+│  三阶段九要素      ← 控制项目实施的结构                     │
+│  驱动问题六原则    ← 控制问题生成的质量标准                  │
+│  4C 能力框架      ← 控制能力映射的准确性                    │
+│  《3-6岁指南》    ← 控制年龄适切性和领域覆盖                │
+│  探究线索递进原则  ← 控制线索间的认知梯度                    │
+├─────────────────────────────────────────────────────────┤
+│                    AI 层（执行）                          │
+│                                                         │
+│  根据方法论规则生成候选方案                                 │
+│  按评分矩阵量化比较                                       │
+│  按检查清单验证产出                                       │
+│  在规则约束下发挥语言和创意能力                              │
+└─────────────────────────────────────────────────────────┘</code></pre>
+<p>这意味着 Course Workshop 不会"自由创作"一份预案 —— 每一步都有明确的输入要求、输出格式和质量检查规则。方法论是"铁轨"，AI 是"列车"。</p>
+<h3 id="23-ai-辅助而非替代">2.3 AI 辅助而非替代</h3>
+<p>Course Workshop 的人机协作模式可以概括为一个公式：</p>
+<blockquote>
+<p><strong>AI 生成骨架 + 专家审核 + 课研主任确认 = 最终产出</strong></p>
+</blockquote>
+<p>在设计流水线的每一个技能中，工作流程都是：</p>
+<ol type="1">
+<li>AI 基于方法论和上下文<strong>生成候选方案</strong>（如 5 个驱动问题候选）</li>
+<li>内置领域专家 Agent <strong>自动审核</strong>并提出改进建议</li>
+<li><strong>呈现给课研主任确认</strong> —— 接受、修改或重新生成</li>
+</ol>
+<p>课研主任始终是最终决策者。工具加速的是"从 0 到 0.8"的过程 —— 把空白文档变成一份有结构、有内容、经过初步审核的草稿。"从 0.8 到 1.0"的精打细磨，仍然依赖课研主任的专业经验和对本班幼儿的了解。</p>
+<h3 id="24-专家验证每一步产出都有人审">2.4 专家验证：每一步产出都有人审</h3>
+<p>Course Workshop 内置 3 位领域专家 Agent，他们以不同的专业视角审核设计产出：</p>
+<table>
+<thead>
+<tr class="header">
+<th>专家角色</th>
+<th>审核视角</th>
+<th>典型的审核意见</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>幼教课程专家</strong> (Early Childhood Curriculum Expert)</td>
+<td>PBL 方法论合规性、课程标准对齐、驱动问题质量</td>
+<td>"这个驱动问题看似开放，但实际上只能沿一条路径探究 —— 建议改为..."</td>
+</tr>
+<tr class="even">
+<td><strong>儿童发展心理学家</strong> (Child Development Psychologist)</td>
+<td>年龄适切性、4C 映射准确性、发展目标合理性</td>
+<td>"这个学习目标用了'理解'这个动词，但对 3-4 岁幼儿应该用'认识'或'了解'"</td>
+</tr>
+<tr class="odd">
+<td><strong>教学设计师</strong> (Instructional Designer)</td>
+<td>课堂可行性、活动步骤清晰度、资源完整性</td>
+<td>"这个活动估计需要 40 分钟，超出了 20-30 分钟的合理范围 —— 建议拆分为两个活动"</td>
+</tr>
+</tbody>
+</table>
+<p>这三位专家在设计流水线的关键节点自动介入：</p>
+<pre><code>驱动问题设计 ← 课程专家审核
+探究线索拆分 ← 课程专家 + 心理学家联合审核
+活动设计     ← 教学设计师 + 心理学家联合审核
+预案评审     ← 三位专家联合评审（9 维度评分）</code></pre>
+<h3 id="25-标准化不等于模板化">2.5 标准化不等于模板化</h3>
+<p>一个常见的误解是：工具化 = 模板化 = 千篇一律。Course Workshop 明确区分两者：</p>
+<table>
+<thead>
+<tr class="header">
+<th>标准化的是</th>
+<th>不标准化的是</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>预案的结构格式（五段式）</td>
+<td>主题选择和主题背景叙述</td>
+</tr>
+<tr class="even">
+<td>驱动问题的评分维度（4 个维度，1-5 分）</td>
+<td>驱动问题的具体内容</td>
+</tr>
+<tr class="odd">
+<td>探究线索的递进原则（具象→问题解决→整合）</td>
+<td>每条线索下的具体子问题和活动</td>
+</tr>
+<tr class="even">
+<td>活动的编码规范（PBL-Cx-y）</td>
+<td>活动的教学内容和教师话术</td>
+</tr>
+<tr class="odd">
+<td>资源的分类规则（4 类）</td>
+<td>具体使用什么材料</td>
+</tr>
+<tr class="even">
+<td>质量检查的 8 项规则</td>
+<td>对检查结果的处理决策</td>
+</tr>
+</tbody>
+</table>
+<p><strong>标准化的是流程和检查规则，不是内容本身。</strong> 同样的工具、同样的流程，"果汁店"主题和"小小建筑师"主题产出的预案内容完全不同。</p>
+<h3 id="26-platform-neutral不绑定特定-ai-平台">2.6 Platform-neutral：不绑定特定 AI 平台</h3>
+<p>Course Workshop 的所有技能定义（SKILL.md）遵循开放的插件规范，不包含任何特定 AI 平台的私有指令。这意味着：</p>
+<ul>
+<li>技能文件使用标准 Markdown + YAML frontmatter 格式</li>
+<li>工具调用（Read、Write、Glob 等）是通用的文件操作</li>
+<li>领域专家 Agent 的角色定义是纯文本，可适配不同的 AI 运行时</li>
+</ul>
+<p>对于使用者而言，这意味着工具不会被锁定在某一个 AI 供应商上 —— 方法论知识和流程定义是属于你的团队的资产。</p>
+<hr />
+<h2 id="3-方法论基础">3. 方法论基础</h2>
+<p>Course Workshop 不发明方法论 —— 它将经过验证的幼儿教育方法论编码为可执行的规则。本节详细介绍工具内置的五大方法论基础。</p>
+<h3 id="31-华美-pbl-项目路径图5-步">3.1 华美 PBL 项目路径图（5 步）</h3>
+<p>华美 PBL 项目路径图（Huamei Project Path and Routine）定义了一个 PBL 项目从启动到收尾的完整流程，分为 5 个阶段。Course Workshop 的预案输出严格遵循这一结构。</p>
+<pre><code>┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
+│ 01 项目概览 │ →  │ 02 项目标准 │ →  │ 03 项目启动 │ →  │ 04 项目探究 │ →  │ 05 项目展示 │
+│  Project   │    │  Project   │    │  Project   │    │  Project   │    │  Project   │
+│  Overview  │    │  Standard  │    │  Launch    │    │  Inquiry   │    │  Products  │
+└───────────┘    └───────────┘    └───────────┘    └───────────┘    └───────────┘
+     │                 │                │                │                │
+     ▼                 ▼                ▼                ▼                ▼
+  主题背景          先备知识          驱动问题         3条探究线索        成果展示
+  教育价值          4C能力目标        主题网络图        每条线索3-5       展览计划
+  领域覆盖          学习目标          启动事件          个活动            反思总结</code></pre>
+<p>每个阶段的职责和对应的 Course Workshop 技能：</p>
+<table>
+<thead>
+<tr class="header">
+<th>阶段</th>
+<th>职责</th>
+<th>对应技能</th>
+<th>产出文件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01 项目概览</td>
+<td>阐述主题背景与教育价值，分析与《指南》五大领域的关联</td>
+<td><code>theme-analysis</code></td>
+<td>theme-analysis.md</td>
+</tr>
+<tr class="even">
+<td>02 项目标准</td>
+<td>明确先备知识、4C 技能目标、可观察的学习目标</td>
+<td><code>prior-knowledge</code> + <code>competency-mapping</code></td>
+<td>prior-knowledge.md, competency-mapping.md</td>
+</tr>
+<tr class="odd">
+<td>03 项目启动</td>
+<td>确定驱动性问题，构建主题网络图</td>
+<td><code>driving-question</code> + <code>network-map</code></td>
+<td>driving-question.md, network-map.md</td>
+</tr>
+<tr class="even">
+<td>04 项目探究</td>
+<td>拆分为 3 条递进探究线索，设计每条线索下的活动序列</td>
+<td><code>inquiry-scaffold</code> + <code>activity-design</code></td>
+<td>inquiry-clues.md, activities/clue-{1,2,3}.md</td>
+</tr>
+<tr class="odd">
+<td>05 项目展示</td>
+<td>规划成果展示形式和反思活动</td>
+<td><code>proposal-generate</code>（自动从线索 3 推导）</td>
+<td>proposal.md</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-三阶段九要素">3.2 三阶段九要素</h3>
+<p>三阶段九要素是华美 PBL 的实施操作框架，将一个项目的完整生命周期拆解为 3 个阶段、9 个可操作的要素。Course Workshop 的技能设计确保九要素在预案中均有对应。</p>
+<h4 id="phase-1项目开始project-beginning-4-个要素">Phase 1：项目开始（Project Beginning）—— 4 个要素</h4>
+<table>
+<thead>
+<tr class="header">
+<th>要素</th>
+<th>名称</th>
+<th>说明</th>
+<th>Course Workshop 中的体现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>目的需求</strong></td>
+<td>回答"为什么做这个项目"——明确教育目的和幼儿的发展需求</td>
+<td><code>theme-analysis</code> 中的教育价值分析和《指南》领域覆盖</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>计划 + 网络图</strong></td>
+<td>师幼共同规划项目路径，绘制主题网络图，梳理探究方向</td>
+<td><code>network-map</code> 生成的结构化主题网络图</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>验证（想象）</strong></td>
+<td>幼儿表达对主题的已有认知和想象，教师评估起点水平</td>
+<td><code>prior-knowledge</code> 的三维度（认知/技能/情感）前期经验评估</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><strong>团讨确定</strong></td>
+<td>通过集体讨论确定探究重点和活动计划，形成共识</td>
+<td><code>driving-question</code> 的候选问题评分与用户确认环节</td>
+</tr>
+</tbody>
+</table>
+<h4 id="phase-2项目发展project-development-3-个要素">Phase 2：项目发展（Project Development）—— 3 个要素</h4>
+<table>
+<thead>
+<tr class="header">
+<th>要素</th>
+<th>名称</th>
+<th>说明</th>
+<th>Course Workshop 中的体现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td><strong>专家采访/实地观摩</strong></td>
+<td>邀请专业人士或组织实地参观，获取一手信息</td>
+<td>活动设计中的"调查型"和"扮演型"活动模板</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><strong>实际开展</strong></td>
+<td>按计划实施探究活动，记录过程中的发现和问题</td>
+<td><code>activity-design</code> 中每个活动的 3-4 步骤设计（含教师行为和幼儿预期反应）</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><strong>调整计划</strong></td>
+<td>根据实际探究中的新发现，灵活调整后续活动计划</td>
+<td>预案设计为"骨架"而非"剧本"——活动间留有调整空间</td>
+</tr>
+</tbody>
+</table>
+<h4 id="phase-3项目结束project-conclusion-2-个要素">Phase 3：项目结束（Project Conclusion）—— 2 个要素</h4>
+<table>
+<thead>
+<tr class="header">
+<th>要素</th>
+<th>名称</th>
+<th>说明</th>
+<th>Course Workshop 中的体现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td><strong>攻略展示/分享</strong></td>
+<td>幼儿以多种形式展示学习成果</td>
+<td><code>proposal-generate</code> 中的"05 项目展示"段落，基于线索 3 的整合展示活动推导</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td><strong>总结反思</strong></td>
+<td>回顾项目全过程，幼儿表达收获，教师撰写反思</td>
+<td>预案中每个活动的最后一步均包含"反思/总结"环节</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-探究线索递进原则">3.3 探究线索递进原则</h3>
+<p>三条探究线索（Inquiry Clues）是 PBL 项目探究阶段的骨架。Course Workshop 内置的核心规则是：</p>
+<blockquote>
+<p><strong>递进关系是"具象体验 → 问题解决 → 整合展示"，不是"简单 → 复杂"。</strong></p>
+</blockquote>
+<p>这一区分至关重要。"简单到复杂"是成人视角的认知难度排序；"具象到抽象"是幼儿认知发展的自然规律。</p>
+<table>
+<thead>
+<tr class="header">
+<th>线索</th>
+<th>阶段名称</th>
+<th>核心焦点</th>
+<th>幼儿的角色</th>
+<th>典型活动类型</th>
+<th>认知层级</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>线索 1</strong></td>
+<td>具象体验</td>
+<td>感受和发现</td>
+<td>体验者</td>
+<td>感官体验、品尝、观察、分类、个人偏好表达</td>
+<td>感知层：我看到了、我摸到了、我喜欢</td>
+</tr>
+<tr class="even">
+<td><strong>线索 2</strong></td>
+<td>问题解决</td>
+<td>探索和创造</td>
+<td>调查者</td>
+<td>对比实验、问卷调查、动手制作、方案测试</td>
+<td>理解层：为什么、怎么做、如果...会怎样</td>
+</tr>
+<tr class="odd">
+<td><strong>线索 3</strong></td>
+<td>整合展示</td>
+<td>应用和分享</td>
+<td>创造者</td>
+<td>综合制作、角色扮演、成果展览、社区分享</td>
+<td>应用层：我来做、我来展示、我教别人</td>
+</tr>
+</tbody>
+</table>
+<p><strong>以"果汁店"主题为例：</strong></p>
+<pre><code>线索 1: 我们喜欢什么果汁？
+        → 品尝不同果汁、投票调查、偏好记录
+        （幼儿在体验和表达感受）
+
+线索 2: 如何制作果汁？
+        → 榨汁实验、保温测试、口味比较
+        （幼儿在解决具体问题）
+
+线索 3: 开一家果汁店！
+        → 设计菜单、准备材料、角色分工、正式营业
+        （幼儿在整合所有经验，创造一个真实产出）</code></pre>
+<h3 id="34-4c-能力框架幼儿适配版">3.4 4C 能力框架（幼儿适配版）</h3>
+<p>4C 框架源自 21 世纪学习技能体系（P21 Framework），Course Workshop 将其适配至 2-6 岁幼儿的发展阶段。工具内置了三层机制确保 4C 映射的准确性。</p>
+<h4 id="第一层年龄适配的行为定义">第一层：年龄适配的行为定义</h4>
+<p>4C 不是抽象的标签，而是可观察的具体行为。不同年龄段，同一个 4C 能力的表现完全不同：</p>
+<table>
+<thead>
+<tr class="header">
+<th>4C 能力</th>
+<th>PreK-3 (2-3岁)</th>
+<th>PreK-4 (3-4岁)</th>
+<th>K (5-6岁)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Creativity 创造力</strong></td>
+<td>涂鸦时赋予意义（"这是妈妈"）；用一个物品假装成另一个</td>
+<td>有目的地制作；能提出"还可以怎样做"</td>
+<td>综合运用多种材料完成有个人风格的作品；能设计解决方案</td>
+</tr>
+<tr class="even">
+<td><strong>Critical Thinking 批判性思维</strong></td>
+<td>注意到事物的明显不同；对简单因果有直觉反应</td>
+<td>能提出"为什么"；能按一个维度分类；能预测简单结果</td>
+<td>能比较多个方案并说出理由；能提出假设并验证</td>
+</tr>
+<tr class="odd">
+<td><strong>Communication 沟通力</strong></td>
+<td>用简短句子+手势表达需求</td>
+<td>能讲述简短个人经历；能向同伴介绍作品</td>
+<td>能有条理地讲述事件；能在讨论中表达观点并回应他人</td>
+</tr>
+<tr class="even">
+<td><strong>Collaboration 协作力</strong></td>
+<td>在同一区域与同伴平行游戏</td>
+<td>能与 1-2 个同伴联合游戏；愿意轮流</td>
+<td>能与同伴商量分工；能在小组中承担角色完成任务</td>
+</tr>
+</tbody>
+</table>
+<h4 id="第二层误分类检测">第二层：误分类检测</h4>
+<p>课程设计中 4C 标注错误的频率极高。Course Workshop 内置一张"常见误分类表"，在 <code>competency-mapping</code> 和 <code>standards-check</code> 技能中自动检测以下错误：</p>
+<table>
+<thead>
+<tr class="header">
+<th>活动类型</th>
+<th>常被错标为</th>
+<th>实际主要发展</th>
+<th>为什么是错的</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>按教师示范制作手工</td>
+<td>Critical Thinking</td>
+<td>Creativity（如果有自主设计空间）</td>
+<td>按步骤模仿不涉及质疑或判断</td>
+</tr>
+<tr class="even">
+<td>小组讨论</td>
+<td>Collaboration</td>
+<td>Communication</td>
+<td>讨论的核心是表达与倾听，除非有共同决策产出</td>
+</tr>
+<tr class="odd">
+<td>投票选择</td>
+<td>Critical Thinking</td>
+<td>Communication + 简单决策</td>
+<td>投票是表达偏好，不涉及分析推理</td>
+</tr>
+<tr class="even">
+<td>在同一桌做各自的手工</td>
+<td>Collaboration</td>
+<td>并行活动，不是协作</td>
+<td>没有共同目标、没有分工、没有相互依赖</td>
+</tr>
+<tr class="odd">
+<td>照范画画画</td>
+<td>Creativity</td>
+<td>模仿，不是创造</td>
+<td>创造力要求自主选择题材/风格/材料</td>
+</tr>
+</tbody>
+</table>
+<h4 id="第三层学习目标动词控制">第三层：学习目标动词控制</h4>
+<p>不同年龄段的学习目标必须使用对应层次的动词。Course Workshop 在 <code>standards-check</code> 中自动检查动词是否匹配年龄段：</p>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>推荐动词</th>
+<th>禁用动词</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PreK-3 (2-3岁)</td>
+<td>感受、尝试、体验、认识、参与、愿意、喜欢</td>
+<td>理解、分析、比较、评价、设计</td>
+</tr>
+<tr class="even">
+<td>PreK-4 (3-4岁)</td>
+<td>认识、了解、能够、知道、学会、愿意、区分</td>
+<td>深入理解、系统分析、独立评价、设计</td>
+</tr>
+<tr class="odd">
+<td>K (5-6岁)</td>
+<td>理解、比较、分析、能够、学会、尝试解释、主动</td>
+<td>掌握、精通、全面理解</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35-3-6-岁儿童学习与发展指南五大领域">3.5 《3-6 岁儿童学习与发展指南》五大领域</h3>
+<p>教育部《3-6 岁儿童学习与发展指南》是幼儿园课程设计的国家标准。Course Workshop 将五大领域的覆盖检查内置为自动化规则。</p>
+<h4 id="五大领域一览">五大领域一览</h4>
+<table>
+<thead>
+<tr class="header">
+<th>领域</th>
+<th>英文</th>
+<th>核心子领域</th>
+<th>在 PBL 中的典型体现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>健康</strong></td>
+<td>Health</td>
+<td>身心状况、动作发展、生活习惯与生活能力</td>
+<td>营养知识、食品安全、卫生习惯、精细动作练习</td>
+</tr>
+<tr class="even">
+<td><strong>语言</strong></td>
+<td>Language</td>
+<td>倾听与表达、阅读与书写准备</td>
+<td>采访记录、讨论分享、绘本阅读、双语词汇</td>
+</tr>
+<tr class="odd">
+<td><strong>社会</strong></td>
+<td>Social</td>
+<td>人际交往、社会适应</td>
+<td>合作分工、角色扮演、社区调查、规则协商</td>
+</tr>
+<tr class="even">
+<td><strong>科学</strong></td>
+<td>Science</td>
+<td>科学探究、数学认知</td>
+<td>观察实验、分类比较、测量统计、因果推理</td>
+</tr>
+<tr class="odd">
+<td><strong>艺术</strong></td>
+<td>Art</td>
+<td>感受与欣赏、表现与创造</td>
+<td>海报设计、手工制作、歌曲表演、作品展览</td>
+</tr>
+</tbody>
+</table>
+<h4 id="覆盖要求">覆盖要求</h4>
+<p>Course Workshop 的 <code>theme-analysis</code> 和 <code>standards-check</code> 技能执行以下覆盖规则：</p>
+<ul>
+<li><strong>必须覆盖</strong>：一个 PBL 项目至少触及 <strong>3 个领域</strong>（核心或关联级别）</li>
+<li><strong>理想覆盖</strong>：4-5 个领域</li>
+<li><strong>异常检测</strong>：如果 5 个领域都被标注为"核心"，系统会提示"一个主题很少真正深度触及全部领域，请检查是否高估了某些领域的关联度"</li>
+</ul>
+<p>对于每个被标注为"核心"或"关联"的领域，系统要求引用具体的《指南》标准条目和对应年龄段的典型表现，确保对齐不是泛泛而谈。</p>
+<h3 id="36-驱动性问题设计-6-原则">3.6 驱动性问题设计 6 原则</h3>
+<p>驱动性问题（Driving Question）是 PBL 项目的灵魂。Course Workshop 的 <code>driving-question</code> 技能内置 6 项评判原则，用于自动评分和质量控制：</p>
+<table>
+<thead>
+<tr class="header">
+<th>原则</th>
+<th>说明</th>
+<th>正面示例</th>
+<th>反面示例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1. 开放性</strong></td>
+<td>允许多种答案，没有唯一正确答案</td>
+<td>"如何开一家果汁店？"（可以从口味、制作、经营等多角度回答）</td>
+<td>"果汁是怎么做的？"（有标准流程答案）</td>
+</tr>
+<tr class="even">
+<td><strong>2. 可探究性</strong></td>
+<td>儿童可以通过动手操作来探索</td>
+<td>"我们怎样让社区变得更好？"（可以调查、制作、服务）</td>
+<td>"为什么要保护环境？"（太抽象，无法动手探索）</td>
+</tr>
+<tr class="odd">
+<td><strong>3. 年龄适切</strong></td>
+<td>语言和概念匹配目标年龄段</td>
+<td>PreK-4: "我们怎么照顾小动物？"</td>
+<td>PreK-3: "如何建立生态平衡？"</td>
+</tr>
+<tr class="even">
+<td><strong>4. 多维度</strong></td>
+<td>能从多个角度展开探究，支撑 3 条线索</td>
+<td>"如何开一家果汁店？"（口味+制作+经营）</td>
+<td>"怎么榨果汁？"（只有一个维度）</td>
+</tr>
+<tr class="odd">
+<td><strong>5. 生活关联</strong></td>
+<td>连接儿童的日常经验</td>
+<td>"我的家人都做什么工作？"</td>
+<td>"古代人如何生活？"</td>
+</tr>
+<tr class="even">
+<td><strong>6. 行动导向</strong></td>
+<td>以"如何""怎样""我们能"开头，引导动手做</td>
+<td>"我们怎样帮助社区里的人？"</td>
+<td>"社区有哪些人？"（信息收集型，不是行动导向）</td>
+</tr>
+</tbody>
+</table>
+<p>在 <code>driving-question</code> 技能中，AI 生成 5 个候选问题后，会按开放性、可探究性、年龄适切、多维度四个维度（每项 1-5 分，满分 20 分）逐一评分，选出最高分的候选作为推荐方案。课程专家 Agent 在推荐方案上做最终审核。</p>
+<p><strong>评分标准示例（开放性维度）：</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>分值</th>
+<th>标准</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5 分</td>
+<td>完全开放，可以有 10+ 种不同的探究方向</td>
+</tr>
+<tr class="even">
+<td>4 分</td>
+<td>比较开放，有 5-10 种探究方向</td>
+</tr>
+<tr class="odd">
+<td>3 分</td>
+<td>中等，有 3-5 种探究方向</td>
+</tr>
+<tr class="even">
+<td>2 分</td>
+<td>较封闭，有 1-2 种主要路径</td>
+</tr>
+<tr class="odd">
+<td>1 分</td>
+<td>封闭，基本只有一个正确答案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-适用人群与场景">4. 适用人群与场景</h2>
+<h3 id="41-目标用户">4.1 目标用户</h3>
+<p>Course Workshop 的设计围绕三类用户，但核心服务对象是课研主任。</p>
+<h4 id="主要用户课研主任--教研组长">主要用户：课研主任 / 教研组长</h4>
+<pre><code>角色：PBL 课程的设计者和把关人
+日常工作：
+  - 每月设计 1-2 份 PBL 项目预案
+  - 确定月度主题和驱动性问题
+  - 编排活动序列和资源清单
+  - 组织教研组评审和修改
+  - 把关预案质量后提交审批
+
+使用 Course Workshop 的方式：
+  - 全流程使用：从主题分析到预案生成
+  - 与 AI 协作完成预案骨架
+  - 在 AI 产出上填充创意和本班特色
+  - 使用质量检查确保合规性
+
+价值：
+  - 首份预案草稿时间从 3-5 天缩短到 1 天
+  - 驱动问题设计从 3-5 轮修改减少到 1-2 轮
+  - 4C 映射误标率显著降低
+  - 资源清单完整性从经验检查变为自动检查</code></pre>
+<h4 id="次要用户一线带班教师">次要用户：一线带班教师</h4>
+<pre><code>角色：课堂教学的设计者和执行者
+日常工作：
+  - 根据课研主任分配的课题设计教案
+  - 编写教学目标、教学环节、教师话术
+  - 准备教学材料
+  - 根据预案/教案组织教学活动
+  - 观察和记录幼儿的学习过程
+
+使用 Course Workshop 的方式：
+  - 使用 /workshop-5step:lesson 设计五步法教案
+  - 使用 /workshop-planner:week-plan 查看周日程安排
+  - 阅读课研主任生成的 PBL 预案
+  - 参考资源清单准备材料
+
+价值：
+  - 教案设计时间从 2-3 小时缩短到 20 分钟
+  - 教学目标自动对标《指南》
+  - 教师话术和分层指导自动生成
+  - 材料清单具体到品名和数量</code></pre>
+<h4 id="第三用户园长--教学副园长">第三用户：园长 / 教学副园长</h4>
+<pre><code>角色：PBL 预案的审批者和质量监督者
+日常工作：
+  - 审批课研主任提交的预案
+  - 监控跨园区课程一致性
+  - 把控教学质量底线
+
+使用 Course Workshop 产出物的方式：
+  - 阅读 quality-report.md（8 项自动检查结果）
+  - 阅读 review-comments.md（3 位专家评审意见和 9 维度评分）
+  - 根据质量报告做出审批决策
+
+价值：
+  - 审批有据可依，不再仅凭印象
+  - 跨园区预案的基准质量有保障
+  - 质量报告格式统一，可横向比较</code></pre>
+<h3 id="42-适用场景">4.2 适用场景</h3>
+<table>
+<thead>
+<tr class="header">
+<th>场景</th>
+<th>说明</th>
+<th>推荐使用的插件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>月度 PBL 预案设计</strong>（最核心场景）</td>
+<td>从月度主题出发，完成一份符合华美 PBL 五段式的完整预案</td>
+<td>全部 11 个插件</td>
+</tr>
+<tr class="even">
+<td><strong>新主题快速试探</strong></td>
+<td>课研团队考虑某个主题是否适合做 PBL 项目，需要快速评估主题的教育价值和探究潜力</td>
+<td>workshop-insight（仅 <code>theme-analysis</code>）</td>
+</tr>
+<tr class="odd">
+<td><strong>课研团队培训</strong></td>
+<td>新入职课研人员学习 PBL 预案设计流程，通过工具内置的方法论规则理解"好的预案长什么样"</td>
+<td>全部 11 个插件（作为教学工具）</td>
+</tr>
+<tr class="even">
+<td><strong>质量审核标准化</strong></td>
+<td>对已有的预案（非 Course Workshop 生成的）进行质量检查，使用统一的 8 项检查规则</td>
+<td>workshop-quality</td>
+</tr>
+<tr class="odd">
+<td><strong>跨园区课程一致性</strong></td>
+<td>确保多个园区使用相同的质量标准和设计流程，减少预案质量的园际差异</td>
+<td>workshop-quality + workshop-core</td>
+</tr>
+<tr class="even">
+<td><strong>资源采购规划</strong></td>
+<td>在预案定稿后，自动汇总 PBL Box 采购清单，避免临时购买和遗漏</td>
+<td>workshop-resource</td>
+</tr>
+<tr class="odd">
+<td><strong>五步法教案设计</strong></td>
+<td>一线教师设计单节课的教案，从教学目标到完整五步结构</td>
+<td>workshop-5step + workshop-pipelines</td>
+</tr>
+<tr class="even">
+<td><strong>主题式课程包交付</strong></td>
+<td>面向客户的月主题课程包，输出主题解读、主题网络、月矩阵、周编排及多活动类型稿件</td>
+<td>workshop-pipelines + workshop-insight + workshop-planner + workshop-5step + workshop-activity + workshop-format</td>
+</tr>
+<tr class="odd">
+<td><strong>学期课程规划</strong></td>
+<td>课研主任规划学期主题日历，拆分月度和周计划</td>
+<td>workshop-planner + workshop-kb</td>
+</tr>
+<tr class="even">
+<td><strong>教学资料库管理</strong></td>
+<td>导入和查询本校历年教案、教材、教研记录</td>
+<td>workshop-kb</td>
+</tr>
+<tr class="odd">
+<td><strong>教学方法论切换</strong></td>
+<td>查看和选择不同教学方法论管线（PBL、五步法等）</td>
+<td>workshop-pipelines</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43-不适用的场景">4.3 不适用的场景</h3>
+<table>
+<thead>
+<tr class="header">
+<th>场景</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>非幼儿园课程体系</strong></td>
+<td>工具面向 2-6 岁幼儿园教学，小学及以上的课程体系不适用</td>
+</tr>
+<tr class="even">
+<td><strong>小学及以上年龄段</strong></td>
+<td>4C 能力定义、学习目标动词、活动时长等全部按 2-6 岁幼儿标准设计，不适用于 7 岁以上</td>
+</tr>
+<tr class="odd">
+<td><strong>课堂执行阶段</strong></td>
+<td>Course Workshop 的产出是"课前预案/教案"，不是课堂实时辅助工具</td>
+</tr>
+<tr class="even">
+<td><strong>跨学年课程体系规划</strong></td>
+<td>工具处理学期内的课程规划和单个课题设计，不做跨学年的战略规划</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-架构总览">5. 架构总览</h2>
+<h3 id="51-十一个插件">5.1 十一个插件</h3>
+<p>Course Workshop 由 11 个插件组成，各司其职：</p>
+<table>
+<thead>
+<tr class="header">
+<th>插件</th>
+<th>定位</th>
+<th>技能数</th>
+<th>一句话说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>workshop-core</strong></td>
+<td>工作空间管理</td>
+<td>7</td>
+<td>初始化、配置、onboarding、状态、计划关联、审批与归档</td>
+</tr>
+<tr class="even">
+<td><strong>workshop-pipelines</strong></td>
+<td>方法论管线</td>
+<td>2</td>
+<td>列出可用教学方法论管线、选择并激活管线</td>
+</tr>
+<tr class="odd">
+<td><strong>workshop-insight</strong></td>
+<td>前期分析</td>
+<td>5</td>
+<td>主题分析、主题解读、主题网络图、前期经验评估、4C 能力映射</td>
+</tr>
+<tr class="even">
+<td><strong>workshop-pbl</strong></td>
+<td>PBL 课程设计</td>
+<td>5</td>
+<td>驱动问题、网络图、线索拆分、活动设计、预案生成</td>
+</tr>
+<tr class="odd">
+<td><strong>workshop-5step</strong></td>
+<td>五步法教案</td>
+<td>4</td>
+<td>教学目标、环节设计、详细话术、教案编译</td>
+</tr>
+<tr class="even">
+<td><strong>workshop-activity</strong></td>
+<td>主题活动稿</td>
+<td>4</td>
+<td>区域活动、户外游戏、生活渗透、家园互动</td>
+</tr>
+<tr class="odd">
+<td><strong>workshop-planner</strong></td>
+<td>课程规划</td>
+<td>3</td>
+<td>学期主题日历、月度子主题、周日程</td>
+</tr>
+<tr class="even">
+<td><strong>workshop-quality</strong></td>
+<td>质量保障</td>
+<td>2</td>
+<td>8 项规则自动检查、3 位专家联合评审</td>
+</tr>
+<tr class="odd">
+<td><strong>workshop-resource</strong></td>
+<td>资源管理</td>
+<td>2</td>
+<td>资源分类规划、资源完整性校验</td>
+</tr>
+<tr class="even">
+<td><strong>workshop-kb</strong></td>
+<td>知识库管理</td>
+<td>3</td>
+<td>教材导入、知识索引、知识查询</td>
+</tr>
+<tr class="odd">
+<td><strong>workshop-format</strong></td>
+<td>导出与格式化</td>
+<td>2</td>
+<td>客户版式标准化、导出包准备</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-插件依赖关系">5.2 插件依赖关系</h3>
+<pre><code>workshop-core        零依赖（独立运行）
+workshop-insight     零依赖（独立运行）
+workshop-quality     零依赖（独立运行）
+workshop-pipelines   零依赖（独立运行）
+workshop-format      依赖 workshop-core + workshop-pipelines（需要工作空间和导出格式层）
+workshop-kb          依赖 workshop-core（需要工作空间）
+workshop-pbl    依赖 workshop-core + workshop-pipelines（需要工作空间和方法论管线）
+workshop-5step      依赖 workshop-core + workshop-pipelines（需要工作空间和方法论管线）
+workshop-activity   依赖 workshop-core + workshop-pipelines（需要工作空间和方法论管线）
+workshop-planner     依赖 workshop-core + workshop-pipelines（需要工作空间和方法论管线）
+workshop-resource    依赖 workshop-core（需要工作空间）</code></pre>
+<p>依赖关系图：</p>
+<pre><code>    ┌──────────────────┐   ┌──────────────────┐
+    │  workshop-core   │   │workshop-pipelines │ ← 基础层
+    └────────┬─────────┘   └────────┬─────────┘
+             │                      │
+    ┌────────┼──────────────────────┼────────────┐
+    │        │                      │            │
+    ▼        ▼                      ▼            ▼
+  ┌────────────────┐  ┌───────────────┐  ┌──────────────┐
+  │workshop-pbl│  │workshop-5step│  │workshop-planner│ ← 依赖 core + pipelines
+  └────────────────┘  └───────────────┘  └──────────────┘
+  ┌────────────────┐  ┌────────────────┐
+  │workshop-resource│  │  workshop-kb   │ ← 依赖 core
+  └────────────────┘  └────────────────┘
+  ┌────────────────┐  ┌────────────────┐
+  │workshop-insight │  │workshop-quality │ ← 独立运行
+  └────────────────┘  └────────────────┘</code></pre>
+<p><strong>实际使用中的推荐组合</strong>：大多数情况下，建议安装全部 11 个插件以获得完整体验。如果只需要部分功能，参考第 4 节的场景推荐。</p>
+<h3 id="53-三十九个技能一览">5.3 三十九个技能一览</h3>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>技能名称</th>
+<th>所属插件</th>
+<th>功能说明</th>
+<th>复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>init</code></td>
+<td>workshop-core</td>
+<td>初始化 .workshop/ 课程运行目录结构</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>config</code></td>
+<td>workshop-core</td>
+<td>查看或修改运行时默认配置、模型和发布参数</td>
+<td>低</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>onboarding</code></td>
+<td>workshop-core</td>
+<td>检查当前工作台 readiness，并推荐下一步操作</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>status</code></td>
+<td>workshop-core</td>
+<td>查看当前工作空间的设计进度、HIL 状态和技能完成度</td>
+<td>低</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>link-plan</code></td>
+<td>workshop-core</td>
+<td>将课程项目与周/月/学期规划记录建立引用关系</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><code>approve</code></td>
+<td>workshop-core</td>
+<td>将项目推进到最终 approval-gate 并记录审批信息</td>
+<td>低</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><code>promote</code></td>
+<td>workshop-core</td>
+<td>将完成项目归档并发布为课程 release bundle</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td><code>pipeline-list</code></td>
+<td>workshop-pipelines</td>
+<td>列出所有可用教学方法论管线及其阶段信息</td>
+<td>低</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td><code>pipeline-select</code></td>
+<td>workshop-pipelines</td>
+<td>选择并激活教学方法论管线到当前工作区</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td><code>theme-analysis</code></td>
+<td>workshop-insight</td>
+<td>分析月度主题的教育价值、《指南》领域覆盖、课程标准对齐</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td><code>theme-narrative</code></td>
+<td>workshop-insight</td>
+<td>生成客户交付口径的“主题解读”文稿</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td><code>theme-network</code></td>
+<td>workshop-insight</td>
+<td>生成“核心主题→子主题→领域目标簇”的主题网络图</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td><code>prior-knowledge</code></td>
+<td>workshop-insight</td>
+<td>评估幼儿的前期经验（认知/技能/情感三维度），含年龄段差异对照</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>14</td>
+<td><code>competency-mapping</code></td>
+<td>workshop-insight</td>
+<td>4C 能力映射 + 学习目标生成，含误分类检测和前期经验桥接分析</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>15</td>
+<td><code>driving-question</code></td>
+<td>workshop-pbl</td>
+<td>生成 5 个候选驱动性问题，四维度打分，课程专家审核</td>
+<td>高</td>
+</tr>
+<tr class="even">
+<td>16</td>
+<td><code>network-map</code></td>
+<td>workshop-pbl</td>
+<td>从驱动问题扩展为主题网络图（子问题 → 叶节点），标注领域覆盖</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>17</td>
+<td><code>inquiry-scaffold</code></td>
+<td>workshop-pbl</td>
+<td>将网络图拆分为 3 条递进探究线索，分配 4C 技能和学习目标</td>
+<td>高</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td><code>activity-design</code></td>
+<td>workshop-pbl</td>
+<td>为每条线索设计 3-5 个活动（编码、步骤、教师提示、资源标注）</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>19</td>
+<td><code>proposal-generate</code></td>
+<td>workshop-pbl</td>
+<td>将所有设计产出物编译为华美 PBL 五段式完整预案文档</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td><code>lesson-objective</code></td>
+<td>workshop-5step</td>
+<td>生成可观察的教学目标（认知/技能/情感三维度），对标《指南》</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>21</td>
+<td><code>lesson-scaffold</code></td>
+<td>workshop-5step</td>
+<td>设计五步教学环节结构，并嵌入重点/难点与观察支持要点</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>22</td>
+<td><code>lesson-detail</code></td>
+<td>workshop-5step</td>
+<td>编写每个环节的教师话术、材料清单、分层指导策略</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>23</td>
+<td><code>lesson-generate</code></td>
+<td>workshop-5step</td>
+<td>将教学目标+环节+话术编译为客户交付口径的主题教学活动稿</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>24</td>
+<td><code>region-activity</code></td>
+<td>workshop-activity</td>
+<td>生成区域活动稿，覆盖预期经验、材料投放和指导策略</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>25</td>
+<td><code>outdoor-game</code></td>
+<td>workshop-activity</td>
+<td>生成户外游戏稿，覆盖玩法、安全提示与场地组织</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>26</td>
+<td><code>life-routine</code></td>
+<td>workshop-activity</td>
+<td>生成生活渗透稿，覆盖教师提示、介入时机与日常实施要点</td>
+<td>低</td>
+</tr>
+<tr class="odd">
+<td>27</td>
+<td><code>home-school</code></td>
+<td>workshop-activity</td>
+<td>生成家园互动稿，覆盖家庭任务、回收方式与教师发送提示</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>28</td>
+<td><code>semester-plan</code></td>
+<td>workshop-planner</td>
+<td>创建学期主题日历，月度主题分配，领域均衡检查</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>29</td>
+<td><code>month-plan</code></td>
+<td>workshop-planner</td>
+<td>生成月度主题活动矩阵、周次递进与材料预览</td>
+<td>高</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td><code>week-plan</code></td>
+<td>workshop-planner</td>
+<td>生成 15-17 项周活动编排、材料清单和教师备忘</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>31</td>
+<td><code>standards-check</code></td>
+<td>workshop-quality</td>
+<td>8 项规则自动检查（课标覆盖、动词适切、4C 准确性、时长等）</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>32</td>
+<td><code>proposal-review</code></td>
+<td>workshop-quality</td>
+<td>3 位专家 Agent 联合评审，9 维度评分，Top 5 改进建议</td>
+<td>高</td>
+</tr>
+<tr class="odd">
+<td>33</td>
+<td><code>resource-planner</code></td>
+<td>workshop-resource</td>
+<td>按 4 类（PBL Box/足迹袋/自备/多媒体）归类资源，生成采购汇总</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>34</td>
+<td><code>resource-check</code></td>
+<td>workshop-resource</td>
+<td>5 项资源校验（覆盖度/数量/目录匹配/重复检测/分类正确性）</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>35</td>
+<td><code>kb-import</code></td>
+<td>workshop-kb</td>
+<td>导入园本教学资料（教材、教案、教研记录），结构化存储</td>
+<td>中</td>
+</tr>
+<tr class="even">
+<td>36</td>
+<td><code>kb-index</code></td>
+<td>workshop-kb</td>
+<td>构建/刷新知识库索引，支持快速检索</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>37</td>
+<td><code>kb-query</code></td>
+<td>workshop-kb</td>
+<td>按主题、年龄段、领域等条件检索知识库</td>
+<td>低</td>
+</tr>
+<tr class="even">
+<td>38</td>
+<td><code>format-lesson</code></td>
+<td>workshop-format</td>
+<td>将教学活动稿整理为客户版式友好的导出源文件</td>
+<td>中</td>
+</tr>
+<tr class="odd">
+<td>39</td>
+<td><code>export-bundle</code></td>
+<td>workshop-format</td>
+<td>生成 word-ready / pdf-ready / remote-ready 导出包与 manifest</td>
+<td>中</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-四条设计流水线">5.4 四条设计流水线</h3>
+<p>Course Workshop 提供三条独立的设计流水线，分别对应不同的教学方法论和粒度：</p>
+<h4 id="流水线-apbl-预案设计workshop-pbldesign">流水线 A：PBL 预案设计（<code>/workshop-pbl:design</code>）</h4>
+<pre><code>  [workshop-insight 可选前期分析]
+  theme-analysis → prior-knowledge → competency-mapping
+                         │
+                         ▼
+  [workshop-pbl 核心流水线]
+  driving-question → network-map → inquiry-scaffold → activity-design ×3 → proposal-generate
+                                                                              │
+                                                                              ▼
+                                                                        proposal.md
+  [workshop-quality + workshop-resource 后处理]
+  standards-check + proposal-review + resource-planner + resource-check</code></pre>
+<h4 id="流水线-b五步法教案设计workshop-5steplesson">流水线 B：五步法教案设计（<code>/workshop-5step:lesson</code>）</h4>
+<pre><code>  [workshop-5step 教案流水线]
+  lesson-objective → lesson-scaffold → lesson-detail → lesson-generate
+       │                  │                                  │
+       ▼                  ▼                                  ▼
+  lesson-objective.md  lesson-scaffold.md              lesson-plan.md
+       ↑                  ↑
+  (workshop-kb        (workshop-pipelines
+   历年教案参考)        five-step 模板)</code></pre>
+<h4 id="流水线-c课程规划workshop-plannerplan">流水线 C：课程规划（<code>/workshop-planner:plan</code>）</h4>
+<pre><code>  [workshop-planner 规划流水线]
+  semester-plan → month-plan → week-plan
+       │              │            │
+       ▼              ▼            ▼
+  semester-plan.md  month-plan.md  week-plan.md
+       ↑              ↑               │
+  (workshop-kb    (workshop-kb        └──→ 喂入流水线 A 或 B
+   学期日历参考)   教材参考)</code></pre>
+<p>三条流水线可独立使用，也可串联：先用流水线 C 做学期规划 → 从月度主题进入流水线 A（PBL）或流水线 B（五步法）。</p>
+<h4 id="流水线-d主题式课程包交付workshop-pipelinespipeline-select-thematic-curriculum">流水线 D：主题式课程包交付（<code>/workshop-pipelines:pipeline-select thematic-curriculum</code>）</h4>
+<pre><code>  [workshop-insight 主题 framing]
+  theme-analysis → theme-narrative → theme-network
+                                       │
+                                       ▼
+  [workshop-planner 主题编排]
+  month-plan → week-plan
+       │            │
+       ▼            ▼
+  月度活动矩阵     15-17 项周活动编排
+       │            │
+       └─────┬──────┘
+             ▼
+  [活动稿生成]
+  workshop-5step: lesson-generate
+  workshop-activity: region-activity / outdoor-game / life-routine / home-school
+             │
+             ▼
+  [导出层]
+  workshop-format: format-lesson → export-bundle</code></pre>
+<p>四条流水线可独立使用，也可串联：先用流水线 C 做规划，再进入流水线 D 产出客户主题课程包；或直接进入流水线 A、B 处理 PBL 与单次教学活动场景。</p>
+<h3 id="55-数据流">5.5 数据流</h3>
+<p>每个技能的输入和输出形成一条清晰的数据链：</p>
+<p><strong>PBL 流水线数据流：</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>技能</th>
+<th>产出</th>
+<th>消费（必需）</th>
+<th>消费（可选）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>theme-analysis</code></td>
+<td>theme-analysis.md</td>
+<td><em>(起点)</em></td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>prior-knowledge</code></td>
+<td>prior-knowledge.md</td>
+<td><em>(起点)</em></td>
+<td>theme-analysis.md</td>
+</tr>
+<tr class="odd">
+<td><code>competency-mapping</code></td>
+<td>competency-mapping.md</td>
+<td><em>(起点)</em></td>
+<td>theme-analysis.md, prior-knowledge.md</td>
+</tr>
+<tr class="even">
+<td><code>driving-question</code></td>
+<td>driving-question.md</td>
+<td><em>(起点)</em></td>
+<td>theme-analysis.md, competency-mapping.md</td>
+</tr>
+<tr class="odd">
+<td><code>network-map</code></td>
+<td>network-map.md</td>
+<td>driving-question.md</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>inquiry-scaffold</code></td>
+<td>inquiry-clues.md</td>
+<td>driving-question.md, network-map.md</td>
+<td>competency-mapping.md</td>
+</tr>
+<tr class="odd">
+<td><code>activity-design</code></td>
+<td>activities/clue-{1,2,3}.md</td>
+<td>inquiry-clues.md</td>
+<td>network-map.md</td>
+</tr>
+<tr class="even">
+<td><code>proposal-generate</code></td>
+<td>proposal.md</td>
+<td>driving-question.md, inquiry-clues.md, activities/</td>
+<td>theme-analysis.md, prior-knowledge.md</td>
+</tr>
+<tr class="odd">
+<td><code>standards-check</code></td>
+<td>quality-report.md</td>
+<td>activities/ 或 proposal.md</td>
+<td>competency-mapping.md</td>
+</tr>
+<tr class="even">
+<td><code>proposal-review</code></td>
+<td>review-comments.md</td>
+<td>activities/ 或 proposal.md</td>
+<td>quality-report.md</td>
+</tr>
+<tr class="odd">
+<td><code>resource-planner</code></td>
+<td>resource-plan.md</td>
+<td>activities/</td>
+<td>proposal.md</td>
+</tr>
+<tr class="even">
+<td><code>resource-check</code></td>
+<td>resource-check-report.md</td>
+<td>resource-plan.md, activities/</td>
+<td>pbl-box-catalog.md</td>
+</tr>
+</tbody>
+</table>
+<p><strong>五步法教案数据流：</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>技能</th>
+<th>产出</th>
+<th>消费（必需）</th>
+<th>消费（可选）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>lesson-objective</code></td>
+<td>lesson-objective.md</td>
+<td><em>(起点)</em></td>
+<td>.workshop/kb/ 历年教案</td>
+</tr>
+<tr class="even">
+<td><code>lesson-scaffold</code></td>
+<td>lesson-scaffold.md</td>
+<td><em>(推荐 lesson-objective.md)</em></td>
+<td>five-step 模板</td>
+</tr>
+<tr class="odd">
+<td><code>lesson-detail</code></td>
+<td>lesson-detail.md</td>
+<td>lesson-scaffold.md</td>
+<td>lesson-objective.md</td>
+</tr>
+<tr class="even">
+<td><code>lesson-generate</code></td>
+<td>lesson-plan.md</td>
+<td>lesson-objective.md, lesson-scaffold.md, lesson-detail.md</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>课程规划数据流：</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>技能</th>
+<th>产出</th>
+<th>消费（必需）</th>
+<th>消费（可选）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>semester-plan</code></td>
+<td>semester-plan.md</td>
+<td><em>(起点)</em></td>
+<td>.workshop/kb/ 学期日历</td>
+</tr>
+<tr class="even">
+<td><code>month-plan</code></td>
+<td>month-plan.md</td>
+<td><em>(推荐 semester-plan.md)</em></td>
+<td>.workshop/kb/ 教材</td>
+</tr>
+<tr class="odd">
+<td><code>week-plan</code></td>
+<td>week-plan.md</td>
+<td><em>(推荐 month-plan.md)</em></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>知识库数据流：</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>技能</th>
+<th>产出</th>
+<th>消费（必需）</th>
+<th>消费（可选）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>kb-import</code></td>
+<td>.workshop/kb/{category}/*.md</td>
+<td>文件路径</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>kb-index</code></td>
+<td>.workshop/kb/index.yaml</td>
+<td>.workshop/kb/ 文档</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td><code>kb-query</code></td>
+<td>搜索结果</td>
+<td>查询条件</td>
+<td>index.yaml</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键设计决策</strong>：insight 插件的 3 个技能都是"可选增强"而非"必需前置"。三条流水线的入口技能都可以独立运行，不强制前置依赖。工具适应不同的工作习惯，而非强制统一流程。</p>
+<h3 id="56-collection-模式core--pipelines--add-ons">5.6 Collection 模式：Core + Pipelines + Add-ons</h3>
+<p>Course Workshop 采用"基础 + 流水线 + 扩展"的组织模式：</p>
+<pre><code>┌─────────────────────────────────────────────────┐
+│                   基础（Foundation）                │
+│                                                   │
+│  workshop-core       ← 工作空间管理（所有项目必备）   │
+│  workshop-pipelines  ← 方法论管线注册中心            │
+├─────────────────────────────────────────────────┤
+│                 设计流水线（Pipelines）               │
+│                                                   │
+│  workshop-pbl   ← PBL 预案设计                │
+│  workshop-5step     ← 五步法教案设计               │
+│  workshop-activity  ← 主题式课程活动稿生成          │
+├─────────────────────────────────────────────────┤
+│                   扩展（Add-ons）                  │
+│                                                   │
+│  workshop-insight    ← 前期分析（推荐但可选）         │
+│  workshop-quality    ← 质量保障（推荐但可选）         │
+│  workshop-resource   ← 资源管理（推荐但可选）         │
+│  workshop-planner    ← 课程规划（推荐但可选）         │
+│  workshop-kb         ← 知识库管理（推荐但可选）       │
+│  workshop-format     ← 导出与格式化（推荐但可选）     │
+└─────────────────────────────────────────────────┘</code></pre>
+<p>最小可用组合：</p>
+<ul>
+<li><strong>PBL</strong>：workshop-core + workshop-pipelines + workshop-pbl（3 个插件，14 个技能）</li>
+<li><strong>五步法</strong>：workshop-core + workshop-pipelines + workshop-5step（3 个插件，13 个技能）</li>
+<li><strong>主题式课程包</strong>：workshop-core + workshop-pipelines + workshop-insight + workshop-planner + workshop-5step + workshop-activity + workshop-format（7 个插件，27 个技能）</li>
+</ul>
+<p>推荐完整安装 <strong>全部 11 个插件</strong>（39 个技能），获得多方法论设计、课程规划、主题式课程包交付、知识库和质量保障的完整能力。</p>
+<hr />
+<h2 id="6-快速上手">6. 快速上手</h2>
+<h3 id="61-安装插件">6.1 安装插件</h3>
+<p>Course Workshop 基于开放的 SKILL.md 插件规范，可在任何支持该规范的 AI 运行时上使用。以下以通用方式说明安装步骤，具体命令请参考你所使用平台的文档。</p>
+<p><strong>方式一：本地加载（推荐初次体验）</strong></p>
+<p>将 11 个插件目录作为本地插件加载到你的 AI 运行时：</p>
+<pre><code>加载插件目录：
+  ./workshop-core          # 基础设施
+  ./workshop-pipelines     # 方法论管线
+  ./workshop-pbl           # PBL 设计
+  ./workshop-5step        # 五步法教案
+  ./workshop-activity      # 主题活动稿
+  ./workshop-insight       # 前期分析
+  ./workshop-quality       # 质量保障
+  ./workshop-resource      # 资源管理
+  ./workshop-planner       # 课程规划
+  ./workshop-kb            # 知识库
+  ./workshop-format        # 导出与格式化</code></pre>
+<p>不同平台的加载方式示例：</p>
+<table>
+<thead>
+<tr class="header">
+<th>平台</th>
+<th>加载命令</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Claude Code</td>
+<td><code>claude --plugin-dir ./workshop-core --plugin-dir ./workshop-pbl ...</code></td>
+</tr>
+<tr class="even">
+<td>其他兼容运行时</td>
+<td>参考该平台的插件加载文档</td>
+</tr>
+</tbody>
+</table>
+<p><strong>方式二：从 Marketplace 安装</strong></p>
+<p>如果你使用的平台支持 Marketplace 机制，可以直接安装：</p>
+<pre><code>1. 添加插件仓库: course-workshop-plugins (github:VanLengs/course-workshop-plugins)
+2. 安装所需插件: workshop-core, workshop-pbl, workshop-5step, workshop-activity, ...</code></pre>
+<blockquote>
+<p><strong>提示</strong>：Course Workshop 的所有技能定义遵循开放规范（Markdown + YAML frontmatter），不依赖任何特定 AI 平台的私有指令。切换平台时，插件文件无需修改。</p>
+</blockquote>
+<h3 id="62-初始化工作区">6.2 初始化工作区</h3>
+<pre><code>&gt; /workshop-core:init
+
+Course workshop runtime initialized at .workshop/
+
+  .workshop/config.yaml   — 工作室配置（默认方法论: pbl-huamei）
+  .workshop/projects/     — 活跃的课程项目
+  .workshop/plans/        — 共享规划记录
+  .workshop/agents/custom/ — 自定义领域专家
+  .workshop/kb/           — 园本知识库
+  .workshop/archive/      — 已完成的预案归档
+
+This directory is git-tracked — commit it to share with your team.
+
+Next steps:
+  /workshop-pipelines:pipeline-list — 查看可用教学方法论管线
+  /workshop-pbl:design &lt;主题&gt;  — 设计 PBL 预案
+  /workshop-5step:lesson &lt;课题&gt;    — 设计五步法教案
+  /workshop-kb:kb-import &lt;路径&gt;     — 导入园本教学资料</code></pre>
+<h3 id="63-运行设计流水线">6.3 运行设计流水线</h3>
+<pre><code>&gt; /workshop-pbl:design 我周围的人
+
+选择执行模式：
+ 🔍 精细模式（默认）— 每个步骤暂停确认
+ ⚡ 快速模式 — 仅在关键节点暂停
+
+请提供以下信息：
+ 1. 月度主题：我周围的人（已提供）
+ 2. 年龄段：PreK-3 (2-3岁) / PreK-4 (3-4岁) / K (5-6岁)</code></pre>
+<p>输入年龄段后，流水线自动启动 5 个技能的串行执行：</p>
+<pre><code>[1/5] driving-question  → 生成驱动性问题 + 评分
+[2/5] network-map       → 构建主题网络图
+[3/5] inquiry-scaffold  → 拆分 3 条探究线索
+[4/5] activity-design   → 设计活动序列（×3 条线索）
+[5/5] proposal-generate → 组装完整预案</code></pre>
+<p>每步产出一个文件，暂停等待确认后继续。</p>
+<h3 id="63b-运行五步法教案设计">6.3b 运行五步法教案设计</h3>
+<pre><code>&gt; /workshop-5step:lesson 认识春天的花
+
+请提供以下信息：
+ 1. 课题：认识春天的花（已提供）
+ 2. 年龄段：小班 (3-4岁) / 中班 (4-5岁) / 大班 (5-6岁)
+ 3. 主要领域：健康 / 语言 / 社会 / 科学 / 艺术</code></pre>
+<p>输入信息后，流水线自动启动 4 个技能的串行执行：</p>
+<pre><code>[1/4] lesson-objective  → 生成教学目标（认知/技能/情感）
+[2/4] lesson-scaffold   → 设计五步教学环节 + 时间分配
+[3/4] lesson-detail     → 编写话术 + 材料 + 分层指导
+[4/4] lesson-generate   → 编译标准教案文档</code></pre>
+<h3 id="64-查看产出文件">6.4 查看产出文件</h3>
+<p><strong>PBL 预案产出：</strong></p>
+<pre><code>.workshop/projects/people-around-me/
+├── driving-question.md     ← 驱动性问题 + 评分
+├── network-map.md          ← 主题网络图
+├── inquiry-clues.md        ← 3 条探究线索
+├── activities/
+│   ├── clue-1.md           ← 线索 1 活动表
+│   ├── clue-2.md           ← 线索 2 活动表
+│   └── clue-3.md           ← 线索 3 活动表
+└── proposal.md             ← 完整预案（华美 5 段式）</code></pre>
+<p><strong>五步法教案产出：</strong></p>
+<pre><code>.workshop/projects/spring-flowers/
+├── lesson-objective.md     ← 教学目标（三维度）
+├── lesson-scaffold.md      ← 五步环节结构 + 时间分配
+├── lesson-detail.md        ← 教师话术 + 材料 + 分层
+└── lesson-plan.md          ← 完整标准教案</code></pre>
+<h3 id="65-运行质量检查">6.5 运行质量检查</h3>
+<pre><code>&gt; /workshop-quality:standards-check people-around-me
+
+质量检查报告：
+ ✅ 课标覆盖度: 4/5 领域（健康、语言、社会、科学）
+ ✅ 学习目标动词: 全部适配 PreK-4
+ ⚠️ 4C 映射: PBL-C1-01 标注 Critical Thinking，建议改为 Creativity
+ ✅ 活动时长: 全部在 20-30 分钟范围内
+ ✅ 探究线索递进性: 具象→探究→整合
+ ✅ 活动编码连续性: 无跳号
+ ⚠️ 资源清单: PBL-C2-05 缺少材料数量
+ ✅ 双语一致性: 通过
+
+Overall: 6 pass, 2 warnings, 0 fails — Ready for review</code></pre>
+<hr />
+<h2 id="7-设计流水线详解">7. 设计流水线详解</h2>
+<h3 id="71-driving-question驱动性问题设计">7.1 driving-question（驱动性问题设计）</h3>
+<p><strong>做什么</strong>：从月度主题生成并验证一个可探究的驱动性问题。</p>
+<p><strong>核心机制 — 4 维度评分</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>维度</th>
+<th>满分</th>
+<th>评分标准</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>开放性</td>
+<td>5</td>
+<td>允许多种答案的程度（5=10+种探究方向）</td>
+</tr>
+<tr class="even">
+<td>可探究性</td>
+<td>5</td>
+<td>儿童能否通过动手操作来探索（5=多种方式）</td>
+</tr>
+<tr class="odd">
+<td>年龄适切</td>
+<td>5</td>
+<td>语言和概念是否匹配目标年龄（5=完全在经验范围内）</td>
+</tr>
+<tr class="even">
+<td>多维度</td>
+<td>5</td>
+<td>能展开几个独立探究维度（5=4+个维度）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>工作流程</strong>：</p>
+<pre><code>输入(主题+年龄段)
+    ↓
+生成 5 个候选问题
+    ↓
+4 维度评分（每题 /20 分）
+    ↓
+课程专家 Agent 验证最高分候选
+    ↓
+呈现推荐问题 + 2 个备选
+    ↓
+用户确认 → 输出 driving-question.md</code></pre>
+<p><strong>专家参与</strong>：<code>early-childhood-curriculum-expert</code> 审核开放性是否真实（而非表面开放实际封闭）。</p>
+<p><strong>常见修正</strong>：</p>
+<ul>
+<li>"这个问题看似开放，但实际只有一条探究路径 — 建议加入情境框架"</li>
+<li>"'如何...'比'什么是...'更好，因为它暗示行动而非定义"</li>
+</ul>
+<h3 id="72-network-map主题网络图构建">7.2 network-map（主题网络图构建）</h3>
+<p><strong>做什么</strong>：将驱动性问题展开成子问题和探究方向的树状结构。</p>
+<p><strong>核心机制 — 五大领域覆盖检查</strong>：</p>
+<p>每个子问题标注它触及的《指南》领域。最终检查：</p>
+<table>
+<thead>
+<tr class="header">
+<th>覆盖度</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5/5 领域</td>
+<td>✅ 优秀</td>
+</tr>
+<tr class="even">
+<td>4/5 领域</td>
+<td>✅ 良好</td>
+</tr>
+<tr class="odd">
+<td>3/5 领域</td>
+<td>⚠️ 达标（最低要求）</td>
+</tr>
+<tr class="even">
+<td>&lt;3 领域</td>
+<td>❌ 不足，需补充子问题</td>
+</tr>
+</tbody>
+</table>
+<p><strong>输出示例（简化）</strong>：</p>
+<pre><code>                          ┌─ 我喜欢什么果汁？
+              ┌─ 口味选择 ┤
+              │           └─ 大家喜欢什么果汁？
+              │
+如何开一家     ├─ 制作方法 ┬─ 怎么制作果汁？
+果汁店？       │           └─ 怎么保温？
+              │
+              └─ 经营管理 ┬─ 怎么定价？
+                          ├─ 怎么吸引顾客？
+                          └─ 怎么算利润？</code></pre>
+<h3 id="73-inquiry-scaffold探究线索拆分">7.3 inquiry-scaffold（探究线索拆分）</h3>
+<p><strong>做什么</strong>：将网络图中的子问题分组为 3 条递进的探究线索。</p>
+<p><strong>核心机制 — 递进原则</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Clue</th>
+<th>Phase</th>
+<th>Focus</th>
+<th>典型子问题类型</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>具象体验</td>
+<td>感受和发现</td>
+<td>个人偏好、感官体验、初步认识</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>问题解决</td>
+<td>探索和创造</td>
+<td>动手制作、实验、调查研究</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>整合展示</td>
+<td>应用和分享</td>
+<td>计划、准备、展示、反思</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>关键区分</strong>：递进是"从具象体验到抽象理解"，<strong>不是</strong>"从简单到复杂"。</p>
+</blockquote>
+<p><strong>4C 分配规则</strong>：</p>
+<p>每条线索分配 <strong>2 个主要 4C 技能</strong>（不是全部 4 个），必须与实际活动内容匹配：</p>
+<table>
+<thead>
+<tr class="header">
+<th>4C Skill</th>
+<th>PreK-3 表现</th>
+<th>PreK-4 表现</th>
+<th>K 表现</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Creativity</td>
+<td>涂鸦、随意拼搭</td>
+<td>有目的地制作</td>
+<td>设计、发明</td>
+</tr>
+<tr class="even">
+<td>Critical Thinking</td>
+<td>分类、配对</td>
+<td>比较、预测</td>
+<td>分析原因、假设验证</td>
+</tr>
+<tr class="odd">
+<td>Communication</td>
+<td>表达需求</td>
+<td>描述观察、简单采访</td>
+<td>展示、说服</td>
+</tr>
+<tr class="even">
+<td>Collaboration</td>
+<td>并行活动</td>
+<td>轮流、分享材料</td>
+<td>分工合作</td>
+</tr>
+</tbody>
+</table>
+<p><strong>双专家并行验证</strong>：</p>
+<ul>
+<li>课程专家 → 检查递进逻辑</li>
+<li>心理学家 → 检查 4C 映射准确性</li>
+</ul>
+<h3 id="74-activity-design活动序列编排">7.4 activity-design（活动序列编排）</h3>
+<p><strong>做什么</strong>：为每条探究线索设计 3-5 个课堂活动（每个 20-30 分钟）。</p>
+<p><strong>核心规范</strong>：</p>
+<p><strong>活动编码</strong>：<code>PBL-C{线索号}-{序号}</code></p>
+<ul>
+<li>PBL-C1-01, PBL-C1-02, PBL-C1-03... （线索 1 的活动）</li>
+<li>PBL-C2-01, PBL-C2-02... （线索 2 的活动，编号重新开始）</li>
+</ul>
+<p><strong>5 种活动类型</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>类型</th>
+<th>Step 1</th>
+<th>Step 2</th>
+<th>Step 3</th>
+<th>Step 4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>讨论型</td>
+<td>教师提问引导</td>
+<td>幼儿自由讨论</td>
+<td>教师总结归纳</td>
+<td>延伸活动</td>
+</tr>
+<tr class="even">
+<td>调查型</td>
+<td>介绍调查方法</td>
+<td>幼儿实施调查</td>
+<td>分享结果</td>
+<td>讨论发现</td>
+</tr>
+<tr class="odd">
+<td>制作型</td>
+<td>展示材料/示范</td>
+<td>幼儿动手制作</td>
+<td>作品展示</td>
+<td>同伴互评</td>
+</tr>
+<tr class="even">
+<td>实验型</td>
+<td>教师提出问题</td>
+<td>幼儿操作实验</td>
+<td>记录结果</td>
+<td>讨论原因</td>
+</tr>
+<tr class="odd">
+<td>扮演型</td>
+<td>情境设定</td>
+<td>角色分配</td>
+<td>扮演活动</td>
+<td>反思讨论</td>
+</tr>
+</tbody>
+</table>
+<p><strong>时长估算公式</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>每步时长</th>
+<th>目标总时长</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PreK-3</td>
+<td>5-6 min</td>
+<td>15-20 min</td>
+</tr>
+<tr class="even">
+<td>PreK-4</td>
+<td>6-8 min</td>
+<td>20-30 min</td>
+</tr>
+<tr class="odd">
+<td>K</td>
+<td>7-10 min</td>
+<td>25-35 min</td>
+</tr>
+</tbody>
+</table>
+<p>超出目标 → 拆分为 2 个活动。</p>
+<p><strong>教师提示 (Tips) 规则</strong>：</p>
+<ul>
+<li>每个活动至少 1 条 Tip</li>
+<li>覆盖最常见的失败场景</li>
+<li>提供替代方案（如"不能邀请厨师，可播放视频替代"）</li>
+</ul>
+<p><strong>资源标注</strong>（4 类）：</p>
+<ul>
+<li>PBL Box：统一配送的材料</li>
+<li>探索足迹袋：孩子个人材料包</li>
+<li>自备材料：教师本地准备</li>
+<li>多媒体：视频、歌曲</li>
+</ul>
+<h3 id="75-proposal-generate预案文档生成">7.5 proposal-generate（预案文档生成）</h3>
+<p><strong>做什么</strong>：将前 4 步产出组装为华美 PBL 5 段式预案文档。</p>
+<p><strong>组装逻辑</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>数据来源</th>
+<th>是否必须</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01 项目概览</td>
+<td>theme-analysis.md（insight）或自动生成</td>
+<td>可选</td>
+</tr>
+<tr class="even">
+<td>02 项目标准</td>
+<td>competency-mapping.md + prior-knowledge.md（insight）或从 inquiry-clues 提取</td>
+<td>可选</td>
+</tr>
+<tr class="odd">
+<td>03 项目启动</td>
+<td>driving-question.md + network-map.md</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="even">
+<td>04 项目探究</td>
+<td>inquiry-clues.md + activities/*.md</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="odd">
+<td>05 项目展示</td>
+<td>从 Clue 3 活动推导</td>
+<td>自动生成</td>
+</tr>
+</tbody>
+</table>
+<p>如果 workshop-insight 的产出存在，预案内容更丰富；如果不存在，也能生成基本版本。</p>
+<h3 id="76-lesson-objective教学目标设计">7.6 lesson-objective（教学目标设计）</h3>
+<p><strong>做什么</strong>：为单节课生成可观察的教学目标，分认知/技能/情感三个维度，对标《指南》。</p>
+<p><strong>核心机制 — 年龄段×动词矩阵</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>认知动词</th>
+<th>技能动词</th>
+<th>情感动词</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小班 (3-4岁)</td>
+<td>感知、认识、知道、发现</td>
+<td>尝试、参与、模仿</td>
+<td>愿意、喜欢、感受</td>
+</tr>
+<tr class="even">
+<td>中班 (4-5岁)</td>
+<td>了解、观察、比较、分辨</td>
+<td>能够、学会、练习</td>
+<td>乐于、主动、关心</td>
+</tr>
+<tr class="odd">
+<td>大班 (5-6岁)</td>
+<td>理解、分析、归纳、推理</td>
+<td>熟练、运用、创造</td>
+<td>欣赏、尊重、坚持</td>
+</tr>
+</tbody>
+</table>
+<p><strong>目标质量规则</strong>：每个目标必须<strong>可观察</strong>（教师能看到/听到是否达成）、<strong>具体</strong>（"能说出 2-3 种花的名称"而非"了解花"）、<strong>对标《指南》</strong>（映射到具体发展目标）。</p>
+<p><strong>专家参与</strong>：<code>child-development-psychologist</code> 验证动词适切性和认知负荷。</p>
+<h3 id="77-lesson-scaffold五步环节设计">7.7 lesson-scaffold（五步环节设计）</h3>
+<p><strong>做什么</strong>：按导入→探究→操作→总结→延伸五步设计教学结构，合理分配时间。</p>
+<p><strong>核心机制 — 年龄段×时间分配</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>总时长</th>
+<th>S1 导入</th>
+<th>S2 探究</th>
+<th>S3 操作</th>
+<th>S4 总结</th>
+<th>S5 延伸</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小班</td>
+<td>15-20 min</td>
+<td>2-3</td>
+<td>5-8</td>
+<td>3-5</td>
+<td>2-3</td>
+<td>1-2</td>
+</tr>
+<tr class="even">
+<td>中班</td>
+<td>20-25 min</td>
+<td>3-4</td>
+<td>8-10</td>
+<td>5-7</td>
+<td>3-4</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>大班</td>
+<td>25-30 min</td>
+<td>3-5</td>
+<td>10-12</td>
+<td>5-8</td>
+<td>3-5</td>
+<td>2-3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>五种导入策略</strong>：实物导入、情境导入、问题导入、游戏导入、回顾导入 — 根据课题特点和年龄段选择。</p>
+<p><strong>专家参与</strong>：<code>instructional-designer</code> 检查时间合理性和活动多样性（不能全是"教师讲"）。</p>
+<h3 id="78-lesson-detail详细话术编写">7.8 lesson-detail（详细话术编写）</h3>
+<p><strong>做什么</strong>：为每个环节编写逐字教师话术、幼儿行为预测、材料清单和分层指导。</p>
+<p><strong>话术质量规则</strong>：</p>
+<ul>
+<li>使用开放性提问（"你发现了什么？"而非"这是什么颜色？"）</li>
+<li>包含等待时间提醒（"给孩子 5 秒钟思考时间"）</li>
+<li>预设 2-3 种常见幼儿回应的应对策略</li>
+<li>每个环节 3-5 条具体教师行为</li>
+</ul>
+<p><strong>分层设计</strong>：S2（探究）和 S3（操作）环节必须提供三层指导：</p>
+<table>
+<thead>
+<tr class="header">
+<th>层级</th>
+<th>特征</th>
+<th>调整策略</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>基础层</td>
+<td>需要更多支持</td>
+<td>降低难度、增加示范、一对一指导</td>
+</tr>
+<tr class="even">
+<td>发展层</td>
+<td>大部分幼儿</td>
+<td>标准任务、开放性指引</td>
+</tr>
+<tr class="odd">
+<td>提高层</td>
+<td>能力较强</td>
+<td>延伸任务、创新挑战</td>
+</tr>
+</tbody>
+</table>
+<p><strong>专家参与</strong>：<code>instructional-designer</code> + <code>child-development-psychologist</code> 联合审核话术自然度和分层合理性。</p>
+<h3 id="79-lesson-generate教案编译">7.9 lesson-generate（教案编译）</h3>
+<p><strong>做什么</strong>：将前 3 步产出组装为标准教案文档。纯编译，不创造新内容。</p>
+<p><strong>组装逻辑</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>数据来源</th>
+<th>是否必须</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>基本信息</td>
+<td>lesson-objective.md + 用户输入</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="even">
+<td>教学目标</td>
+<td>lesson-objective.md</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="odd">
+<td>教学准备</td>
+<td>lesson-detail.md（材料汇总）</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="even">
+<td>教学过程</td>
+<td>lesson-scaffold.md + lesson-detail.md</td>
+<td><strong>必须</strong></td>
+</tr>
+<tr class="odd">
+<td>分层指导</td>
+<td>lesson-detail.md</td>
+<td>可选</td>
+</tr>
+<tr class="even">
+<td>教学反思</td>
+<td>空模板</td>
+<td>自动生成</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-领域专家体系">8. 领域专家体系</h2>
+<h3 id="81-内置专家">8.1 内置专家</h3>
+<p>Course Workshop 内置 3 个领域专家 Agent，每个专家在设计流水线的不同环节自动参与审核：</p>
+<table>
+<thead>
+<tr class="header">
+<th>专家</th>
+<th>核心关注</th>
+<th>PBL 流水线参与环节</th>
+<th>五步法流水线参与环节</th>
+<th>规划流水线参与环节</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>幼儿教育课程专家</td>
+<td>方法论正确性、课标对齐</td>
+<td>driving-question, inquiry-scaffold, theme-analysis, standards-check, proposal-review</td>
+<td>lesson-objective</td>
+<td>semester-plan, month-plan</td>
+</tr>
+<tr class="even">
+<td>儿童发展心理学家</td>
+<td>年龄适配性、4C 映射</td>
+<td>inquiry-scaffold, activity-design, prior-knowledge, competency-mapping, proposal-review</td>
+<td>lesson-objective, lesson-detail</td>
+<td>semester-plan</td>
+</tr>
+<tr class="odd">
+<td>教学设计师</td>
+<td>活动可执行性、资源完整性</td>
+<td>activity-design, proposal-review</td>
+<td>lesson-scaffold, lesson-detail</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-专家修正实例">8.2 专家修正实例</h3>
+<p>以下是果汁店 PBL 案例中专家的实际修正：</p>
+<p><strong>课程专家修正</strong>：</p>
+<blockquote>
+<p>"驱动问题'如何开一家果汁店'之所以好，是因为它允许孩子从多个维度探究（口味、制作、经营），而不是只有一个正确答案。但注意：递进不是'从简单到复杂'，而是'从具象体验到抽象理解'——先动手做（Clue 1: 口味），再解决问题（Clue 2: 经营），最后整合展示（Clue 3: 开业准备）。"</p>
+</blockquote>
+<p><strong>心理学家修正</strong>：</p>
+<blockquote>
+<p>"PDF 中 PBL-C1-01（我喜欢的果汁）标注为 Communication + Critical Thinking，但实际上制作纸筒果汁杯主要发展的是 <strong>Creativity + Fine Motor</strong>，不是 Critical Thinking。Critical Thinking 需要比较、分析、判断，而这个活动主要是创意表达。"</p>
+</blockquote>
+<p><strong>教学设计师修正</strong>：</p>
+<blockquote>
+<p>"PBL-C2-05（热果汁保温实验）实际需要 40+ 分钟（倒水 + 等待 15 分钟 + 测温 + 讨论），<strong>应该拆分为 2 个课时</strong>：第一课时'探索保温材料'，第二课时'保温测试与记录'。"</p>
+</blockquote>
+<h3 id="83-创建自定义专家">8.3 创建自定义专家</h3>
+<p>如果园所有特色课程方向（如蒙台梭利、STEM、特殊教育），可以创建自定义专家：</p>
+<p>将专家定义文件放入 <code>.workshop/agents/custom/</code> 目录：</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Role: Montessori Education Expert (蒙台梭利教育专家)</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">## Your Domain</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>蒙台梭利教育理念在幼儿园 PBL 课程中的应用...</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## Your Perspective</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>从蒙台梭利&quot;有准备的环境&quot;和&quot;跟随儿童&quot;原则出发...</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">## What You Contribute</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="fu">### Domain Knowledge</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>感官教育与 PBL 活动的结合</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>混龄教学中的 PBL 适配</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>自主操作材料的设计原则</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>...</span></code></pre></div>
+<p>自定义专家会被自动发现并参与相关技能的审核。运行时优先级为：</p>
+<ol type="1">
+<li><code>.workshop/agents/custom/</code></li>
+<li><code>experts/</code></li>
+<li><code>workshop-*/agents/</code></li>
+</ol>
+<h3 id="84-专家发现机制">8.4 专家发现机制</h3>
+<p>每个使用专家的技能在运行时执行以下步骤：</p>
+<ol type="1">
+<li>解析必需专家名，按顺序查找：
+<ul>
+<li><code>.workshop/agents/custom/</code></li>
+<li><code>experts/</code></li>
+<li><code>当前 plugin/agents/</code></li>
+</ul></li>
+<li>扫描 <code>.workshop/agents/custom/*.md</code> — 加载园所或项目自定义专家</li>
+<li>扫描 <code>experts/*.md</code> — 加载共享领域专家</li>
+<li>扫描内置 <code>agents/*.md</code> — 加载插件私有专家（跳过已被更高层覆盖的同名文件）</li>
+<li>按相关性匹配 — 根据专家的 <code>## Your Domain</code> 与当前主题匹配，选择额外专家</li>
+<li>跳过模板文件 <code>_domain-expert-template.md</code></li>
+</ol>
+<hr />
+<h2 id="9-完整案例果汁店-pbl-项目">9. 完整案例：果汁店 PBL 项目</h2>
+<p>以下使用华美幼儿园 11 月 PBL 预案"我周围的人"为案例，完整演示 Course Workshop 的设计流水线。</p>
+<p><strong>输入</strong>：</p>
+<ul>
+<li>月度主题：我周围的人 / People Around Me</li>
+<li>年龄段：PreK-4 (3-4 岁)</li>
+<li>驱动性问题预期方向：通过"开果汁店"体验社区角色</li>
+</ul>
+<h3 id="91-driving-question-输出">9.1 driving-question 输出</h3>
+<p><strong>5 个候选问题评分</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>候选问题</th>
+<th>开放性</th>
+<th>可探究性</th>
+<th>年龄适切</th>
+<th>多维度</th>
+<th>总分</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>如何开一家果汁店？</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+<td><strong>20</strong></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>我们怎么帮助社区里的人？</td>
+<td>5</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>17</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>我的家人每天都做什么？</td>
+<td>4</td>
+<td>3</td>
+<td>5</td>
+<td>3</td>
+<td>15</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>社区里有哪些商店？</td>
+<td>3</td>
+<td>3</td>
+<td>5</td>
+<td>3</td>
+<td>14</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>为什么我们需要朋友？</td>
+<td>4</td>
+<td>2</td>
+<td>4</td>
+<td>2</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐问题</strong>：</p>
+<blockquote>
+<p><strong>如何开一家果汁店？</strong> <strong>How to open a juice shop?</strong></p>
+<p>总分：20/20</p>
+<p>可展开的探究维度：</p>
+<ol type="1">
+<li>口味选择 — 调查偏好、了解应季水果、营养搭配</li>
+<li>制作方法 — 工具选择、制作步骤、保温方法</li>
+<li>经营管理 — 海报设计、定价、优惠券、利润计算</li>
+<li>开业准备 — 分工协作、场地布置、正式开店</li>
+</ol>
+</blockquote>
+<h3 id="92-network-map-输出">9.2 network-map 输出</h3>
+<pre><code>                                      ┌─ 我喜欢什么果汁？[语言]
+                          ┌─ 口味偏好 ─┤
+                          │            ├─ 大家喜欢什么果汁？[社会]
+                          │            └─ 应季水果有哪些？[科学]
+                          │
+                          │            ┌─ 水果的营养搭配？[科学/健康]
+              ┌─ 口味选择 ─┤
+              │            └─ 营养搭配 ─┤
+              │                        └─ 为什么要喝果汁？[健康]
+              │
+              │                        ┌─ 榨汁工具有哪些？[科学]
+              │            ┌─ 工具选择 ─┤
+              │            │            └─ 不同水果用什么工具？[科学]
+              │            │
+如何开一家     ├─ 制作方法 ─┼─ 制作步骤 ─── 果汁怎么做？[科学]
+果汁店？       │            │
+              │            └─ 保温方法 ─┬─ 怎么让果汁不变凉？[科学]
+              │                        └─ 自制保温瓶 [科学/艺术]
+              │
+              │            ┌─ 宣传推广 ─┬─ 怎么让人知道果汁店？[社会]
+              │            │            ├─ 果汁店海报 [艺术]
+              │            │            └─ 优惠券设计 [艺术]
+              ├─ 经营管理 ─┤
+              │            ├─ 定价利润 ─┬─ 果汁卖多少钱？[科学/数学]
+              │            │            └─ 怎么算赚了多少？[科学/数学]
+              │            └─ 市场调研 ─── 别人卖多少钱？[社会]
+              │
+              └─ 开业准备 ─┬─ 分工合作 ─── 谁做什么？[社会]
+                           └─ 正式开店 ─── 果汁售卖活动 [社会/语言]</code></pre>
+<p><strong>领域覆盖度</strong>：✅ 健康 ✅ 语言 ✅ 社会 ✅ 科学 ✅ 艺术 — <strong>5/5 全覆盖</strong></p>
+<h3 id="93-inquiry-scaffold-输出">9.3 inquiry-scaffold 输出</h3>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Clue 1</th>
+<th>Clue 2</th>
+<th>Clue 3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>关键问题</strong></td>
+<td>果汁店要做什么口味的果汁？ What flavor does the juice store make?</td>
+<td>如何经营果汁店？ How to run a juice shop?</td>
+<td>开业前需要做哪些准备？ What preparations do I need to do?</td>
+</tr>
+<tr class="even">
+<td><strong>成功素养</strong></td>
+<td>① 沟通能力 ② 思辨能力</td>
+<td>① 思辨能力 ② 创造力 ③ 合作能力</td>
+<td>① 合作能力 ② 沟通能力</td>
+</tr>
+<tr class="odd">
+<td><strong>学习目标</strong></td>
+<td>① 能够通过问卷调查了解大家喜欢的果汁 ② 能够综合应季水果和营养搭配确定果汁</td>
+<td>① 知道如何制作果汁并了解步骤 ② 能够尝试找到保温方法 ③ 理解什么是利润</td>
+<td>① 能够有分工有合作完成果汁店计划 ② 能够参与售卖活动并提高沟通能力</td>
+</tr>
+<tr class="even">
+<td><strong>关键词</strong></td>
+<td>juice, fruit, season, healthy, vitamin, nutrition</td>
+<td>tools, squeeze, step, poster, coupon, keep warm, market, profit, price</td>
+<td>plan, teamwork, decoration, opening, sale, communication</td>
+</tr>
+<tr class="odd">
+<td><strong>建议时长</strong></td>
+<td>3-5 天</td>
+<td>3-5 天</td>
+<td>3-5 天</td>
+</tr>
+<tr class="even">
+<td><strong>递进关系</strong></td>
+<td>具象体验 →</td>
+<td>问题解决 →</td>
+<td>整合展示</td>
+</tr>
+</tbody>
+</table>
+<h3 id="94-activity-design-输出clue-1-完整活动表">9.4 activity-design 输出（Clue 1 完整活动表）</h3>
+<p><strong>探究线索 1：果汁店要做什么口味的果汁？</strong></p>
+<blockquote>
+<p>成功素养：① 沟通能力 ② 思辨能力 学习目标：① 能够通过问卷调查了解大家喜欢的果汁 ② 能够综合应季水果和营养搭配确定果汁 关键词：juice, fruit, season, month, healthy, vitamin, nutrition</p>
+</blockquote>
+<table>
+<thead>
+<tr class="header">
+<th>关键问题</th>
+<th>活动名称</th>
+<th>活动内容</th>
+<th>活动资源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>要做什么口味的果汁？</td>
+<td><strong>PBL-C1-01</strong> 我喜欢的果汁 / My Favorite Juice</td>
+<td>1. 教师提问：你今天喝果汁了吗？你最喜欢什么果汁？幼儿讨论。 2. 幼儿一一说自己喜欢喝的果汁是什么，是什么颜色的。 3. 教师引导幼儿利用纸筒，根据制作说明，制作自己喜欢的纸筒果汁杯。 <em>提示：引导不会使用剪刀的幼儿寻求同伴或教师帮助。</em></td>
+<td>• PBL 项目盒：彩色皱纹纸、纸筒果汁制作说明 • 探索足迹袋：纸筒、吸管、水果模型纸 • 自备材料：颜料、剪刀</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>PBL-C1-02</strong> 你喜欢什么果汁？ / What Juice Do You Like?</td>
+<td>1. 如果我们要开一家果汁店，要卖什么果汁呢？哪种果汁会最受欢迎？教师抛出问题，幼儿自由讨论。 2. 教师引导幼儿进行采访调查。幼儿拿着调查问卷去园里进行随机采访，完成果汁调查问卷。 3. 幼儿分享自己的调查结果。 <em>提示：教师可以提前示范如何提问和记录，对于不会写字的幼儿可用画图代替。</em></td>
+<td>• 探索足迹袋：果汁调查问卷 • 自备材料：板夹、笔</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><strong>PBL-C1-03</strong> 应季的水果 / Fruits In Season</td>
+<td>1. 教师提问：现在是什么季节？我们都能吃到哪些水果？ 2. 教师利用应季水果时间表向幼儿解释应季水果的概念，并根据当前季节选择可以制作果汁的水果。 3. 教师引导幼儿制作水果眼镜。 4. 做好后，带上眼镜，向同伴展示。 <em>提示：可以让幼儿从家里带一种应季水果来分享。</em></td>
+<td>• PBL 项目盒：应季水果时间表 • 探索足迹袋：水果眼镜材料 • 自备材料：剪刀、胶水</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>PBL-C1-04</strong> 营养搭配 / Nutritional Matching</td>
+<td>1. 教师提问：我们为什么要喝果汁呢？幼儿自由讨论。 2. 教师邀请厨师或保健医生来向幼儿讲解果汁的营养成分、我们为什么要喝果汁、喝果汁有哪些好处等。 3. 根据厨师或保健医生的讲解，教师和幼儿一起完成水果搭配表。 4. 教师和幼儿一起总结此探究线索下的活动，综合考虑大家喜欢的果汁、应季的水果以及有营养的果汁，最后确定要制作的果汁。 <em>提示：如果不能邀请厨师或保健医生，教师可以播放视频，幼儿通过视频了解果汁的营养成分。</em></td>
+<td>• PBL 项目盒：水果搭配表 • 多媒体：12 Healthy Smoothies 视频</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95-proposal-generate-输出结构">9.5 proposal-generate 输出结构</h3>
+<p>最终预案 <code>proposal.md</code> 的 5 段式结构：</p>
+<pre><code># 我周围的人 PBL 项目活动预案 (11月)
+# People Around Me PBL Project Pre-proposal (Nov)
+
+## 01 项目概览 Project Overview
+  → 主题背景（中英双语 2-3 段）
+  → 教育价值阐述
+
+## 02 项目标准 Project Standard
+  → Prior Knowledge 先前经验（3 条）
+  → 4C&#39;s of 21st Century Learning Skills（4 行表格）
+  → Learning Goals 学习目标（4 条）
+
+## 03 项目启动 Project Launch
+  → 驱动性问题引出叙述
+  → &quot;如何开一家果汁店？&quot; 驱动问题展示
+  → 主题网络图
+
+## 04 项目探究 Project Inquiry
+  → 驱动问题 → 3 条线索概览图
+  → Clue 1: 完整活动表（4 个活动）
+  → Clue 2: 完整活动表（9 个活动）
+  → Clue 3: 完整活动表（若干活动）
+
+## 05 项目展示 Project Products
+  → 果汁店开业活动方案
+  → 记录书制作
+  → 成果展示墙</code></pre>
+<h3 id="96-standards-check-质量报告">9.6 standards-check 质量报告</h3>
+<table>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>检查项</th>
+<th>状态</th>
+<th>详情</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>课标覆盖度</td>
+<td>✅ pass</td>
+<td>5/5 领域全覆盖</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>学习目标动词</td>
+<td>✅ pass</td>
+<td>全部使用 PreK-4 适配动词（能够/了解/知道）</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>4C 映射</td>
+<td>⚠️ warning</td>
+<td>PBL-C1-01 标注 Critical Thinking，建议改为 Creativity</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>活动时长</td>
+<td>⚠️ warning</td>
+<td>PBL-C2-05 估计需 40 min，建议拆分</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>线索递进性</td>
+<td>✅ pass</td>
+<td>具象体验→问题解决→整合展示</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>活动编码</td>
+<td>✅ pass</td>
+<td>C1: 01-04, C2: 01-09, C3: 连续无跳号</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>资源完整性</td>
+<td>⚠️ warning</td>
+<td>PBL-C2-05 缺少材料数量标注</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>双语一致性</td>
+<td>✅ pass</td>
+<td>关键内容中英文对照完整</td>
+</tr>
+</tbody>
+</table>
+<p><strong>总结</strong>：5 pass, 3 warnings, 0 fails — <strong>可提交评审</strong>（建议先处理 warnings）</p>
+<h3 id="97-resource-planner-资源汇总clue-1">9.7 resource-planner 资源汇总（Clue 1）</h3>
+<p><strong>PBL Box 订单汇总</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>物料</th>
+<th>数量（25人班）</th>
+<th>线索</th>
+<th>活动</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>彩色皱纹纸</td>
+<td>1 包(25 张)</td>
+<td>C1</td>
+<td>PBL-C1-01</td>
+</tr>
+<tr class="even">
+<td>纸筒果汁制作说明</td>
+<td>25 份</td>
+<td>C1</td>
+<td>PBL-C1-01</td>
+</tr>
+<tr class="odd">
+<td>应季水果时间表</td>
+<td>5 份(每组 1 份)</td>
+<td>C1</td>
+<td>PBL-C1-03</td>
+</tr>
+<tr class="even">
+<td>水果搭配表</td>
+<td>5 份</td>
+<td>C1</td>
+<td>PBL-C1-04</td>
+</tr>
+</tbody>
+</table>
+<p><strong>探索足迹袋内容</strong>：</p>
+<table>
+<thead>
+<tr class="header">
+<th>物料</th>
+<th>数量</th>
+<th>活动</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>纸筒 + 吸管 + 水果模型纸</td>
+<td>各 25 套</td>
+<td>PBL-C1-01</td>
+</tr>
+<tr class="even">
+<td>果汁调查问卷</td>
+<td>25 份</td>
+<td>PBL-C1-02</td>
+</tr>
+<tr class="odd">
+<td>水果眼镜材料</td>
+<td>25 套</td>
+<td>PBL-C1-03</td>
+</tr>
+</tbody>
+</table>
+<p><strong>教师自备材料</strong>：</p>
+<ul>
+<li>颜料、剪刀 (PBL-C1-01)</li>
+<li>板夹 × 25、笔 × 25 (PBL-C1-02)</li>
+<li>剪刀、胶水 (PBL-C1-03)</li>
+</ul>
+<hr />
+<h2 id="10-最佳实践">10. 最佳实践</h2>
+<h3 id="101-推荐做法-">10.1 推荐做法 ✅</h3>
+<p><strong>先分析再设计</strong></p>
+<p>先运行 <code>workshop-insight</code>（theme-analysis + prior-knowledge + competency-mapping），再运行 <code>workshop-pbl</code>。前期分析的产出让设计更有依据。</p>
+<p><strong>每一步暂停确认</strong></p>
+<p>首次使用建议选择精细模式。驱动性问题确认后再画网络图，网络图确认后再拆线索。不要盲目全自动 — 课研主任的专业判断是不可替代的。</p>
+<p><strong>创建园本领域专家</strong></p>
+<p>不同幼儿园有不同的教育特色。创建自定义专家放入 <code>.workshop/agents/custom/</code>，让工具理解你的园本特色：</p>
+<ul>
+<li>蒙台梭利幼儿园 → 创建蒙台梭利教育专家</li>
+<li>STEM 特色园 → 创建 STEM 教育专家</li>
+<li>双语园 → 创建语言发展专家</li>
+</ul>
+<p><strong>让一线教师参与评审</strong></p>
+<p>运行 <code>/workshop-quality:proposal-review</code> 后，将评审报告分享给一线教师。她们是预案的最终使用者，能发现"写得好看但用不了"的问题。</p>
+<p><strong>定期更新 PBL Box 目录</strong></p>
+<p>每学期开学前更新 <code>references/pbl-box-catalog.md</code>，确保资源匹配结果与供应商实际库存一致。</p>
+<p><strong>使用知识库辅助设计</strong></p>
+<p>导入本校历年教案和教材到 workshop-kb（<code>/workshop-kb:kb-import &lt;路径&gt;</code>），让设计流水线能自动参考过往经验。lesson-objective 和 semester-plan 技能会自动检索相关历史资料。</p>
+<p><strong>学期规划先行</strong></p>
+<p>先运行 <code>/workshop-planner:semester-plan</code> 确定学期主题框架，再逐月设计具体课程。自顶向下的规划确保主题连贯和领域均衡。</p>
+<p><strong>选择合适的方法论</strong></p>
+<p>使用 <code>/workshop-pipelines:pipeline-list</code> 查看可用管线。PBL 适合跨领域整合探究项目（月度粒度），五步法适合单节课的结构化教学（课时粒度）。两种方法论可以在同一学期中混合使用。</p>
+<h3 id="102-避免事项-">10.2 避免事项 ❌</h3>
+<p><strong>不要跳过驱动问题验证</strong></p>
+<p>驱动问题是整个预案的锚点。一个封闭的驱动问题会导致后续所有线索和活动都偏离 PBL 本质。即使赶时间，也要让专家 Agent 验证开放性。</p>
+<p><strong>不要让 AI 完全替代专业判断</strong></p>
+<p>Course Workshop 生成的是骨架和建议。课研主任应该基于对本班孩子的了解，调整活动内容、替换不适合的子问题、修改资源清单。工具是助手，不是替代者。</p>
+<p><strong>不要忽略专家修正</strong></p>
+<p>专家 Agent 的修正往往指出非专业人士看不到的问题（如 4C 映射错误、年龄段不适配）。修正建议不是可选的装饰 — 它们保障了预案的专业质量。</p>
+<p><strong>不要使用模糊的资源描述</strong></p>
+<p>资源清单的精确度直接影响开课准备。"水果"要写成"苹果 × 5 个、橙子 × 5 个"，"材料"要写成"彩色皱纹纸 × 1 包(25 张)"。</p>
+<h3 id="103-团队协作工作流">10.3 团队协作工作流</h3>
+<pre><code>课研主任 A                课研主任 B              园长
+    │                         │                    │
+    ├─ /designer:design       │                    │
+    │  (生成预案草稿)          │                    │
+    │                         │                    │
+    ├─ 人工审核 + 微调         │                    │
+    │                         │                    │
+    │                    /quality:proposal-review    │
+    │                    (同事互审)                  │
+    │                         │                    │
+    ├─ 根据评审修改            │                    │
+    │                         │                    │
+    │                    /quality:standards-check    │
+    │                    (自动质量检查)              │
+    │                         │                    │
+    │                         ├────────────────────→│
+    │                         │                审批 │
+    │                         │←───────────────────┤
+    │                         │                    │
+    ├─ /core:promote          │                    │
+    │  (归档 + 发放)           │                    │
+    ▼                         ▼                    ▼
+  教师接收预案 + PBL Box 下单</code></pre>
+<hr />
+<h2 id="11-附录">11. 附录</h2>
+<h3 id="a-活动编码规范">A. 活动编码规范</h3>
+<table>
+<thead>
+<tr class="header">
+<th>元素</th>
+<th>格式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>编码格式</td>
+<td><code>PBL-C{线索号}-{序号}</code></td>
+<td>PBL-C1-01</td>
+</tr>
+<tr class="even">
+<td>线索号</td>
+<td>1, 2, 3</td>
+<td>C1, C2, C3</td>
+</tr>
+<tr class="odd">
+<td>序号</td>
+<td>01, 02, 03...（两位数，补零）</td>
+<td>01, 02, 09, 10</td>
+</tr>
+<tr class="even">
+<td>显示格式</td>
+<td>编码 + 中文名 / 英文名</td>
+<td>PBL-C1-01 我喜欢的果汁 / My Favorite Juice</td>
+</tr>
+</tbody>
+</table>
+<p><strong>规则</strong>：</p>
+<ol type="1">
+<li>同一线索内编号连续，不跳号</li>
+<li>每条新线索编号重新从 01 开始</li>
+<li>每个编码对应唯一一个活动</li>
+<li>编码一旦分配不重新编号</li>
+</ol>
+<h3 id="b-学习目标动词表">B. 学习目标动词表</h3>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>推荐动词</th>
+<th>避免动词</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PreK-3 (2-3岁)</td>
+<td>感受、尝试、体验、认识、参与</td>
+<td>理解、分析、评估、比较</td>
+</tr>
+<tr class="even">
+<td>PreK-4 (3-4岁)</td>
+<td>认识、了解、能够、知道、愿意</td>
+<td>分析、设计、评价、建构</td>
+</tr>
+<tr class="odd">
+<td>K (5-6岁)</td>
+<td>理解、比较、分析、能够、主动</td>
+<td>评估、批判、论证、抽象</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c-4c-能力误分类对照表">C. 4C 能力误分类对照表</h3>
+<table>
+<thead>
+<tr class="header">
+<th>活动类型</th>
+<th>经常被错标为</th>
+<th>实际发展的能力</th>
+<th>判断依据</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>制作手工</td>
+<td>Critical Thinking</td>
+<td><strong>Creativity</strong></td>
+<td>无比较/分析/判断环节</td>
+</tr>
+<tr class="even">
+<td>小组讨论</td>
+<td>Collaboration</td>
+<td><strong>Communication</strong></td>
+<td>无分工/共同目标</td>
+</tr>
+<tr class="odd">
+<td>投票选择</td>
+<td>Critical Thinking</td>
+<td><strong>Communication</strong> + 简单决策</td>
+<td>无深度分析</td>
+</tr>
+<tr class="even">
+<td>角色扮演</td>
+<td>Communication</td>
+<td><strong>Creativity</strong> + Social</td>
+<td>创造性表达为主</td>
+</tr>
+<tr class="odd">
+<td>分组任务</td>
+<td>Collaboration</td>
+<td>需确认有<strong>真正的分工</strong></td>
+<td>有分工 = Collaboration，无分工 = 并行活动</td>
+</tr>
+<tr class="even">
+<td>观察记录</td>
+<td>Critical Thinking</td>
+<td><strong>正确</strong>（如果包含比较/预测）</td>
+<td>需有分析环节</td>
+</tr>
+</tbody>
+</table>
+<h3 id="d-技能状态机">D. 技能状态机</h3>
+<pre><code>[planning] → [designing] → [reviewing] → [approved] → [shipped]
+                                ↑              │
+                                └── 打回修改 ──┘</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>触发</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>planning</td>
+<td>/workshop-core:init</td>
+<td>工作区已创建</td>
+</tr>
+<tr class="even">
+<td>designing</td>
+<td>/workshop-pbl:design</td>
+<td>正在设计预案</td>
+</tr>
+<tr class="odd">
+<td>reviewing</td>
+<td>/workshop-quality:standards-check</td>
+<td>质量检查中</td>
+</tr>
+<tr class="even">
+<td>approved</td>
+<td>园长审批通过</td>
+<td>可以发放</td>
+</tr>
+<tr class="odd">
+<td>shipped</td>
+<td>/workshop-core:promote</td>
+<td>已发放 + 归档</td>
+</tr>
+</tbody>
+</table>
+<h3 id="e-文件参考表">E. 文件参考表</h3>
+<table>
+<thead>
+<tr class="header">
+<th>文件</th>
+<th>创建者</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>.workshop/config.yaml</code></td>
+<td>init</td>
+<td>工作室配置</td>
+</tr>
+<tr class="even">
+<td><code>.workshop/agents/custom/{name}.md</code></td>
+<td>手动创建</td>
+<td>自定义领域专家</td>
+</tr>
+<tr class="odd">
+<td><code>experts/{name}.md</code></td>
+<td>仓库维护</td>
+<td>共享领域专家</td>
+</tr>
+<tr class="even">
+<td><code>.workshop/kb/**/*.md</code></td>
+<td>kb-import</td>
+<td>知识库文档</td>
+</tr>
+<tr class="odd">
+<td><code>.workshop/kb/index.yaml</code></td>
+<td>kb-index</td>
+<td>知识库索引</td>
+</tr>
+<tr class="even">
+<td><code>driving-question.md</code></td>
+<td>driving-question</td>
+<td>驱动性问题 + 评分</td>
+</tr>
+<tr class="odd">
+<td><code>network-map.md</code></td>
+<td>network-map</td>
+<td>主题网络图</td>
+</tr>
+<tr class="even">
+<td><code>inquiry-clues.md</code></td>
+<td>inquiry-scaffold</td>
+<td>3 条探究线索</td>
+</tr>
+<tr class="odd">
+<td><code>activities/clue-{N}.md</code></td>
+<td>activity-design</td>
+<td>活动序列表</td>
+</tr>
+<tr class="even">
+<td><code>proposal.md</code></td>
+<td>proposal-generate</td>
+<td>完整预案文档</td>
+</tr>
+<tr class="odd">
+<td><code>lesson-objective.md</code></td>
+<td>lesson-objective</td>
+<td>教学目标（三维度）</td>
+</tr>
+<tr class="even">
+<td><code>lesson-scaffold.md</code></td>
+<td>lesson-scaffold</td>
+<td>五步教学环节结构</td>
+</tr>
+<tr class="odd">
+<td><code>lesson-detail.md</code></td>
+<td>lesson-detail</td>
+<td>详细话术+材料+分层</td>
+</tr>
+<tr class="even">
+<td><code>lesson-plan.md</code></td>
+<td>lesson-generate</td>
+<td>完整标准教案</td>
+</tr>
+<tr class="odd">
+<td><code>semester-plan.md</code></td>
+<td>semester-plan</td>
+<td>学期主题日历</td>
+</tr>
+<tr class="even">
+<td><code>month-plan.md</code></td>
+<td>month-plan</td>
+<td>月度子主题计划</td>
+</tr>
+<tr class="odd">
+<td><code>week-plan.md</code></td>
+<td>week-plan</td>
+<td>周日程表</td>
+</tr>
+<tr class="even">
+<td><code>theme-analysis.md</code></td>
+<td>theme-analysis</td>
+<td>主题分析</td>
+</tr>
+<tr class="odd">
+<td><code>prior-knowledge.md</code></td>
+<td>prior-knowledge</td>
+<td>先前经验评估</td>
+</tr>
+<tr class="even">
+<td><code>competency-mapping.md</code></td>
+<td>competency-mapping</td>
+<td>4C 映射 + 学习目标</td>
+</tr>
+<tr class="odd">
+<td><code>quality-report.md</code></td>
+<td>standards-check</td>
+<td>质量检查报告</td>
+</tr>
+<tr class="even">
+<td><code>review-comments.md</code></td>
+<td>proposal-review</td>
+<td>专家评审意见</td>
+</tr>
+<tr class="odd">
+<td><code>resource-plan.md</code></td>
+<td>resource-planner</td>
+<td>资源清单</td>
+</tr>
+<tr class="even">
+<td><code>resource-check-report.md</code></td>
+<td>resource-check</td>
+<td>资源校验报告</td>
+</tr>
+<tr class="odd">
+<td><code>status.json</code></td>
+<td>多个技能</td>
+<td>阶段追踪</td>
+</tr>
+</tbody>
+</table>
+<h3 id="f-五步法环节编码规范">F. 五步法环节编码规范</h3>
+<table>
+<thead>
+<tr class="header">
+<th>元素</th>
+<th>格式</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>编码格式</td>
+<td><code>FS-S{环节号}-{序号}</code></td>
+<td>FS-S2-01</td>
+</tr>
+<tr class="even">
+<td>环节号</td>
+<td>1-5</td>
+<td>S1(导入), S2(探究), S3(操作), S4(总结), S5(延伸)</td>
+</tr>
+<tr class="odd">
+<td>序号</td>
+<td>01, 02...（两位数，补零）</td>
+<td>01, 02</td>
+</tr>
+<tr class="even">
+<td>显示格式</td>
+<td>编码 + 活动名称</td>
+<td>FS-S2-01 观察春天的花</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g-五步法时间分配参考">G. 五步法时间分配参考</h3>
+<table>
+<thead>
+<tr class="header">
+<th>年龄段</th>
+<th>总时长</th>
+<th>S1 导入</th>
+<th>S2 探究</th>
+<th>S3 操作</th>
+<th>S4 总结</th>
+<th>S5 延伸</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小班 (3-4岁)</td>
+<td>15-20 min</td>
+<td>2-3</td>
+<td>5-8</td>
+<td>3-5</td>
+<td>2-3</td>
+<td>1-2</td>
+</tr>
+<tr class="even">
+<td>中班 (4-5岁)</td>
+<td>20-25 min</td>
+<td>3-4</td>
+<td>8-10</td>
+<td>5-7</td>
+<td>3-4</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>大班 (5-6岁)</td>
+<td>25-30 min</td>
+<td>3-5</td>
+<td>10-12</td>
+<td>5-8</td>
+<td>3-5</td>
+<td>2-3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="h-参考文献">H. 参考文献</h3>
+<ol type="1">
+<li>中华人民共和国教育部.《3-6 岁儿童学习与发展指南》. 2012.</li>
+<li>Helm, J. H., &amp; Katz, L. G. <em>Young Investigators: The Project Approach in the Early Years</em>. Teachers College Press, 2016.</li>
+<li>Partnership for 21st Century Learning. <em>Framework for 21st Century Learning</em>. P21, 2019.</li>
+<li>Chard, S. C. <em>The Project Approach: Making Curriculum Come Alive</em>. Scholastic, 1998.</li>
+<li>华美国际教育集团.《华美 PBL 项目课程实施指南》. 2025.</li>
+</ol>
+</div>
+</body>
+</html>

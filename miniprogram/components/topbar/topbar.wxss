@@ -1,0 +1,6 @@
+.top { display: flex; align-items: center; justify-content: space-between; padding: 20rpx 32rpx; background: #fff; border-bottom: 1rpx solid #d6e0dc; }
+.brand { display: flex; align-items: center; gap: 16rpx; }
+.logo { width: 64rpx; height: 64rpx; border-radius: 18rpx; }
+.name { display: block; font-weight: 900; font-size: 30rpx; }
+.sub { display: block; font-size: 22rpx; color: #5b716b; }
+.who { border: 1rpx solid #d6e0dc; border-radius: 14rpx; padding: 10rpx 20rpx; font-size: 26rpx; max-width: 300rpx; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

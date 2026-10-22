@@ -1,0 +1,13 @@
+{
+  "name": "workshop-kb",
+  "version": "0.2.0",
+  "description": "School-specific knowledge base management — import, index, and query local teaching materials (textbooks, lesson plans, school philosophy, research records)",
+  "author": {
+    "name": "VanLengs",
+    "url": "https://github.com/VanLengs"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["workshop", "knowledge-base", "school", "textbooks", "lesson-plans"],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}
