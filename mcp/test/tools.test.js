@@ -36,7 +36,7 @@ describe('tools', () => {
   })
   test('list_paths / get_path read the local course pack', async () => {
     const l = await byName.list_paths({})
-    expect(l.paths.length).toBe(15); expect(l.total_levels).toBe(100)
+    expect(l.paths.length).toBe(16); expect(l.total_levels).toBe(105)
     const p = await byName.get_path({ path: 'manage' })
     expect(p.levels.length).toBe(6); expect(p.levels[0]).toHaveProperty('title')
     await expect(byName.get_path({ path: 'nope' })).rejects.toMatchObject({ code: 'NOT_FOUND' })

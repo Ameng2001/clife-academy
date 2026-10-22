@@ -20,7 +20,7 @@ export const TOOLS = [
     handler: async () => { const r = await get('/api/policy'); return { version: r.version, rules: r.rules } }
   },
   {
-    name: 'list_paths', description: '课程目录：15 条路径（岗位、领域、阶段、区县管理员）各几关。', schema: {},
+    name: 'list_paths', description: '课程目录：16 条路径（岗位、领域、阶段、区县管理员、用教研工坊做课）各几关。', schema: {},
     handler: async () => ({ paths: PATH_KEYS.map(pathRow), total_levels: PATH_KEYS.reduce((n, p) => n + levelCount(p), 0) })
   },
   {

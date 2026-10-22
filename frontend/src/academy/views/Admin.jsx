@@ -155,7 +155,7 @@ export default function Admin() {
       <Group title="资源与案例" icon="folder">
         <Row to="/resources" title="资源库" sub="文献与政策、模板与工具；内置教育部文件只读" n={o.content.resources} />
         <Row to="/cases?tab=queue" title="专家案例审核" sub="入库、园长同意书、下架；审核人在园所页授" n={`${o.content.casesPending} 待审`} />
-        <Row to="/library" title="课程包" sub="15 条路径 100 关；改关卡走代码仓库" />
+        <Row to="/library" title="课程包" sub="16 条路径 105 关；改关卡走代码仓库" />
         <Row to="/collections" title="合集" sub="按主题攒案例、关卡、讲堂微课、名师讲堂、资源；全平台的由这里建" />
       </Group>
 
