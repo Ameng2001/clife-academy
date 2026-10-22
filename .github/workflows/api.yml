@@ -1,0 +1,70 @@
+# 幼师学坊 api 的 CI。上游 openGym 的 .gitlab-ci.yml 还在仓库里但不跑（我们在 GitHub），这里是实际生效的。
+#
+# 三件事：
+#   academy-tests   学坊自己的接口测试（api/test/academy-*.test.js），红了就是坏了
+#   api-full-suite  上游继承的全套（含 Coach / jobs），有十几个和学坊无关的旧失败，只记录不拦
+#   workshop-checks 起一个带开发桩的 api，把给教研工坊的两个联调脚本跑一遍（docs/WORKSHOP-TODO.md 第五节），
+#                   任何一步 FAIL 就红：工坊接的接口契约在这里守着
+name: api
+
+on:
+  push:
+    branches: [main]
+    paths: ['api/**', 'scripts/**', 'package.json', '.github/workflows/api.yml']
+  pull_request:
+    paths: ['api/**', 'scripts/**', 'package.json', '.github/workflows/api.yml']
+  workflow_dispatch:
+
+jobs:
+  academy-tests:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: api/package-lock.json }
+      - run: npm ci --omit=optional
+      - run: node --test test/academy-*.test.js
+
+  api-full-suite:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    defaults: { run: { working-directory: api } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: api/package-lock.json }
+      - run: npm ci --omit=optional
+      - run: npm test
+
+  workshop-checks:
+    runs-on: ubuntu-latest
+    env:
+      ACADEMY_URL: http://127.0.0.1:3000
+      TOOLS_API_KEY: ci-tools-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: api/package-lock.json }
+      - run: npm ci --omit=optional
+        working-directory: api
+      - name: 起一个带开发桩的 api
+        working-directory: api
+        run: |
+          mkdir -p "$RUNNER_TEMP/data"
+          DATA_DIR="$RUNNER_TEMP/data" PORT=3000 ORIGIN=http://127.0.0.1:3000 DEV_LOGIN=1 FIRST_USER_ADMIN=1 \
+            nohup node server.js > "$RUNNER_TEMP/api.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:3000/api/health > /dev/null && break; sleep 1; done
+          curl -fs http://127.0.0.1:3000/api/health
+          # 第一个登录的是管理员：先让「CI管理员」占住，教师账号才是普通教师，积分脚本的 --admin 也能充园所额度
+          curl -fs -X POST http://127.0.0.1:3000/api/login/dev -H 'Content-Type: application/json' \
+            -d '{"name":"CI管理员","role":"director","org":"本地运营"}' > /dev/null
+      - name: 分享联调（待办第 1–8 条）
+        run: npm run check:share -- --dev CI教师
+      - name: 积分、钱包与改编来源联调（待办第 9、10、12–15 条）
+        run: npm run check:spend -- --dev CI教师 --admin CI管理员
+      - name: 只算价
+        run: npm run price -- pbl 4 --adapted
+      - name: api 日志
+        if: failure()
+        run: tail -n 100 "$RUNNER_TEMP/api.log"

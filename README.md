@@ -15,7 +15,7 @@ frontend/   React 19 + Vite + Zustand 单页应用（PC 网页；小程序另见
 mcp/        只读 MCP 桥：园长、教育局用自己的 LLM 客户端查进度，拿「设置」里建的只读令牌调 GET 接口（见 mcp/README.md）
 web/        nginx：托前端、反代 /api
 docs/       MIGRATION.md 迁移方案；upstream/ 上游原文档
-scripts/    import-lessons.py 从大课堂原型导入课程数据；workshop-spend-check.mjs 教研工坊接积分、钱包页与改编来源的联调脚本、workshop-share-check.mjs 工坊分享到学坊的联调脚本（都给工坊服务端的同学；根目录 `npm run check:share` / `check:spend` / `check:workshop` / `price`，用法见 docs/WORKSHOP-TODO.md 第五节）
+scripts/    import-lessons.py 从大课堂原型导入课程数据；workshop-spend-check.mjs 教研工坊接积分、钱包页与改编来源的联调脚本、workshop-share-check.mjs 工坊分享到学坊的联调脚本（都给工坊服务端的同学；根目录 `npm run check:share` / `check:spend` / `check:workshop` / `price`，用法见 docs/WORKSHOP-TODO.md 第五节；CI 见 .github/workflows/api.yml）
 ```
 
 ## 开发

@@ -48,7 +48,7 @@
 
 ### 两个联调脚本
 
-学坊仓库 `scripts/` 下，Node 18 以上直接跑，不装依赖；根目录 `package.json` 也挂了 `npm run check:share` / `check:spend` / `check:workshop`（两个连跑）/ `price`，参数跟在 `--` 后面。每步打印请求、应答与判定，最后一行 `PASS n/n` 或 `FAIL`，退出码 0 / 1，可以放进工坊的 CI。两个脚本都只动测试账号，交上去的课园长不同意就留在「等园长同意」，不进库。
+学坊仓库 `scripts/` 下，Node 18 以上直接跑，不装依赖；根目录 `package.json` 也挂了 `npm run check:share` / `check:spend` / `check:workshop`（两个连跑）/ `price`，参数跟在 `--` 后面。每步打印请求、应答与判定，最后一行 `PASS n/n` 或 `FAIL`，退出码 0 / 1，可以放进工坊的 CI。两个脚本都只动测试账号，交上去的课园长不同意就留在「等园长同意」，不进库。学坊自己的 CI（`.github/workflows/api.yml` 的 `workshop-checks`）每次改接口都对着开发桩把两个脚本跑一遍，接口契约变了学坊这边先红。
 
 | 脚本 | 验哪几条 | 要什么 |
 |---|---|---|
