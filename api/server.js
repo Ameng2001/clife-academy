@@ -1803,7 +1803,7 @@ const MEDIA = createMediaStore({ dir: path.join(DATA, 'uploads'), limits: MEDIA_
 // 订阅消息发送器：没配模板时 send() 直接答 no-template，提交与点评照常。
 const NOTIFIER = createNotifier({ db, saveDb });
 const PAIRS = createPairs(db);
-// 关卡以外的学分台账（案例入库、作答精选）；勋章按记录算，称号人授。
+// 关卡以外的专业发展事件记录（案例入库、作答精选、路径、证书……）；积分由 points.js 按规则记；勋章按记录算，称号人授。
 const LEDGER = createLedger(db);
 const COMMUNITIES = createCommunities(db);
 const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER, ledger: LEDGER });

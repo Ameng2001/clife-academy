@@ -68,7 +68,7 @@ export default function Home() {
         </div>
       </> : <div className="big" style={{ marginTop: 4 }}>本路径已全部通过 🎉</div>}
       <div className="ac-bar"><i style={{ width: `${sum.total ? sum.done / sum.total * 100 : 0}%` }} /></div>
-      <div className="small muted" style={{ marginTop: 6 }}>{sum.done} / {sum.total} 关 · {credits} 学分</div>
+      <div className="small muted" style={{ marginTop: 6 }}>{sum.done} / {sum.total} 关</div>
       {plan && plan.levels.length > 0 && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={() => nav('/coach')}>本周待学（Coach 学期计划第 {plan.week} 周）：{plan.levels.map(l => (l.passed ? '✓ ' : '') + l.title).join('、')} ›</div>}
     </div>
 
@@ -79,7 +79,7 @@ export default function Home() {
     </form>
 
     <div className="card tap" style={{ marginTop: 10, padding: 12 }} onClick={() => nav('/community')}>
-      <div className="ac-row"><div><div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>教研共同体 · 大家做过的</div><div className="small" style={{ marginTop: 4 }}>专家案例是园里做过的事，课程成果是在教研工坊做出来、班里用过的课。实名分享，入库记学分；学分换的积分又能在工坊里用。</div></div><Icon name="chevronRight" /></div>
+      <div className="ac-row"><div><div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>教研共同体 · 大家做过的</div><div className="small" style={{ marginTop: 4 }}>专家案例是园里做过的事，课程成果是在教研工坊做出来、班里用过的课。实名分享，入库记积分，积分又能在工坊里用。</div></div><Icon name="chevronRight" /></div>
     </div>
 
     <div className="tiles">

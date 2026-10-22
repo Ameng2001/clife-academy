@@ -7,6 +7,7 @@
  * 谁能办：管理员（全平台或指定本园）、园长（本园）。谁能看：范围内的人；帖子只有营员看（营内互看）。 */
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
+import { LEARN } from './honors.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const DAY = 86400000;
@@ -115,6 +116,7 @@ export function campRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     if (summary.length < 20) return json(res, 400, { error: 'write the closing review (at least 20 characters)', code: 'summary' });
     c.summary = summary; c.closedAt = now();
     c.graduates = c.members.filter(m => c.posts.some(p => p.uid === m.uid)).map(m => m.uid);
+    if (ledger?.grant) for (const uid of c.graduates) ledger.grant(uid, 'camp', c.id, LEARN.camp, `练习营「${c.title.slice(0, 20)}」结营`);
     saveDb();
     audit(req, 'camp.close', { user, msg: `${c.id} ${c.graduates.length}` });
     json(res, 200, { camp: pub(c, user) });

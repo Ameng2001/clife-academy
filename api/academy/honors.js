@@ -1,7 +1,9 @@
-/* 学分台账、勋章与荣誉称号（docs/ROADMAP.md 第七节「荣誉与勋章」「分享激励」）。
+/* 专业发展事件记录、勋章与荣誉称号（docs/ROADMAP.md 第七节「荣誉与勋章」「分享激励」）。
  *
- * 学分：关卡学分在客户端状态里（progress → credits），这里只记关卡以外的：案例入库 +2、研讨作答被精选 +2。
- *   db.credits: { uid, kind:'case'|'drill', ref, n, note, at }，同一 (kind, ref) 只记一次。
+ * 事件记录（db.credits，名字是历史遗留，平台只有积分一种资产）：关卡以外的专业发展事件，一条一次：案例 / 课程成果 / 赛作品入库、
+ *   研讨作答被精选、走完一条路径、取得证书、实践关作品通过点评、练习营结营。积分由 points.js 包住 grant 按规则记，这里不管数。
+ *   路径与证书没有服务端事件（进度在客户端状态里），由 ledger.learn(uid, stateOf) 按记录补记，读积分 / 荣誉时调。
+ *   db.credits: { uid, kind:'case'|'work'|'drill'|'contest'|'path'|'cert'|'practice'|'camp', ref, n, note, at }，同一 (kind, ref) 只记一次。
  * 勋章：不存，按记录算（条件公开，见 BADGES）。成长勋章看路径完成；贡献勋章看案例、精选、点评次数、带教。
  *   不按在线时长、登录天数发任何东西；不做勋章墙排行。
  * 荣誉称号：人授。db.titles: { id, uid, name, org, title, label, reason, by, byName, at }
@@ -15,7 +17,7 @@ import { earnedOf, KIND_LABEL } from './certificates.js';
 export const TITLES = Object.freeze({ seed: '种子教师', sharer: '年度分享者', contest: '同课异构入选', studio: '名师工作室成员', custom: '' });
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 
-/** 关卡以外的学分台账。 */
+/** 关卡以外的专业发展事件记录（n 只是历史字段，积分数在 points.js 的规则里）。 */
 export function createLedger(db) {
   db.credits = db.credits || [];
   return {
@@ -24,11 +26,24 @@ export function createLedger(db) {
       db.credits.push({ uid, kind, ref, n, note: str(note, 120), at: Date.now() }); return true;
     },
     of: uid => db.credits.filter(c => c.uid === uid).sort((a, b) => b.at - a.at),
-    total: uid => db.credits.filter(c => c.uid === uid).reduce((s, c) => s + c.n, 0)
+    total: uid => db.credits.filter(c => c.uid === uid).reduce((s, c) => s + c.n, 0),
+    // 学侧按记录补记：走完的路径 +5、拿到的证书 +10（骨干也算）。答记了几条。
+    learn(uid, stateOf) {
+      if (typeof stateOf !== 'function') return 0;
+      const S = stateOf(uid) || {}, prog = S.progress && typeof S.progress === 'object' ? S.progress : {};
+      let n = 0;
+      for (const path of Object.keys(PATH_LEN)) {
+        const len = PATH_LEN[path]; let d = 0; while (d < len && prog[`${path}-${d}`]?.passedAt) d++;
+        if (len > 0 && d >= len && this.grant(uid, 'path', path, LEARN.path, `走完「${PATH_NAMES[path] || path}」路径`)) n++;
+      }
+      for (const x of earnedOf(uid, { db, stateOf }).earned) if (this.grant(uid, 'cert', `${x.kind}:${x.ref}`, LEARN.cert, `取得 ${x.label}`)) n++;
+      return n;
+    }
   };
 }
 
 const THRESHOLDS = { cases: [1, 5, 20], featured: [1, 5], reviews: [20], answers: [10] };
+export const LEARN = Object.freeze({ path: 1, cert: 1, practice: 1, camp: 1 });   // 记录条数，不是积分；积分看 points.js EARN
 export const HELPFUL_MIN = 5;
 /** 一个人的勋章。stateOf(uid) 给客户端状态（progress）。 */
 export function badgesOf(uid, { db, stateOf, pairs }) {
@@ -101,10 +116,11 @@ export function honorRoutes({ json, readBody, db, saveDb, readSession, audit, is
     if (!org) return json(res, 400, { error: 'your account has no kindergarten', code: 'org' });
     json(res, 200, { orgName: user.academy?.org?.name || null, badges: orgBadgesOf(org, { db, stateOf: readStateCached, isAdmin, orgKeyOf }) });
   },
-  // 本人：勋章、称号、关卡以外的学分
+  // 本人：勋章、称号、关卡以外的事件记录
   'GET /api/me/honors': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
+    if (ledger.learn(user.id, readStateCached)) saveDb();
     json(res, 200, { badges: badgesOf(user.id, { db, stateOf: readStateCached, pairs }), titles: db.titles.filter(t => t.uid === user.id).sort((a, b) => b.at - a.at).map(pubTitle), credits: ledger.of(user.id), creditsTotal: ledger.total(user.id), titleNames: TITLES });
   },
   // 园长看本园授过的称号；管理员看全部

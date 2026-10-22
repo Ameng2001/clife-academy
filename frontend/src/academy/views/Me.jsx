@@ -18,13 +18,13 @@ export default function Me() {
   const recs = Object.entries(S.progress || {}).sort((a, b) => b[1].passedAt - a[1].passedAt)
   const subs = useSubmissions(s => s.all)
   useEffect(() => { if (user) useSubmissions.getState().loadAll() }, [user?.id])
-  const [honors, setHonors] = useState(null)
-  useEffect(() => { if (user) api('/api/me/honors').then(setHonors).catch(() => setHonors(null)); else setHonors(null) }, [user?.id])
+  const [honors, setHonors] = useState(null), [points, setPoints] = useState(null)
+  useEffect(() => { if (user) { api('/api/me/honors').then(setHonors).catch(() => setHonors(null)); api('/api/me/points').then(setPoints).catch(() => setPoints(null)) } else { setHonors(null); setPoints(null) } }, [user?.id])
   const cap = useMemo(() => capabilityMap(S.progress, subs || []), [S.progress, subs])
   return <div className="narrow">
     <div className="hdr"><div><h1>我的</h1><div className="sub">{user ? user.name : '演示账号'} · {sum.name}</div></div><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     <div className="tiles">
-      <div className="tile tappable" onClick={() => nav('/honors')}><div className="l">学分</div><div className="v">{credits + (honors?.creditsTotal || 0)}</div>{honors && <div className="small muted">{honors.titles.length ? honors.titles.map(t => t.label).join('、') + ' · ' : ''}勋章 {honors.badges.filter(b => b.on).length} · 兑积分</div>}</div>
+      <div className="tile tappable" onClick={() => nav('/honors')}><div className="l">积分</div><div className="v">{points ? points.points : '—'}</div>{honors && <div className="small muted">{honors.titles.length ? honors.titles.map(t => t.label).join('、') + ' · ' : ''}勋章 {honors.badges.filter(b => b.on).length} · 荣誉</div>}</div>
       <div className="tile"><div className="l">本岗位已通过</div><div className="v">{sum.done}<span className="small muted"> / {sum.total}</span></div></div>
       <div className="tile"><div className="l">岗位徽章</div><div className="v">{badges.filter(b => b.finished).length}</div></div>
       <div className="tile"><div className="l">初级岗位认证</div><div className="v" style={{ fontSize: 18 }}>{sum.finished ? '可报名' : '未达到'}</div></div>

@@ -88,7 +88,7 @@ export default function Works() {
     const note = (notes[w.id] || '').trim()
     if (action === 'reject' && !note) return toast('退回要写原因')
     setBusy(true)
-    try { await api('/api/works/decide', { method: 'POST', body: JSON.stringify({ id: w.id, action, note }) }); toast(action === 'consent' ? '已同意，转审核' : action === 'approve' ? '已入库，分享者 +3 学分' : '已退回'); await load() }
+    try { await api('/api/works/decide', { method: 'POST', body: JSON.stringify({ id: w.id, action, note }) }); toast(action === 'consent' ? '已同意，转审核' : action === 'approve' ? '已入库，分享者记积分' : '已退回'); await load() }
     catch (e) { toast('没办成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
   }
@@ -108,7 +108,7 @@ export default function Works() {
     </div>}
 
     {form && <div className="card" style={{ marginBottom: 14 }}>
-      <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改这门' : '分享一门课'} · 在教研工坊里点「分享到幼师学坊」会自动填好；手填也行。不出现幼儿姓名与正脸；交了以后园长同意、审核人入库，入库 +3 学分</div>
+      <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改这门' : '分享一门课'} · 在教研工坊里点「分享到幼师学坊」会自动填好；手填也行。不出现幼儿姓名与正脸；交了以后园长同意、审核人入库，入库记积分</div>
       <TextField placeholder="课程名，如「运动：下肢力量锻炼」" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
       <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
         <select className="ac-sel" value={form.pipeline} onChange={e => setForm({ ...form, pipeline: e.target.value })} style={{ flex: 2, minWidth: 140 }}>{PIPES.map(([k, t]) => <option key={k} value={k}>{t}</option>)}</select>
@@ -146,7 +146,7 @@ export default function Works() {
         <span style={{ width: 8 }} />
         {AGES.map(a => <button key={a} className={'chip' + (a === age ? ' on' : '')} onClick={() => setParam('age', a === age ? null : a)}>{a}</button>)}
       </div>
-      {data && !data.works.length && <div className="card small muted">还没有入库的课程成果。{data.total ? '换个筛选试试。' : '在教研工坊做过、班里用过的课，点右上角「分享一门课」交上来；入库 +3 学分，别人用了你看得到。'}</div>}
+      {data && !data.works.length && <div className="card small muted">还没有入库的课程成果。{data.total ? '换个筛选试试。' : '在教研工坊做过、班里用过的课，点右上角「分享一门课」交上来；入库记积分，别人用了你看得到。'}</div>}
       <div className="grid2">{data?.works.map(w => card(w))}</div>
     </>}
 

@@ -82,4 +82,7 @@ test('honors: badges are computed from progress and records; the ledger records 
   assert.equal(badgesOf('m', { db, stateOf, pairs }).find(x => x.key === 'path-nurse').at, 1015);
   const L = createLedger(db);
   assert.equal(L.grant('u', 'case', 'c1', 2, 'x'), true); assert.equal(L.grant('u', 'case', 'c1', 2, 'x'), false); assert.equal(L.total('u'), 2);
+  // learn：走完的路径与拿到的证书各记一条，再调不重复
+  assert.equal(L.learn('m', stateOf), 2); assert.equal(L.learn('m', stateOf), 0);
+  assert.deepEqual(L.of('m').map(c => c.kind).sort(), ['cert', 'path']); assert.equal(L.learn('u', stateOf), 0);
 });

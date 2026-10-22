@@ -8,7 +8,7 @@
  *   changes 教师在 AI 起草稿上改了什么（至少一条）：这是成果的「人」的部分，没有就不收。工坊起草不算成果，用过并改过才算。
  *   files   外链（工坊的 docx 下载地址或园所网盘），不上传文件；最多 20 条，只收 https。
  * db.workUses: { workId, uid, name, orgName, note, at } 「用过，有效」，数只给分享者本人、本园园长与管理员看，不排行。
- * 入库给分享者 +3 学分（比案例多 1：一门课比一件事重）。教研工坊按 docs/WORKSHOP-SHARE.md 用投稿令牌直接投（POST /api/works）。
+ * 入库记一次分享者的事件，积分按 points.js 规则到账（课程成果默认比案例多：一门课比一件事重）。教研工坊按 docs/WORKSHOP-SHARE.md 用投稿令牌直接投（POST /api/works）。
  * 实名、全平台可见；不出现幼儿姓名与正脸；不显示人数、不排名。 */
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';

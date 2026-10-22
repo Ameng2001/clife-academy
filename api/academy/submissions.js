@@ -11,6 +11,7 @@
  * 素材规则：不出现幼儿姓名与正脸，前端提示，审核在点评里把关。 */
 import crypto from 'node:crypto';
 import { LEVEL_TYPES, LEVELS, RUBRICS } from './events-data.js';
+import { LEARN } from './honors.js';
 import { orgKeyOf } from './org.js';
 import { fmtTime } from './notify.js';
 
@@ -111,6 +112,8 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     s.status = verdict;
     s.review = { by: user.id, byName: user.name, at: Date.now(), scores, comment };
     saveDb();
+    // 学侧：实践关作品通过点评记一次事件（关卡本身过关另记），同一关只记一次；积分按 points.js 规则
+    if (verdict === 'pass' && ledger?.grant) ledger.grant(s.uid, 'practice', s.levelId, LEARN.practice, `「${LEVELS[s.levelId] || s.levelId}」的作品通过点评`);
     // 互动给分：点评人，一份提交只记一次
     if (firstReview && ledger?.interact && s.uid !== user.id) ledger.interact(user.id, 'review', `submission:${s.id}`, `点评了「${LEVELS[s.levelId] || s.levelId}」的一份作品`);
     audit(req, 'submission.review', { user, msg: `${s.levelId} ${verdict}` });

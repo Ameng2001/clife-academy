@@ -13,34 +13,32 @@ import { useBrand } from '../brand.js'
 const fmtWhen = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getMonth() + 1}-${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}` }
 const toLocal = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` }
 
-// 积分比例：学分到账时按它记积分；改了只影响之后到账的。钱包页与教研工坊统一，这里只管比例。
+// 积分规则：每类事件记多少积分；改了只影响之后的。钱包页与教研工坊统一，这里只管规则。
 function PointsRules() {
   const toast = useUI.getState().toast
-  const [r, setR] = useState(null), [defs, setDefs] = useState({}), [rate, setRate] = useState(''), [inter, setInter] = useState({}), [busy, setBusy] = useState(false)
-  const load = () => api('/api/admin/points/rules').then(x => { setR(x.rules); setDefs(x.interactDefaults || {}); setRate(String(x.rules.rate)); setInter(Object.fromEntries(Object.entries(x.rules.interact || {}).map(([k, v]) => [k, String(v)]))) }).catch(() => setR(null))
+  const [r, setR] = useState(null), [defs, setDefs] = useState({ earn: {}, interact: {} }), [earn, setEarn] = useState({}), [inter, setInter] = useState({}), [busy, setBusy] = useState(false)
+  const toStr = o => Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, String(v)]))
+  const load = () => api('/api/admin/points/rules').then(x => { setR(x.rules); setDefs({ earn: x.earnDefaults || {}, interact: x.interactDefaults || {} }); setEarn(toStr(x.rules.earn)); setInter(toStr(x.rules.interact)) }).catch(() => setR(null))
   useEffect(() => { load() }, [])
-  const dirty = r && (String(r.rate) !== rate || Object.keys(inter).some(k => String(r.interact?.[k]) !== inter[k]))
+  const dirty = r && (Object.keys(earn).some(k => String(r.earn?.[k]) !== earn[k]) || Object.keys(inter).some(k => String(r.interact?.[k]) !== inter[k]))
   const save = async () => {
-    const n = Math.floor(Number(rate)); if (!(n >= 1 && n <= 100)) return toast('比例填 1 到 100 的整数')
-    const interact = {}
-    for (const [k, v] of Object.entries(inter)) { const m = Math.floor(Number(v)); if (!(m >= 0 && m <= 100)) return toast('互动给分填 0 到 100 的整数，0 是不给'); interact[k] = m }
+    const e = {}, it = {}
+    for (const [k, v] of Object.entries(earn)) { const m = Math.floor(Number(v)); if (!(m >= 0 && m <= 1000)) return toast('学与贡献填 0 到 1000 的整数，0 是不给'); e[k] = m }
+    for (const [k, v] of Object.entries(inter)) { const m = Math.floor(Number(v)); if (!(m >= 0 && m <= 100)) return toast('互动填 0 到 100 的整数，0 是不给'); it[k] = m }
     if (!confirm('改积分规则？已记的积分不重算，只影响之后的。')) return
     setBusy(true)
-    try { await api('/api/admin/points/rules', { method: 'POST', body: JSON.stringify({ rate: n, interact }) }); toast('已改'); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+    try { await api('/api/admin/points/rules', { method: 'POST', body: JSON.stringify({ earn: e, interact: it }) }); toast('已改'); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   if (!r) return <div className="small muted" style={{ padding: '4px 0' }}>没取到积分规则。</div>
-  const cap = k => { const d = defs[k] || {}; return [d.perAboutDay ? `同一作品每天 ${d.perAboutDay} 次` : '', d.day ? `每天 ${d.day} 次` : '', d.month ? `每月 ${d.month} 次` : ''].filter(Boolean).join(' · ') }
+  const cap = k => { const d = defs.interact[k] || {}; return [d.perAboutDay ? `同一作品每天 ${d.perAboutDay} 次` : '', d.day ? `每天 ${d.day} 次` : '', d.month ? `每月 ${d.month} 次` : ''].filter(Boolean).join(' · ') }
+  const row = (k, name, sub, val, set, max) => <div key={k} className="ac-row small" style={{ marginTop: 6, gap: 8 }}><span style={{ flex: 1, minWidth: 0 }}>{name}{sub ? <span className="muted"> · {sub}</span> : null}</span><TextField type="number" min="0" max={max} value={val} onChange={e => set(e.target.value)} style={{ width: 80 }} /></div>
   return <div style={{ padding: '4px 0' }}>
-    <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-      <span className="small" style={{ fontWeight: 600 }}>学分到账</span><span className="small">1 学分 =</span><TextField type="number" min="1" max="100" value={rate} onChange={e => setRate(e.target.value)} style={{ width: 80 }} /><span className="small">积分</span>
-    </div>
-    <div className="small" style={{ fontWeight: 600, marginTop: 10 }}>互动给分（只记积分，不记学分；0 是不给）</div>
-    {Object.keys(inter).map(k => <div key={k} className="ac-row small" style={{ marginTop: 6, gap: 8 }}>
-      <span style={{ flex: 1, minWidth: 0 }}>{defs[k]?.name || k}{cap(k) ? <span className="muted"> · {cap(k)}</span> : null}</span>
-      <TextField type="number" min="0" max="100" value={inter[k]} onChange={e => setInter({ ...inter, [k]: e.target.value })} style={{ width: 72 }} />
-    </div>)}
+    <div className="small" style={{ fontWeight: 600 }}>学与贡献（每次记多少积分；0 是不给）</div>
+    {Object.keys(earn).map(k => row(k, defs.earn[k]?.name || k, '', earn[k], v => setEarn({ ...earn, [k]: v }), 1000))}
+    <div className="small" style={{ fontWeight: 600, marginTop: 10 }}>互动（有日 / 月上限）</div>
+    {Object.keys(inter).map(k => row(k, defs.interact[k]?.name || k, cap(k), inter[k], v => setInter({ ...inter, [k]: v }), 100))}
     <div className="ac-row" style={{ marginTop: 10 }}>
-      <span className="small muted">{r.byName ? `${r.byName} 改于 ${fmtDay(r.at)}` : `没改过，比例用的是部署默认 ${r.envRate}`}。改了只影响之后的，已记的不重算。钱包页与教研工坊统一，学坊不单独做。</span>
+      <span className="small muted">{r.byName ? `${r.byName} 改于 ${fmtDay(r.at)}` : '没改过，用的是默认'}。改了只影响之后的，已记的不重算。积分是唯一的资产；钱包页与教研工坊统一，学坊不单独做。</span>
       <Button size="sm" variant="primary" disabled={busy || !dirty} onClick={save}>改</Button>
     </div>
   </div>

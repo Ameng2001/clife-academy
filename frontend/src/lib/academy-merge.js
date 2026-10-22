@@ -36,7 +36,7 @@ export function mergeSessions(a, b) {
   return [...seen.values()].sort((x, y) => (Number(x.end) || 0) - (Number(y.end) || 0) || String(x.levelId).localeCompare(String(y.levelId)))
 }
 
-/** 学分从进度推：每关记在它自己 entry 的 credits 上（缺省 1），按路径键（id 的前半）累加。 */
+/** 过关数从进度推（字段名 credits 是历史遗留，每关 1）：按路径键（id 的前半）累加；积分由服务端按它对账。 */
 export function creditsOf(progress) {
   const out = {}
   for (const [id, e] of Object.entries(isMap(progress) ? progress : {})) {

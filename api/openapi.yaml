@@ -764,7 +764,7 @@ paths:
     get:
       tags: [academy]
       operationId: academyMyHonors
-      summary: 本人的勋章、荣誉称号与关卡以外的学分
+      summary: 本人的勋章、荣誉称号与关卡以外的事件记录
       description: 勋章按记录算（路径完成、案例被采纳 1/5/20、精选 1/5、点评 20 次、带出一个人），不存；称号由园长或管理员授；学分台账记案例入库 +2、作答精选 +2。
       responses:
         '200': { description: '`{ badges, titles, credits, creditsTotal, titleNames }`' }
@@ -772,31 +772,22 @@ paths:
     get:
       tags: [academy]
       operationId: academyMyPoints
-      summary: 本人的学分与积分
-      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, auto, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。学分到账时自动按 rate 记积分（台账即时、关卡学分读余额时对账补记），所以 creditsAvailable 总是 0。互动类只记积分（history 里 kind interact，sub used / usedBy / adopted / review / campPost）：作品被标「用过，有效」+5（同一作品每天 1 次、每月 20 次）、标别人并写了一句 +2（每天 3 次）、答疑被采纳 +5、点评别人的作品 +3（每天 5 次）、营帖 +1；同一 (sub, ref) 只记一次；不奖签到、时长、浏览、点赞。'
+      summary: 本人的积分（平台唯一的资产）
+      description: '`{ points, levelsPassed, rules: { earn, interact }, tools, history }`。学（过关、走完路径、证书、实践关作品通过点评、结营）、贡献（案例 / 课程成果 / 赛作品入库、作答精选）、互动（被标用过有效、标别人并写一句、答疑采纳、点评、营帖）都自动记；过关在客户端进度里，读余额时对账补记。history 的 kind earn / interact / spend，sub 是事件名。不奖签到、时长、浏览、点赞。只本人可见、不排行、不可转赠。钱包页与教研工坊统一，学坊不单独做。'
       responses:
         '200': { description: 余额与流水 }
-  /api/me/points/exchange:
-    post:
-      tags: [academy]
-      operationId: academyPointsExchange
-      summary: 学分兑积分（过渡期保留；自动到账后可兑的总是 0）
-      description: '`{ credits }`。按 `db.pointsRules.rate`（管理员可改，默认 `POINTS_PER_CREDIT` 或 10）兑。'
-      responses:
-        '200': { description: 兑换后的余额 }
-        '400': { description: 不是正整数，或超过可兑的 }
   /api/admin/points/rules:
     get:
       tags: [admin]
       operationId: adminPointsRules
       summary: 积分比例（管理员）
       responses:
-        '200': { description: '`{ rules: { rate, envRate, interact: { used, usedBy, adopted, review, campPost }, at, byName }, interactDefaults, tools }`' }
+        '200': { description: '`{ rules: { earn: { level, path, cert, practice, camp, case, work, drill, contest }, interact: { used, usedBy, adopted, review, campPost }, at, byName }, earnDefaults, interactDefaults, tools }`' }
     post:
       tags: [admin]
       operationId: adminSetPointsRules
       summary: 改积分规则，只影响之后的
-      description: '`{ rate?, interact?: { used?, usedBy?, adopted?, review?, campPost? } }`。rate 1–100；互动给分 0–100，0 是不给。已记的积分不重算。'
+      description: '`{ earn?: {…}, interact?: {…} }`。学与贡献 0–1000、互动 0–100，0 是不给。已记的积分不重算。'
       responses:
         '200': { description: '`{ rules }`' }
         '400': { description: rate 不是 1–100 的整数 }
@@ -1339,7 +1330,7 @@ paths:
       tags: [academy]
       operationId: academyContestClose
       summary: 收官：全部作品进案例库（主持人）
-      description: '`{ id, summary? }`。入选的标「同课异构 · 月 · 年龄班」，其余标「参赛作品」；每份 +2 学分。'
+      description: '`{ id, summary? }`。入选的标「同课异构 · 月 · 年龄班」，其余标「参赛作品」；每份记积分（规则表 contest）。'
       responses:
         '200': { description: '`{ contest }`' }
   /api/contests/file:
@@ -4499,7 +4490,7 @@ paths:
       tags: [academy]
       operationId: academyDecideWork
       summary: 园长同意 / 审核人入库或退回
-      description: '`{ id, action: consent | approve | reject, note? }`。入库给分享者 +3 学分。'
+      description: '`{ id, action: consent | approve | reject, note? }`。入库给分享者记积分（规则表 work，默认 30）。'
       responses:
         '200': { description: '`{ work }`' }
         '403': { description: 不是本园园长 / 不是审核人 }

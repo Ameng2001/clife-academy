@@ -61,7 +61,7 @@ export default function Level() {
     if (!r.passed) { useUI.getState().toast(r.why === 'quiz' ? '测验还没全对，改一改再提交。' : r.why === 'zuo' ? '「做」这一步还没完成。' : '这一关现在不能结算。'); return }
     update(s => { s.progress = r.S.progress; s.sessions = r.S.sessions; s.credits = r.S.credits })
     drafts.clear(id)
-    useUI.getState().toast(`第 ${lv.i + 1} 关通过，+1 学分`)
+    useUI.getState().toast(`第 ${lv.i + 1} 关通过，积分已记`)
     nav('/paths/' + lv.path, { replace: true })
   }
 

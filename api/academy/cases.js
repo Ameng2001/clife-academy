@@ -4,7 +4,7 @@
  * adaptedFrom: { caseId, note } 改编来源链（ROADMAP 第十三节第 3 条）：改自哪条入库案例、改了什么。原作者与改编者都署名；改编案例入库时给原案例记一次「用过，有效」（改编者不是原作者时）。
  *   链可以多级（改自改编的），对外给 chain（往上最多 5 级）与 adaptations（改自这条的已入库案例）。
  * db.caseUses: { caseId, uid, name, orgName, note, at }  「用过，有效」：别的教师用了这份案例标一次、留一句怎么改的；数只给分享者本人、本园园长与管理员看，不排行。
- * 入库给分享者 +2 学分（honors.js 台账，一条案例只记一次）。
+ * 入库记一次分享者的事件（honors.js，一条案例只记一次），积分按 points.js 规则到账。
  *             by, byName, org, orgName, status, note, at, consent:{by,byName,at}|null, curated:{by,byName,at}|null }
  *   status  'consent'  待本园园长同意（教师自荐）
  *           'pending'  待审核（园长同意或园长直接推荐）

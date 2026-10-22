@@ -20,7 +20,7 @@ export default function Landing({ relogin }) {
       <div className="landing-hero">
         <div className="small" style={{ color: 'var(--acc)', fontWeight: 600 }}>幼儿园教师专业发展 · 本地研修平台</div>
         <h1>按岗位走关，在平台上做一次就算一次</h1>
-        <p>{PATH_KEYS.length} 条路径 {total} 关，保健医、班级教师、保育员、园长各走各的线，七个专业领域都有。学到的在园里做了，平台记一次，学分可以换工具额度，也计入继续教育学时。</p>
+        <p>{PATH_KEYS.length} 条路径 {total} 关，保健医、班级教师、保育员、园长各走各的线，七个专业领域都有。学到的在园里做了，平台记一次；记下的积分可以换教研工坊的使用额度和教学物料，学习时长计入继续教育学时。</p>
         <div className="landing-points">
           <div><Icon name="play" /><b>讲、看、做</b><span>每关先讲清楚，再看一段演示，最后在园里做一次或交一份作品</span></div>
           <div><Icon name="sparkles" /><b>{rule('work-not-person')?.title || '评作品不评人'}</b><span>{rule('no-ranking')?.text || '作品由点评人、带教教师看，不排名、不公开分数，案例实名共享'}</span></div>

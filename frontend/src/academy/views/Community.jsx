@@ -104,7 +104,7 @@ export default function Community() {
             <div className="tile tappable" onClick={() => nav('/collections')}><div className="l"><Icon name="grid" />建一份合集</div><div className="small muted" style={{ marginTop: 4 }}>按主题攒案例、关卡、讲堂微课</div></div>
             <div className="tile tappable" onClick={() => nav('/sharedays')}><div className="l"><Icon name="share" />交一页分享日</div><div className="small muted" style={{ marginTop: 4 }}>每学期一次，各园一页，不评比</div></div>
           </div>
-          <div className="small muted" style={{ marginTop: 8 }}>在教研工坊里点「分享到幼师学坊」可以直接投过来：到「设置 → 接口令牌」建一枚投稿令牌。学分换的积分又能在工坊里用。{community ? ' 本共同体：' + community.name + '。' : ''}</div>
+          <div className="small muted" style={{ marginTop: 8 }}>在教研工坊里点「分享到幼师学坊」可以直接投过来：到「设置 → 接口令牌」建一枚投稿令牌。入库记的积分又能在工坊里用。{community ? ' 本共同体：' + community.name + '。' : ''}</div>
         </div>
       </div>
 
