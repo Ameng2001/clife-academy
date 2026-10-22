@@ -137,6 +137,7 @@ test('adapt chain: adapt only from an approved work that allows it; the adaptati
   assert.equal(orig.adaptations.length, 1); assert.equal(orig.adaptations[0].byName, '李老师'); assert.deepEqual(orig.adaptations[0].changes, ['跨跳垫换成跳绳，中班跳得动']);
   assert.equal(orig.uses.length, 1); assert.ok(orig.uses[0].note.includes('改编为'));
   assert.equal(adap.chain.length, 1); assert.equal(adap.chain[0].id, a);
+  assert.equal(orig.source.courseId, '1522', 'workshop course id is exposed so the client can build the ?from= jump');
   r = await call('GET', '/api/me/points', null, wang.auth);
   assert.ok(r.json.history.some(h => h.sub === 'adapted'), 'original author got adapted points'); assert.ok(r.json.points > wangBefore);
   // 自己改自己的：没有 use、没有 adapted

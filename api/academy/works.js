@@ -55,7 +55,7 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
   const pub = (w, user) => ({
     id: w.id, title: w.title, pipeline: w.pipeline, pipelineName: PIPELINES[w.pipeline], age: w.age, weeks: w.weeks, domains: w.domains, domainNames: w.domains.map(d => FIVE[d]),
     summary: w.summary, changes: w.changes, files: seesFiles(user, w) ? w.files : [], filesScope: scopeOf(w), filesScopeName: FILES_SCOPES[scopeOf(w)], filesHidden: !seesFiles(user, w) && w.files.length > 0,
-    message: w.message || null, allowAdapt: w.allowAdapt !== false, source: { kind: w.source.kind, url: w.source.url || null, via: w.source.via || null },
+    message: w.message || null, allowAdapt: w.allowAdapt !== false, source: { kind: w.source.kind, courseId: w.source.courseId || null, url: w.source.url || null, via: w.source.via || null },
     byName: w.byName, orgName: w.orgName, status: w.status, note: w.note || null, at: w.at,
     consent: w.consent ? { byName: w.consent.byName, at: w.consent.at } : null, curated: w.curated ? { byName: w.curated.byName, at: w.curated.at } : null,
     mine: !!user && w.by === user.id, byTitles: titlesOf(db, w.by).map(t => t.label),

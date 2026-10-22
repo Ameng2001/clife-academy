@@ -17,7 +17,7 @@ const AGES = ['小班', '中班', '大班', '混龄']
 const SCOPES = [['all', '全平台'], ['community', '本共同体'], ['org', '本园']]
 const EMPTY = { id: null, title: '', pipeline: 'theme', age: '', weeks: '', domains: [], summary: '', changes: [''], files: [], source: { courseId: '', url: '' }, message: '', allowAdapt: true, filesScope: 'all', adaptedFrom: null }
 
-function WorkCard({ w, open, onOpen, actions, onUsed, onAdapt, nav }) {
+function WorkCard({ w, open, onOpen, actions, onUsed, onAdapt, onAdaptHere, nav }) {
   const [note, setNote] = useState('')
   const [t, col] = STATUS[w.status] || [w.status, 'var(--label-2)']
   return <div className={'card' + (open ? ' open' : '')} style={{ marginTop: 10, ...(w.status === 'draft' ? { background: 'var(--surface-2)', borderStyle: 'dashed' } : {}) }}>
@@ -47,7 +47,7 @@ function WorkCard({ w, open, onOpen, actions, onUsed, onAdapt, nav }) {
       </div>}
       {w.adaptedFrom && <div className="small" style={{ marginTop: 8, color: 'var(--label-2)' }}><Icon name="link" /> 改自 {w.adaptedFrom.byName}{w.adaptedFrom.orgName ? '（' + w.adaptedFrom.orgName + '）' : ''}的{w.adaptedFrom.available && nav ? <span className="tap" style={{ textDecoration: 'underline' }} onClick={e => { e.stopPropagation(); nav('/works?q=' + encodeURIComponent(w.adaptedFrom.title)) }}>《{w.adaptedFrom.title}》</span> : `《${w.adaptedFrom.title}》`}{w.chain?.length > 1 && <span className="muted">，再往上：{w.chain.slice(1).map(x => `${x.byName}《${x.title}》`).join(' ← ')}</span>}</div>}
       {w.adaptations?.length > 0 && <div className="small" style={{ marginTop: 6, color: 'var(--label-2)' }}><Icon name="sparkles" /> 被改编：{w.adaptations.map((x, i) => <span key={x.id}>{i ? '；' : ''}{x.byName}{x.orgName ? '（' + x.orgName + '）' : ''}{nav ? <span className="tap" style={{ textDecoration: 'underline' }} onClick={e => { e.stopPropagation(); nav('/works?q=' + encodeURIComponent(x.title)) }}>《{x.title}》</span> : `《${x.title}》`}{x.changes?.length ? '，改了：' + x.changes[0] : ''}</span>)}</div>}
-      {w.canAdapt && onAdapt && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={e => { e.stopPropagation(); onAdapt(w) }}><Icon name="pencil" /> 改编这门课：按我们班的情况改一版，原作者与你都署名 ›</div>}
+      {w.canAdapt && onAdapt && <div className="small" style={{ marginTop: 8 }}><span className="tap" style={{ color: 'var(--acc)' }} onClick={e => { e.stopPropagation(); onAdapt(w) }}><Icon name="pencil" /> {onAdaptHere ? '改编这门课：到教研工坊照它开一门新课，用过再分享回来 ›' : '改编这门课：按我们班的情况改一版，原作者与你都署名 ›'}</span>{onAdaptHere && <span className="tap muted" style={{ marginInlineStart: 10 }} onClick={e => { e.stopPropagation(); onAdaptHere(w) }}>不用工坊，在这里手填</span>}</div>}
       {actions && <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap' }}>{actions}</div>}
     </div>}
   </div>
@@ -55,7 +55,7 @@ function WorkCard({ w, open, onOpen, actions, onUsed, onAdapt, nav }) {
 
 export default function Works() {
   const nav = useNavigate()
-  const user = useStore(s => s.user)
+  const user = useStore(s => s.user), config = useStore(s => s.config)
   const [sp, setSp] = useSearchParams()
   const tab = sp.get('tab') || 'all'
   const [q, setQ] = useState(sp.get('q') || '')
@@ -102,9 +102,12 @@ export default function Works() {
   const del = async w => { if (!confirm(`删掉「${w.title}」？`)) return; try { await api('/api/works/delete', { method: 'POST', body: JSON.stringify({ id: w.id }) }); await load() } catch (e) { toast('没删成') } }
   const edit = w => setForm({ id: w.id, draft: w.status === 'draft', title: w.title, pipeline: w.pipeline, age: w.age || '', weeks: w.weeks || '', domains: w.domains, summary: w.summary, changes: w.changes.length ? w.changes : [''], files: w.files, source: { courseId: '', url: w.source.url || '' }, message: w.message || '', allowAdapt: w.allowAdapt !== false, filesScope: w.filesScope || 'all', adaptedFrom: w.adaptedFrom ? { id: w.adaptedFrom.id, title: w.adaptedFrom.title, byName: w.adaptedFrom.byName } : null })
   // 改编：预填管线、年龄班、周数、领域与简介当底稿，标题前加「改编：」，文件与工坊地址不带（是自己做出来的新一版）；「改了什么」自己写
-  const adapt = w => { setForm({ ...EMPTY, title: '改编：' + w.title, pipeline: w.pipeline, age: w.age || '', weeks: w.weeks || '', domains: w.domains, summary: w.summary, adaptedFrom: { id: w.id, title: w.title, byName: w.byName, url: w.source?.url || null } }); setOpenId(null); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  // 工坊接了 ?from=（服务端配 WORKSHOP_ADAPT_URL）且这门课来自工坊：跳工坊照它开新课，交回来时工坊带 adaptedFrom；否则在这里开预填表
+  const adaptUrlOf = w => { const t = config?.workshop?.adaptUrl; return t && w.source?.courseId ? t.replace('{courseId}', encodeURIComponent(w.source.courseId)).replace('{workId}', encodeURIComponent(w.id)) : null }
+  const adaptHere = w => { setForm({ ...EMPTY, title: '改编：' + w.title, pipeline: w.pipeline, age: w.age || '', weeks: w.weeks || '', domains: w.domains, summary: w.summary, adaptedFrom: { id: w.id, title: w.title, byName: w.byName, url: w.source?.url || null } }); setOpenId(null); window.scrollTo({ top: 0, behavior: 'smooth' }) }
+  const adapt = w => { const u = adaptUrlOf(w); if (u) window.open(u, '_blank', 'noopener'); else adaptHere(w) }
   const queueCount = (queue?.consent?.length || 0) + (queue?.pending?.length || 0)
-  const card = (w, extra) => <WorkCard key={w.id} w={w} open={openId === w.id} onOpen={() => setOpenId(openId === w.id ? null : w.id)} onUsed={used} onAdapt={adapt} nav={nav} actions={extra} />
+  const card = (w, extra) => <WorkCard key={w.id} w={w} open={openId === w.id} onOpen={() => setOpenId(openId === w.id ? null : w.id)} onUsed={used} onAdapt={adapt} onAdaptHere={adaptUrlOf(w) ? adaptHere : null} nav={nav} actions={extra} />
 
   return <div className="narrow wide">
     <div className="hdr"><div><h1>课程成果</h1><div className="sub">在教研工坊做出来、班里用过的课 · 实名共享 · 每门写明改了什么</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button>{user && !form && <button className="chip" onClick={() => nav('/works/agent')}><Icon name="sparkles" /> 用 Agent 整理</button>}{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一门课</Button>}</div></div>

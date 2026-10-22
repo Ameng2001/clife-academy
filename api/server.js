@@ -80,6 +80,9 @@ const PORT = +(process.env.PORT || 3000);
 const DATA = process.env.DATA_DIR || '/data';
 const RP_ID = process.env.RP_ID || 'localhost';
 const ORIGIN = process.env.ORIGIN || 'http://localhost:8080';
+// 教研工坊支持 ?from= 复制课程后配这个（docs/WORKSHOP-TODO.md 第 9–11 条）：学坊「改编这门课」就跳工坊开新课。
+// 模板里 {courseId} 是工坊课程 id，{workId} 是学坊成果 id。空着就仍在学坊开预填表。
+const WORKSHOP_ADAPT_URL = (process.env.WORKSHOP_ADAPT_URL || '').trim();
 const RP_NAME = process.env.RP_NAME || 'openGym';
 // Admin dashboard (issue): admins are matched by uid (or the admin flag FIRST_USER_ADMIN sets);
 // INVITE_ONLY gates new signups behind a code the admin generates. Off by default, so a fresh
@@ -1994,6 +1997,8 @@ const routes = {
       invite_only: INVITE_ONLY, allow_guest: ALLOW_GUEST,
       // 平台名称（运营方可改，见 academy/brand.js）：登录前就要显示，所以公开。
       brand: brandOf(db),
+      // 工坊接了 ?from= 才有：前端「改编这门课」据此决定跳工坊还是开表
+      ...(WORKSHOP_ADAPT_URL ? { workshop: { adaptUrl: WORKSHOP_ADAPT_URL } } : {}),
       ...authConfig(),
       ...eventsConfig(DEV_LOGIN),
       // Only when on, so an instance without passwords answers exactly as it did before (#118).
