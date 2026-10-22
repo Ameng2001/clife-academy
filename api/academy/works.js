@@ -29,6 +29,8 @@ const isDirector = (u, isAdmin) => !!u && (u.academy?.role === 'director' || isA
 export const FILES_SCOPES = Object.freeze({ all: '全平台', community: '本共同体', org: '本园' });
 
 const DRAFT_TTL = 7 * 86400000;
+import { toolAuth, toolUserOf } from './points.js';
+
 export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger = null, communities = null }) {
   db.works = db.works || []; db.workUses = db.workUses || [];
   // 七天没动的草稿自动删（读「我交的」或再落草稿时顺手清）
@@ -68,6 +70,25 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
   const domainsOf = body => [...new Set((Array.isArray(body.domains) ? body.domains : []).filter(d => FIVE[d]))];
 
   return {
+  // 工坊开改编课时核对来源（docs/WORKSHOP-TODO.md 第 9、10 条）：?id=<学坊成果 id>&from=<工坊课程 id>&uid=   带 TOOLS_API_KEY，不要登录。
+  // 答这门成果能不能改编、?from 对不对得上、是不是本人的，以及新课要标的「改编自」一句；不给文件（工坊自己库里有原课）
+  'GET /api/tools/work': async (req, res) => {
+    if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
+    const sp = new URL(req.url, 'http://x').searchParams;
+    const w = db.works.find(x => x.id === str(sp.get('id'), 40));
+    if (!w) return json(res, 404, { error: 'no such work', code: 'work' });
+    const from = str(sp.get('from'), 64) || null, u = sp.get('uid') ? toolUserOf(db, sp.get('uid')) : null;
+    if (sp.get('uid') && !u) return json(res, 404, { error: 'no such user', code: 'uid' });
+    const why = w.status !== 'approved' ? 'not-approved' : w.allowAdapt === false ? 'not-allowed' : (from && w.source.courseId && from !== w.source.courseId) ? 'course-mismatch' : null;
+    json(res, 200, {
+      id: w.id, title: w.title, byName: w.byName, orgName: w.orgName, pipeline: w.pipeline, pipelineName: PIPELINES[w.pipeline], age: w.age, weeks: w.weeks, domains: w.domains, domainNames: w.domains.map(d => FIVE[d]),
+      summary: w.summary, status: w.status, allowAdapt: w.allowAdapt !== false, source: { kind: w.source.kind, courseId: w.source.courseId || null, url: w.source.url || null },
+      adaptedFrom: adaptedOf(w), chain: chainOf(w),
+      canAdapt: !why, why, match: from ? !w.source.courseId || from === w.source.courseId : null, own: !!u && w.by === u.id,
+      label: `改编自《${w.title}》· ${w.byName}${w.orgName ? '（' + w.orgName + '）' : ''}`,
+      share: { adaptedFrom: w.id, note: '分享改编版时 POST /api/works 带 adaptedFrom 就是这个 id；扣积分时 POST /api/points/spend 也带它，5 折' }
+    });
+  },
   // 已入库的；?pipeline=&age=&domain=&q=
   'GET /api/works': async (req, res) => {
     const user = readSession(req);

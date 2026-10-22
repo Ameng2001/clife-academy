@@ -20,6 +20,8 @@ import { platformConfigured } from '../auth/platform.js';
 const TOOLS_KEY = (process.env.TOOLS_API_KEY || '').trim();
 export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察评价工具', bagel: '贝果实验室' });
 const TOOL_LABEL = { ...TOOLS, mall: '教学物料商城' };
+/** 工具服务端的密钥校验：Authorization: Bearer <TOOLS_API_KEY>。没配密钥一律 false。 */
+export const toolAuth = req => !!TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
 // 钱包页的四栏（工坊钱包页按这个分组显示，docs/WORKSHOP-TODO.md 第 15 条）：学与贡献、互动、工具扣减、商城
 export const GROUPS = Object.freeze({ learn: '学与贡献', interact: '互动', tool: '工具扣减', mall: '教学物料商城' });
 // 工坊的建议价（docs/POINTS-DESIGN.md 第三节）：主题式 30 / 周、项目式 40 / 周、单节活动 10；改编一门入库成果 5 折（向上取整）。工坊可以自己算 n，也可以传 pipeline / weeks 让学坊算
@@ -135,7 +137,6 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   };
   // 流水：个人积分的每一笔，加上从园所额度扣的（在 orgQuotaLog 里，sub 标 quota），按时间倒序
   const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at })) : [])].sort((a, b) => b.at - a.at);
-  const toolAuth = req => TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
   const adminOnly = (req, res) => { const user = readSession(req); if (!user) { json(res, 401, { error: 'not signed in' }); return null; } if (!isAdmin(user)) { json(res, 403, { error: 'admins only', code: 'admin' }); return null; } return user; };
 
   return {

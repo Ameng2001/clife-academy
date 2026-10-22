@@ -145,6 +145,16 @@ test('adapt chain: adapt only from an approved work that allows it; the adaptati
   assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 10, ref: 'course:7:draft', adaptedFrom: 'nope' }, key)).json.code, 'adapt');
   const wh = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json.history.find(h => h.kind === 'spend');
   assert.equal(wh.n, -5); assert.ok(wh.note.startsWith('改编自《'));
+  // 工坊开 ?from=1522&work=<a> 时核对来源（第 9、10 条）：对得上、能改编、不是本人；from 错了 course-mismatch；锁了的 not-allowed；没登录过学坊的 uid 404
+  assert.equal((await call('GET', `/api/tools/work?id=${a}`)).status, 403);
+  let tw = await call('GET', `/api/tools/work?id=${a}&from=1522&uid=${li.id}`, null, key);
+  assert.equal(tw.status, 200); assert.equal(tw.json.canAdapt, true); assert.equal(tw.json.match, true); assert.equal(tw.json.own, false); assert.equal(tw.json.source.courseId, '1522');
+  assert.equal(tw.json.label, '改编自《' + WORK.title + '》· 王老师（园B）'); assert.equal(tw.json.share.adaptedFrom, a); assert.equal(tw.json.files, undefined, 'no files: the workshop has the course');
+  assert.equal((await call('GET', `/api/tools/work?id=${a}&from=1522&uid=${wang.id}`, null, key)).json.own, true);
+  tw = await call('GET', `/api/tools/work?id=${a}&from=9999`, null, key); assert.equal(tw.json.canAdapt, false); assert.equal(tw.json.why, 'course-mismatch'); assert.equal(tw.json.match, false);
+  tw = await call('GET', `/api/tools/work?id=${locked}`, null, key); assert.equal(tw.json.canAdapt, false); assert.equal(tw.json.why, 'not-allowed');
+  assert.equal((await call('GET', `/api/tools/work?id=nope`, null, key)).json.code, 'work');
+  assert.equal((await call('GET', `/api/tools/work?id=${a}&uid=nobody`, null, key)).json.code, 'uid');
   await call('POST', '/api/works/decide', { id: b, action: 'consent' }, (await login('赵园长', 'director', '园C')).auth);
   await approve(b);
   r = await call('GET', '/api/works', null, wang.auth); const orig = r.json.works.find(w => w.id === a), adap = r.json.works.find(w => w.id === b);

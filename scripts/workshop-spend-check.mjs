@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* 教研工坊 ↔ 幼师学坊 积分扣减与钱包页联调（docs/WORKSHOP-TODO.md 第 12–15 条；接口 docs/POINTS-DESIGN.md 第三节）。
+/* 教研工坊 ↔ 幼师学坊 积分扣减、钱包页与改编来源联调（docs/WORKSHOP-TODO.md 第 9、10、12–15 条；接口 docs/POINTS-DESIGN.md 第三节）。
  *
  * 给工坊服务端的同学用：对着学坊测试环境把「查余额 → 按管线扣减 → 重复调用不再扣 → 不够答 409 → 园所额度先扣 → 改编半价」跑一遍，
  * 每步打印请求、应答与判定，最后一行 PASS / FAIL。扣掉的积分只在测试账号上。
@@ -148,7 +148,15 @@ if (workId) {
     const h = (await call('GET', `/api/points/of?uid=${encodeURIComponent(uid)}`, null, tools)).json.history || [];
     check('11c 流水里这一笔 -5，note 写「改编自《…》 5 折」', h.some(x => x.kind === 'spend' && x.n === -5 && /^改编自《/.test(x.note || '')));
   } else check('11b 改编扣减：账户不够 5 分答 409（给测试账号攒点分再跑）', r.status === 409 && r.json?.code === 'insufficient', `余额 ${bal?.total}`);
-} else console.log('  （没有可改编的入库成果，跳过第 11 步：传 --work <学坊成果 id> 指定一门）');
+  // 12. 开改编课前核对来源（待办第 9、10 条）：?from 与这门成果的 courseId 对不对得上、能不能改编、「改编自」怎么标
+  r = await call('GET', `/api/tools/work?id=${encodeURIComponent(workId)}&uid=${encodeURIComponent(uid)}`, null, tools);
+  check('12 核对来源 /api/tools/work 200：canAdapt、label「改编自《…》· 谁（园）」、share.adaptedFrom 是这门成果 id', r.status === 200 && r.json?.canAdapt === true && /^改编自《.+》· /.test(r.json.label || '') && r.json.share?.adaptedFrom === workId && typeof r.json.own === 'boolean', r.json?.label);
+  if (r.json?.source?.courseId) {
+    const bad = await call('GET', `/api/tools/work?id=${encodeURIComponent(workId)}&from=not-this-course`, null, tools);
+    check('12b ?from 与成果的 courseId 不一致：canAdapt false、why course-mismatch', bad.json?.canAdapt === false && bad.json?.why === 'course-mismatch');
+  } else console.log('  （这门成果没有工坊课程 id，跳过 12b）');
+  check('12c 没带密钥答 403', (await call('GET', `/api/tools/work?id=${encodeURIComponent(workId)}`)).status === 403);
+} else console.log('  （没有可改编的入库成果，跳过第 11、12 步：传 --work <学坊成果 id> 指定一门）');
 
 summary();
 

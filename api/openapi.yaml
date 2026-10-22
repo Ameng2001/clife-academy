@@ -4512,6 +4512,17 @@ paths:
         '200': { description: '`{ days, events: [{ event, levels }], scope: org|self }`' }
         '401': { description: 未登录 }
 
+  /api/tools/work:
+    get:
+      tags: [academy]
+      operationId: academyToolsWork
+      summary: 工坊开改编课时核对来源（TOOLS_API_KEY）
+      description: |
+        `?id=<学坊成果 id>&from=<工坊课程 id>&uid=`。不要登录、不动账、不给文件。答这门成果的基本信息、`source.courseId`、
+        `canAdapt`（入库且允许改编且 from 对得上）与 `why`（not-approved / not-allowed / course-mismatch）、`match`、`own`（uid 就是分享者）、
+        新课要标的 `label`「改编自《…》· 谁（园）」、`share.adaptedFrom`（分享与扣积分时都带这个 id）。成果不存在 404 `work`，uid 没登过学坊 404 `uid`。
+      responses:
+        '200': { description: 来源核对结果 }
   /api/works:
     get:
       tags: [academy]
