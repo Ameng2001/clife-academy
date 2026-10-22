@@ -24,6 +24,7 @@ import { createNotifier, notifyRoutes, notifyConfigured } from './academy/notify
 import { createPairs, pairRoutes } from './academy/pairs.js';
 import { resourceRoutes } from './academy/resources.js';
 import { caseRoutes } from './academy/cases.js';
+import { workRoutes } from './academy/works.js';
 import { formRoutes } from './academy/forms.js';
 import { policyRoutes } from './academy/policy.js';
 import { collectionRoutes } from './academy/collections.js';
@@ -2645,6 +2646,8 @@ const routes = {
   ...resourceRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   // 案例库（academy/cases.js）
   ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
+  // 课程成果：教研工坊做出来、班里用过的课（academy/works.js）
+  ...workRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger: LEDGER }),
   // 合集（academy/collections.js）：按主题攒案例、关卡、切片、场次、资源
   ...collectionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
   // 口径库（academy/policy.js）：红线一份，不登录也给

@@ -4446,6 +4446,63 @@ paths:
         '200': { description: '`{ days, events: [{ event, levels }], scope: org|self }`' }
         '401': { description: 未登录 }
 
+  /api/works:
+    get:
+      tags: [academy]
+      operationId: academyListWorks
+      summary: 课程成果（已入库）
+      description: '教师在教研工坊做出来、班里用过的课，分享到幼师学坊。`?pipeline=theme|pbl|activity&age=&domain=lang|social|health|art|sci&q=`。每条带 pipeline、age、weeks、domains（五大领域）、summary、changes（在起草稿上改了什么）、files（外链）、source（workshop/token/own）、署名；「用过，有效」的名单只给分享者本人、本园园长与管理员。不给人数、不排名。'
+      responses:
+        '200': { description: '`{ works, total, pipelines, domains, ages }`' }
+        '401': { description: 未登录 }
+    post:
+      tags: [academy]
+      operationId: academyPostWork
+      summary: 交一门课程成果（投稿令牌可用，见 docs/WORKSHOP-SHARE.md）
+      description: '`{ id?, title, pipeline, age?, weeks?, domains:[…], summary(≥50 字), changes:[≥1 条], files?:[{ name, url(https) }], source?:{ courseId?, url? } }`。教师交→园长同意→审核人入库；园长自己交直接待审核。changes 为空不收：工坊起草不算成果，用过并改过才算。'
+      responses:
+        '200': { description: '`{ work }`' }
+        '400': { description: 'title / pipeline / summary / changes / domains 不合' }
+        '403': { description: 不是本人的，或已入库 }
+  /api/works/mine:
+    get:
+      tags: [academy]
+      operationId: academyMyWorks
+      summary: 我交的课程成果
+      responses:
+        '200': { description: '`{ works }`' }
+  /api/works/queue:
+    get:
+      tags: [academy]
+      operationId: academyWorkQueue
+      summary: 课程成果待办（园长待同意、审核人待审核）
+      responses:
+        '200': { description: '`{ director, curator, consent, pending }`' }
+  /api/works/decide:
+    post:
+      tags: [academy]
+      operationId: academyDecideWork
+      summary: 园长同意 / 审核人入库或退回
+      description: '`{ id, action: consent | approve | reject, note? }`。入库给分享者 +3 学分。'
+      responses:
+        '200': { description: '`{ work }`' }
+        '403': { description: 不是本园园长 / 不是审核人 }
+  /api/works/delete:
+    post:
+      tags: [academy]
+      operationId: academyDeleteWork
+      summary: 删还没入库的（本人）；管理员可删任何
+      responses:
+        '200': { description: '`{ ok }`' }
+  /api/works/used:
+    post:
+      tags: [academy]
+      operationId: academyWorkUsed
+      summary: 「用过，有效」
+      description: '`{ id, note? }`，一人一门记一次；分享者在成果上看得到谁用过。'
+      responses:
+        '200': { description: '`{ work }`' }
+
 components:
   securitySchemes:
     cookieAuth:

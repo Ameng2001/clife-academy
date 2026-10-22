@@ -11,7 +11,7 @@ export default function TopNav() {
   const nav = useNavigate(), loc = useLocation()
   const user = useStore(s => s.user)
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'cases' && (cur === 'forms' || cur === 'resources')) || (k === 'library' && cur === 'collections')
+  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'cases' && (cur === 'forms' || cur === 'resources' || cur === 'works')) || (k === 'library' && cur === 'collections')
   const role = user?.admin ? ['admin', '运营后台', 'gear'] : user?.academy?.role === 'district' ? ['district', '区县看板', 'gauge'] : user?.academy?.role === 'director' ? ['org', '园长看板', 'gauge'] : null
   return <nav id="topnav" aria-label="主导航">
     <div className="topnav-in">

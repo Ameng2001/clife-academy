@@ -14,6 +14,7 @@
 | `POST /api/cases` | 投一条案例：`{ title, domain, age?, use, text(≥50 字), files?, adaptedFrom?, adaptNote? }`；也能改自己还没入库的（带 `id`） |
 | `POST /api/cases/forms/draft` | 给已入库案例生成轻形态草稿：`{ caseId, kind: parents\|transition\|memo }` |
 | `POST /api/cases/forms` | 改定轻形态：`{ id, content }` |
+| `POST /api/works` | 投一门课程成果（教研工坊「分享到幼师学坊」）：`{ title, pipeline, age?, weeks?, domains, summary(≥50 字), changes(≥1), files?, source? }`，契约见 docs/WORKSHOP-SHARE.md |
 
 其余写请求一律 `403 { code: 'scope' }`。只读令牌的任何写请求仍是 `403 { code: 'readonly' }`。
 

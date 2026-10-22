@@ -78,6 +78,10 @@ export default function Home() {
       <div className="small muted" style={{ marginTop: 6 }}>不受解锁限制，点开直接看「讲」与「看」；走关还是在学习路径。</div>
     </form>
 
+    <div className="card tap" style={{ marginTop: 10, padding: 12 }} onClick={() => nav('/works')}>
+      <div className="ac-row"><div><div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>课程成果 · 从教研工坊分享过来</div><div className="small" style={{ marginTop: 4 }}>在工坊做出来、班里用过的课，写明改了什么，入库 +3 学分；学分换的积分又能在工坊里用。</div></div><Icon name="chevronRight" /></div>
+    </div>
+
     <div className="tiles">
       {user?.admin && <div className="tile tappable" onClick={() => nav('/admin')}><div className="l"><Icon name="gear" />运营后台</div><div className="v">六组事</div><div className="small muted">用户与园所、研修期次、资源与案例、发题与点评、公告、审计</div></div>}
       <div className="tile tappable" onClick={() => nav('/paths')}><div className="l"><Icon name="list" />全部路径</div><div className="v">{PATH_KEYS.length} 条</div></div>
