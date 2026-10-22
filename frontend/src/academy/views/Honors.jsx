@@ -21,7 +21,7 @@ export default function Honors() {
 
     {p && <div className="card">
       <div className="tiles" style={{ margin: 0 }}>
-        <div className="tile"><div className="l">积分</div><div className="v">{p.points}</div><div className="small muted">过关、入库、互动都自动记</div></div>
+        <div className="tile"><div className="l">积分</div><div className="v">{p.points}</div><div className="small muted">{p.quota?.left > 0 ? `另有园所额度 ${p.quota.left}，只能用在工具上` : '过关、入库、互动都自动记'}</div></div>
         <div className="tile"><div className="l">通过的关</div><div className="v">{p.levelsPassed}</div><div className="small muted">每关 {p.rules?.earn?.level ?? 10} 积分</div></div>
       </div>
       <div className="small muted" style={{ marginTop: 10 }}>积分是工具的使用额度：{Object.values(p.tools).join('、')}里换特定资源时扣。只有你自己看得到，不排行、不可转赠。明细与花销在教研工坊的钱包页看，两边是同一个账。 <span className="tap" style={{ color: 'var(--acc)' }} onClick={() => nav('/mall')}>教学物料商城 ›</span></div>

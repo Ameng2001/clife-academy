@@ -10,6 +10,7 @@
  * 不是货币：不能充值、提现、转赠；不排行、不公开、不与考核挂钩。
  *
  * 商城（mall.js）经 ledger.points.spend / refund 扣与退，流水 tool 'mall'。
+ * 园所额度池（quota.js）：工具扣减先扣园所分给本人的额度，再扣个人积分；额度不进商城、不进个人余额。
  *
  * db.points: { uid, kind:'earn'|'interact'|'spend'|'refund'|'exchange'(旧), n(正为入、负为出), sub?, ref?, about?, levels?, tool?, note, at } */
 import { orgKeyOf } from './org.js';
@@ -45,7 +46,7 @@ const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateStrin
 const sameMonth = (a, b) => { const x = new Date(a), y = new Date(b); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth(); };
 const intIn = (v, lo, hi) => { const n = Math.floor(Number(v)); return n >= lo && n <= hi ? n : null; };
 
-export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger }) {
+export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger, quota = null }) {
   db.points = db.points || [];
   db.pointsRules = db.pointsRules && typeof db.pointsRules === 'object' ? db.pointsRules : { at: 0, byName: null };
   const earnN = k => { const v = db.pointsRules.earn?.[k]; return Number.isInteger(v) && v >= 0 ? v : EARN[k].n; };
@@ -95,7 +96,8 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (delta >= 1) { const n = delta * earnN('level'); if (n > 0) push({ uid, kind: 'earn', n, sub: 'level', levels: delta, note: `过了 ${delta} 关` }); else push({ uid, kind: 'earn', n: 0, sub: 'level', levels: delta, note: `过了 ${delta} 关` }); changed = true; }
     if (changed) saveDb();
   };
-  const summary = uid => { settle(uid); return { points: balance(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
+  const quotaOf = uid => { const u = db.users.find(x => x.id === uid); return quota && u ? { left: quota.left(uid), used: quota.used(uid), orgName: u.academy?.org?.name || null } : { left: 0, used: 0, orgName: null }; };
+  const summary = uid => { settle(uid); return { points: balance(uid), quota: quotaOf(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
   const pubRow = p => ({ kind: p.kind, sub: p.sub || null, n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
   const toolAuth = req => TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
   const adminOnly = (req, res) => { const user = readSession(req); if (!user) { json(res, 401, { error: 'not signed in' }); return null; } if (!isAdmin(user)) { json(res, 403, { error: 'admins only', code: 'admin' }); return null; } return user; };
@@ -113,7 +115,8 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     const u = db.users.find(x => x.id === uid);
     if (!u) return json(res, 404, { error: 'no such user' });
     settle(uid);
-    json(res, 200, { uid, name: u.name, orgName: u.academy?.org?.name || null, points: balance(uid) });
+    const q = quotaOf(uid);
+    json(res, 200, { uid, name: u.name, orgName: q.orgName, points: balance(uid), quota: q.left, total: balance(uid) + q.left });
   },
   // 工具服务端扣减：{ uid, tool, n(正整数), ref, note }。余额不够答 409；同一 (tool, ref) 重复调用答已扣过、不再扣。
   'POST /api/points/spend': async (req, res) => {
@@ -126,13 +129,17 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (!(n >= 1)) return json(res, 400, { error: 'n must be a positive integer', code: 'n' });
     if (!ref) return json(res, 400, { error: 'ref required (idempotency key)', code: 'ref' });
     settle(uid);
-    const dup = db.points.find(p => p.uid === uid && p.kind === 'spend' && p.tool === tool && p.ref === ref);
-    if (dup) return json(res, 200, { ok: true, duplicate: true, points: balance(uid) });
-    if (balance(uid) < n) return json(res, 409, { error: 'insufficient points', code: 'insufficient', points: balance(uid) });
-    push({ uid, kind: 'spend', n: -n, tool, ref, note: str(body.note, 120) });
+    // 幂等：两本账（个人积分、园所额度）上只要有一条就是扣过了
+    const dup = db.points.find(p => p.uid === uid && p.kind === 'spend' && p.tool === tool && p.ref === ref) || (quota && quota.spent(uid, tool, ref));
+    if (dup) return json(res, 200, { ok: true, duplicate: true, points: balance(uid), quota: quotaOf(uid).left });
+    const q = quotaOf(uid).left;
+    if (balance(uid) + q < n) return json(res, 409, { error: 'insufficient points', code: 'insufficient', points: balance(uid), quota: q });
+    // 先扣园所分配的额度，再扣自己赚的
+    const fromQuota = quota ? quota.spend(u, n, tool, ref, str(body.note, 120)) : 0, fromPoints = n - fromQuota;
+    if (fromPoints > 0) push({ uid, kind: 'spend', n: -fromPoints, tool, ref, note: str(body.note, 120) });
     saveDb();
-    audit(req, 'points.spend', { user: u, msg: `${tool} ${ref} -${n}` });
-    json(res, 200, { ok: true, duplicate: false, points: balance(uid) });
+    audit(req, 'points.spend', { user: u, msg: `${tool} ${ref} -${n}（园所额度 ${fromQuota}，积分 ${fromPoints}）` });
+    json(res, 200, { ok: true, duplicate: false, points: balance(uid), quota: quotaOf(uid).left, fromQuota, fromPoints });
   },
   // 一个人的流水：管理员对账用；工坊的钱包页（钱包页与工坊统一，学坊不单独做）带 TOOLS_API_KEY 取。?uid=
   'GET /api/points/of': async (req, res) => {

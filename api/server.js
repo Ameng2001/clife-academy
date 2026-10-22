@@ -32,8 +32,9 @@ import { brandRoutes, brandOf } from './academy/brand.js';
 import { lectureRoutes } from './academy/lectures.js';
 import { drillRoutes } from './academy/drills.js';
 import { honorRoutes, createLedger } from './academy/honors.js';
-import { pointsRoutes } from './academy/points.js';
+import { pointsRoutes, TOOLS } from './academy/points.js';
 import { mallRoutes } from './academy/mall.js';
+import { createQuota, quotaRoutes } from './academy/quota.js';
 import { contestRoutes } from './academy/contests.js';
 import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
@@ -1806,6 +1807,7 @@ const NOTIFIER = createNotifier({ db, saveDb });
 const PAIRS = createPairs(db);
 // 关卡以外的专业发展事件记录（案例入库、作答精选、路径、证书……）；积分由 points.js 按规则记；勋章按记录算，称号人授。
 const LEDGER = createLedger(db);
+const QUOTA = createQuota(db, saveDb);
 const COMMUNITIES = createCommunities(db);
 const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER, ledger: LEDGER });
 setInterval(() => { try { QUESTIONS.escalateDue(); } catch { /* 下一轮再试 */ } }, 10 * 60000).unref?.();
@@ -2659,7 +2661,8 @@ const routes = {
   ...LECTURES.routes,
   ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
-  ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER }),
+  ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER, quota: QUOTA }),
+  ...quotaRoutes({ json, readBody, db, readSession, audit, isAdmin, quota: QUOTA, tools: TOOLS }),
   ...mallRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES, ledger: LEDGER }),
   ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),

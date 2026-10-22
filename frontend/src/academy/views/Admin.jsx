@@ -44,6 +44,32 @@ function PointsRules() {
   </div>
 }
 
+// 园所额度充值（docs/POINTS-DESIGN.md 第五节）：按合同给园所充，园长在园长看板分给教师
+function QuotaTopup() {
+  const toast = useUI.getState().toast
+  const [d, setD] = useState(null), [org, setOrg] = useState(''), [n, setN] = useState(''), [note, setNote] = useState(''), [busy, setBusy] = useState(false)
+  const load = () => api('/api/admin/quota').then(setD).catch(() => setD(null))
+  useEffect(() => { load() }, [])
+  const save = async () => {
+    const m = Math.floor(Number(n)); if (!org || !(m >= 1 && m <= 100000)) return toast('选园所，额度填 1 到 100000 的整数')
+    if (!confirm(`给「${d.orgs.find(o => o.org === org)?.name}」充 ${m}？充了只能由园长分给教师，不能撤。`)) return
+    setBusy(true)
+    try { await api('/api/admin/quota/topup', { method: 'POST', body: JSON.stringify({ org, n: m, note }) }); toast('已充'); setN(''); setNote(''); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+  }
+  if (!d) return <div className="small muted" style={{ padding: '4px 0' }}>没取到园所额度。</div>
+  return <div style={{ padding: '4px 0' }}>
+    <div className="small" style={{ fontWeight: 600 }}>园所额度充值 <span className="muted" style={{ fontWeight: 400 }}>· 按合同充给园所，园长在园长看板分给教师；只能用在工具上，不进商城</span></div>
+    {d.orgs.filter(o => o.topup > 0).map(o => <div key={o.org} className="ac-row small" style={{ marginTop: 6 }}><span>{o.name}</span><span className="muted">池子 {o.pool} · 累计 {o.topup}</span></div>)}
+    <div className="ac-row" style={{ marginTop: 8, gap: 8, flexWrap: 'wrap' }}>
+      <select className="ac-sel" value={org} onChange={e => setOrg(e.target.value)} style={{ flex: 1, minWidth: 140 }}><option value="">园所</option>{d.orgs.map(o => <option key={o.org} value={o.org}>{o.name} · {o.members} 人</option>)}</select>
+      <TextField type="number" min="1" max="100000" placeholder="额度" value={n} onChange={e => setN(e.target.value)} style={{ width: 90 }} />
+      <TextField placeholder="合同号或备注" value={note} onChange={e => setNote(e.target.value)} style={{ flex: 1, minWidth: 120 }} />
+      <Button size="sm" variant="primary" disabled={busy || !org || !n} onClick={save}>充</Button>
+    </div>
+    {d.log.length > 0 && <div style={{ marginTop: 8 }}>{d.log.slice(0, 6).map(r => <div key={r.id} className="ac-row small muted" style={{ marginTop: 4 }}><span>{fmtDay(r.at)} · {r.orgName} · {r.byName}{r.note ? ' · ' + r.note : ''}</span><span>+{r.n}</span></div>)}</div>}
+  </div>
+}
+
 function Group({ title, icon, children }) { return <div className="sect"><div className="sect-t"><Icon name={icon} /> {title}</div><div className="sect-b">{children}</div></div> }
 function Row({ to, title, sub, n, onClick }) {
   const nav = useNavigate()
@@ -202,6 +228,7 @@ export default function Admin() {
       <Group title="积分" icon="star">
         <Row to="/mall" title="教学物料商城" sub="上架教具、绘本、耗材、名额；看订单、标发货与签收；库存数只有运营方看得到" />
         <PointsRules />
+        <QuotaTopup />
       </Group>
 
       <Group title="公告" icon="speaker">

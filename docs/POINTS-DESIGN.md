@@ -96,6 +96,13 @@
 
 没学够的教师也要用工坊。园所可以有一个**园所额度池**：本地运营方按合同给园所充额度（这是合同里的事，不是教师的积分），园长在园长看板把额度分给教师（一次分配、可收回未用部分）。教师花的时候先扣园所分配的，再扣自己赚的。园所额度不进商城，只能用在工具上。
 
+已做（夜 63，`api/academy/quota.js`）：一张流水 `db.orgQuotaLog`（充值 topup / 分配 alloc / 收回 recall / 扣减 spend），池子 = 充 − 分 + 收，某人在手 = 分 − 收 − 扣。
+- 运营后台「积分」组：`POST /api/admin/quota/topup { org, n ≤ 100000, note }`，只有管理员，充了不能撤；`GET /api/admin/quota` 各园池子一览。
+- 园长看板「园所额度」：`GET /api/org/quota`（池子、每人在手与用掉、流水）、`POST /api/org/quota/alloc { uid, n }`（本园教师，不含园长自己，≤ 池子）、`POST /api/org/quota/recall { uid, n? }`（不带 n 全收，只收没用掉的）。
+- 工具扣减 `POST /api/points/spend`：先扣园所额度再扣积分，应答带 `fromQuota / fromPoints`；幂等按 (tool, ref) 在两本账上一起查；`GET /api/points/balance` 带 `quota` 与 `total`。工坊的钱包页按 `points`、`quota` 两行显示。
+- 商城（`ledger.points.spend`）只看个人积分，额度在手也换不了物料。
+- 教师看到：`GET /api/me/points` 的 `quota.left`，荣誉页积分 tile、我的页、小程序我的页一句「另有园所额度 N，只能用在工具上」。
+
 ## 六、学坊这边要加的（按先后）
 
 | 项 | 改哪 | 量 |
@@ -105,7 +112,7 @@
 | ~~互动类给分~~ 已做（夜 58）：`points.js` 挂 `ledger.interact`，cases / works 的「用过」、questions 采纳、submissions 点评、camps 发帖各调一次；同一 (sub, ref) 只记一次，日 / 月 / 同作品每天上限；数字在 `db.pointsRules.interact`，运营后台可改、0 是不给 | — | — |
 | ~~钱包页~~ 不做：钱包页与教研工坊统一，教师在工坊的钱包页看余额、明细与花销（工坊用 `TOOLS_API_KEY` 调 `GET /api/points/of?uid=` 取流水）；学坊荣誉页只留余额与最近几笔 | 工坊仓库 | — |
 | ~~物料商城~~ 已做（夜 61）：物料（范围 / 库存 / 收货方式）、换、取消退回、发货签收；运营后台入口；小程序页 | — | — |
-| 园所额度池：充值、分配、收回、扣减顺序 | `points.js`、`Director.jsx` | 中 |
+| ~~园所额度池~~ 已做（夜 63）：充值（管理员）、分配与收回（园长）、工具扣减先额度后积分；商城不用额度 | — | — |
 | 工坊侧按管线扣减与改编半价 | 工坊仓库 | 中 |
 
 ## 七、不做的

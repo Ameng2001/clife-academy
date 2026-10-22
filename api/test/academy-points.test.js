@@ -163,3 +163,43 @@ test('contribution points: the original author of an adapted case, a lecture sha
   assert.equal((await pts(wang)).points, 90);
   assert.equal((await call('GET', '/api/admin/points/rules', null, admin.auth)).json.rules.earn.lecture, 50);
 });
+
+test('quota: admin tops up a kindergarten, the director allocates and recalls, tool spends take the org quota first and then personal points; the mall never touches quota', async t => {
+  const { call, login } = await startServer(t);
+  const admin = await login('运营方', 'director', '本地运营');
+  const zhao = await login('赵园长', 'director', '柳北区示例幼儿园'), wang = await login('王老师', 'teacher', '柳北区示例幼儿园'), other = await login('外园老师', 'teacher', '别的园');
+  const key = { Authorization: 'Bearer tools-secret' };
+  // 王老师先攒 20 积分（案例入库）
+  let r = await call('POST', '/api/cases', { title: '心情墙', domain: 'env', use: 'adapt', text: TEXT }, wang.auth); await call('POST', '/api/cases/decide', { id: r.json.case.id, action: 'approve' }, admin.auth);
+  assert.equal((await call('GET', '/api/me/points', null, wang.auth)).json.points, 20);
+  // 没充值：池子 0，分不出去
+  r = await call('GET', '/api/org/quota', null, zhao.auth); assert.equal(r.json.pool, 0); assert.ok(r.json.members.some(m => m.id === wang.id)); assert.ok(!r.json.members.some(m => m.id === zhao.id), 'director is not in the allocation list');
+  assert.equal((await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 10 }, zhao.auth)).status, 409);
+  assert.equal((await call('GET', '/api/org/quota', null, wang.auth)).status, 403, 'teachers cannot see the pool');
+  // 管理员充值 100；园长不能充
+  const orgKey = (await call('GET', '/api/admin/quota', null, admin.auth)).json.orgs.find(o => o.name === '柳北区示例幼儿园').org;
+  assert.equal((await call('POST', '/api/admin/quota/topup', { org: orgKey, n: 100, note: '合同 2026-A' }, zhao.auth)).status, 403);
+  r = await call('POST', '/api/admin/quota/topup', { org: orgKey, n: 100, note: '合同 2026-A' }, admin.auth); assert.equal(r.status, 200); assert.equal(r.json.pool, 100);
+  // 园长分 30 给王老师；不能分给外园、不能分给自己、不能超池子
+  assert.equal((await call('POST', '/api/org/quota/alloc', { uid: other.id, n: 10 }, zhao.auth)).status, 403);
+  assert.equal((await call('POST', '/api/org/quota/alloc', { uid: zhao.id, n: 10 }, zhao.auth)).status, 400);
+  assert.equal((await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 101 }, zhao.auth)).status, 409);
+  r = await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 30 }, zhao.auth); assert.equal(r.status, 200); assert.equal(r.json.pool, 70); assert.equal(r.json.members.find(m => m.id === wang.id).left, 30);
+  r = await call('GET', '/api/me/points', null, wang.auth); assert.equal(r.json.points, 20); assert.equal(r.json.quota.left, 30);
+  r = await call('GET', '/api/points/balance?uid=' + wang.id, null, key); assert.equal(r.json.quota, 30); assert.equal(r.json.total, 50);
+  // 工具扣 40：先扣额度 30，再扣积分 10；重复调用不再扣
+  r = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 40, ref: 'course-1' }, key);
+  assert.equal(r.status, 200); assert.equal(r.json.fromQuota, 30); assert.equal(r.json.fromPoints, 10); assert.equal(r.json.points, 10); assert.equal(r.json.quota, 0);
+  r = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 40, ref: 'course-1' }, key); assert.equal(r.json.duplicate, true); assert.equal(r.json.points, 10);
+  assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 11, ref: 'course-2' }, key)).status, 409, 'quota 0 + points 10 < 11');
+  // 再分 20，只用额度扣 5：个人积分不动；园长收回剩下的 15
+  await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 20 }, zhao.auth);
+  r = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'observe', n: 5, ref: 'obs-1' }, key); assert.equal(r.json.fromQuota, 5); assert.equal(r.json.points, 10);
+  assert.equal((await call('POST', '/api/org/quota/recall', { uid: wang.id, n: 16 }, zhao.auth)).status, 409);
+  r = await call('POST', '/api/org/quota/recall', { uid: wang.id }, zhao.auth); assert.equal(r.status, 200); assert.equal(r.json.pool, 65); assert.equal(r.json.members.find(m => m.id === wang.id).left, 0); assert.equal(r.json.members.find(m => m.id === wang.id).used, 35);
+  // 商城只看个人积分：额度 20 在手也换不了 25 分的物料
+  await call('POST', '/api/org/quota/alloc', { uid: wang.id, n: 20 }, zhao.auth);
+  r = await call('POST', '/api/mall/items', { title: '绘本', desc: '一本', points: 25, scope: 'all', deliver: 'org' }, admin.auth); assert.equal(r.status, 200);
+  r = await call('POST', '/api/mall/redeem', { id: r.json.item.id }, wang.auth); assert.equal(r.status, 409, 'mall ignores org quota');
+  r = await call('GET', '/api/me/points', null, wang.auth); assert.equal(r.json.points, 10); assert.equal(r.json.quota.left, 20);
+});

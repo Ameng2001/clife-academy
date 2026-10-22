@@ -46,6 +46,23 @@ export default function Director() {
   const [titles, setTitles] = useState(null), [titleFor, setTitleFor] = useState(null), [titleKey, setTitleKey] = useState('seed'), [titleLabel, setTitleLabel] = useState(''), [reason, setReason] = useState('')
   const loadTitles = () => api('/api/org/titles').then(setTitles).catch(() => setTitles(null))
   const [certs, setCerts] = useState(null)
+  // 园所额度池（docs/POINTS-DESIGN.md 第五节）：运营方按合同充的，园长分给教师，可收回没用掉的；教师在工具里先扣这个再扣自己的积分
+  const [quota, setQuota] = useState(null), [qFor, setQFor] = useState(''), [qN, setQN] = useState('')
+  useEffect(() => { if (user) api('/api/org/quota').then(setQuota).catch(() => setQuota(null)) }, [user?.id])
+  const alloc = async () => {
+    const n = Math.floor(Number(qN)); if (!qFor || !(n >= 1)) return useUI.getState().toast('选人、填额度')
+    setBusy(true)
+    try { setQuota(await api('/api/org/quota/alloc', { method: 'POST', body: JSON.stringify({ uid: qFor, n }) })); useUI.getState().toast('已分'); setQN('') }
+    catch (e) { useUI.getState().toast(e.code === 'pool' ? '池子里不够了' : '没分成' + (e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
+  const recall = async m => {
+    if (!confirm(`收回 ${m.name} 没用掉的 ${m.left}？`)) return
+    setBusy(true)
+    try { setQuota(await api('/api/org/quota/recall', { method: 'POST', body: JSON.stringify({ uid: m.id }) })); useUI.getState().toast('已收回') }
+    catch (e) { useUI.getState().toast('没收成' + (e.message ? '：' + e.message : '')) }
+    finally { setBusy(false) }
+  }
   useEffect(() => { if (user) api('/api/org/certificates').then(setCerts).catch(() => setCerts(null)) }, [user?.id])
   const [stats, setStats] = useState(null), [coach, setCoach] = useState(null), [weekly, setWeekly] = useState(null), [sr, setSr] = useState(null)
   useEffect(() => { if (user) { api('/api/review/stats').then(setStats).catch(() => setStats(null)); api('/api/org/coach').then(setCoach).catch(() => setCoach(null)); api('/api/ops/weekly').then(setWeekly).catch(() => setWeekly(null)); api('/api/selfreview/others').then(setSr).catch(() => setSr(null)) } }, [user?.id])
@@ -139,6 +156,20 @@ export default function Director() {
       {!certs.certificates.length && <div className="lrow small muted">还没有人拿到证书。岗位数智应用认证走完本岗位路径自动发；领域研修证书要作品全部通过点评。</div>}
       {certs.certificates.slice(0, 20).map(c => <div key={c.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t"><Icon name="checkCircle" /> {c.name} · {c.label}</div><div className="small muted">{fmtDay(c.at)} · 编号 {c.no}</div></div></div>)}
       <div className="lrow small muted">只记级别与日期，没有分数；不跨园比较，不作考核依据。</div>
+    </div></div>}
+
+    {quota && <div className="sect"><div className="sect-t">园所额度 <span className="small muted">池子 {quota.pool} · 已分在手 {quota.allocated} · 累计充 {quota.topup}</span></div><div className="sect-b">
+      {!quota.topup && <div className="lrow small muted">还没充过。园所额度由本地运营方按合同充，充了在这里分给教师；没学够积分的教师也能用教研工坊。</div>}
+      {quota.members.filter(m => m.left > 0 || m.used > 0).map(m => <div key={m.id} className="lrow">
+        <div style={{ flex: 1 }}><div className="lrow-t">{m.name}</div><div className="small muted">在手 {m.left} · 用掉 {m.used}</div></div>
+        {m.left > 0 && <button className="chip" disabled={busy} onClick={() => recall(m)}>收回</button>}
+      </div>)}
+      {quota.pool > 0 && quota.members.length > 0 && <div className="lrow" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <select className="ac-sel" value={qFor} onChange={e => setQFor(e.target.value)} style={{ flex: 1, minWidth: 120 }}><option value="">分给谁</option>{quota.members.map(m => <option key={m.id} value={m.id}>{m.name}{m.left ? ` · 在手 ${m.left}` : ''}</option>)}</select>
+        <TextField type="number" min="1" max={quota.pool} placeholder="额度" value={qN} onChange={e => setQN(e.target.value)} style={{ width: 90 }} />
+        <Button size="sm" variant="tinted" disabled={busy || !qFor || !qN} onClick={alloc}>分配</Button>
+      </div>}
+      <div className="lrow small muted">教师在工具里花的时候先扣园所分给他的，再扣自己赚的积分；额度不进物料商城、不转赠、不计入个人积分。</div>
     </div></div>}
 
     <div className="sect"><div className="sect-t">带教配对</div><div className="sect-b">
