@@ -114,3 +114,6 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
 @media (min-width: 1000px) {
   #app .course-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 }
+
+/* 切 tab 时短页（专家案例、资源库）没有滚动条，内容会左右抖 7px：给文档滚动条留固定槽位 */
+html { scrollbar-gutter: stable; }
