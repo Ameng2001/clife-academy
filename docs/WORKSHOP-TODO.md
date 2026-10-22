@@ -32,12 +32,36 @@
 | 12 | 服务端接 `TOOLS_API_KEY` | 工坊服务端配学坊地址与密钥（只放服务端，不进前端、不进日志）；接上先调 `GET /api/tools/ping` 握手，拿到学坊名、认的 tool、`uid.accepts`。**uid 传平台账号的 uid 就行**（统一登录，学坊按 `user.platform.uid` 找人），也认学坊自己的 `user.id`；应答里 `uid` 是学坊 id、`platformUid` 是平台 uid。找不到人答 `404 uid`：这位教师还没登过学坊，工坊提示「先用平台账号登一次幼师学坊」 | `ping` 答 `ok:true`；`GET /api/points/balance?uid=<平台 uid>` 返回余额、园所额度与合计。学坊联调脚本第 0 步验握手：`node scripts/workshop-spend-check.mjs --uid <平台 uid>` |
 | 13 | 按管线扣减 | 起草确认那一步调 `POST /api/points/spend { uid, tool: 'workshop', n, ref, note }`。建议价：主题式 30 / 周、项目式 40 / 周、单节活动 10；`ref` 用课程 id 加阶段（如 `course:1522:draft`），同一 `ref` 重复调用不再扣。学坊先扣园所额度再扣个人积分，应答 `fromQuota / fromPoints`。余额不够答 `409 insufficient`，工坊提示「积分不够：去幼师学坊学几关，或请园长分配园所额度」 | 学坊流水里出现 tool 为教研工坊的扣减。学坊给了联调脚本：`ACADEMY_URL=<学坊测试环境> TOOLS_API_KEY=<密钥> node scripts/workshop-spend-check.mjs --uid <测试教师 uid>`，查余额、扣减、重复 ref、超额 409、字段校验、流水一遍跑完打 PASS；`--price pbl 4 --adapted` 只算价，`priceOf()` 是算价的参考实现 |
 | 14 | 改编半价 | `?from=…&work=<学坊成果 id>` 开的课，扣减时把 `work` 作 `adaptedFrom` 传给学坊：`POST /api/points/spend { uid, tool:'workshop', pipeline, weeks, ref, adaptedFrom }`，学坊核过这门成果入库且允许改编就按 5 折扣（向上取整）、自己写 note；起草确认前可先 `GET /api/points/quote?pipeline=&weeks=&adaptedFrom=&uid=` 报价给教师看（带够不够）。工坊不必自己算价、不必自己写「改编自」；不是从学坊跳来的课不传 `adaptedFrom`，原价。成果没入库或不许改编答 `400 adapt`，这时按原价再调一次 | 流水 note 写「改编自《…》 5 折」。联调脚本第 10、11 步：`node scripts/workshop-spend-check.mjs --uid <uid> --work <学坊成果 id>` |
-| 15 | 钱包页两行 | 工坊个人页的钱包：`GET /api/points/of?uid=`（带密钥）一次取齐：`points` 与 `quota.left` 两行余额（「积分 N」「园所额度 N · 来自 quota.orgName」）；`sections` 四栏小计按顺序渲染（学与贡献 / 互动 / 工具扣减 / 教学物料商城，各带 label、n、count）；`history[]` 每笔带 `group`（归哪一栏）、`tool`（显示名）、`note`、`n`（正入负出）、`at`，`sub === 'quota'` 的是从园所额度扣的，前面标「园所额度」；`links.mall` 就是「换教学物料」入口地址（`mallHint` 是按钮文案）。**不做**充值、转赠、排行，也不自己算余额 | 教师在工坊看到的余额与学坊「我的」一致（同一份算法）。钱包页要做的功能点逐条在 docs/WALLET-TODO.md，之后钱包相关的事都记在那里。学坊联调脚本第 9 步把这几项都验了：`node scripts/workshop-spend-check.mjs --uid <uid>` |
+| 15 | 钱包页 | 工坊个人页的钱包，`GET /api/points/of?uid=`（带密钥）一次取齐，只渲染、不自己算余额、不自己分类。具体做什么拆成下面 15.1–15.14 十四个功能点（与 docs/WALLET-TODO.md W1–W14 一一对应，那边是总账，这边照抄）。**不做**充值、转赠、排行 | 教师在工坊看到的余额与学坊「我的」一致（同一份算法）。学坊联调脚本第 9 步把整包字段都验了：`npm run check:spend -- --uid <uid>` |
+
+
+### 第 15 条的功能点（钱包页）
+
+学坊接口全部已齐，十四条都是工坊界面的事。字段名以 `GET /api/points/of` 应答为准（api/openapi.yaml）。
+
+| # | 功能点 | 取什么 | 验收 |
+|---|---|---|---|
+| 15.1 | 两行余额：「积分 N」「园所额度 N」 | `points`、`quota.left` | 与学坊「我的」页数字一致 |
+| 15.2 | 园所额度一句：谁分的、来自哪个园、已用多少、只用在工具上、先扣它再扣积分 | `quota.orgName`、`quota.used` | 有额度或用过额度的人看得到这句 |
+| 15.3 | 「换教学物料」入口，到学坊商城 | `links.mall`、`mallHint` | 点了新开学坊 `/#/mall` |
+| 15.4 | 没有额度、没分过时的空态一句（「园所额度由园长分，到园长那里要」） | `quota.left === 0 && quota.used === 0` | 不留空白 |
+| 15.5 | 四栏小计：学与贡献 / 互动 / 工具扣减 / 教学物料商城，各带笔数 | `sections[]`（key、label、n、count），按给的顺序渲染 | 四栏数字相加等于 `points` 的变动 |
+| 15.6 | 流水列表：日期 · 工具 · 备注 · ±n | `history[]`（at、tool、note、n） | 正进负出，最近的在前 |
+| 15.7 | 从园所额度扣的几笔标「园所额度」，数字淡色，不计入个人积分变动 | `history[].sub === 'quota'` | 教师分得清哪几笔没动自己的积分 |
+| 15.8 | 按四栏筛流水 | `history[].group` | 筛后笔数与 `sections[].count` 对得上 |
+| 15.9 | 改编半价的几笔点开能到学坊那门成果 | `history[].adaptedFrom {id, title, url}` | 点了新开学坊成果页 |
+| 15.10 | 「加载更多」翻页 | `?before=<nextBefore>&limit=<n ≤ 500>`；`total`、`nextBefore`；`sections` 始终按全量 | 翻到底 `nextBefore` 为空 |
+| 15.11 | 园所额度的来龙去脉：园长哪天分了多少、收回多少、在哪个工具用了多少 | `quotaLog[]`（kind alloc / recall / spend、n、byName、tool、text、at），单独一块，不混进流水 | `text` 直接显示即可 |
+| 15.12 | 起草确认前的报价：原价、改编折后价、够不够、先扣额度多少再扣积分多少 | `GET /api/points/quote?pipeline=&weeks=&adaptedFrom=&uid=`（`full`、`n`、`enough`、`points`、`quota`） | 教师点确认前看到这几个数 |
+| 15.13 | 不够时的一句话与两条路：「去幼师学坊学几关」链学坊路径页、「请园长分配园所额度」 | `409 insufficient` 的 `points`、`quota`；`links.paths` | 两条路都能点 |
+| 15.14 | 价表展示：主题式 30 / 周、项目式 40 / 周、单节活动 10、改编 5 折 | `GET /api/tools/ping` 的 `prices`，或 quote 应答的 `prices` | 不在工坊里硬写价 |
+
+先做 15.1–15.3、15.5–15.7、15.12–15.13（能看余额、看明细、花之前有数），其余补齐。
 
 ## 四、顺序建议
 
 1. 第 1、2、3、5 条先上（能分享就行），4、6、7、8 同一周补齐。
-2. 第 12、13、15 条第二批：积分扣减上线前先用园所额度池给试点园充值，避免老师第一次用就被拦。
+2. 第 12、13、15 条第二批（15 先做 15.1–15.3、15.5–15.7、15.12–15.13）：积分扣减上线前先用园所额度池给试点园充值，避免老师第一次用就被拦。
 3. 第 9、10、11、14 条第三批。
 
 ## 五、联调要的东西
