@@ -58,7 +58,7 @@ export default function Settings() {
   }
 
   return <div className="narrow">
-    <div className="hdr"><button className="iconbtn" onClick={() => nav(-1)}><Icon name="chevronLeft" /></button><div><h1>设置</h1></div></div>
+    <div className="hdr"><div><h1>设置</h1><div className="sub">外观 · 账号 · 同步 · 接口令牌</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
 
     <Section title="外观">
       <div className="card"><Segmented options={THEMES} value={S.theme === 'light' || S.theme === 'dark' ? S.theme : 'auto'} onChange={v => update(s => { s.theme = v })} /></div>
