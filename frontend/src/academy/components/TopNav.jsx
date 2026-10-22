@@ -5,13 +5,13 @@ import Icon from '../../components/Icon.jsx'
 import { useStore } from '../../store/useStore.js'
 import { useBrand } from '../brand.js'
 
-const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '微课库'], ['cases', '案例库'], ['lectures', '大讲堂'], ['resources', '资源库']]
+const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '微课库'], ['cases', '案例库'], ['lectures', '大讲堂']]
 export default function TopNav() {
   const brand = useBrand()
   const nav = useNavigate(), loc = useLocation()
   const user = useStore(s => s.user)
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'cases' && cur === 'forms') || (k === 'library' && cur === 'collections')
+  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'cases' && (cur === 'forms' || cur === 'resources')) || (k === 'library' && cur === 'collections')
   const role = user?.admin ? ['admin', '运营后台', 'gear'] : user?.academy?.role === 'district' ? ['district', '区县看板', 'gauge'] : user?.academy?.role === 'director' ? ['org', '园长看板', 'gauge'] : null
   return <nav id="topnav" aria-label="主导航">
     <div className="topnav-in">
