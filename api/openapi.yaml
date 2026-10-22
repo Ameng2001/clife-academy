@@ -835,6 +835,17 @@ paths:
         `uid.accepts` 含 `platform` 时，工具传平台账号的 uid 即可（统一登录，按 `user.platform.uid` 找人），也认学坊自己的 `user.id`。没配密钥 404 `off`，密钥不对 403 `tools-key`。
       responses:
         '200': { description: 握手信息 }
+  /api/points/quote:
+    get:
+      tags: [academy]
+      operationId: academyPointsQuote
+      summary: 工具服务端报价（TOOLS_API_KEY）
+      description: |
+        `?pipeline=theme|pbl|activity&weeks=&adaptedFrom=<学坊成果 id>&uid=`。不动账。主题式 30 / 周、项目式 40 / 周、单节活动 10；
+        `adaptedFrom` 是学坊里入库且允许改编的成果就按 5 折（向上取整），答 `{ pipeline, weeks, full, n, adapted {id,title,byName}, note, prices }`，给了 uid 再带 `points / quota / enough`。
+        成果没入库或不许改编 400 `adapt`；pipeline 不认识 400 `pipeline`。
+      responses:
+        '200': { description: 报价 }
   /api/points/balance:
     get:
       tags: [academy]
@@ -849,7 +860,7 @@ paths:
       tags: [academy]
       operationId: academyPointsSpend
       summary: 工具服务端扣积分（TOOLS_API_KEY，幂等）
-      description: '`{ uid, tool: workshop|observe|bagel, n, ref, note? }`。同一 (tool, ref) 只扣一次。'
+      description: '可传 `pipeline / weeks`（与 `n` 二选一）让学坊算价；`adaptedFrom`（学坊成果 id）改编 5 折，流水 note 写「改编自《…》 5 折」，成果没入库或不许改编 400 `adapt`。`{ uid, tool: workshop|observe|bagel, n, ref, note? }`。同一 (tool, ref) 只扣一次。'
       responses:
         '200': { description: '`{ ok, duplicate, points }`' }
         '409': { description: 余额不够 }

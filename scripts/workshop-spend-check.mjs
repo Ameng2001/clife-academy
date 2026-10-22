@@ -4,11 +4,12 @@
  * 给工坊服务端的同学用：对着学坊测试环境把「查余额 → 按管线扣减 → 重复调用不再扣 → 不够答 409 → 园所额度先扣 → 改编半价」跑一遍，
  * 每步打印请求、应答与判定，最后一行 PASS / FAIL。扣掉的积分只在测试账号上。
  *
- *   ACADEMY_URL=https://xueshe.example.cn TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --uid <教师 uid>   # uid 传平台账号的 uid（统一登录）或学坊的 user.id 都行
+ *   ACADEMY_URL=https://xueshe.example.cn TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --uid <教师 uid> [--work <学坊成果 id>]   # uid 传平台账号的 uid（统一登录）或学坊的 user.id 都行；--work 给一门入库成果验改编半价
  *   ACADEMY_URL=http://127.0.0.1:3000 TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --dev 联调老师 [--admin 赵园长]   # 本机开发桩：建账号、推 3 关攒 30 分；--admin 是本机 db 里的管理员，用来充园所额度
  *   node scripts/workshop-spend-check.mjs --price theme 3            # 只算价：主题式 3 周
  *
- * 定价（工坊服务端照这个算，学坊只收 n）：主题式 30 / 周、项目式 40 / 周、单节活动 10；改编一门入库成果 5 折。
+ * 定价：主题式 30 / 周、项目式 40 / 周、单节活动 10；改编一门入库成果 5 折（向上取整）。工坊可以自己算 n（priceOf 是参考实现），
+ * 也可以只传 pipeline / weeks / adaptedFrom 让学坊算（GET /api/points/quote 报价、POST /api/points/spend 直接扣）；改编要传 adaptedFrom（学坊成果 id），学坊核过入库且允许改编才打折。
  * ref 的约定：`course:<courseId>:<stage>`，同一 ref 重复调用学坊答 duplicate:true、不再扣；一门课分阶段扣就换 stage。 */
 
 const PRICE = { theme: { per: 'week', n: 30, name: '主题式课程' }, pbl: { per: 'week', n: 40, name: '项目式课程' }, activity: { per: 'once', n: 10, name: '单节活动' } };
@@ -127,6 +128,27 @@ check('9c 每笔流水带 group，工坊的扣减在 tool 栏，从园所额度�
 check('9d 入口链接 links.mall 指向学坊 /#/mall，带 mallHint', typeof W.links?.mall === 'string' && W.links.mall.endsWith('/#/mall') && W.mallHint === '换教学物料', W.links?.mall);
 const me = await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`, null, tools);
 check('9e 钱包页余额与 balance 接口一致（也就是教师在学坊「我的」看到的）', me.json?.points === W.points && me.json?.quota === W.quota?.left);
+
+// 10. 报价（待办第 14 条）：学坊算的价与本地 priceOf 一致；改编要有学坊成果 id
+r = await call('GET', '/api/points/quote?pipeline=theme&weeks=3', null, tools);
+check('10 报价 theme 3 周 = 90，与 priceOf 一致', r.status === 200 && r.json?.n === 90 && r.json.n === priceOf('theme', 3).n && r.json.full === 90);
+r = await call('GET', '/api/points/quote?pipeline=nope', null, tools); check('10b pipeline 不认识答 400 pipeline', r.status === 400 && r.json?.code === 'pipeline');
+r = await call('GET', '/api/points/quote?pipeline=theme&weeks=3&adaptedFrom=no-such-work', null, tools); check('10c adaptedFrom 不是入库成果答 400 adapt', r.status === 400 && r.json?.code === 'adapt');
+// 11. 改编半价：要一门入库且允许改编的成果。--work <学坊成果 id> 指定；--dev 模式下在本机 db 里找一门
+let workId = flag('--work');
+if (!workId && sessionAuth) { const ws = await call('GET', '/api/works', null, sessionAuth); workId = (ws.json?.works || []).find(w => w.allowAdapt !== false)?.id || null; }
+if (workId) {
+  r = await call('GET', `/api/points/quote?pipeline=theme&weeks=3&adaptedFrom=${encodeURIComponent(workId)}&uid=${encodeURIComponent(uid)}`, null, tools);
+  check('11 改编报价：theme 3 周 90 → 45，note 写「改编自《…》 5 折」，带 enough', r.status === 200 && r.json?.n === 45 && r.json.full === 90 && /^改编自《.+》 5 折/.test(r.json.note || '') && typeof r.json.enough === 'boolean', r.json?.note);
+  const refA = `course:cj-${stamp}:adapt`;
+  r = await call('POST', '/api/points/spend', { uid, tool: 'workshop', pipeline: 'activity', ref: refA, adaptedFrom: workId, note: '联调' }, tools);
+  const bal = (await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`, null, tools)).json;
+  if (r.status === 200) {
+    check('11b 改编扣减：传 pipeline activity + adaptedFrom，学坊算 10 → 扣 5，note 带「改编自《…》 5 折」', r.json.n === 5 && r.json.full === 10 && r.json.adapted?.id === workId && /^改编自《.+》 5 折 · 单节活动 · 联调$/.test(r.json.note), r.json.note);
+    const h = (await call('GET', `/api/points/of?uid=${encodeURIComponent(uid)}`, null, tools)).json.history || [];
+    check('11c 流水里这一笔 -5，note 写「改编自《…》 5 折」', h.some(x => x.kind === 'spend' && x.n === -5 && /^改编自《/.test(x.note || '')));
+  } else check('11b 改编扣减：账户不够 5 分答 409（给测试账号攒点分再跑）', r.status === 409 && r.json?.code === 'insufficient', `余额 ${bal?.total}`);
+} else console.log('  （没有可改编的入库成果，跳过第 11 步：传 --work <学坊成果 id> 指定一门）');
 
 summary();
 

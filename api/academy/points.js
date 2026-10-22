@@ -22,6 +22,14 @@ export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察�
 const TOOL_LABEL = { ...TOOLS, mall: '教学物料商城' };
 // 钱包页的四栏（工坊钱包页按这个分组显示，docs/WORKSHOP-TODO.md 第 15 条）：学与贡献、互动、工具扣减、商城
 export const GROUPS = Object.freeze({ learn: '学与贡献', interact: '互动', tool: '工具扣减', mall: '教学物料商城' });
+// 工坊的建议价（docs/POINTS-DESIGN.md 第三节）：主题式 30 / 周、项目式 40 / 周、单节活动 10；改编一门入库成果 5 折（向上取整）。工坊可以自己算 n，也可以传 pipeline / weeks 让学坊算
+export const PRICE = Object.freeze({ theme: { per: 'week', n: 30, name: '主题式课程' }, pbl: { per: 'week', n: 40, name: '项目式课程' }, activity: { per: 'once', n: 10, name: '单节活动' } });
+export function priceOf(pipeline, weeks = 1, adapted = false) {
+  const p = PRICE[pipeline]; if (!p) return null;
+  const w = p.per === 'week' ? Math.min(20, Math.max(1, Math.floor(Number(weeks) || 1))) : 1;
+  const full = p.n * w;
+  return { pipeline, weeks: w, full, n: adapted ? Math.ceil(full / 2) : full, note: `${p.name}${p.per === 'week' ? ` ${w} 周` : ''}` };
+}
 /** 工具服务端传来的 uid：先当学坊自己的 user.id 找；找不到再当平台账号的 uid（统一登录，user.platform.uid）找。停用的账号不认。 */
 export const toolUserOf = (db, uid) => {
   const id = String(uid || ''); if (!id) return null;
@@ -110,6 +118,15 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   const summary = uid => { settle(uid); return { points: balance(uid), quota: quotaOf(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
   const pubRow = p => ({ kind: p.kind, sub: p.sub || null, group: groupOf(p), n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
   // 工坊钱包页要的整包：两行余额、四栏小计、入口链接。余额与学坊「我的」同一份 summary()，不会两边不一样
+  // 改编依据：学坊里一门入库、允许改编的成果。没传就不是改编；传了但不合答 400 adapt
+  const adaptBasis = raw => {
+    const fid = str(raw, 40); if (!fid) return { ok: true, value: null };
+    const o = (db.works || []).find(x => x.id === fid);
+    if (!o || o.status !== 'approved') return { ok: false, error: 'adaptedFrom must be a work that is in the library' };
+    if (o.allowAdapt === false) return { ok: false, error: 'the sharer did not allow adapting this one' };
+    return { ok: true, value: { id: o.id, title: o.title, byName: o.byName } };
+  };
+  const noteOf = (price, adapted, extra) => [adapted ? `改编自《${adapted.title}》 5 折` : null, price ? price.note : null, extra].filter(Boolean).join(' · ');
   const base = String(origin || '').replace(/\/+$/, '');
   const wallet = uid => {
     const u = db.users.find(x => x.id === uid), hist = history(uid).map(pubRow);
@@ -136,8 +153,8 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
       ok: true, academy: { name: b.name, short: b.short, origin: base },
       tools: TOOLS, groups: GROUPS,
       uid: { accepts: platformConfigured() ? ['academy', 'platform'] : ['academy'], note: platformConfigured() ? '统一登录：uid 传平台账号的 uid 即可，学坊按 user.platform.uid 找人；也认学坊自己的 user.id' : '这套学坊没接平台登录，uid 只认学坊自己的 user.id' },
-      routes: { balance: 'GET /api/points/balance?uid=', spend: 'POST /api/points/spend', wallet: 'GET /api/points/of?uid=' },
-      rules: rules().earn, quota: !!quota
+      routes: { balance: 'GET /api/points/balance?uid=', quote: 'GET /api/points/quote', spend: 'POST /api/points/spend', wallet: 'GET /api/points/of?uid=' },
+      prices: PRICE, rules: rules().earn, quota: !!quota
     });
   },
   // 工具服务端查余额：?uid=   （TOOLS_API_KEY）
@@ -149,17 +166,41 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     const q = quotaOf(uid);
     json(res, 200, { uid, platformUid: u.platform?.uid || null, name: u.name, orgName: q.orgName, points: balance(uid), quota: q.left, total: balance(uid) + q.left });
   },
-  // 工具服务端扣减：{ uid, tool, n(正整数), ref, note }。余额不够答 409；同一 (tool, ref) 重复调用答已扣过、不再扣。
+  // 报价（docs/WORKSHOP-TODO.md 第 14 条）：?pipeline=&weeks=&adaptedFrom=<学坊成果 id>&uid=  不动账。改编入库成果 5 折；uid 给了就带余额与够不够
+  'GET /api/points/quote': async (req, res) => {
+    if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
+    const sp = new URL(req.url, 'http://x').searchParams;
+    const ad = adaptBasis(sp.get('adaptedFrom')); if (!ad.ok) return json(res, 400, { error: ad.error, code: 'adapt' });
+    const price = priceOf(sp.get('pipeline'), sp.get('weeks'), !!ad.value);
+    if (!price) return json(res, 400, { error: 'pipeline must be one of ' + Object.keys(PRICE).join(', '), code: 'pipeline' });
+    const out = { ...price, adapted: ad.value, note: noteOf(price, ad.value, null), prices: PRICE };
+    const u = sp.get('uid') ? toolUserOf(db, sp.get('uid')) : null;
+    if (sp.get('uid') && !u) return json(res, 404, { error: 'no such user', code: 'uid' });
+    if (u) { settle(u.id); const q = quotaOf(u.id).left; Object.assign(out, { uid: u.id, points: balance(u.id), quota: q, enough: balance(u.id) + q >= price.n }); }
+    json(res, 200, out);
+  },
+  // 工具服务端扣减：{ uid, tool, n(正整数) 或 pipeline(+weeks), ref, note, adaptedFrom? }。余额不够答 409；同一 (tool, ref) 重复调用答已扣过、不再扣。
+  // adaptedFrom 是学坊里一门入库且允许改编的成果 id：按 5 折扣，流水 note 写「改编自《…》 5 折」
   'POST /api/points/spend': async (req, res) => {
     if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
     const body = await readBody(req);
-    const tool = TOOLS[body.tool] ? body.tool : null, n = Math.floor(Number(body.n)), ref = str(body.ref, 120);
+    const tool = TOOLS[body.tool] ? body.tool : null, ref = str(body.ref, 120);
     const u = toolUserOf(db, body.uid);
     if (!u) return json(res, 404, { error: 'no such user', code: 'uid' });
     const uid = u.id;
     if (!tool) return json(res, 400, { error: 'tool must be one of ' + Object.keys(TOOLS).join(', '), code: 'tool' });
-    if (!(n >= 1)) return json(res, 400, { error: 'n must be a positive integer', code: 'n' });
+    const ad = adaptBasis(body.adaptedFrom); if (!ad.ok) return json(res, 400, { error: ad.error, code: 'adapt' });
+    let n, full = null, price = null;
+    if (body.pipeline !== undefined && body.n === undefined) {
+      price = priceOf(body.pipeline, body.weeks, !!ad.value);
+      if (!price) return json(res, 400, { error: 'pipeline must be one of ' + Object.keys(PRICE).join(', '), code: 'pipeline' });
+      n = price.n; full = price.full;
+    } else {
+      full = Math.floor(Number(body.n)); n = ad.value ? Math.ceil(full / 2) : full;
+    }
+    if (!(full >= 1)) return json(res, 400, { error: 'n must be a positive integer', code: 'n' });
     if (!ref) return json(res, 400, { error: 'ref required (idempotency key)', code: 'ref' });
+    const note = noteOf(price, ad.value, str(body.note, 120));
     settle(uid);
     // 幂等：两本账（个人积分、园所额度）上只要有一条就是扣过了
     const dup = db.points.find(p => p.uid === uid && p.kind === 'spend' && p.tool === tool && p.ref === ref) || (quota && quota.spent(uid, tool, ref));
@@ -167,11 +208,11 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     const q = quotaOf(uid).left;
     if (balance(uid) + q < n) return json(res, 409, { error: 'insufficient points', code: 'insufficient', points: balance(uid), quota: q });
     // 先扣园所分配的额度，再扣自己赚的
-    const fromQuota = quota ? quota.spend(u, n, tool, ref, str(body.note, 120)) : 0, fromPoints = n - fromQuota;
-    if (fromPoints > 0) push({ uid, kind: 'spend', n: -fromPoints, tool, ref, note: str(body.note, 120) });
+    const fromQuota = quota ? quota.spend(u, n, tool, ref, note) : 0, fromPoints = n - fromQuota;
+    if (fromPoints > 0) push({ uid, kind: 'spend', n: -fromPoints, tool, ref, note, ...(ad.value ? { adaptedFrom: ad.value.id } : {}) });
     saveDb();
-    audit(req, 'points.spend', { user: u, msg: `${tool} ${ref} -${n}（园所额度 ${fromQuota}，积分 ${fromPoints}）` });
-    json(res, 200, { ok: true, duplicate: false, points: balance(uid), quota: quotaOf(uid).left, fromQuota, fromPoints });
+    audit(req, 'points.spend', { user: u, msg: `${tool} ${ref} -${n}（园所额度 ${fromQuota}，积分 ${fromPoints}${ad.value ? '，改编自 ' + ad.value.id + ' 5 折' : ''}）` });
+    json(res, 200, { ok: true, duplicate: false, points: balance(uid), quota: quotaOf(uid).left, fromQuota, fromPoints, n, full, adapted: ad.value, note });
   },
   // 一个人的流水：管理员对账用；工坊的钱包页（钱包页与工坊统一，学坊不单独做）带 TOOLS_API_KEY 取。?uid=
   'GET /api/points/of': async (req, res) => {

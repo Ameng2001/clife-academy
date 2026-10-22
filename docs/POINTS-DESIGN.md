@@ -62,14 +62,14 @@
 
 ## 三、花：两个去处
 
-**1. 工具额度（已有）**：接入的工具服务端带 `TOOLS_API_KEY` 调 `POST /api/points/spend`，按 (tool, ref) 幂等扣减。接上先 `GET /api/tools/ping` 握手（夜 71）；`uid` 传平台账号的 uid 或学坊 `user.id` 都认（统一登录，`toolUserOf`）。工坊按课程起草扣，建议价：
+**1. 工具额度（已有）**：接入的工具服务端带 `TOOLS_API_KEY` 调 `POST /api/points/spend`，按 (tool, ref) 幂等扣减。接上先 `GET /api/tools/ping` 握手（夜 71）；价表 `PRICE` 在 points.js，`GET /api/points/quote` 报价、`spend` 可只传 `pipeline / weeks / adaptedFrom` 由学坊算（夜 72）；`uid` 传平台账号的 uid 或学坊 `user.id` 都认（统一登录，`toolUserOf`）。工坊按课程起草扣，建议价：
 
 | 工具 | 事 | 积分 |
 |---|---|---|
 | 教研工坊 | 主题式课程（按周） | 30 / 周 |
 | 教研工坊 | 项目式课程（按周） | 40 / 周 |
 | 教研工坊 | 单节活动 | 10 |
-| 教研工坊 | 改编一门入库成果（`?from=`） | 原价 5 折 |
+| 教研工坊 | 改编一门入库成果（`?from=`，扣减带 `adaptedFrom`） | 原价 5 折，向上取整；学坊核成果入库且允许改编，note 写「改编自《…》 5 折」 |
 | 观察评价工具 | 生成一份量表 | 10 |
 | 贝果实验室 | 一次创新课生成 | 20 |
 

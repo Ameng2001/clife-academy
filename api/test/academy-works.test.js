@@ -13,7 +13,7 @@ const SUMMARY = '小班 3 周主题式课程，从体测发现下肢力量薄弱
 async function startServer(t) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'academy-works-'));
   const child = spawn(process.execPath, ['server.js'], { cwd: API, stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, PORT: '0', DATA_DIR: dataDir, ORIGIN: 'http://localhost:8080', RP_ID: 'localhost', DEV_LOGIN: '1', FIRST_USER_ADMIN: '1' } });
+    env: { ...process.env, PORT: '0', DATA_DIR: dataDir, ORIGIN: 'http://localhost:8080', RP_ID: 'localhost', DEV_LOGIN: '1', FIRST_USER_ADMIN: '1', TOOLS_API_KEY: 'tools-secret' } });
   const h = { log: '' }; child.stdout.on('data', d => h.log += d); child.stderr.on('data', d => h.log += d);
   const port = await boundPort(child, () => h.log);
   t.after(() => { child.kill(); fs.rmSync(dataDir, { recursive: true, force: true }); });
@@ -131,6 +131,20 @@ test('adapt chain: adapt only from an approved work that allows it; the adaptati
   assert.equal(r.status, 200, JSON.stringify(r.json)); const b = r.json.work.id;
   assert.equal(r.json.work.adaptedFrom.id, a); assert.equal(r.json.work.adaptedFrom.byName, '王老师');
   assert.equal((await call('GET', '/api/works', null, li.auth)).json.works.find(w => w.id === a).adaptations.length, 0, 'not until approved');
+  // 工坊改编半价（WORKSHOP-TODO 第 14 条）：报价与扣减都按入库成果 5 折；没入库的、不许改编的答 400 adapt
+  const key = { Authorization: 'Bearer tools-secret' };
+  let qt = await call('GET', `/api/points/quote?pipeline=theme&weeks=3&adaptedFrom=${a}&uid=${li.id}`, null, key);
+  assert.equal(qt.status, 200); assert.equal(qt.json.full, 90); assert.equal(qt.json.n, 45); assert.equal(qt.json.adapted.title, WORK.title); assert.ok(qt.json.note.startsWith('改编自《' + WORK.title + '》 5 折')); assert.equal(qt.json.enough, false);
+  assert.equal((await call('GET', `/api/points/quote?pipeline=theme&weeks=3`, null, key)).json.n, 90);
+  assert.equal((await call('GET', `/api/points/quote?pipeline=pbl&weeks=4&adaptedFrom=${locked}`, null, key)).json.code, 'adapt');
+  assert.equal((await call('GET', `/api/points/quote?pipeline=nope`, null, key)).json.code, 'pipeline');
+  let sp = await call('POST', '/api/points/spend', { uid: li.id, tool: 'workshop', pipeline: 'activity', ref: 'course:9:draft', adaptedFrom: a }, key);
+  assert.equal(sp.status, 409);
+  sp = await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 10, ref: 'course:8:draft', adaptedFrom: a, note: '联调' }, key);
+  assert.equal(sp.status, 200); assert.equal(sp.json.n, 5); assert.equal(sp.json.full, 10); assert.equal(sp.json.note, '改编自《' + WORK.title + '》 5 折 · 联调');
+  assert.equal((await call('POST', '/api/points/spend', { uid: wang.id, tool: 'workshop', n: 10, ref: 'course:7:draft', adaptedFrom: 'nope' }, key)).json.code, 'adapt');
+  const wh = (await call('GET', '/api/points/of?uid=' + wang.id, null, key)).json.history.find(h => h.kind === 'spend');
+  assert.equal(wh.n, -5); assert.ok(wh.note.startsWith('改编自《'));
   await call('POST', '/api/works/decide', { id: b, action: 'consent' }, (await login('赵园长', 'director', '园C')).auth);
   await approve(b);
   r = await call('GET', '/api/works', null, wang.auth); const orig = r.json.works.find(w => w.id === a), adap = r.json.works.find(w => w.id === b);
