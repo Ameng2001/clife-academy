@@ -13,7 +13,7 @@ export const PREFIX = 'cla_';
 export const MAX_LIVE = 5;
 export const SCOPES = Object.freeze({ read: '只读', submit: '投稿' });
 /** 投稿令牌放行的写路由（server.js 分发处查）。 */
-export const SUBMIT_ROUTES = Object.freeze(['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works']);
+export const SUBMIT_ROUTES = Object.freeze(['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft']);
 const hashOf = secret => crypto.createHash('sha256').update(secret).digest('hex');
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 

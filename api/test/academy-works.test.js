@@ -90,3 +90,25 @@ test('message / allowAdapt / filesScope: message ≤ 80 chars, files hidden outs
   assert.equal(plain.json.work.message, null); assert.equal(plain.json.work.allowAdapt, true); assert.equal(plain.json.work.filesScope, 'all');
   assert.equal((await call('POST', '/api/works', { ...WORK, title: '第二门', id: plain.json.work.id, filesScope: 'nowhere' }, teacher.auth)).json.work.filesScope, 'all');
 });
+
+test('draft: a token lands a draft without changes (and any changes it sends are dropped); only the owner sees it; the owner completes it and submits; the token cannot push it through', async t => {
+  const { call, login } = await startServer(t);
+  await login('运营方', 'director', '本地运营'); // 第一个账号是管理员
+  const teacher = await login('王老师', 'teacher', '园B'), zhao = await login('赵园长', 'director', '园B');
+  const tk = await call('POST', '/api/me/tokens', { label: 'Claude', scope: 'submit' }, teacher.auth);
+  const auth = { Authorization: 'Bearer ' + tk.json.token };
+  let r = await call('POST', '/api/works/draft', { title: '运动：下肢力量', pipeline: 'theme', summary: '短的', domains: ['health'], changes: ['Agent 编的'] }, auth);
+  assert.equal(r.status, 200, JSON.stringify(r.json)); const id = r.json.work.id;
+  assert.equal(r.json.work.status, 'draft'); assert.deepEqual(r.json.work.changes, [], 'token changes are dropped'); assert.equal(r.json.work.source.via, 'Claude'); assert.equal(r.json.url, `/works?tab=mine&id=${id}`); assert.ok(r.json.work.expiresAt > Date.now());
+  assert.equal((await call('POST', '/api/works/draft', { title: 'x' }, auth)).status, 400, 'pipeline required');
+  // 只本人可见：公开列表没有、园长队列没有、「我交的」有
+  assert.ok(!(await call('GET', '/api/works', null, zhao.auth)).json.works.some(w => w.id === id));
+  assert.equal((await call('GET', '/api/works/queue', null, zhao.auth)).json.consent.length, 0);
+  r = await call('GET', '/api/works/mine', null, teacher.auth); assert.equal(r.json.works[0].id, id); assert.equal(r.json.works[0].status, 'draft');
+  // 令牌不能把草稿推进流程；教师补齐后交，变 consent
+  assert.equal((await call('POST', '/api/works', { ...WORK, id }, auth)).status, 403);
+  assert.equal((await call('POST', '/api/works', { ...WORK, id, changes: [] }, teacher.auth)).status, 400, 'still needs changes');
+  r = await call('POST', '/api/works', { ...WORK, id, changes: ['跳箱改成跨跳垫'] }, teacher.auth); assert.equal(r.status, 200, JSON.stringify(r.json)); assert.equal(r.json.work.status, 'consent');
+  assert.equal((await call('GET', '/api/works/queue', null, zhao.auth)).json.consent.length, 1);
+  assert.equal((await call('POST', '/api/works/draft', { id, title: 'x', pipeline: 'theme' }, teacher.auth)).status, 403, 'no longer a draft');
+});

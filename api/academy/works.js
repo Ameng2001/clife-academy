@@ -5,6 +5,8 @@
  *   message    分享者给同行的一句话（≤ 80 字，可空）：不是评价不是总结，显示在卡片与详情上（docs/WORKSHOP-SHARE-DESIGN.md）
  *   allowAdapt 允许别人改编（默认 true）；filesScope 文件外链对谁可见：all 全平台 / community 本共同体 / org 本园（默认 all）。简介与「改了什么」始终全平台可见
  *   status  同专家案例：consent 待园长同意 → pending 待审核 → approved 已入库 | rejected 退回
+ *           另有 draft 草稿（docs/WORKSHOP-SHARE-DESIGN.md 三 B 路）：外部 Agent 用投稿令牌 POST /api/works/draft 落的，或教师自己存的；只有本人看得到，
+ *           不进园长队列、不记积分；令牌投来的 changes 一律丢弃（Agent 不替教师写「改了什么」）；教师在「我交的」补齐后 POST /api/works 带 id 才变 consent。七天没动的自动删。
  *   changes 教师在 AI 起草稿上改了什么（至少一条）：这是成果的「人」的部分，没有就不收。工坊起草不算成果，用过并改过才算。
  *   files   外链（工坊的 docx 下载地址或园所网盘），不上传文件；最多 20 条，只收 https。
  * db.workUses: { workId, uid, name, orgName, note, at } 「用过，有效」，数只给分享者本人、本园园长与管理员看，不排行。
@@ -24,8 +26,12 @@ const isDirector = (u, isAdmin) => !!u && (u.academy?.role === 'director' || isA
 
 export const FILES_SCOPES = Object.freeze({ all: '全平台', community: '本共同体', org: '本园' });
 
+const DRAFT_TTL = 7 * 86400000;
 export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger = null, communities = null }) {
   db.works = db.works || []; db.workUses = db.workUses || [];
+  // 七天没动的草稿自动删（读「我交的」或再落草稿时顺手清）
+  const purgeDrafts = () => { const cut = Date.now() - DRAFT_TTL; const n = db.works.length; db.works = db.works.filter(w => w.status !== 'draft' || (w.updatedAt || w.at) > cut); if (db.works.length !== n) saveDb(); };
+  const touchedAt = w => w.updatedAt || w.at;
   const usesOf = id => db.workUses.filter(u => u.workId === id);
   const seesUses = (user, w) => !!user && (w.by === user.id || isAdmin(user) || (isDirector(user, isAdmin) && w.org && w.org === orgKeyOf(user)));
   const scopeOf = w => FILES_SCOPES[w.filesScope] ? w.filesScope : 'all';
@@ -60,7 +66,8 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
   'GET /api/works/mine': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    json(res, 200, { works: db.works.filter(w => w.by === user.id).sort((a, b) => b.at - a.at).map(w => pub(w, user)) });
+    purgeDrafts();
+    json(res, 200, { works: db.works.filter(w => w.by === user.id).sort((a, b) => b.at - a.at).map(w => ({ ...pub(w, user), ...(w.status === 'draft' ? { expiresAt: touchedAt(w) + DRAFT_TTL } : {}) })) });
   },
   // 园长：本园待同意；审核人：待审核
   'GET /api/works/queue': async (req, res) => {
@@ -81,6 +88,7 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     let w = id ? db.works.find(x => x.id === id) : null;
     if (id && !w) return json(res, 404, { error: 'no such work' });
     if (w && (w.by !== user.id || w.status === 'approved')) return json(res, 403, { error: 'not yours or already in the library', code: 'edit' });
+    if (w && w.status === 'draft' && req.apiToken) return json(res, 403, { error: 'drafts are completed and submitted by the teacher, not by a token', code: 'draft' });
     const title = str(body.title, 120), summary = str(body.summary, 3000);
     if (!title) return json(res, 400, { error: 'title required', code: 'title' });
     if (!PIPELINES[body.pipeline]) return json(res, 400, { error: 'pipeline must be theme | pbl | activity', code: 'pipeline' });
@@ -103,7 +111,7 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     if (w) {
       Object.assign(w, { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, message, allowAdapt, filesScope, updatedAt: now });
       if (courseId || url) w.source = source;
-      if (w.status === 'rejected') { w.status = isDirector(user, isAdmin) ? 'pending' : 'consent'; w.note = null; }
+      if (w.status === 'rejected' || w.status === 'draft') { w.status = isDirector(user, isAdmin) ? 'pending' : 'consent'; w.note = null; if (w.status === 'pending') w.consent = w.consent || { by: user.id, byName: user.name, at: now }; }
     } else {
       const directorSelf = isDirector(user, isAdmin);
       w = { id: crypto.randomBytes(9).toString('base64url'), title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, source, message, allowAdapt, filesScope,
@@ -114,6 +122,35 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     saveDb();
     audit(req, id ? 'work.edit' : 'work.new', { user, msg: w.id });
     json(res, 200, { work: pub(w, user) });
+  },
+  // 草稿：投稿令牌（外部 Agent）或本人。字段同 POST /api/works，但只要 title 与 pipeline；summary 可短、changes 可空。
+  // 令牌投来的 changes 一律丢弃：「改了什么」只能教师自己写。状态 draft，只本人可见，不进队列、不记积分。应答带教师补齐用的地址。
+  'POST /api/works/draft': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    purgeDrafts();
+    const body = await readBody(req);
+    const id = str(body.id, 40);
+    let w = id ? db.works.find(x => x.id === id) : null;
+    if (id && !w) return json(res, 404, { error: 'no such work' });
+    if (w && (w.by !== user.id || w.status !== 'draft')) return json(res, 403, { error: 'not yours or not a draft', code: 'edit' });
+    const title = str(body.title, 120), summary = str(body.summary, 3000);
+    if (!title) return json(res, 400, { error: 'title required', code: 'title' });
+    if (!PIPELINES[body.pipeline]) return json(res, 400, { error: 'pipeline must be theme | pbl | activity', code: 'pipeline' });
+    const changes = req.apiToken ? (w ? w.changes : []) : changesOf(body);
+    const domains = domainsOf(body);
+    const age = AGES.includes(body.age) ? body.age : null, weeks = Number.isInteger(body.weeks) && body.weeks > 0 && body.weeks <= 20 ? body.weeks : null;
+    const src = body.source && typeof body.source === 'object' ? body.source : {};
+    const courseId = str(src.courseId, 80), url = /^https:\/\//.test(str(src.url, 500)) ? str(src.url, 500) : '';
+    const source = req.apiToken ? { kind: 'token', via: req.apiToken.label, tokenId: req.apiToken.id, ...(courseId ? { courseId } : {}), ...(url ? { url } : {}) }
+      : courseId || url ? { kind: 'workshop', ...(courseId ? { courseId } : {}), ...(url ? { url } : {}) } : { kind: 'own' };
+    const fields = { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files: filesOf(body), source, message: str(body.message, 80), allowAdapt: body.allowAdapt !== false, filesScope: FILES_SCOPES[body.filesScope] ? body.filesScope : 'all' };
+    const now = Date.now();
+    if (w) Object.assign(w, fields, { updatedAt: now });
+    else { w = { id: crypto.randomBytes(9).toString('base64url'), ...fields, by: user.id, byName: user.name, org: orgKeyOf(user), orgName: user.academy?.org?.name || null, status: 'draft', note: null, at: now, updatedAt: now, consent: null, curated: null }; db.works.push(w); }
+    saveDb();
+    audit(req, 'work.draft', { user, msg: `${w.id}${req.apiToken ? ' via ' + req.apiToken.label : ''}` });
+    json(res, 200, { work: { ...pub(w, user), expiresAt: now + DRAFT_TTL }, url: `/works?tab=mine&id=${w.id}`, next: '教师在幼师学坊「课程成果 → 我交的」打开这条草稿，补「在起草稿上改了什么」后点「交给园长」。Agent 不替教师写这一栏。' });
   },
   // 园长同意 / 审核人入库或退回：{ id, action: 'consent' | 'approve' | 'reject', note? }
   'POST /api/works/decide': async (req, res) => {

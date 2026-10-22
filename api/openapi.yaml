@@ -4505,11 +4505,21 @@ paths:
         '200': { description: '`{ work }`' }
         '400': { description: 'title / pipeline / summary / changes / domains 不合' }
         '403': { description: 不是本人的，或已入库 }
+  /api/works/draft:
+    post:
+      tags: [academy]
+      operationId: academyDraftWork
+      summary: 落一份课程成果草稿（外部 Agent 用投稿令牌，见 docs/WORKSHOP-SHARE.md）
+      description: '字段同 `POST /api/works`，但只要 title 与 pipeline；summary 可短于 50 字，changes 可空。投稿令牌投来的 changes 一律丢弃：「改了什么」只能教师自己在学坊里写。状态 `draft`，只本人可见，不进园长队列、不记积分；带 `id` 改自己的草稿。七天没动自动删。教师在「课程成果 → 我交的」打开草稿补齐后 `POST /api/works` 带 id 提交，才变 consent。令牌不能用 `POST /api/works` 把草稿推进去（403 draft）。'
+      responses:
+        '200': { description: '`{ work(带 expiresAt), url: /works?tab=mine&id=…, next }`' }
+        '400': { description: 'title / pipeline 不合' }
+        '403': { description: 不是本人的，或不是草稿 }
   /api/works/mine:
     get:
       tags: [academy]
       operationId: academyMyWorks
-      summary: 我交的课程成果
+      summary: 我交的课程成果（含草稿，草稿带 expiresAt）
       responses:
         '200': { description: '`{ works }`' }
   /api/works/queue:

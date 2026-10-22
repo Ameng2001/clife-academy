@@ -61,6 +61,17 @@ Content-Type: application/json
 | 403 | scope | 令牌不是投稿令牌，或调了别的写接口 |
 | 403 | edit | 带了 id 但不是本人的，或已入库 |
 
+## 草稿（外部 Agent 走这条）
+
+用 Claude 等 Agent 整理课程的教师，不直接 `POST /api/works`，而是 `POST /api/works/draft`（同样的令牌、同样的字段）：
+
+- 只要 `title` 与 `pipeline`，`summary` 可短，`changes` **不要带**，带了服务端也丢弃：「改了什么」只能教师自己写；
+- 应答 `{ work, url, next }`，`url` 是 `/works?tab=mine&id=<id>`，把它给教师；教师在学坊打开，补齐「改了什么」后点「交给园长」才进流程；
+- 草稿只有本人看得到，不进园长队列，不记积分；七天没动自动删；
+- 令牌不能用 `POST /api/works` 带 `id` 把草稿推进流程（`403 { code: 'draft' }`）。
+
+教研工坊自己的「分享到幼师学坊」按钮仍走 `POST /api/works`：教师在工坊页面上已经填了「改了什么」。
+
 ## 不要做的
 
 - 不要把工坊的课程评分、送审次数、审核意见带过来。学坊不展示这些数字。
