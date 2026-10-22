@@ -22,7 +22,7 @@
 
 ## 二、仓库与目录
 
-只有一个仓库：`clife-academy`，github.com/Ameng2001/clife-academy（私有）。学坊代码、微信小程序、方案与契约、工坊分享增量全在里面。教研工坊引擎本身是另一件产品，不进本仓库。
+只有一个仓库：`clife-academy`，github.com/Ameng2001/clife-academy，公开仓库（基底 openGym 为 AGPL，公开发布符合其许可）。学坊代码、微信小程序、方案与契约、工坊分享增量全在里面。教研工坊引擎本身是另一件产品，不进本仓库。
 
 ```
 api/            Node 原生 http，无框架。server.js 装路由；api/academy/ 42 个业务模块，每个导出 'METHOD /path' 映射
