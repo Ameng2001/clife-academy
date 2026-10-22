@@ -39,7 +39,7 @@ export default function Library() {
       <button className={'chip' + (!scene ? ' on' : '')} onClick={() => setParam('scene', null)}>全部场景</button>
       {scenes.map(s => <button key={s} className={'chip' + (s === scene ? ' on' : '')} onClick={() => setParam('scene', s === scene ? null : s)}>{s}</button>)}
     </div>
-    <div className="sect"><div className="sect-t">{q ? `找到 ${rows.length} 关` : `${rows.length} 关`}</div><div className="sect-b">
+    <div className="sect"><div className="sect-t">{q ? `找到 ${rows.length} 关` : `${rows.length} 关`}</div><div className="sect-b cols2">
       {!rows.length && <div className="lrow small muted">没有匹配的微课。换个词，或者去掉岗位、场景筛选。</div>}
       {rows.map(({ lesson: l, where }) => { const st = statusOf(S.progress, l.id); return (
         <div key={l.id} className="lrow tap" onClick={() => nav('/level/' + l.id)}>

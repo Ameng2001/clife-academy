@@ -90,7 +90,7 @@ export default function Resources() {
       </div>
     </div>}
 
-    <div className="sect"><div className="sect-t">{data ? `${data.resources.length} 条` : '正在取数…'}</div><div className="sect-b">
+    <div className="sect"><div className="sect-t">{data ? `${data.resources.length} 条` : '正在取数…'}</div><div className="sect-b cols2">
       {data && !data.resources.length && <div className="lrow small muted">没有匹配的资源。{!user && '登录后还能看到本园上传的。'}</div>}
       {data?.resources.map(r => <div key={r.id} className="lrow" style={{ alignItems: 'flex-start' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
