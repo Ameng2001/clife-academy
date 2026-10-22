@@ -36,6 +36,8 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
 /* ---------------- 桌面壳（≥ 1000px）：顶部导航替代底部 tab，容器放宽，首页两栏，浏览页卡片两列 ---------------- */
 #topnav{display:none}
 .landing-main{display:none}
+.paths-list{display:none}
+.paths-grid{display:block}
 .home-grid{display:block}
 @media (min-width:1000px){
   #tabbar{display:none !important}
@@ -61,6 +63,11 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
   .wide .grid2>.card.open,.wide .grid2>.card:only-child{grid-column:1/-1}
   .wide .sect-b.cols2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
   .wide .hdr h1{font-size:30px}
+  /* 学习路径：左栏路径竖列表，右栏关卡 */
+  .paths-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+  #app .paths-chips{display:none}
+  .paths-list{display:block;margin-top:0;position:sticky;top:76px}
+  .paths-list .lrow.on{background:color-mix(in srgb,var(--acc) 10%,transparent)}
   /* 手机上 chips 是横向滑动条；桌面没法滑，让它换行 */
   #app .chips{flex-wrap:wrap;overflow-x:visible}
   /* 登录前页 */
