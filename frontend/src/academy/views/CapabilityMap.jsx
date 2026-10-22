@@ -17,7 +17,7 @@ export default function CapabilityMap() {
   const subs = useSubmissions(s => s.all)
   useEffect(() => { if (user) useSubmissions.getState().loadAll() }, [user?.id])
   const m = useMemo(() => capabilityMap(S.progress, subs || []), [S.progress, subs])
-  return <div className="narrow">
+  return <div className="narrow wide">
     <div className="hdr"><div><h1>能力地图</h1><div className="sub">《幼儿园教师专业标准》七个领域 · {m.evidenced} 个有证据</div></div><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div>
     <div className="card small muted">只给本人看。证据是关卡通过、作品被点评通过、研讨作答三类；不是分数，不和别人比，不作考核依据。</div>
     <div className="sect"><div className="sect-b">

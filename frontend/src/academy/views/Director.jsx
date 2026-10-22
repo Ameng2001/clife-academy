@@ -70,12 +70,12 @@ export default function Director() {
   </div>
 
   if (!user) return <div className="narrow wide">{head}<div className="card small muted">登录园长账号后可看本园情况。</div></div>
-  if (err) return <div className="narrow">{head}<div className="card small">{err.status === 403 ? '这页只给园长看。岗位由平台账号决定。' : err.status === 401 ? '登录已过期，请重新登录。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
-  if (!data) return <div className="narrow">{head}<div className="card small muted">正在取数…</div></div>
+  if (err) return <div className="narrow wide">{head}<div className="card small">{err.status === 403 ? '这页只给园长看。岗位由平台账号决定。' : err.status === 401 ? '登录已过期，请重新登录。' : '没取到数据' + (err.message ? '：' + err.message : '')}</div></div>
+  if (!data) return <div className="narrow wide">{head}<div className="card small muted">正在取数…</div></div>
 
   const roles = data.roles.filter(r => r.members > 0)
   const needs = roles.filter(r => r.next && r.finished < r.members).sort((a, b) => a.rate - b.rate)
-  return <div className="narrow">
+  return <div className="narrow wide">
     {head}
     <div className="tiles">
       <div className="tile"><div className="l"><Icon name="personCircle" />本园在学</div><div className="v">{data.members_total}<span className="small muted"> 人</span></div></div>

@@ -61,6 +61,8 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
   .wide .grid2>.card.open{grid-column:1/-1}
   .wide .sect-b.cols2{display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
   .wide .hdr h1{font-size:30px}
+  /* 手机上 chips 是横向滑动条；桌面没法滑，让它换行 */
+  #app .chips{flex-wrap:wrap;overflow-x:visible}
   /* 登录前页 */
   .landing{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start;padding-top:24px}
   .landing-main{display:block}
