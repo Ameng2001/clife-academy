@@ -78,8 +78,8 @@ export default function Home() {
       <div className="small muted" style={{ marginTop: 6 }}>不受解锁限制，点开直接看「讲」与「看」；走关还是在学习路径。</div>
     </form>
 
-    <div className="card tap" style={{ marginTop: 10, padding: 12 }} onClick={() => nav('/works')}>
-      <div className="ac-row"><div><div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>课程成果 · 从教研工坊分享过来</div><div className="small" style={{ marginTop: 4 }}>在工坊做出来、班里用过的课，写明改了什么，入库 +3 学分；学分换的积分又能在工坊里用。</div></div><Icon name="chevronRight" /></div>
+    <div className="card tap" style={{ marginTop: 10, padding: 12 }} onClick={() => nav('/community')}>
+      <div className="ac-row"><div><div className="lbl2" style={{ color: 'var(--label-2)', fontSize: 13 }}>教研共同体 · 大家做过的</div><div className="small" style={{ marginTop: 4 }}>专家案例是园里做过的事，课程成果是在教研工坊做出来、班里用过的课。实名分享，入库记学分；学分换的积分又能在工坊里用。</div></div><Icon name="chevronRight" /></div>
     </div>
 
     <div className="tiles">

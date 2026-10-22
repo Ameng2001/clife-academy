@@ -66,7 +66,7 @@ export default function Library() {
   const count = type === 'clip' ? `${clipRows.length} 条` : q ? `找到 ${rows.length} 关` : view === 'recent' ? `${recentRows.length} 关` : `${shown.length} 关`
 
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>精品微课</h1><div className="sub">遇到事查一下 · {total} 关按场景查，不受解锁限制；要走关去学习路径</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/paths')}><Icon name="steps" /> 学习路径</button><button className="chip" onClick={() => nav('/collections')}><Icon name="grid" /> 合集</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button></div></div>
+    <div className="hdr"><div><h1>精品微课</h1><div className="sub">遇到事查一下 · {total} 关按场景查，不受解锁限制；要走关去学习路径</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/paths')}><Icon name="steps" /> 学习路径</button><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button></div></div>
     <div style={{ position: 'relative', marginBottom: 12 }}>
       <TextField placeholder="搜标题、操作步骤、平台菜单，如「批量管理」" value={q} onChange={e => setQ(e.target.value)} style={{ paddingInlineStart: 36 }} />
       <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--label-3)', display: 'flex' }}><Icon name="magnifier" /></span>

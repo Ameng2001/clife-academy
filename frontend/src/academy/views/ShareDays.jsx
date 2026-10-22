@@ -51,7 +51,7 @@ export default function ShareDays() {
     try { await api('/api/sharedays', { method: 'POST', body: JSON.stringify({ communityId: form.communityId, at: new Date(form.at + 'T14:00').getTime(), place: form.place, theme: form.theme }) }); toast('已办'); setForm(null); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>园所分享日</h1><div className="sub">每学期一次 · 各园一页 · 共同体内交流 · 不评比</div></div><div className="hdr-actions">{data?.communities.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ communityId: data.communities[0].id, at: toLocal(Date.now() + 14 * 86400000), place: '', theme: '' })}>办一场</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    <div className="hdr"><div><h1>园所分享日</h1><div className="sub">每学期一次 · 各园一页 · 共同体内交流 · 不评比</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button>{data?.communities.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ communityId: data.communities[0].id, at: toLocal(Date.now() + 14 * 86400000), place: '', theme: '' })}>办一场</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card">
       <div className="row" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>

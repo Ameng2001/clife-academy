@@ -96,7 +96,7 @@ export default function Works() {
   const card = (w, extra) => <WorkCard key={w.id} w={w} open={openId === w.id} onOpen={() => setOpenId(openId === w.id ? null : w.id)} onUsed={used} actions={extra} />
 
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>课程成果</h1><div className="sub">在教研工坊做出来、班里用过的课 · 实名共享 · 每门写明改了什么</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button>{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一门课</Button>}</div></div>
+    <div className="hdr"><div><h1>课程成果</h1><div className="sub">在教研工坊做出来、班里用过的课 · 实名共享 · 每门写明改了什么</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button><button className="chip" onClick={() => nav('/cases')}><Icon name="sparkles" /> 专家案例</button>{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一门课</Button>}</div></div>
     {!user && <div className="card small muted">课程成果实名共享，登录后可见。</div>}
     {user && <div className="ac-tabs" style={{ marginBottom: 12 }}>
       <button className={tab === 'all' ? 'on' : ''} onClick={() => setParam('tab', null)}>全部{data ? ` ${data.total}` : ''}</button>

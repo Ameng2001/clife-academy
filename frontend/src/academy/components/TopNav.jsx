@@ -5,13 +5,15 @@ import Icon from '../../components/Icon.jsx'
 import { useStore } from '../../store/useStore.js'
 import { useBrand } from '../brand.js'
 
-const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '精品微课'], ['cases', '专家案例'], ['lectures', '名师讲堂']]
+// 左四项是「学」（PGC），最右一项「教研共同体」是「分享」（UGC：专家案例、课程成果、合集、分享日、工作室）。
+const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '精品微课'], ['lectures', '名师讲堂'], ['community', '教研共同体']]
+const UGC = new Set(['community', 'cases', 'works', 'forms', 'resources', 'collections', 'sharedays', 'studios'])
 export default function TopNav() {
   const brand = useBrand()
   const nav = useNavigate(), loc = useLocation()
   const user = useStore(s => s.user)
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'cases' && (cur === 'forms' || cur === 'resources' || cur === 'works')) || (k === 'library' && cur === 'collections')
+  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'community' && UGC.has(cur))
   const role = user?.admin ? ['admin', '运营后台', 'gear'] : user?.academy?.role === 'district' ? ['district', '区县看板', 'gauge'] : user?.academy?.role === 'director' ? ['org', '园长看板', 'gauge'] : null
   return <nav id="topnav" aria-label="主导航">
     <div className="topnav-in">

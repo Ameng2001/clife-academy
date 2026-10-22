@@ -1,6 +1,6 @@
 // 大课堂的应用壳：沿用上游的 store（状态、同步、登录）、主题、Toast、Modals、SyncBanner，
 // 路由、底栏、设置、同步状态条都是大课堂自己的；上游健身视图已删。
-// 壳分两套：手机底部四个 tab（Tabs），桌面 ≥ 1000px 顶部导航（TopNav）；哪套显示由 academy.css 的断点定。没登录时是 Landing（桌面左介绍右登录卡）。
+// 壳分两套：手机底部五个 tab（Tabs），桌面 ≥ 1000px 顶部导航（TopNav）；哪套显示由 academy.css 的断点定。没登录时是 Landing（桌面左介绍右登录卡）。
 import { useEffect, useState } from 'react'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
@@ -26,6 +26,7 @@ import CapabilityMap from './views/CapabilityMap.jsx'
 import Resources from './views/Resources.jsx'
 import Cases from './views/Cases.jsx'
 import Works from './views/Works.jsx'
+import Community from './views/Community.jsx'
 import Lectures from './views/Lectures.jsx'
 import Forms from './views/Forms.jsx'
 import Policy from './views/Policy.jsx'
@@ -63,11 +64,13 @@ function Tab({ active, icon, label, onClick }) {
 function Tabs() {
   const nav = useNavigate(), loc = useLocation()
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'home' && cur === 'settings')
+  const ugc = new Set(['community', 'cases', 'works', 'forms', 'resources', 'collections', 'sharedays', 'studios'])
+  const on = k => cur === k || (k === 'paths' && cur === 'level') || (k === 'home' && cur === 'settings') || (k === 'community' && ugc.has(cur))
   return <nav id="tabbar">
     <Tab active={on('home')} icon="house" label="首页" onClick={() => nav('/home')} />
     <Tab active={on('paths')} icon="list" label="学习路径" onClick={() => nav('/paths')} />
     <Tab active={on('library')} icon="magnifier" label="精品微课" onClick={() => nav('/library')} />
+    <Tab active={on('community')} icon="share" label="共同体" onClick={() => nav('/community')} />
     <Tab active={on('me')} icon="personCircle" label="我的" onClick={() => nav('/me')} />
   </nav>
 }
@@ -110,6 +113,7 @@ function Shell() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/works" element={<Works />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/lectures" element={<Lectures />} />
           <Route path="/forms/:caseId" element={<Forms />} />
           <Route path="/policy" element={<Policy />} />

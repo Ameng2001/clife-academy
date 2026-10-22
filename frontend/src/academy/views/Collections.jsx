@@ -60,7 +60,7 @@ export default function Collections() {
   const list = d?.collections || []
   const open = openId ? list.find(c => c.id === openId) : null
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>合集</h1><div className="sub">按主题攒案例、关卡、讲堂微课、名师讲堂、资源 · 不计数、不排行</div></div><div className="hdr-actions">{d?.scopes.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ id: null, title: '', desc: '', scope: d.scopes[0].key, communityId: d.community?.id || '', items: [] })}>建一份</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    <div className="hdr"><div><h1>合集</h1><div className="sub">按主题攒案例、关卡、讲堂微课、名师讲堂、资源 · 不计数、不排行</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/community')}><Icon name="share" /> 教研共同体</button>{d?.scopes.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ id: null, title: '', desc: '', scope: d.scopes[0].key, communityId: d.community?.id || '', items: [] })}>建一份</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card" style={{ marginBottom: 14 }}>
       <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改这份' : '建一份合集'} · 最多 {d.max} 条</div>
