@@ -782,7 +782,7 @@ paths:
       operationId: adminPointsRules
       summary: 积分比例（管理员）
       responses:
-        '200': { description: '`{ rules: { earn: { level, path, cert, practice, camp, case, work, drill, contest }, interact: { used, usedBy, adopted, review, campPost }, at, byName }, earnDefaults, interactDefaults, tools }`' }
+        '200': { description: '`{ rules: { earn: { level, path, cert, practice, camp, case, work, drill, contest, adapted, lecture, shareday }, interact: { used, usedBy, adopted, review, campPost }, at, byName }, earnDefaults, interactDefaults, tools }`' }
     post:
       tags: [admin]
       operationId: adminSetPointsRules

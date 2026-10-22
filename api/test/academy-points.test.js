@@ -140,3 +140,26 @@ test('interaction points: used/usedBy with per-work-per-day and daily caps, adop
   assert.equal((await pts(zhao)).points, zhaoBefore); assert.equal((await pts(wang)).points, 36 + 20 + 5);
   r = await call('GET', '/api/admin/points/rules', null, admin.auth); assert.equal(r.json.interactDefaults.usedBy.n, 2); assert.equal(r.json.rules.interact.used, 5);
 });
+
+test('contribution points: the original author of an adapted case, a lecture sharer invited on stage; each once', async t => {
+  const { call, login } = await startServer(t);
+  const admin = await login('运营方', 'director', '本地运营');
+  const wang = await login('王老师', 'teacher', '甲园'), li = await login('李老师', 'teacher', '乙园');
+  const pts = async who => (await call('GET', '/api/me/points', null, who.auth)).json;
+  let r = await call('POST', '/api/cases', { title: '心情墙', domain: 'env', use: 'adapt', text: TEXT }, wang.auth); const cid = r.json.case.id;
+  await call('POST', '/api/cases/decide', { id: cid, action: 'approve' }, admin.auth);
+  assert.equal((await pts(wang)).points, 20);
+  // 李改编王的案例入库：李记 case 20，王记 adapted 20
+  r = await call('POST', '/api/cases', { title: '心情墙（中班版）', domain: 'env', use: 'adapt', text: TEXT, adaptedFrom: cid, adaptNote: '照片换成名字卡' }, li.auth);
+  assert.equal(r.status, 200, JSON.stringify(r.json)); const aid = r.json.case.id;
+  await call('POST', '/api/cases/decide', { id: aid, action: 'approve' }, admin.auth);
+  assert.equal((await pts(li)).points, 20);
+  r = await pts(wang); assert.equal(r.points, 40); assert.ok(r.history.some(h => h.sub === 'adapted' && h.n === 20 && h.note.includes('李老师')), JSON.stringify(r.history));
+  // 讲堂邀上台：王记 lecture 50，再邀同一场不重复
+  r = await call('POST', '/api/lectures', { title: '课程成果分享专场', at: Date.now() + 86400000, minutes: 60 }, admin.auth); assert.equal(r.status, 200, JSON.stringify(r.json)); const lid = r.json.lecture.id;
+  r = await call('POST', '/api/lectures/invite', { id: lid, uid: wang.id, caseId: cid }, admin.auth); assert.equal(r.status, 200, JSON.stringify(r.json));
+  assert.equal((await pts(wang)).points, 90);
+  await call('POST', '/api/lectures/invite', { id: lid, uid: wang.id }, admin.auth);
+  assert.equal((await pts(wang)).points, 90);
+  assert.equal((await call('GET', '/api/admin/points/rules', null, admin.auth)).json.rules.earn.lecture, 50);
+});

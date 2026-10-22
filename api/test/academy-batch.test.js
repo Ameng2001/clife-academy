@@ -169,6 +169,10 @@ test('share days: district admin hosts for a community; each director submits on
   r = await call('POST', '/api/sharedays/page', { id, caseIds: [caseId, 'nope'], note: '这学期我们改了两个区角。' }, a.auth); assert.equal(r.status, 200); assert.equal(r.json.shareday.pages[0].cases.length, 1);
   r = await call('POST', '/api/sharedays/page', { id, caseIds: [caseId], note: '乙园这学期想借甲园那条心情墙的做法。' }, b.auth); assert.equal(r.json.shareday.pages[1].cases.length, 0);   // 不是本园的案例不收
   r = await call('GET', '/api/sharedays', null, b.auth); assert.equal(r.json.sharedays[0].pages.length, 2); assert.equal(JSON.stringify(r.json).includes('"votes"'), false);
+  // 交页的园长记积分（规则表 shareday，默认 20），改页不重复
+  r = await call('GET', '/api/me/points', null, b.auth); assert.ok(r.json.history.some(h => h.sub === 'shareday' && h.n === 20), JSON.stringify(r.json.history));
+  await call('POST', '/api/sharedays/page', { id, caseIds: [caseId], note: '乙园改了一下这页的话。' }, b.auth);
+  assert.equal((await call('GET', '/api/me/points', null, b.auth)).json.history.filter(h => h.sub === 'shareday').length, 1);
   r = await call('POST', '/api/sharedays/close', { id }, d.auth); assert.ok(r.json.shareday.closedAt);
   assert.equal((await call('POST', '/api/sharedays/page', { id, caseIds: [], note: '晚了晚了晚了晚了晚了' }, a.auth)).json.code, 'closed');
 });

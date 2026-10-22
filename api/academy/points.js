@@ -24,7 +24,10 @@ export const EARN = Object.freeze({
   case:     { name: '专家案例入库', n: 20 },
   work:     { name: '课程成果入库', n: 30 },
   drill:    { name: '研讨作答被精选', n: 20 },
-  contest:  { name: '赛作品入库', n: 20 }
+  contest:  { name: '赛作品入库', n: 20 },
+  adapted:  { name: '自己的案例被改编入库（原作者）', n: 20 },
+  lecture:  { name: '名师讲堂上台分享', n: 50 },
+  shareday: { name: '园所分享日交页（园长）', n: 20 }
 });
 // 互动：n 积分；day / month 本人每日 / 每月最多记几次；perAboutDay 同一作品每天最多记几次
 export const INTERACT = Object.freeze({

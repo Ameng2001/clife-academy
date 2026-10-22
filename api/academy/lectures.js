@@ -81,7 +81,7 @@ export function cleanPack(p) {
   return { preview: { points: strs(p.preview?.points, 60, PACK_POINTS_MAX) }, clips, poster: { headline: str(p.poster?.headline, 40), lines: strs(p.poster?.lines, 60, PACK_LINES_MAX) } };
 }
 
-export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null }) {
+export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null, ledger = null }) {
   db.lectures = db.lectures || [];
   const now = () => Date.now();
   const endOf = l => l.at + (l.minutes || 60) * 60000;
@@ -250,7 +250,7 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
     const c = caseId ? (db.cases || []).find(x => x.id === caseId && x.status === 'approved' && x.by === t.id) : null;
     if (caseId && !c) return json(res, 400, { error: 'pick one of their approved cases', code: 'case' });
     l.sharers = l.sharers || [];
-    if (!l.sharers.some(s => s.uid === t.id)) l.sharers.push({ uid: t.id, name: t.name, orgName: t.academy?.org?.name || null, caseId, at: now() });
+    if (!l.sharers.some(s => s.uid === t.id)) { l.sharers.push({ uid: t.id, name: t.name, orgName: t.academy?.org?.name || null, caseId, at: now() }); if (ledger) ledger.grant(t.id, 'lecture', `${l.id}:${t.id}`, 1, `名师讲堂上台分享：${l.title.slice(0, 24)}`); }
     if (c) { l.caseIds = l.caseIds || []; if (!l.caseIds.includes(c.id)) l.caseIds.push(c.id); }
     db.titles = db.titles || [];
     let title = db.titles.find(x => x.uid === t.id && x.title === 'sharer');

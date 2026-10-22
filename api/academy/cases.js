@@ -182,6 +182,8 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
       if (body.action === 'approve' && c.adaptedFrom) {
         const o = db.cases.find(x => x.id === c.adaptedFrom.caseId);
         if (o && o.by !== c.by && !db.caseUses.some(u => u.caseId === o.id && u.uid === c.by)) db.caseUses.push({ caseId: o.id, uid: c.by, name: c.byName, orgName: c.orgName, note: `改编为《${c.title}》`, at: now });
+        // 原作者记一次「被改编入库」（改编者自己的入库另记 case）
+        if (o && o.by !== c.by && ledger) ledger.grant(o.by, 'adapted', c.id, 1, `「${o.title.slice(0, 24)}」被 ${c.byName} 改编入库`);
       }
     } else return json(res, 400, { error: 'action must be consent, approve or reject', code: 'action' });
     saveDb();

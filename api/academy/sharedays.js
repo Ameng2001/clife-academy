@@ -11,7 +11,7 @@ import { isDistrictAdmin, districtKeyOf } from './district.js';
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 export const MAX_CASES = 8;
 
-export function shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities }) {
+export function shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities, ledger = null }) {
   db.sharedays = db.sharedays || [];
   const now = () => Date.now();
   const newId = () => crypto.randomBytes(9).toString('base64url');
@@ -73,6 +73,8 @@ export function shareDayRoutes({ json, readBody, db, saveDb, readSession, audit,
     let p = s.pages.find(x => x.org === org);
     if (p) Object.assign(p, { caseIds: ids, note, by: user.id, byName: user.name, updatedAt: now() });
     else { p = { org, orgName: user.academy?.org?.name || null, caseIds: ids, note, by: user.id, byName: user.name, at: now(), updatedAt: now() }; s.pages.push(p); }
+    // 交页的园长记一次（一次分享日一园一次，改页不重复）
+    if (ledger) ledger.grant(user.id, 'shareday', `${s.id}:${org}`, 1, `园所分享日交页：${s.theme ? s.theme.slice(0, 24) : s.id}`);
     saveDb();
     audit(req, 'shareday.page', { user, msg: s.id });
     json(res, 200, { shareday: pub(s, user) });

@@ -1809,7 +1809,7 @@ const COMMUNITIES = createCommunities(db);
 const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER, ledger: LEDGER });
 setInterval(() => { try { QUESTIONS.escalateDue(); } catch { /* 下一轮再试 */ } }, 10 * 60000).unref?.();
 // 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
-const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
+const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER, ledger: LEDGER });
 const WEEKLY = weeklyRoutes({ json, db, saveDb, readSession, isAdmin, readStateCached, notifier: NOTIFIER });
 setInterval(() => { WEEKLY.pushWeekly().catch(e => console.error('weekly report:', e.message)); }, 10 * 60000).unref?.();
 setInterval(() => { LECTURES.tick().catch(e => console.error('lecture reminder:', e.message)); }, 60000).unref();
@@ -2672,7 +2672,7 @@ const routes = {
   ...campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger: LEDGER }),
   ...studyGroupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...programRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
-  ...shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
+  ...shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES, ledger: LEDGER }),
   ...WEEKLY.routes,
   ...academyCoachRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS }),
   ...academyAdminRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, auditRows: () => auditKeep(auditLines()) }),

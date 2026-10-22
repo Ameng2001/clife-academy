@@ -3,7 +3,7 @@
  * 事件记录（db.credits，名字是历史遗留，平台只有积分一种资产）：关卡以外的专业发展事件，一条一次：案例 / 课程成果 / 赛作品入库、
  *   研讨作答被精选、走完一条路径、取得证书、实践关作品通过点评、练习营结营。积分由 points.js 包住 grant 按规则记，这里不管数。
  *   路径与证书没有服务端事件（进度在客户端状态里），由 ledger.learn(uid, stateOf) 按记录补记，读积分 / 荣誉时调。
- *   db.credits: { uid, kind:'case'|'work'|'drill'|'contest'|'path'|'cert'|'practice'|'camp', ref, n, note, at }，同一 (kind, ref) 只记一次。
+ *   db.credits: { uid, kind:'case'|'work'|'drill'|'contest'|'adapted'|'lecture'|'shareday'|'path'|'cert'|'practice'|'camp', ref, n, note, at }，同一 (kind, ref) 只记一次。
  * 勋章：不存，按记录算（条件公开，见 BADGES）。成长勋章看路径完成；贡献勋章看案例、精选、点评次数、带教。
  *   不按在线时长、登录天数发任何东西；不做勋章墙排行。
  * 荣誉称号：人授。db.titles: { id, uid, name, org, title, label, reason, by, byName, at }
