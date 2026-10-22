@@ -19,17 +19,18 @@ function Tokens() {
   const [d, setD] = useState(null), [fresh, setFresh] = useState(null), [busy, setBusy] = useState(false)
   const load = () => api('/api/me/tokens').then(setD).catch(() => setD(null))
   useEffect(() => { load() }, [])
-  const make = async () => {
-    const label = prompt('这枚令牌给哪个客户端用？（标签，便于日后撤）', 'Claude Desktop'); if (label === null) return
+  const make = async scope => {
+    const label = prompt(scope === 'submit' ? '这枚投稿令牌给哪个系统用？（标签会写在它投来的案例上）' : '这枚令牌给哪个客户端用？（标签，便于日后撤）', scope === 'submit' ? '教研工坊' : 'Claude Desktop'); if (label === null) return
     setBusy(true)
-    try { const r = await api('/api/me/tokens', { method: 'POST', body: JSON.stringify({ label }) }); setFresh(r.token); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+    try { const r = await api('/api/me/tokens', { method: 'POST', body: JSON.stringify({ label, scope }) }); setFresh(r.token); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
   const revoke = async t => { if (!confirm(`撤「${t.label}」？用它的客户端立刻失效。`)) return; try { await api('/api/me/tokens/revoke', { method: 'POST', body: JSON.stringify({ id: t.id }) }); load() } catch (e) { toast('没成') } }
   const copy = async () => { try { await navigator.clipboard.writeText(fresh); toast('已复制') } catch { toast('复制失败，手动选中复制') } }
   return <>
     {fresh && <div className="card" style={{ background: 'color-mix(in srgb,var(--acc) 10%,transparent)' }}><div className="small muted">新令牌，只显示这一次，现在复制走</div><div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, wordBreak: 'break-all', margin: '6px 0' }}>{fresh}</div><div className="row" style={{ gap: 8 }}><Button size="sm" variant="primary" onClick={copy}>复制</Button><Button size="sm" onClick={() => setFresh(null)}>收起</Button></div></div>}
-    {(d?.tokens || []).map(t => <Row key={t.id} icon="key" title={t.label} subtitle={`建于 ${new Date(t.at).toLocaleDateString('zh-CN')}${t.lastUsedAt ? ' · 最近用 ' + new Date(t.lastUsedAt).toLocaleString('zh-CN', { hour12: false }) : ' · 还没用过'}`} accessory="chevron" onClick={() => revoke(t)} />)}
-    <Row icon="plus" title="新建一枚" subtitle={d ? `${d.tokens.length}/${d.max} 枚在用 · 填进 LLM 客户端的 ACADEMY_TOKEN` : ''} onClick={() => !busy && make()} accessory="chevron" />
+    {(d?.tokens || []).map(t => <Row key={t.id} icon="key" title={`${t.label} · ${t.scopeName || '只读'}`} subtitle={`建于 ${new Date(t.at).toLocaleDateString('zh-CN')}${t.lastUsedAt ? ' · 最近用 ' + new Date(t.lastUsedAt).toLocaleString('zh-CN', { hour12: false }) : ' · 还没用过'}`} accessory="chevron" onClick={() => revoke(t)} />)}
+    <Row icon="plus" title="新建一枚只读令牌" subtitle={d ? `${d.tokens.length}/${d.max} 枚在用 · 填进 LLM 客户端的 ACADEMY_TOKEN` : ''} onClick={() => !busy && make('read')} accessory="chevron" />
+    <Row icon="plus" title="新建一枚投稿令牌" subtitle="给教研工坊、第三方往案例库投稿用：只放三条案例库写接口，署名是你，仍走园长同意与审核" onClick={() => !busy && make('submit')} accessory="chevron" />
   </>
 }
 

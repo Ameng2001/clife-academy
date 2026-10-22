@@ -47,7 +47,7 @@ import { shareDayRoutes } from './academy/sharedays.js';
 import { weeklyRoutes } from './academy/weekly.js';
 import { coachRoutes as academyCoachRoutes } from './academy/coach.js';
 import { adminRoutes as academyAdminRoutes } from './academy/admin.js';
-import { tokenRoutes as academyTokenRoutes, tokenUserOf, looksLikeToken } from './academy/tokens.js';
+import { tokenRoutes as academyTokenRoutes, tokenOf, tokenAllows, looksLikeToken } from './academy/tokens.js';
 import { cohortRoutes as academyCohortRoutes } from './academy/cohort.js';
 import { transferRoutes as academyTransferRoutes } from './academy/transfer.js';
 import { startCadence } from './coach/cadence.js';
@@ -630,8 +630,8 @@ function sessionOf(req) {
   const cookie = cookieToken(req);
   const tok = cookie || (auth.startsWith('Bearer ') ? auth.slice(7).trim() : null);
   if (!tok) return null;
-  // 只读接口令牌（academy/tokens.js）：MCP 桥带来的。不过期、不续签；非 GET 在分发处已被挡掉。
-  if (!cookie && looksLikeToken(tok)) { const u = tokenUserOf(db, tok); return u ? { user: u, exp: Infinity, bearer: true, readonly: true } : null; }
+  // 接口令牌（academy/tokens.js）：MCP 桥或投稿方带来的。不过期、不续签；写请求在分发处按 scope 挡（只读一律 403，投稿只放三条案例库路由）。
+  if (!cookie && looksLikeToken(tok)) { const r = tokenOf(db, tok); return r ? { user: r.user, exp: Infinity, bearer: true, readonly: r.token.scope !== 'submit', token: { id: r.token.id, label: r.token.label, scope: r.token.scope || 'read' } } : null; }
   const payload = verifySig(tok);
   if (!payload) return null;
   const [uid, exp, ver] = payload.split(':');
@@ -2757,8 +2757,11 @@ const server = http.createServer(async (req, res) => {
   if (mm) { key = req.method + ' /api/media/{hash}'; req.mediaHash = mm[1]; }
   const handler = routes[key];
   if (!handler) return json(res, 404, { error: 'not found' });
-  // 只读接口令牌只能读：带着它的写请求在这里就回头，不进任何路由。
-  if (req.method !== 'GET' && req.method !== 'HEAD' && looksLikeToken((req.headers.authorization || '').replace(/^Bearer\s+/i, ''))) return json(res, 403, { error: 'read-only token', code: 'readonly' });
+  // 接口令牌的写请求在这里就定：只读令牌一律回头；投稿令牌只放案例库那三条，别的也回头。不进任何路由。
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
+    const bt = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    if (looksLikeToken(bt)) { const r = tokenOf(db, bt); if (!r || !tokenAllows(r.token, key)) return json(res, 403, { error: r?.token?.scope === 'submit' ? 'submit token: only case submissions' : 'read-only token', code: r?.token?.scope === 'submit' ? 'scope' : 'readonly' }); req.apiToken = r.token; }
+  }
   if (!csrfOk(req, key)) {
     // Logged, not audited: this is reachable without a session, and an audit entry per attempt
     // would let anyone fill the log. An operator who has genuinely mis-set ORIGIN needs to see

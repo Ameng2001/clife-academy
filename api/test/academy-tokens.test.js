@@ -58,3 +58,28 @@ test('a token reads as its owner, cannot write, is listed without its secret, an
   for (let i = 0; i < 5; i++) assert.equal((await call('POST', '/api/me/tokens', {}, dir.auth)).status, 200);
   assert.equal((await call('POST', '/api/me/tokens', {}, dir.auth)).json.code, 'max');
 });
+
+test('a submit token can post a case and light forms as its owner, nothing else; the case carries the token label', async t => {
+  const { call, login } = await startServer(t);
+  const dir = await login('赵园长', 'director', '甲园');
+  const made = await call('POST', '/api/me/tokens', { label: '教研工坊', scope: 'submit' }, dir.auth);
+  assert.equal(made.json.item.scope, 'submit');
+  const tok = { Authorization: 'Bearer ' + made.json.token };
+  assert.equal((await call('GET', '/api/me', null, tok)).status, 200);
+  const text = '之前午睡前孩子们总是吵，老师要喊好几遍。后来我们在入睡前加了十分钟安静角，先听一段故事。现在大部分孩子十分钟内能躺下。';
+  let r = await call('POST', '/api/cases', { title: '工坊投来的安静角', domain: 'life', use: 'adapt', text }, tok);
+  assert.equal(r.status, 200); assert.equal(r.json.case.byName, '赵园长'); assert.deepEqual(r.json.case.source, { kind: 'token', via: '教研工坊', tokenId: made.json.item.id }); assert.equal(r.json.case.status, 'pending');
+  // 别的写不行
+  assert.equal((await call('POST', '/api/admin/notices', { title: 'x', text: 'yyyy' }, tok)).json.code, 'scope');
+  assert.equal((await call('POST', '/api/cases/decide', { id: r.json.case.id, action: 'approve' }, tok)).json.code, 'scope');
+  assert.equal((await call('POST', '/api/me/tokens', { label: 'x' }, tok)).json.code, 'scope');
+  // 入库后可以用投稿令牌做轻形态
+  const admin = dir; // 第一个登录的是管理员
+  assert.equal((await call('POST', '/api/cases/decide', { id: r.json.case.id, action: 'approve' }, admin.auth)).status, 200);
+  r = await call('POST', '/api/cases/forms/draft', { caseId: r.json.case.id, kind: 'memo' }, tok); assert.equal(r.status, 200);
+  r = await call('POST', '/api/cases/forms', { id: r.json.form.id, content: r.json.form.content }, tok); assert.equal(r.status, 200);
+  // 只读令牌仍然一律 403
+  const ro = await call('POST', '/api/me/tokens', { label: 'MCP' }, dir.auth);
+  assert.equal((await call('POST', '/api/cases', { title: 'x', domain: 'life', use: 'adapt', text }, { Authorization: 'Bearer ' + ro.json.token })).json.code, 'readonly');
+  const list = await call('GET', '/api/me/tokens', null, dir.auth); assert.deepEqual(list.json.submitRoutes, ['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms']);
+});

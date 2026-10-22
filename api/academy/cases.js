@@ -1,6 +1,6 @@
 /* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
  *
- * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'contest'|'own', submissionId?, levelId?, answerId?, drillId?, contestId?, entryId?, tag?, selected? },
+ * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'contest'|'own'|'token', submissionId?, levelId?, answerId?, drillId?, contestId?, entryId?, tag?, selected?, via?(投稿令牌标签) },
  * adaptedFrom: { caseId, note } 改编来源链（ROADMAP 第十三节第 3 条）：改自哪条入库案例、改了什么。原作者与改编者都署名；改编案例入库时给原案例记一次「用过，有效」（改编者不是原作者时）。
  *   链可以多级（改自改编的），对外给 chain（往上最多 5 级）与 adaptations（改自这条的已入库案例）。
  * db.caseUses: { caseId, uid, name, orgName, note, at }  「用过，有效」：别的教师用了这份案例标一次、留一句怎么改的；数只给分享者本人、本园园长与管理员看，不排行。
@@ -103,8 +103,8 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     if (!DOMAINS.includes(body.domain)) return json(res, 400, { error: 'domain required', code: 'domain' });
     const use = USES[body.use] ? body.use : (c ? c.use : 'idea');
     const age = AGES.includes(body.age) ? body.age : (c && body.age === undefined ? c.age : null);
-    // 从实践关作品推荐
-    let author = user, source = { kind: 'own' }, files = [];
+    // 从实践关作品推荐；投稿令牌（tokens.js scope submit）投来的记 kind 'token' 与令牌标签
+    let author = user, source = req.apiToken ? { kind: 'token', via: req.apiToken.label, tokenId: req.apiToken.id } : { kind: 'own' }, files = [];
     const subId = str(body.submissionId, 40);
     if (subId) {
       const s = (db.submissions || []).find(x => x.id === subId);
