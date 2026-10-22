@@ -112,7 +112,7 @@ export default function Home() {
     </div>}
     </div><aside className="home-side">
     {lecture && <div className="card tappable" style={{ background: 'var(--acc)', color: '#fff', marginTop: 14 }} onClick={() => nav('/lectures')}>
-      <div className="small" style={{ opacity: .85 }}>园长大讲堂 · 每月一场</div>
+      <div className="small" style={{ opacity: .85 }}>名师讲堂 · 每月一场</div>
       <div className="small" style={{ opacity: .85, marginTop: 2 }}>{fmtWhen(lecture.at, lecture.minutes)}{lecture.phase === 'live' ? ' · 正在直播' : ''}</div>
       <div style={{ fontWeight: 700, fontSize: 18, margin: '4px 0' }}>{lecture.title}</div>
       {lecture.desc && <div className="small" style={{ opacity: .9 }}>{lecture.desc}</div>}

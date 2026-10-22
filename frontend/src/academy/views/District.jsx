@@ -78,13 +78,13 @@ export default function District() {
           <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">斗课园内赛</div><span className="small muted">{d.activity.contests.total} 场 · 进行中 {d.activity.contests.open} · 已收官 {d.activity.contests.done}</span></div>
           <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">研讨关作答</div><span className="small muted">{d.activity.drillAnswers} 条</span></div>
           <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">入库案例</div><span className="small muted">{d.activity.cases} 条</span></div>
-          <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">大讲堂预约</div><span className="small muted">{d.activity.lectureBookings} 人次</span></div>
+          <div className="lrow"><div style={{ flex: 1 }} className="lrow-t">名师讲堂预约</div><span className="small muted">{d.activity.lectureBookings} 人次</span></div>
           <div className="lrow small muted">跨园共同体与共同体赛分期开；先在下面登记本区园所名单。</div>
         </div>
       </div>}
 
       {cm && <div className="sect">
-        <div className="sect-t">跨园共同体 <span className="small muted">{cm.communities.length} 组 · 组内共享案例库与联合研讨题</span></div>
+        <div className="sect-t">跨园共同体 <span className="small muted">{cm.communities.length} 组 · 组内共享专家案例与联合研讨题</span></div>
         <div className="sect-b">
           {cm.communities.map(c => <div key={c.id} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{c.name}</div><div className="small muted">{c.orgs.map(o => o.name + (o.key === c.lead ? '（组长园）' : '')).join('、')}{c.note ? ' · ' + c.note : ''}</div></div>
             <div className="row" style={{ gap: 6 }}><Button size="sm" variant="ghost" onClick={() => setCform({ id: c.id, name: c.name, orgs: c.orgs.map(o => o.key), lead: c.lead || '', note: c.note || '', known: c.orgs })}>改</Button><Button size="sm" variant="ghost" onClick={() => deleteCommunity(c)}>解散</Button></div></div>)}
@@ -99,7 +99,7 @@ export default function District() {
             </div>
             <div className="row" style={{ gap: 8, marginTop: 10, justifyContent: 'flex-end' }}><Button size="sm" onClick={() => setCform(null)}>取消</Button><Button size="sm" variant="primary" disabled={busy} onClick={saveCommunity}>{cform.id ? '存' : '建组'}</Button></div>
           </div> : <div className="lrow"><Button size="sm" variant="ghost" onClick={() => setCform({ name: '', orgs: [], lead: '', note: '' })}>建一组</Button><span className="small muted" style={{ marginInlineStart: 8 }}>没编组的园 {cm.free.length} 所</span></div>}
-          <div className="lrow small muted">组内共享的是教研产出：案例库、联合研讨题的作答。不共享任何一园的进度、体检卡、人员表。联合研讨题在「每周一题」里出。</div>
+          <div className="lrow small muted">组内共享的是教研产出：专家案例、联合研讨题的作答。不共享任何一园的进度、体检卡、人员表。联合研讨题在「每周一题」里出。</div>
         </div>
       </div>}
 

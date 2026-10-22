@@ -51,7 +51,7 @@ function Showcase({ sc, reload, nav, openId }) {
       {d.note && <div className="small" style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{d.note}</div>}
       {d.summary && <div className="small" style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>收官：{d.summary}</div>}
       <div style={{ marginTop: 10 }}><div className="small muted">上台作品{d.canHost && !d.closedAt ? '（按出场顺序）' : ''}</div>
-        {!d.entries.length && <div className="lrow small muted">{d.canHost ? (d.pool?.length ? '从下面的候选池挑。' : '候选池还是空的：共同体赛收官有入选作品、或工作室收录产出后出现；也可在案例库另选。') : '主持人还没定。'}</div>}
+        {!d.entries.length && <div className="lrow small muted">{d.canHost ? (d.pool?.length ? '从下面的候选池挑。' : '候选池还是空的：共同体赛收官有入选作品、或工作室收录产出后出现；也可在专家案例另选。') : '主持人还没定。'}</div>}
         {d.entries.map((c, i) => <div key={c.id} className="lrow" style={{ display: 'block' }}>
           <div className="ac-row"><div style={{ flex: 1 }} className="tap" onClick={() => nav('/cases?q=' + encodeURIComponent(c.title))}><div className="lrow-t">{i + 1}. {c.title}{c.mine ? <span className="tag" style={{ marginInlineStart: 6, color: 'var(--acc)' }}>我的</span> : null}</div><div className="small muted">{c.byName}{c.orgName ? ' · ' + c.orgName : ''}{c.communityName ? ' · ' + c.communityName : ''}{c.tag ? ' · ' + c.tag : ''}</div></div>{d.canHost && !d.closedAt && <Button size="sm" onClick={() => post('/api/showcases/entries', { id: sc.id, caseIds: d.entries.filter(x => x.id !== c.id).map(x => x.id) }, '已撤下', done)}>撤下</Button>}</div>
           {c.comment ? <div className="small" style={{ marginTop: 6, padding: '8px 10px', background: 'color-mix(in srgb,var(--acc) 7%,transparent)', borderRadius: 8, whiteSpace: 'pre-wrap' }}><b>名师点评</b>（{c.comment.byName}）：{c.comment.text}</div> : null}
@@ -60,7 +60,7 @@ function Showcase({ sc, reload, nav, openId }) {
       </div>
       {d.sharers.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">年度分享者</div>{d.sharers.map(x => <div key={x.uid} className="lrow"><div style={{ flex: 1 }}><div className="lrow-t">{x.name}{x.orgName ? '（' + x.orgName + '）' : ''}</div><div className="small muted">{x.reason}</div></div></div>)}</div>}
       {d.canHost && !d.closedAt && <>
-        {d.pool?.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">候选池：各共同体赛入选作品与工作室产出（也可在案例库另选）</div>{d.pool.map(c => <CaseRow key={c.id} c={c} nav={nav} right={<Button size="sm" onClick={() => post('/api/showcases/entries', { id: sc.id, caseIds: [...d.entries.map(x => x.id), c.id] }, '已上台', done)}>上台</Button>} />)}</div>}
+        {d.pool?.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">候选池：各共同体赛入选作品与工作室产出（也可在专家案例另选）</div>{d.pool.map(c => <CaseRow key={c.id} c={c} nav={nav} right={<Button size="sm" onClick={() => post('/api/showcases/entries', { id: sc.id, caseIds: [...d.entries.map(x => x.id), c.id] }, '已上台', done)}>上台</Button>} />)}</div>}
         {d.entries.length > 0 && <div style={{ marginTop: 10 }}><div className="small muted">授「年度分享者」（只能授上台作品的作者，留理由）</div>{[...new Map(d.entries.map(c => [c.byName, c])).values()].map(c => <div key={c.id} className="row" style={{ gap: 8, marginTop: 6, alignItems: 'center' }}><span className="small" style={{ minWidth: 60 }}>{c.byName}</span><TextField placeholder="理由" value={sharer[c.id] ?? ''} onChange={e => setSharer({ ...sharer, [c.id]: e.target.value })} style={{ flex: 1 }} /><Button size="sm" disabled={(sharer[c.id] || '').trim().length < 5} onClick={() => post('/api/showcases/sharer', { id: sc.id, uid: c.byUid, reason: sharer[c.id] }, '已授', done)}>授</Button></div>)}</div>}
         <div className="row" style={{ gap: 8, marginTop: 12, alignItems: 'center' }}><TextField placeholder="收官一句话（可空）" value={summary} onChange={e => setSummary(e.target.value)} style={{ flex: 1 }} /><Button size="sm" variant="primary" disabled={!d.entries.length} onClick={() => window.confirm('收官后上台案例标「市级展示 · ' + sc.year + '」，不能再改。确定？') && post('/api/showcases/close', { id: sc.id, summary }, '已收官', done)}>收官</Button></div>
       </>}
@@ -107,6 +107,6 @@ export default function Studios() {
       {!shows.showcases.length && <div className="card small muted">还没有市级展示。{shows.canHost ? '点「办一场」。' : '由名师工作室主持，各共同体赛的入选作品上台。'}</div>}
       {shows.showcases.map(sc => <Showcase key={sc.id} sc={sc} reload={load} nav={nav} openId={sp.get('show')} />)}
     </div>}
-    <div className="small muted" style={{ marginTop: 14 }}>三级赛制：园内赛 → 共同体赛 → 市级展示。展示不评分、不排名、不按园统计；上台案例在案例库标「市级展示」。</div>
+    <div className="small muted" style={{ marginTop: 14 }}>三级赛制：园内赛 → 共同体赛 → 市级展示。展示不评分、不排名、不按园统计；上台案例在专家案例标「市级展示」。</div>
   </div>
 }

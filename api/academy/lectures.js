@@ -1,4 +1,4 @@
-/* 园长大讲堂（docs/ROADMAP.md 第四节）：每月一场，政策解读、园所建设路径、课程领导力。
+/* 名师讲堂（docs/ROADMAP.md 第四节）：每月一场，政策解读、园所建设路径、课程领导力。
  * 直播在第三方（腾讯会议、视频号等），平台只做三件事：预约、回放列表、讲义。
  *
  * db.lectures: { id, title, desc, who, speaker, at(开播时间戳), minutes, liveUrl, replayUrl, slides:{url}|{file:{hash,name,type,size,owner}}|null,
@@ -11,7 +11,7 @@
  * 讲堂包（ROADMAP 第十三节）：一场讲堂不只是一场直播，配讲前预习卡、讲后三五条微课切片、一张知识海报。
  * l.pack: { script(讲稿), preview:{ points:[≤5] }, clips:[{ id, title, desc, start? }](≤6), poster:{ headline, lines:[≤6] }, draftedAt, model:boolean, updatedAt }
  * 草稿由规则从讲稿切出来（段落→要点、切片、海报），接了模型只改措辞不改结构；管理员改定后保存。
- * 对外：预习卡随场次一直可见；切片与海报等讲完（phase=done）才给；讲稿只有管理员看得到。切片进微课库「讲堂微课」一节（GET /api/lectures/clips）。 */
+ * 对外：预习卡随场次一直可见；切片与海报等讲完（phase=done）才给；讲稿只有管理员看得到。切片进精品微课「讲堂微课」一节（GET /api/lectures/clips）。 */
 import crypto from 'node:crypto';
 import { TITLES } from './honors.js';
 import { orgKeyOf } from './org.js';
@@ -53,10 +53,10 @@ export function packDraftOf(l, script) {
   const points = paras.map(p => clip(p.head || firstSentence(p.text), 60)).filter(Boolean).slice(0, PACK_POINTS_MAX);
   const groups = paras.length <= 5 ? paras.map(p => [p]) : (() => { const n = 5, size = Math.ceil(paras.length / n), g = []; for (let i = 0; i < paras.length; i += size) g.push(paras.slice(i, i + size)); return g; })();
   const clips = groups.filter(g => g.length).map((g, i) => ({ id: 'c' + (i + 1), title: clip(g[0].head || firstSentence(g[0].text), 30), desc: clip(g.map(p => p.text).join(' '), 200), start: null })).slice(0, PACK_CLIPS_MAX);
-  const poster = { headline: clip(l.title || '', 40), lines: [...points.slice(0, 4), ...(l.speaker ? [l.speaker + ' 主讲 · 园长大讲堂'] : [])].slice(0, PACK_LINES_MAX) };
+  const poster = { headline: clip(l.title || '', 40), lines: [...points.slice(0, 4), ...(l.speaker ? [l.speaker + ' 主讲 · 名师讲堂'] : [])].slice(0, PACK_LINES_MAX) };
   return { preview: { points }, clips, poster };
 }
-export const PACK_SYSTEM = `你在整理一场幼儿园园长大讲堂的「讲堂包」：讲前预习卡要点、讲后微课切片的标题与一句话简介、一张知识海报的标题与几行字。
+export const PACK_SYSTEM = `你在整理一场幼儿园名师讲堂的「讲堂包」：讲前预习卡要点、讲后微课切片的标题与一句话简介、一张知识海报的标题与几行字。
 ${systemRules(['ai-drafts', 'child-data', 'child-screen', 'real-name', 'plain'])}
 结构照草稿：points 条数不变；clips 条数与 id 不变，只改 title（≤ 30 字）和 desc（≤ 200 字）；poster.lines 条数不变。只输出 JSON，不要别的。`;
 export async function polishPack(draft, l, script) {
@@ -114,7 +114,7 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
       for (const uid of l.bookings) {
         if (l.reminded.includes(uid)) continue;
         l.reminded.push(uid); changed = true; n++;
-        notifier.send(uid, 'lecture', { title: l.title, at: l.at, who: l.speaker || '园长大讲堂', url: l.liveUrl || '' }, 'pages/live/live');
+        notifier.send(uid, 'lecture', { title: l.title, at: l.at, who: l.speaker || '名师讲堂', url: l.liveUrl || '' }, 'pages/live/live');
       }
       if (changed) saveDb();
     }
@@ -204,7 +204,7 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
     audit(req, 'lecture.pack.save', { user, msg: l.id });
     json(res, 200, { lecture: pub(l, user) });
   },
-  // 讲堂微课：讲完的场次的切片，给微课库「讲堂微课」一节与小程序。谁都能看。
+  // 讲堂微课：讲完的场次的切片，给精品微课「讲堂微课」一节与小程序。谁都能看。
   'GET /api/lectures/clips': async (req, res) => {
     const rows = db.lectures.filter(l => phase(l) === 'done' && l.pack?.clips?.length).sort((a, b) => b.at - a.at)
       .flatMap(l => l.pack.clips.map(c => ({ id: l.id + ':' + c.id, lectureId: l.id, lecture: l.title, speaker: l.speaker || '', at: l.at, title: c.title, desc: c.desc, start: c.start ?? null, replayUrl: l.replayUrl || null })));
@@ -254,7 +254,7 @@ export function lectureRoutes({ json, readBody, db, saveDb, readSession, audit, 
     if (c) { l.caseIds = l.caseIds || []; if (!l.caseIds.includes(c.id)) l.caseIds.push(c.id); }
     db.titles = db.titles || [];
     let title = db.titles.find(x => x.uid === t.id && x.title === 'sharer');
-    if (!title) { title = { id: crypto.randomBytes(9).toString('base64url'), uid: t.id, name: t.name, org: orgKeyOf(t), title: 'sharer', label: TITLES.sharer, reason: `园长大讲堂分享：${l.title}`, by: user.id, byName: user.name, at: now() }; db.titles.push(title); }
+    if (!title) { title = { id: crypto.randomBytes(9).toString('base64url'), uid: t.id, name: t.name, org: orgKeyOf(t), title: 'sharer', label: TITLES.sharer, reason: `名师讲堂分享：${l.title}`, by: user.id, byName: user.name, at: now() }; db.titles.push(title); }
     l.titleIds = l.titleIds || []; if (!l.titleIds.includes(title.id)) l.titleIds.push(title.id);
     l.updatedAt = now(); saveDb();
     audit(req, 'lecture.invite', { user, msg: `${l.id} ${t.id}` });

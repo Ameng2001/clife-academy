@@ -34,7 +34,7 @@ function Card({ s, onReviewed, director }) {
     {s.text && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{s.text}</div>}
     {s.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{s.files.map(f => <a key={f.hash} href={`api/submissions/file?id=${s.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/submissions/file?id=${s.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {done && s.review && <div className="small" style={{ marginTop: 10, color: 'var(--label-2)' }}>{s.review.byName} · {fmtDay(s.review.at)}{s.review.comment ? ' · ' + s.review.comment : ''}</div>}
-    {done && s.status === 'pass' && director && <div style={{ marginTop: 8 }}><Button size="sm" icon="sparkles" onClick={recommend}>推荐入案例库</Button></div>}
+    {done && s.status === 'pass' && director && <div style={{ marginTop: 8 }}><Button size="sm" icon="sparkles" onClick={recommend}>推荐入专家案例</Button></div>}
     {!done && (open ? <div style={{ marginTop: 12, paddingTop: 12, borderTop: 'var(--hair) solid var(--sep)' }}>
       {s.rubric.map((r, i) => <div key={i} className="ac-row" style={{ marginTop: 6 }}>
         <span style={{ fontSize: 14, flex: 1 }}>{r}</span>

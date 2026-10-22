@@ -44,7 +44,7 @@ function Answers({ d, user }) {
         <TextField placeholder={a.review ? '改一句意见' : '一句意见'} value={notes[a.id] ?? ''} onChange={e => setNotes({ ...notes, [a.id]: e.target.value })} style={{ flex: 1, minWidth: 160 }} />
         <Button size="sm" disabled={busy} onClick={() => review(a, false)}>点评</Button>
         <Button size="sm" variant="tinted" icon="starFill" disabled={busy} onClick={() => review(a, true)}>精选</Button>
-        {a.review?.featured && (user.academy?.role === 'director' || user.admin) && <Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, a)}>推荐入案例库</Button>}
+        {a.review?.featured && (user.academy?.role === 'director' || user.admin) && <Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, a)}>推荐入专家案例</Button>}
       </div>}
     </div>)}
   </div>
@@ -76,7 +76,7 @@ function Drill({ d, user, first, onChange, onEdit, onDelete }) {
         <div style={{ marginTop: 6, fontSize: 15, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{d.mine.text}</div>
         {d.mine.review && <div className="small" style={{ marginTop: 8, paddingTop: 8, borderTop: 'var(--hair) solid var(--sep)', color: 'var(--label-2)' }}>{d.mine.review.byName} 的点评：{d.mine.review.comment}</div>}
         {d.mine.review && <div className="row" style={{ gap: 8, marginTop: 6, alignItems: 'center' }}><Button size="sm" variant={d.mine.review.helpful ? 'tinted' : 'plain'} onClick={async () => { try { await api('/api/drills/helpful', { method: 'POST', body: JSON.stringify({ answerId: d.mine.id, on: !d.mine.review.helpful }) }); load() } catch (e) { useUI.getState().toast('没标成') } }}>{d.mine.review.helpful ? '已标「有帮助」' : '这条点评有帮助'}</Button><span className="small muted">只有你能标；计点评人的贡献勋章</span></div>}
-        <div className="row" style={{ gap: 8, marginTop: 8 }}><Button size="sm" onClick={() => { setText(d.mine.text); setEditing(true) }}>再写一版</Button><Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, d.mine)}>分享到案例库</Button></div>
+        <div className="row" style={{ gap: 8, marginTop: 8 }}><Button size="sm" onClick={() => { setText(d.mine.text); setEditing(true) }}>再写一版</Button><Button size="sm" icon="sparkles" onClick={() => toCase(nav, d, d.mine)}>分享到专家案例</Button></div>
       </div>}
       {canAnswer && <div style={{ marginTop: 12 }}>
         <TextArea rows={5} placeholder="先写你会怎么做或怎么说，再写为什么。50–150 字" value={text} onChange={e => setText(e.target.value)} />

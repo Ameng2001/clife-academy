@@ -93,3 +93,24 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
   #app .hdr > div:first-child { flex: 1 1 52%; }
   #app .hdr > .hdr-actions { flex: 0 1 auto; flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
 }
+
+/* 精品微课：课程卡片网格（手机两列，桌面四列）与带标签的筛选行 */
+.course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+#app .course { padding: 10px; margin: 0; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+.course-cover { aspect-ratio: 16 / 9; border-radius: 10px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 10px; color: #fff; }
+.course-cover .lb { font-size: 12px; font-weight: 600; opacity: .95; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.course-cover .ic { position: absolute; top: 10px; inset-inline-end: 10px; font-size: 22px; opacity: .9; }
+.course-cover.role { background: linear-gradient(135deg, #1f6b5c, #3aa17e); }
+.course-cover.domain { background: linear-gradient(135deg, #2f4f9b, #5b8def); }
+.course-cover.stage { background: linear-gradient(135deg, #8a4b1f, #d98a3c); }
+.course-cover.admin { background: linear-gradient(135deg, #4a4a52, #7b7b86); }
+.course-cover.clip { background: linear-gradient(135deg, #5a3a8a, #9b6fd1); }
+.course-t { font-weight: 600; font-size: 15px; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.course-m { font-size: 12px; color: var(--label-2); line-height: 1.4; }
+.course-f { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-top: auto; }
+.frow { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 4px; }
+.frow > .fl { flex: none; width: 60px; padding-top: 7px; font-size: 13px; color: var(--label-2); }
+.frow > .chips { flex: 1; min-width: 0; margin: 0; }
+@media (min-width: 1000px) {
+  #app .course-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+}

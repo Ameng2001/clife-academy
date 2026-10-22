@@ -53,7 +53,7 @@ export default function Director() {
   const grantTitle = async () => {
     if (reason.trim().length < 5) return useUI.getState().toast('写授予理由，至少 5 字')
     setBusy(true)
-    try { await api('/api/org/titles', { method: 'POST', body: JSON.stringify({ uid: titleFor.id, title: titleKey, label: titleLabel, reason }) }); useUI.getState().toast(`已记：${titleFor.name} · ${titleKey === 'custom' ? titleLabel : titles.titleNames[titleKey]}。颁发安排在大讲堂或园内活动上。`); setTitleFor(null); setReason(''); setTitleLabel(''); loadTitles() }
+    try { await api('/api/org/titles', { method: 'POST', body: JSON.stringify({ uid: titleFor.id, title: titleKey, label: titleLabel, reason }) }); useUI.getState().toast(`已记：${titleFor.name} · ${titleKey === 'custom' ? titleLabel : titles.titleNames[titleKey]}。颁发安排在名师讲堂或园内活动上。`); setTitleFor(null); setReason(''); setTitleLabel(''); loadTitles() }
     catch (e) { useUI.getState().toast('没成' + (e.message ? '：' + e.message : '')) }
     finally { setBusy(false) }
   }
@@ -120,7 +120,7 @@ export default function Director() {
         {m.id !== user.id && <button className="chip" style={{ marginInlineStart: 6 }} disabled={busy} onClick={() => { setTitleFor(m); setReason('') }}>授称号</button>}
       </div>)}
       {titleFor && <div className="lrow" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
-        <div className="small muted">给 {titleFor.name} 授荣誉称号 · 写清理由，颁发在大讲堂或园内活动上，这里只是记录</div>
+        <div className="small muted">给 {titleFor.name} 授荣誉称号 · 写清理由，颁发在名师讲堂或园内活动上，这里只是记录</div>
         <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
           <select className="ac-sel" value={titleKey} onChange={e => setTitleKey(e.target.value)}>{Object.entries(titles?.titleNames || {}).map(([k, v]) => <option key={k} value={k}>{k === 'custom' ? '自定…' : v}</option>)}</select>
           {titleKey === 'custom' && <TextField placeholder="称号名" value={titleLabel} onChange={e => setTitleLabel(e.target.value)} style={{ width: 140 }} />}

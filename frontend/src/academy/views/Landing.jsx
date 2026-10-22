@@ -1,5 +1,5 @@
-// 登录前页：桌面上左边是介绍、路径目录、下一场大讲堂与回放数，右边是登录卡（Login.jsx）；手机上只有登录卡（academy.css 把左栏藏掉）。
-// 不是门户：能公开的只有这些；案例库、看板都要登录。数据读 /api/lectures（不登录也给）和本地课包目录。
+// 登录前页：桌面上左边是介绍、路径目录、下一场名师讲堂与回放数，右边是登录卡（Login.jsx）；手机上只有登录卡（academy.css 把左栏藏掉）。
+// 不是门户：能公开的只有这些；专家案例、看板都要登录。数据读 /api/lectures（不登录也给）和本地课包目录。
 import { useEffect, useState } from 'react'
 import Icon from '../../components/Icon.jsx'
 import { PATH_KEYS, PATH_META, pathNameOf, levelsOf } from '../../lib/lessons.js'
@@ -34,7 +34,7 @@ export default function Landing({ relogin }) {
           {groups.map(([k, ps]) => <div key={k} style={{ marginTop: 8 }}><div className="small muted">{KIND[k]}路径</div><div className="chips" style={{ marginTop: 4 }}>{ps.map(p => <span key={p} className="chip nocap">{pathNameOf(p)} · {levelsOf(p).length} 关</span>)}</div></div>)}
         </div>
         <div className="card">
-          <div className="sect-t" style={{ marginTop: 0 }}>园长大讲堂</div>
+          <div className="sect-t" style={{ marginTop: 0 }}>名师讲堂</div>
           {next ? <>
             <div className="small muted" style={{ marginTop: 6 }}>下一场 · {fmtWhen(next.at, next.minutes)}</div>
             <div style={{ fontWeight: 700, fontSize: 17, margin: '4px 0' }}>{next.title}</div>
@@ -42,7 +42,7 @@ export default function Landing({ relogin }) {
             {next.pack?.preview?.points?.length > 0 && <div className="small" style={{ marginTop: 8 }}>{next.pack.preview.points.map((x, i) => <div key={i}>{i + 1}. {x}</div>)}</div>}
             <div className="small muted" style={{ marginTop: 8 }}>登录后可预约，开播前提醒</div>
           </> : <div className="small muted" style={{ marginTop: 6 }}>每月一场，政策解读、园所建设路径、课程领导力。{lec ? '下一场还没排。' : ''}</div>}
-          {lec?.done?.length > 0 && <div className="small muted" style={{ marginTop: 10 }}>已有 {lec.done.length} 场回放{lec.done.some(l => l.pack?.clips?.length) ? '，切出的微课进微课库' : ''}</div>}
+          {lec?.done?.length > 0 && <div className="small muted" style={{ marginTop: 10 }}>已有 {lec.done.length} 场回放{lec.done.some(l => l.pack?.clips?.length) ? '，切出的微课进精品微课' : ''}</div>}
         </div>
       </div>
       <div className="small muted" style={{ marginTop: 14 }}>平台由本地运营方运营，账号来自园所所在的平台；没有账号请联系本园园长或区县教研员。</div>

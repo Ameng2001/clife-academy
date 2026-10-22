@@ -1,4 +1,4 @@
-/* 案例库（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
+/* 专家案例（docs/ROADMAP.md 第四节）：实践关与研讨关的优秀作品（园长同意后）、种子园做法、公开案例改编。
  *
  * db.cases: { id, title, domain, age, use, text, files:[{hash,name,type,owner}], source:{ kind:'submission'|'drill'|'contest'|'own'|'token', submissionId?, levelId?, answerId?, drillId?, contestId?, entryId?, tag?, selected?, via?(投稿令牌标签) },
  * adaptedFrom: { caseId, note } 改编来源链（ROADMAP 第十三节第 3 条）：改自哪条入库案例、改了什么。原作者与改编者都署名；改编案例入库时给原案例记一次「用过，有效」（改编者不是原作者时）。
@@ -58,7 +58,7 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     if (!user) return json(res, 401, { error: 'not signed in' });
     const sp = new URL(req.url, 'http://x').searchParams;
     const q = norm(sp.get('q')), domain = sp.get('domain') || '', age = sp.get('age') || '', use = sp.get('use') || '';
-    // ?community=1：只看本园所在共同体各园入库的案例（ROADMAP 第六节：共同体内共享案例库）
+    // ?community=1：只看本园所在共同体各园入库的案例（ROADMAP 第六节：共同体内共享专家案例）
     const community = communities ? communities.ofOrg(orgKeyOf(user)) : null;
     let list = db.cases.filter(c => c.status === 'approved');
     if (sp.get('community') === '1' && community) { const keys = new Set(community.orgs.map(o => o.key)); list = list.filter(c => keys.has(c.org)); }

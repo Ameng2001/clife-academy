@@ -1,4 +1,4 @@
-// 案例库：实践关与研讨关的优秀作品（园长同意后）、种子园做法。实名、登录可见、全平台共享。
+// 专家案例：实践关与研讨关的优秀作品（园长同意后）、种子园做法。实名、登录可见、全平台共享。
 // 教师自荐 → 园长同意 → 审核人入库；园长从已通过的作品推荐直接进待审核。每个案例标「可直接用 / 需改编 / 只看思路」。
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -66,7 +66,7 @@ export default function Cases() {
   }
   useEffect(() => { const t = setTimeout(() => { if ((sp.get('q') || '') !== q) setParam('q', q) }, 250); return () => clearTimeout(t) }, [q])
   useEffect(() => { load() }, [sp.toString(), user?.id])
-  // 从点评页「推荐入案例库」带来的作品：预填表单
+  // 从点评页「推荐入专家案例」带来的作品：预填表单
   useEffect(() => {
     const raw = sp.get('from'); if (!raw) return
     try { const f = JSON.parse(raw); setForm({ ...EMPTY, submissionId: f.submissionId, answerId: f.answerId, title: f.title || '', domain: f.domain || 'obs', use: 'adapt', text: f.text || '' }) } catch { /* 无妨 */ }
@@ -111,8 +111,8 @@ export default function Cases() {
   const queueCount = (queue?.consent?.length || 0) + (queue?.pending?.length || 0)
 
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>案例库</h1><div className="sub">园里真实做过的事 · 实名共享 · 每条标明怎么用</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/resources')}><Icon name="folder" /> 资源库</button>{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一个</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
-    {!user && <div className="card small muted">案例库实名共享，登录后可见。</div>}
+    <div className="hdr"><div><h1>专家案例</h1><div className="sub">园里真实做过的事 · 实名共享 · 每条标明怎么用</div></div><div className="hdr-actions"><button className="chip" onClick={() => nav('/resources')}><Icon name="folder" /> 资源库</button>{user && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>分享一个</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    {!user && <div className="card small muted">专家案例实名共享，登录后可见。</div>}
     {user && <div className="ac-tabs" style={{ marginBottom: 12 }}>
       <button className={tab === 'all' ? 'on' : ''} onClick={() => setParam('tab', null)}>全部{data ? ` ${data.total}` : ''}</button>
       <button className={tab === 'mine' ? 'on' : ''} onClick={() => setParam('tab', 'mine')}>我交的{mine ? ` ${mine.cases.length}` : ''}</button>

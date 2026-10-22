@@ -1,4 +1,4 @@
-/* 合集（docs/ROADMAP.md 第十三节第 6 条）：按主题把案例、关卡、讲堂微课切片、大讲堂场次、资源攒成一份，给人按主题找东西用。
+/* 合集（docs/ROADMAP.md 第十三节第 6 条）：按主题把案例、关卡、讲堂微课切片、名师讲堂场次、资源攒成一份，给人按主题找东西用。
  * 没有点赞、收藏数、浏览数（口径库 no-social-currency）；排序只按更新时间。
  *
  * db.collections: { id, title, desc, scope:'all'|'district'|'community'|'org', district?, communityId?, org?,
@@ -14,7 +14,7 @@ import { districtKeyOf, districtOrgsOf, isDistrictAdmin } from './district.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 export const SCOPES = Object.freeze({ all: '全平台', district: '本区县', community: '共同体', org: '本园' });
-export const KINDS = Object.freeze({ case: '案例', level: '关卡', clip: '讲堂微课', lecture: '大讲堂', resource: '资源' });
+export const KINDS = Object.freeze({ case: '案例', level: '关卡', clip: '讲堂微课', lecture: '名师讲堂', resource: '资源' });
 export const MAX_ITEMS = 40;
 
 export function collectionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities = null }) {
@@ -46,7 +46,7 @@ export function collectionRoutes({ json, readBody, db, saveDb, readSession, audi
     if (it.kind === 'case') { const c = (db.cases || []).find(x => x.id === it.id && x.status === 'approved'); return c ? { ...it, title: c.title, sub: `${c.byName}${c.orgName ? ' · ' + c.orgName : ''}`, to: '/cases?q=' + encodeURIComponent(c.title) } : null; }
     if (it.kind === 'level') { const t = LEVELS[it.id]; return t ? { ...it, title: t, sub: LEVEL_INFO[it.id]?.scene || '', to: '/level/' + it.id } : null; }
     if (it.kind === 'clip') { const [lid, cid] = String(it.id).split(':'); const l = (db.lectures || []).find(x => x.id === lid); const c = l?.pack?.clips?.find(x => x.id === cid); return l && c ? { ...it, title: c.title, sub: l.title, to: l.replayUrl ? l.replayUrl + (c.start ? '#t=' + c.start : '') : '/lectures', external: !!l.replayUrl } : null; }
-    if (it.kind === 'lecture') { const l = (db.lectures || []).find(x => x.id === it.id); return l ? { ...it, title: l.title, sub: l.speaker ? l.speaker + ' 主讲' : '园长大讲堂', to: '/lectures' } : null; }
+    if (it.kind === 'lecture') { const l = (db.lectures || []).find(x => x.id === it.id); return l ? { ...it, title: l.title, sub: l.speaker ? l.speaker + ' 主讲' : '名师讲堂', to: '/lectures' } : null; }
     if (it.kind === 'resource') { const org = orgKeyOf(u); const r = SEED.find(x => x.id === it.id) || (db.resources || []).find(x => x.id === it.id && (x.scope === 'public' || x.org === org)); return r ? { ...it, title: r.title, sub: r.desc ? r.desc.slice(0, 60) : '', to: '/resources?q=' + encodeURIComponent(r.title) } : null; }
     return null;
   };

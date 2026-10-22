@@ -44,7 +44,7 @@ test('pack draft: headings become preview points and clip titles; text is moved,
   const d = packDraftOf({ title: '数智化幼儿园的建设路径', speaker: '张教授' }, SCRIPT);
   assert.deepEqual(d.preview.points, ['为什么要做', '怎么起步', '常见的坑', '下一步']);
   assert.equal(d.clips.length, 4); assert.equal(d.clips[0].id, 'c1'); assert.equal(d.clips[1].title, '怎么起步'); assert.match(d.clips[1].desc, /^先选一个班/);
-  assert.equal(d.poster.headline, '数智化幼儿园的建设路径'); assert.equal(d.poster.lines.at(-1), '张教授 主讲 · 园长大讲堂');
+  assert.equal(d.poster.headline, '数智化幼儿园的建设路径'); assert.equal(d.poster.lines.at(-1), '张教授 主讲 · 名师讲堂');
   // 没小标题、没空行：按句子切，最多 5 条要点、切片不超过 5 组
   const long = Array.from({ length: 14 }, (_, i) => `第 ${i + 1} 句话讲一件事。`).join('');
   const e = packDraftOf({ title: 't' }, long);

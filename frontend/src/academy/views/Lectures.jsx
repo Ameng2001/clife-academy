@@ -1,4 +1,4 @@
-// 园长大讲堂：每月一场。直播在第三方，这里只做预约、回放列表、讲义，加一个讲堂包（讲前预习卡、讲后微课切片与知识海报）。排场与讲堂包是管理员（本地运营方）的事。
+// 名师讲堂：每月一场。直播在第三方，这里只做预约、回放列表、讲义，加一个讲堂包（讲前预习卡、讲后微课切片与知识海报）。排场与讲堂包是管理员（本地运营方）的事。
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
@@ -53,7 +53,7 @@ function PackEditor({ l, onDone }) {
 function Poster({ poster, lecture }) {
   if (!poster?.headline) return null
   return <div style={{ marginTop: 10, borderRadius: 14, padding: '14px 16px', background: 'linear-gradient(135deg, var(--acc), color-mix(in srgb, var(--acc) 55%, #1c3b33))', color: '#fff' }}>
-    <div className="small" style={{ opacity: .8 }}>园长大讲堂 · 知识海报</div>
+    <div className="small" style={{ opacity: .8 }}>名师讲堂 · 知识海报</div>
     <div style={{ fontWeight: 800, fontSize: 19, margin: '4px 0 8px', lineHeight: 1.3 }}>{poster.headline}</div>
     {poster.lines?.map((x, i) => <div key={i} style={{ fontSize: 14, lineHeight: 1.6 }}>· {x}</div>)}
     <div className="small" style={{ opacity: .7, marginTop: 8 }}>{lecture.speaker ? lecture.speaker + ' 主讲 · ' : ''}{fmtWhen(lecture.at, lecture.minutes).split(' 周')[0]}</div>
@@ -85,7 +85,7 @@ function Card({ l, first, user, onBook, onEdit, onDelete, onChange }) {
       {onEdit && <><Button size="sm" style={first ? { background: 'rgba(255,255,255,.18)', color: '#fff' } : {}} onClick={() => onEdit(l)}>改</Button><Button size="sm" style={first ? { background: 'rgba(255,255,255,.18)', color: '#fff' } : {}} onClick={() => onDelete(l)}>删</Button><Button size="sm" style={first ? { background: 'rgba(255,255,255,.18)', color: '#fff' } : {}} onClick={() => setPackOpen(o => !o)}>{pk ? '讲堂包' : '做讲堂包'}</Button></>}
     </div>
     {pk?.preview?.points?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><div style={{ fontWeight: 600 }}>{l.phase === 'done' ? '这场讲了' : '讲前先看'}</div>{pk.preview.points.map((x, i) => <div key={i} style={{ lineHeight: 1.6 }}>{i + 1}. {x}</div>)}</div>}
-    {l.phase === 'done' && pk?.clips?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><div style={{ fontWeight: 600 }}>微课切片 · {pk.clips.length} 条<span className="tap" style={{ marginInlineStart: 8, textDecoration: 'underline', fontWeight: 400 }} onClick={() => nav('/library?q=' + encodeURIComponent(l.title.slice(0, 8)))}>微课库里也有</span></div>
+    {l.phase === 'done' && pk?.clips?.length > 0 && <div className="small" style={{ marginTop: 10, ...sub }}><div style={{ fontWeight: 600 }}>微课切片 · {pk.clips.length} 条<span className="tap" style={{ marginInlineStart: 8, textDecoration: 'underline', fontWeight: 400 }} onClick={() => nav('/library?q=' + encodeURIComponent(l.title.slice(0, 8)))}>精品微课里也有</span></div>
       {pk.clips.map(c => <div key={c.id} style={{ marginTop: 4 }}>{l.replayUrl ? <a href={l.replayUrl + (c.start ? '#t=' + c.start : '')} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'underline' }}>{c.title}</a> : <span>{c.title}</span>}{c.start ? <span style={{ opacity: .7 }}> · {Math.floor(c.start / 60)}′{String(c.start % 60).padStart(2, '0')}″</span> : null}{c.desc ? <div style={{ opacity: .85 }}>{c.desc}</div> : null}</div>)}
     </div>}
     {l.phase === 'done' && <Poster poster={pk?.poster} lecture={l} />}
@@ -137,7 +137,7 @@ export default function Lectures() {
     try { const m = await uploadMedia(f); setForm(x => ({ ...x, slidesFile: m, slidesUrl: '' })) } catch (err) { useUI.getState().toast('上传失败' + (err.message ? '：' + err.message : '')) } finally { setBusy(false) }
   }
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>园长大讲堂</h1><div className="sub">每月一场 · 安排在午睡时段 · 直播后有回放与讲义</div></div><div className="hdr-actions">{data?.canEdit && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>排一场</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    <div className="hdr"><div><h1>名师讲堂</h1><div className="sub">每月一场 · 安排在午睡时段 · 直播后有回放与讲义</div></div><div className="hdr-actions">{data?.canEdit && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ ...EMPTY })}>排一场</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
 
     {form && <div className="card" style={{ marginBottom: 14 }}>
       <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改这场' : '排一场'} · 直播放第三方（腾讯会议、视频号），这里填链接</div>

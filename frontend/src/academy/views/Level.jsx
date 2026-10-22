@@ -68,7 +68,7 @@ export default function Level() {
       <button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button>
     </div>
     {st === 'done' && <div className="card small" style={{ color: 'var(--green)' }}>已通过。可以复习，不再计分。</div>}
-    {st === 'locked' && <div className="card small muted">从微课库查阅：这一关还没解锁，可以看「讲」与「看」，通关要按路径顺序来。</div>}
+    {st === 'locked' && <div className="card small muted">从精品微课查阅：这一关还没解锁，可以看「讲」与「看」，通关要按路径顺序来。</div>}
     <div className="ac-tabs">{SEGS.map(([k, n]) => <button key={k} className={(d.seg === k ? 'on' : '') + (segDone[k] && k !== 'jiang' && k !== 'kan' ? ' done' : '')} onClick={() => setDraft(id, x => { x.seg = k })}>{n}</button>)}</div>
 
     {d.seg === 'jiang' && <div className="card">

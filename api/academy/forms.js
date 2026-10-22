@@ -3,7 +3,7 @@
  *   transition 过渡环节「改前改后」对比卡：场景、改前几条、改后几条、为什么
  *   memo       《评估指南》条文记忆卡：按案例领域配 2–3 条关键指标，每条一句要义＋案例里对应的做法
  * db.caseForms: { id, caseId, kind, content, by, byName, at, updatedAt, model }
- * 谁能做：案例作者、审核人（curator）、管理员，只对已入库案例；谁能看：登录用户（与案例库同）。
+ * 谁能做：案例作者、审核人（curator）、管理员，只对已入库案例；谁能看：登录用户（与专家案例同）。
  * 草稿由规则从正文切出来，只搬案例里的话；接了模型只改措辞、不改结构、不加内容。不出现幼儿姓名；改编仍要署原作者（形态挂在案例下，署名随案例）。 */
 import crypto from 'node:crypto';
 import * as assistant from './assistant.js';
@@ -156,7 +156,7 @@ export function formRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     audit(req, 'caseform.save', { user, msg: f.id });
     json(res, 200, { form: pub(f, user, c) });
   },
-  // 全库的轻形态清单（登录可见）：{ kind? } → 按时间，供案例库「拿来就用」筛选
+  // 全库的轻形态清单（登录可见）：{ kind? } → 按时间，供专家案例「拿来就用」筛选
   'GET /api/cases/forms/all': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });

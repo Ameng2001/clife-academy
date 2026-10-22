@@ -1,5 +1,5 @@
 // 我的荣誉与学分：勋章（按记录算）、称号（人授）、学分明细、学分兑积分（积分是教研工坊、观察评价工具、贝果实验室的使用额度）。
-// 不排行、不公开；颁发在大讲堂或园内活动上，这里只是记录。
+// 不排行、不公开；颁发在名师讲堂或园内活动上，这里只是记录。
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'

@@ -1,4 +1,4 @@
-// 合集（/collections，/api/collections）：按主题攒案例、关卡、讲堂微课、大讲堂、资源。没有点赞与浏览数，只按更新时间排。
+// 合集（/collections，/api/collections）：按主题攒案例、关卡、讲堂微课、名师讲堂、资源。没有点赞与浏览数，只按更新时间排。
 // 建：管理员、区县管理员、园长、种子教师，范围按角色给；看：按范围。
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -18,7 +18,7 @@ function Item({ it, kinds }) {
   return it.external ? <a className="lrow tap" href={it.to} target="_blank" rel="noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>{inner}</a> : <div className="lrow tap" onClick={() => nav(it.to)}>{inner}</div>
 }
 
-// 挑条目：案例（已入库）、关卡、讲堂微课、大讲堂、资源，各自一个搜索框
+// 挑条目：案例（已入库）、关卡、讲堂微课、名师讲堂、资源，各自一个搜索框
 function Picker({ items, setItems, max }) {
   const [tab, setTab] = useState('case'), [q, setQ] = useState('')
   const [pool, setPool] = useState({ case: null, clip: null, lecture: null, resource: null })
@@ -33,7 +33,7 @@ function Picker({ items, setItems, max }) {
   const has = x => items.some(i => i.kind === x.kind && i.id === x.id)
   const toggle = x => setItems(has(x) ? items.filter(i => !(i.kind === x.kind && i.id === x.id)) : items.length < max ? [...items, { kind: x.kind, id: x.id, note: '', title: x.title }] : items)
   return <div style={{ marginTop: 8 }}>
-    <div className="ac-tabs">{['case', 'level', 'clip', 'lecture', 'resource'].map(k => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{{ case: '案例', level: '关卡', clip: '讲堂微课', lecture: '大讲堂', resource: '资源' }[k]}</button>)}</div>
+    <div className="ac-tabs">{['case', 'level', 'clip', 'lecture', 'resource'].map(k => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{{ case: '案例', level: '关卡', clip: '讲堂微课', lecture: '名师讲堂', resource: '资源' }[k]}</button>)}</div>
     <TextField placeholder="搜一下" value={q} onChange={e => setQ(e.target.value)} />
     <div className="chips" style={{ marginTop: 6 }}>{cand.map(x => <button key={x.kind + x.id} className={'chip nocap' + (has(x) ? ' on' : '')} onClick={() => toggle(x)}>{x.title.slice(0, 18)}{x.sub ? ' · ' + x.sub.slice(0, 8) : ''}</button>)}{!cand.length && <span className="small muted">没有可挑的</span>}</div>
   </div>
@@ -60,7 +60,7 @@ export default function Collections() {
   const list = d?.collections || []
   const open = openId ? list.find(c => c.id === openId) : null
   return <div className="narrow wide">
-    <div className="hdr"><div><h1>合集</h1><div className="sub">按主题攒案例、关卡、讲堂微课、大讲堂、资源 · 不计数、不排行</div></div><div className="hdr-actions">{d?.scopes.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ id: null, title: '', desc: '', scope: d.scopes[0].key, communityId: d.community?.id || '', items: [] })}>建一份</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
+    <div className="hdr"><div><h1>合集</h1><div className="sub">按主题攒案例、关卡、讲堂微课、名师讲堂、资源 · 不计数、不排行</div></div><div className="hdr-actions">{d?.scopes.length > 0 && !form && <Button size="sm" variant="tinted" icon="plus" onClick={() => setForm({ id: null, title: '', desc: '', scope: d.scopes[0].key, communityId: d.community?.id || '', items: [] })}>建一份</Button>}<button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后在这里看。</div>}
     {form && <div className="card" style={{ marginBottom: 14 }}>
       <div className="small muted" style={{ marginBottom: 8 }}>{form.id ? '改这份' : '建一份合集'} · 最多 {d.max} 条</div>

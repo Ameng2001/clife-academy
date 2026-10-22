@@ -2,11 +2,11 @@
  *
  * 发展档案：本人全部学习与作品记录，随人走。JSON 导出 ＋ 网页可打印成 PDF。
  *   含：通过的关（含测验对错数，本人可见）、实践与研讨作答及点评结论（点评人署名与一句意见）、入库案例、斗课作品与入选、
- *       研讨关作答数、证书、勋章、称号、学分台账、工作室与共同体、答疑被采纳数、预约过的大讲堂。
+ *       研讨关作答数、证书、勋章、称号、学分台账、工作室与共同体、答疑被采纳数、预约过的名师讲堂。
  *   不含：幼儿数据（平台本来就没有）、AI 的中间判断（答疑助手草稿、Coach 建议都不进档案）、别人的测验分。
  * 学时证明：按本地运营方与市教育局谈定的格式出具。格式与计时规则是可配的（db.hoursRule，管理员改），默认：
  *   1 学时 = 45 分钟；工具关按关卡时长；实践关另加 60 分钟（作品）；研讨关另加 30 分钟（作答）；骨干认证通过加 240 分钟（答辩）；
- *   大讲堂预约不计（没有到场记录）。学时按 0.5 向下取整。证明有编号可核验，出具时把规则快照存下来，规则以后改了旧证明不变。
+ *   名师讲堂预约不计（没有到场记录）。学时按 0.5 向下取整。证明有编号可核验，出具时把规则快照存下来，规则以后改了旧证明不变。
  * db.hoursCerts: { id, no 'XS-<年>-<五位>', uid, name, orgName, from, to, hours, minutes, lines:[{kind,label,count,minutes}], rule, at } */
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
@@ -39,7 +39,7 @@ export function hoursOf(uid, { from, to, rule, db, stateOf }) {
   if (sem) lines.push({ kind: 'seminar', label: `研讨关作答（关卡时长 ＋ ${rule.seminarExtra} 分钟）`, count: sem, minutes: semMin });
   const bb = (db.certificates || []).filter(c => c.uid === uid && c.kind === 'backbone' && inRange(c.at));
   if (bb.length && rule.backboneMinutes) lines.push({ kind: 'backbone', label: '骨干教师认证答辩通过', count: bb.length, minutes: bb.length * rule.backboneMinutes });
-  if (rule.lectureCounts) { const ls = (db.lectures || []).filter(l => l.bookings?.includes(uid) && inRange(l.at) && l.at + (l.minutes || 60) * 60000 < Date.now()); if (ls.length) lines.push({ kind: 'lecture', label: '园长大讲堂（预约且已开播）', count: ls.length, minutes: ls.reduce((a, l) => a + (l.minutes || 60), 0) }); }
+  if (rule.lectureCounts) { const ls = (db.lectures || []).filter(l => l.bookings?.includes(uid) && inRange(l.at) && l.at + (l.minutes || 60) * 60000 < Date.now()); if (ls.length) lines.push({ kind: 'lecture', label: '名师讲堂（预约且已开播）', count: ls.length, minutes: ls.reduce((a, l) => a + (l.minutes || 60), 0) }); }
   const pg = (db.programs || []).filter(p => p.hours > 0 && p.applicants.some(a => a.uid === uid && a.status === 'completed' && inRange(a.completedAt || p.closedAt || p.to)));
   if (pg.length) lines.push({ kind: 'program', label: '研修项目（完成，按期次学时）', count: pg.length, minutes: Math.round(pg.reduce((a, p) => a + p.hours, 0) * rule.minutesPerHour) });
   const minutes = lines.reduce((a, l) => a + l.minutes, 0);

@@ -1,5 +1,5 @@
 // 斗课——同课异构擂台：园内赛与共同体赛（区县管理员面向一个跨园共同体出题，跨园编组互评）。主持人（园长、点评人）出题；教师自愿应战交活动设计＋≤3 分钟片段；截止后同园互评（量表五项＋一句话，实名）；
-// 主持人编组、写对照点评、定入选、收官——全部作品进案例库。分数不公开：作者看自己的，主持人看平均分，别人看不到。
+// 主持人编组、写对照点评、定入选、收官——全部作品进专家案例。分数不公开：作者看自己的，主持人看平均分，别人看不到。
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '../../components/Icon.jsx'
@@ -30,7 +30,7 @@ function Entry({ e, c, onRated, onToggleSelect }) {
   }
   return <div className="card" style={{ marginTop: 8, padding: 12, ...(e.selected ? { borderInlineStart: '3px solid var(--acc)' } : {}) }}>
     <div className="ac-row tap" onClick={() => setOpen(!open)}>
-      <div><span style={{ fontWeight: 600 }}>{e.name}</span>{e.orgName && <span className="small muted"> · {e.orgName}</span>}{e.mine && <span className="small muted"> · 我的</span>}{e.group && <span className="small muted"> · 第 {e.group} 组</span>}{e.selected && <span className="tag" style={{ marginInlineStart: 6, color: 'var(--acc)' }}>入选</span>}{c.phase === 'done' && e.caseId && <span className="small muted"> · 已进案例库</span>}</div>
+      <div><span style={{ fontWeight: 600 }}>{e.name}</span>{e.orgName && <span className="small muted"> · {e.orgName}</span>}{e.mine && <span className="small muted"> · 我的</span>}{e.group && <span className="small muted"> · 第 {e.group} 组</span>}{e.selected && <span className="tag" style={{ marginInlineStart: 6, color: 'var(--acc)' }}>入选</span>}{c.phase === 'done' && e.caseId && <span className="small muted"> · 已进专家案例</span>}</div>
       <span className="small muted">{e.ratingsCount ? `${e.ratingsCount} 人评 · ` : ''}{e.avg != null ? `均 ${e.avg} · ` : ''}{fmtDay(e.updatedAt)} <Icon name={open ? 'chevronUp' : 'chevronDown'} /></span>
     </div>
     {open && e.design && <div style={{ marginTop: 8, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{e.design}</div>}
@@ -104,7 +104,7 @@ function Contest({ c, user, onChange }) {
       <div className="row" style={{ gap: 8, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
         {c.phase === 'open' && <Button size="sm" disabled={busy} onClick={() => confirm('现在截止应战？之后进入互评。') && host('/api/contests', { month: c.month, title: c.title, age: c.age, activity: c.activity, goal: c.goal, guide: c.guide, domain: c.domain, dueAt: Date.now() - 1 }, '已截止')}>提前截止</Button>}
         {c.phase === 'review' && <Button size="sm" disabled={busy} onClick={() => host('/api/contests/group', {}, c.level === 'community' ? '已跨园编组，每组 3–4 人、不同园搭配' : '已按报名顺序编组，每组 3–4 人')}>{c.groups.length ? '重新编组' : c.level === 'community' ? '跨园编组' : '编组'}</Button>}
-        {c.phase === 'review' && <><TextField placeholder="收官一句话（可不填）" value={summary} onChange={e => setSummary(e.target.value)} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" variant="primary" icon="trophy" disabled={busy} onClick={() => confirm(`收官？${c.entries} 份作品全部进案例库（入选 ${c.selectedCount}），每份 +2 学分。`) && host('/api/contests/close', { summary }, '已收官，作品都在案例库了')}>收官</Button></>}
+        {c.phase === 'review' && <><TextField placeholder="收官一句话（可不填）" value={summary} onChange={e => setSummary(e.target.value)} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" variant="primary" icon="trophy" disabled={busy} onClick={() => confirm(`收官？${c.entries} 份作品全部进专家案例（入选 ${c.selectedCount}），每份 +2 学分。`) && host('/api/contests/close', { summary }, '已收官，作品都在专家案例了')}>收官</Button></>}
         {c.phase === 'open' && <Button size="sm" disabled={busy} onClick={() => confirm('删掉这场？报名的作品也一起删。') && host('/api/contests/delete', {}, '已删')}>删</Button>}
       </div>
     </div>}

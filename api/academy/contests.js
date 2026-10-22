@@ -5,11 +5,11 @@
  * db.contests: { id, level:'org'|'community', org, orgName, community:id|null, communityName, district, month('2026-12'), title(主题), age, activity(活动名), goal(目标), guide(《指南》条目), domain,
  *                openAt, dueAt(提交截止), reviewAt(互评截止), groups:[{ n, entryIds:[], review:{by,byName,text,at}|null }], selected:[entryId],
  *                closedAt, summary, by, byName, at, updatedAt }
- *   阶段 phase：open（应战中）→ review（截止后：编组、互评、对照点评、入选）→ done（收官：全部作品进案例库）
+ *   阶段 phase：open（应战中）→ review（截止后：编组、互评、对照点评、入选）→ done（收官：全部作品进专家案例）
  * db.contestEntries: { id, contestId, uid, name, org, design(活动设计), video:{hash,name,type}|null, note, at, updatedAt,
  *                      ratings:[{ by, byName, scores:[5], comment, at }], caseId }
  * 规矩：票数与分数不公开——作者只看到自己的分与一句话，主持人看平均分用来定入选，谁都看不到别人的分；量表每一项对作品不对人；
- *       没入选的作品也进案例库，标「参赛作品」；入选的标「同课异构 · 月 · 年龄班 领域」，在大讲堂展示。
+ *       没入选的作品也进专家案例，标「参赛作品」；入选的标「同课异构 · 月 · 年龄班 领域」，在名师讲堂展示。
  * 素材：实施片段 ≤ 3 分钟，幼儿不露脸，拍教师与材料（前端提示，互评把关）。 */
 import crypto from 'node:crypto';
 import { orgKeyOf } from './org.js';
@@ -245,7 +245,7 @@ export function contestRoutes({ json, readBody, db, saveDb, readSession, audit, 
     audit(req, 'contest.select', { user, msg: `${c.id} ${c.selected.length}` });
     json(res, 200, { contest: pubContest(c, user, true) });
   },
-  // 收官：{ id, summary? }。全部作品进案例库（已入库状态，署名作者）：入选的标「同课异构 · 月 · 年龄班」，其余标「参赛作品」；每份 +2 学分。
+  // 收官：{ id, summary? }。全部作品进专家案例（已入库状态，署名作者）：入选的标「同课异构 · 月 · 年龄班」，其余标「参赛作品」；每份 +2 学分。
   'POST /api/contests/close': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });

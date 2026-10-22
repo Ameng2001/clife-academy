@@ -66,7 +66,7 @@ function Tabs() {
   return <nav id="tabbar">
     <Tab active={on('home')} icon="house" label="首页" onClick={() => nav('/home')} />
     <Tab active={on('paths')} icon="list" label="学习路径" onClick={() => nav('/paths')} />
-    <Tab active={on('library')} icon="magnifier" label="微课库" onClick={() => nav('/library')} />
+    <Tab active={on('library')} icon="magnifier" label="精品微课" onClick={() => nav('/library')} />
     <Tab active={on('me')} icon="personCircle" label="我的" onClick={() => nav('/me')} />
   </nav>
 }

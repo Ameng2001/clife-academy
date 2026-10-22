@@ -5,7 +5,7 @@ import Icon from '../../components/Icon.jsx'
 import { useStore } from '../../store/useStore.js'
 import { useBrand } from '../brand.js'
 
-const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '微课库'], ['cases', '案例库'], ['lectures', '大讲堂']]
+const ITEMS = [['home', '首页'], ['paths', '学习路径'], ['library', '精品微课'], ['cases', '专家案例'], ['lectures', '名师讲堂']]
 export default function TopNav() {
   const brand = useBrand()
   const nav = useNavigate(), loc = useLocation()
