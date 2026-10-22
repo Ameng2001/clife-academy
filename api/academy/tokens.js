@@ -13,7 +13,7 @@ export const PREFIX = 'cla_';
 export const MAX_LIVE = 5;
 export const SCOPES = Object.freeze({ read: '只读', submit: '投稿' });
 /** 投稿令牌放行的写路由（server.js 分发处查）。 */
-export const SUBMIT_ROUTES = Object.freeze(['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft']);
+export const SUBMIT_ROUTES = Object.freeze(['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft', 'POST /api/works/message']);
 const hashOf = secret => crypto.createHash('sha256').update(secret).digest('hex');
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 
@@ -44,6 +44,18 @@ export function tokenRoutes({ json, readBody, db, saveDb, readSession, audit }) 
   const pub = t => ({ id: t.id, label: t.label, scope: t.scope || 'read', scopeName: SCOPES[t.scope || 'read'], at: t.at, lastUsedAt: t.lastUsedAt || null });
   const mine = user => db.apiTokens.filter(t => t.uid === user.id && !t.revokedAt).sort((a, b) => b.at - a.at);
   return {
+  // 令牌自检（docs/WORKSHOP-TODO.md 第 1 条）：工坊收到教师粘的令牌，调这条看是谁的、是不是投稿令牌。用会话调答 404 no-token
+  'GET /api/me/token': async (req, res) => {
+    const bt = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    if (!looksLikeToken(bt)) return json(res, 404, { error: 'not a token request', code: 'no-token' });
+    const r = tokenOf(db, bt);
+    if (!r) return json(res, 401, { error: 'token invalid or revoked', code: 'token' });
+    const { token: t, user } = r;
+    json(res, 200, { ok: t.scope === 'submit', scope: t.scope, scopeName: SCOPES[t.scope], label: t.label, createdAt: t.at, lastUsedAt: t.lastUsedAt || null,
+      user: { id: user.id, name: user.name, orgName: user.academy?.org?.name || null, role: user.academy?.role || null },
+      canSubmit: t.scope === 'submit', submitRoutes: t.scope === 'submit' ? SUBMIT_ROUTES : [],
+      hint: t.scope === 'submit' ? null : '这是只读令牌。到幼师学坊「设置 → 接口令牌 → 新建一枚投稿令牌」' });
+  },
   'GET /api/me/tokens': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });

@@ -62,6 +62,16 @@ Content-Type: application/json
 | 403 | scope | 令牌不是投稿令牌，或调了别的写接口 |
 | 403 | edit | 带了 id 但不是本人的，或已入库 |
 
+## 配套接口
+
+- `GET /api/me/token`（用令牌调）：令牌自检，答 `ok`（是不是投稿令牌）、`label`、`user {name, orgName}`、`hint`。工坊令牌设置页粘进来就调一次。
+- `GET /api/works/options`（令牌或登录）：四栏表的词表与上限（`pipelines / domains / ages / filesScopes / limits / changesHints / changesTemplate / flow`），工坊不自己维护一份。
+- `POST /api/works/message { id, message }`：署名一句单独改，入库后也能。
+- `GET /api/works/mine`（令牌可读）：本人交过的，带 `status` 与退回的 `note`。
+- 提交应答 `{ work, url, next }`：`url` 是 `/works?tab=mine&id=…`（前面拼 `<学坊>/#`），`next` 给教师看的下一步。
+
+联调脚本：`scripts/workshop-share-check.mjs`。
+
 ## 草稿（外部 Agent 走这条）
 
 用 Claude 等 Agent 整理课程的教师，不直接 `POST /api/works`，而是 `POST /api/works/draft`（同样的令牌、同样的字段）。给 Agent 读的说明在 `GET /skill/share-work.md`（公开，text/markdown，也挂在 `/api/skill/share-work.md`）；教师在学坊「课程成果 → 用 Agent 整理」页拿到带这个地址与令牌的指令。

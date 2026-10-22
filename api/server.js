@@ -2782,7 +2782,7 @@ const server = http.createServer(async (req, res) => {
   // 接口令牌的写请求在这里就定：只读令牌一律回头；投稿令牌只放案例库那三条，别的也回头。不进任何路由。
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     const bt = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-    if (looksLikeToken(bt)) { const r = tokenOf(db, bt); if (!r || !tokenAllows(r.token, key)) return json(res, 403, { error: r?.token?.scope === 'submit' ? 'submit token: only case submissions' : 'read-only token', code: r?.token?.scope === 'submit' ? 'scope' : 'readonly' }); req.apiToken = r.token; }
+    if (looksLikeToken(bt)) { const r = tokenOf(db, bt); if (!r || !tokenAllows(r.token, key)) return json(res, 403, { error: r?.token?.scope === 'submit' ? 'submit token: only submissions (cases, works)' : 'read-only token', code: r?.token?.scope === 'submit' ? 'scope' : 'readonly' }); req.apiToken = r.token; }
   }
   if (!csrfOk(req, key)) {
     // Logged, not audited: this is reachable without a session, and an audit entry per attempt

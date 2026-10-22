@@ -67,6 +67,13 @@ test('a submit token can post a case and light forms as its owner, nothing else;
   assert.equal(made.json.item.scope, 'submit');
   const tok = { Authorization: 'Bearer ' + made.json.token };
   assert.equal((await call('GET', '/api/me', null, tok)).status, 200);
+  // 令牌自检：投稿令牌 ok，只读令牌 ok:false 带提示；会话调 404；撤了的 401
+  let chk = await call('GET', '/api/me/token', null, tok);
+  assert.equal(chk.status, 200); assert.equal(chk.json.ok, true); assert.equal(chk.json.scope, 'submit'); assert.equal(chk.json.label, '教研工坊'); assert.equal(chk.json.user.name, '赵园长'); assert.equal(chk.json.user.orgName, '甲园'); assert.ok(chk.json.submitRoutes.includes('POST /api/works'));
+  const roTok = await call('POST', '/api/me/tokens', { label: 'MCP2' }, dir.auth);
+  chk = await call('GET', '/api/me/token', null, { Authorization: 'Bearer ' + roTok.json.token }); assert.equal(chk.json.ok, false); assert.equal(chk.json.scope, 'read'); assert.ok(chk.json.hint.includes('投稿令牌'));
+  assert.equal((await call('GET', '/api/me/token', null, dir.auth)).json.code, 'no-token');
+  assert.equal((await call('GET', '/api/me/token', null, { Authorization: 'Bearer cla_nope.nope' })).status, 401);
   const text = '之前午睡前孩子们总是吵，老师要喊好几遍。后来我们在入睡前加了十分钟安静角，先听一段故事。现在大部分孩子十分钟内能躺下。';
   let r = await call('POST', '/api/cases', { title: '工坊投来的安静角', domain: 'life', use: 'adapt', text }, tok);
   assert.equal(r.status, 200); assert.equal(r.json.case.byName, '赵园长'); assert.deepEqual(r.json.case.source, { kind: 'token', via: '教研工坊', tokenId: made.json.item.id }); assert.equal(r.json.case.status, 'pending');
@@ -82,7 +89,7 @@ test('a submit token can post a case and light forms as its owner, nothing else;
   // 只读令牌仍然一律 403
   const ro = await call('POST', '/api/me/tokens', { label: 'MCP' }, dir.auth);
   assert.equal((await call('POST', '/api/cases', { title: 'x', domain: 'life', use: 'adapt', text }, { Authorization: 'Bearer ' + ro.json.token })).json.code, 'readonly');
-  const list = await call('GET', '/api/me/tokens', null, dir.auth); assert.deepEqual(list.json.submitRoutes, ['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft']);
+  const list = await call('GET', '/api/me/tokens', null, dir.auth); assert.deepEqual(list.json.submitRoutes, ['POST /api/cases', 'POST /api/cases/forms/draft', 'POST /api/cases/forms', 'POST /api/works', 'POST /api/works/draft', 'POST /api/works/message']);
 });
 
 test('the share skill is public markdown at /skill/share-work.md and /api/skill/share-work.md, and tells the agent to use the draft route and leave changes alone', async t => {

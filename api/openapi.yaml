@@ -4523,6 +4523,30 @@ paths:
         新课要标的 `label`「改编自《…》· 谁（园）」、`share.adaptedFrom`（分享与扣积分时都带这个 id）。成果不存在 404 `work`，uid 没登过学坊 404 `uid`。
       responses:
         '200': { description: 来源核对结果 }
+  /api/works/options:
+    get:
+      tags: [academy]
+      operationId: academyWorksOptions
+      summary: 四栏表要的词表与上限（登录或令牌）
+      description: '工坊分享表照这个渲染：pipelines / domains / ages / filesScopes、limits（summary ≥ 50 等）、defaults、changesHints 三个提示词与模板句、flow 状态流、statusUrl、openUrl。'
+      responses:
+        '200': { description: 词表 }
+  /api/works/message:
+    post:
+      tags: [academy]
+      operationId: academyWorksMessage
+      summary: 署名一句（本人；投稿令牌可用）
+      description: '`{ id, message ≤ 80 }`。只改这一句，别的字段不动；入库了也能补或改，空字符串清掉。不是本人 403 edit，草稿 403 draft，message 不是字符串 400 message。'
+      responses:
+        '200': { description: 更新后的成果 }
+  /api/me/token:
+    get:
+      tags: [academy]
+      operationId: academyMeToken
+      summary: 令牌自检（用令牌调）
+      description: '工坊收到教师粘的令牌时调：答 `ok`（是不是投稿令牌）、scope、label、user {id, name, orgName, role}、submitRoutes、hint。会话调 404 no-token，无效或已撤 401。'
+      responses:
+        '200': { description: 令牌信息 }
   /api/works:
     get:
       tags: [academy]

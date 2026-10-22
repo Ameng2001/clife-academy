@@ -72,6 +72,22 @@ test('a submit token can post a work and nothing else; it is tagged with the tok
 test('message / allowAdapt / filesScope: message ≤ 80 chars, files hidden outside the scope, summary and changes still public', async t => {
   const { call, login } = await startServer(t);
   const admin = await login('管理员', 'director', '园A');
+  {
+    // 四栏表词表与上限；提交应答带 url 与 next；署名一句单独改（入库后也能），草稿不行，别人的不行
+    const zhou = await login('周老师', 'teacher', '园Z'), qian = await login('钱老师', 'teacher', '园Z');
+    const tok = await call('POST', '/api/me/tokens', { label: '教研工坊', scope: 'submit' }, zhou.auth); const tk = { Authorization: 'Bearer ' + tok.json.token };
+    let o = await call('GET', '/api/works/options', null, tk); assert.equal(o.status, 200); assert.equal(o.json.limits.summaryMin, 50); assert.deepEqual(Object.keys(o.json.pipelines), ['theme', 'pbl', 'activity']); assert.equal(o.json.changesHints.length, 3);
+    assert.equal((await call('GET', '/api/works/options')).status, 401);
+    let r = await call('POST', '/api/works', WORK, tk); assert.equal(r.status, 200); assert.equal(r.json.url, '/works?tab=mine&id=' + r.json.work.id); assert.ok(r.json.next.includes('园长')); const wid = r.json.work.id;
+    r = await call('POST', '/api/works/message', { id: wid, message: '中班也能用，跳绳换矮一点的' }, tk); assert.equal(r.status, 200); assert.equal(r.json.work.message, '中班也能用，跳绳换矮一点的');
+    assert.equal((await call('POST', '/api/works/message', { id: wid, message: 'x' }, qian.auth)).json.code, 'edit');
+    assert.equal((await call('POST', '/api/works/message', { id: wid }, tk)).json.code, 'message');
+    assert.equal((await call('POST', '/api/works/message', { id: 'nope', message: 'x' }, tk)).json.code, 'work');
+    const d = await call('POST', '/api/works/draft', { title: '草', pipeline: 'theme' }, tk); assert.equal((await call('POST', '/api/works/message', { id: d.json.work.id, message: 'x' }, tk)).json.code, 'draft');
+    await call('POST', '/api/works/decide', { id: wid, action: 'consent' }, (await login('赵园长Z', 'director', '园Z')).auth); await call('POST', '/api/works/decide', { id: wid, action: 'approve' }, admin.auth);
+    r = await call('POST', '/api/works/message', { id: wid, message: '' }, tk); assert.equal(r.status, 200); assert.equal(r.json.work.message, null, 'cleared after approval is fine');
+    assert.equal((await call('POST', '/api/works', { ...WORK, id: wid }, tk)).json.code, 'edit', 'but the body itself is locked');
+  }
   const teacher = await login('王老师', 'teacher', '园B');
   const mate = await login('刘老师', 'teacher', '园B');
   const other = await login('赵老师', 'teacher', '园C');

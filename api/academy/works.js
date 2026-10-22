@@ -161,7 +161,33 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     }
     saveDb();
     audit(req, id ? 'work.edit' : 'work.new', { user, msg: w.id });
+    json(res, 200, { work: pub(w, user), url: '/works?tab=mine&id=' + w.id, next: w.status === 'consent' ? '等园长同意，再由审核人入库' : '等审核人入库' });
+  },
+  // 署名一句（docs/WORKSHOP-TODO.md 第 6 条）：{ id, message ≤ 80 字 }。只改这一句，别的字段不动；本人的、不是草稿就行，入库了也能补或改；空字符串清掉
+  'POST /api/works/message': async (req, res) => {
+    const user = readSession(req);
+    if (!user) return json(res, 401, { error: 'not signed in' });
+    const body = await readBody(req);
+    const w = db.works.find(x => x.id === str(body.id, 40));
+    if (!w) return json(res, 404, { error: 'no such work', code: 'work' });
+    if (w.by !== user.id) return json(res, 403, { error: 'not yours', code: 'edit' });
+    if (w.status === 'draft') return json(res, 403, { error: 'complete the draft first', code: 'draft' });
+    if (typeof body.message !== 'string') return json(res, 400, { error: 'message: a string of at most 80 characters', code: 'message' });
+    w.message = str(body.message, 80); w.updatedAt = Date.now(); saveDb();
+    audit(req, 'work.message', { user, msg: w.id });
     json(res, 200, { work: pub(w, user) });
+  },
+  // 四栏表要的词表与上限（第 3 条）：工坊照这个渲染，不自己维护一份。登录或令牌都能读
+  'GET /api/works/options': async (req, res) => {
+    if (!readSession(req)) return json(res, 401, { error: 'not signed in' });
+    json(res, 200, {
+      pipelines: PIPELINES, domains: FIVE, ages: AGES, filesScopes: FILES_SCOPES,
+      limits: { title: 120, summaryMin: 50, summaryMax: 3000, changesMin: 1, changesMax: 10, changeLen: 300, files: 20, fileUrl: 'https://', message: 80, weeksMin: 1, weeksMax: 20 },
+      defaults: { allowAdapt: true, filesScope: 'all' },
+      changesHints: ['幼儿应答', '材料', '环节数'], changesTemplate: '把 ___ 改成 ___，因为 ___',
+      flow: ['consent 等园长同意', 'pending 等审核人入库', 'approved 已入库', 'rejected 退回，改了带同一个 id 再交'],
+      statusUrl: '/api/works/mine', openUrl: '/#/works?tab=mine&id={id}'
+    });
   },
   // 草稿：投稿令牌（外部 Agent）或本人。字段同 POST /api/works，但只要 title 与 pipeline；summary 可短、changes 可空。
   // 令牌投来的 changes 一律丢弃：「改了什么」只能教师自己写。状态 draft，只本人可见，不进队列、不记积分。应答带教师补齐用的地址。
