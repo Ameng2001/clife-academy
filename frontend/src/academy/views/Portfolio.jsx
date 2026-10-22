@@ -79,7 +79,7 @@ export default function Portfolio() {
   }
   const removeImport = async i => { if (!confirm(`删掉迁入的「${i.person.orgName || i.issuer.name}」这份？`)) return; try { await api('/api/me/portfolio/imports/remove', { method: 'POST', body: JSON.stringify({ id: i.id }) }); setP(await api('/api/me/portfolio')) } catch { toast('没成') } }
   const download = async () => { try { const fresh = await api('/api/me/portfolio?download=1'); const blob = new Blob([JSON.stringify(fresh, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `发展档案-${fresh.person.name}-${toLocal(fresh.exportedAt)}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000) } catch (e) { toast('没下成' + (e.message ? '：' + e.message : '')) } }
-  return <div className="narrow wide">
+  return <div className="narrow">
     <div className="hdr"><div><h1>发展档案</h1><div className="sub">本人全部学习与作品记录 · 随人走 · 不含幼儿数据与 AI 中间判断</div></div><div className="hdr-actions no-print"><Button size="sm" icon="clipboard" onClick={() => window.print()}>打印 / 存 PDF</Button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     {!user && <div className="card small muted">登录后可见。</div>}
     {p && <>
