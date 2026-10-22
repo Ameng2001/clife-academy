@@ -63,6 +63,12 @@ if (!uid && flag('--dev')) {
     const org = (q.json?.orgs || []).find(o => o.name === '联调幼儿园');
     if (org) { await call('POST', '/api/admin/quota/topup', { org: org.org, n: 15, note: '联调 ' + stamp }, adminAuth); await call('POST', '/api/org/quota/alloc', { uid, n: 15 }, zhaoAuth); }
     else console.log('  （--admin 给的账号不是管理员，跳过园所额度）');
+    // 再给第 11、12 步备一门入库且允许改编的成果：园长自己交（不用等同意），管理员入库
+    if (q.status === 200 && !flag('--work')) {
+      const w = await call('POST', '/api/works', { title: `联调原课 ${stamp}`, pipeline: 'theme', age: '小班', weeks: 3, domains: ['health'], source: { courseId: 'cj-orig-' + stamp },
+        summary: '从体测发现本班下肢力量薄弱出发，三周主题，户外以跨跳、攀爬为主，室内配儿歌与绘本，每周一次家园同做，三周后多数孩子能连续跨跳三格。', changes: ['把跨跳垫换成地面画格，因为小班怕高'] }, zhaoAuth);
+      if (w.json?.work?.id) await call('POST', '/api/works/decide', { id: w.json.work.id, action: 'approve' }, adminAuth);
+    }
   }
 }
 if (!uid) { console.error('给 --uid <教师 uid>，或本机开发桩用 --dev <姓名>'); process.exit(2); }
