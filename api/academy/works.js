@@ -9,6 +9,8 @@
  *           不进园长队列、不记积分；令牌投来的 changes 一律丢弃（Agent 不替教师写「改了什么」）；教师在「我交的」补齐后 POST /api/works 带 id 才变 consent。七天没动的自动删。
  *   changes 教师在 AI 起草稿上改了什么（至少一条）：这是成果的「人」的部分，没有就不收。工坊起草不算成果，用过并改过才算。
  *   files   外链（工坊的 docx 下载地址或园所网盘），不上传文件；最多 20 条，只收 https。
+ *   adaptedFrom { workId, title, byName, at } 改编来源链（docs/WORKSHOP-SHARE-DESIGN.md 第四节）：改自哪门入库的、允许改编的课程成果。
+ *           改了什么就是 changes 那一栏。原作者与改编者都署名；改编版入库时给原成果记一次「用过，有效」，原作者记一次 adapted（改编者不是原作者时）。
  * db.workUses: { workId, uid, name, orgName, note, at } 「用过，有效」，数只给分享者本人、本园园长与管理员看，不排行。
  * 入库记一次分享者的事件，积分按 points.js 规则到账（课程成果默认比案例多：一门课比一件事重）。教研工坊按 docs/WORKSHOP-SHARE.md 用投稿令牌直接投（POST /api/works）。
  * 实名、全平台可见；不出现幼儿姓名与正脸；不显示人数、不排名。 */
@@ -36,6 +38,20 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
   const seesUses = (user, w) => !!user && (w.by === user.id || isAdmin(user) || (isDirector(user, isAdmin) && w.org && w.org === orgKeyOf(user)));
   const scopeOf = w => FILES_SCOPES[w.filesScope] ? w.filesScope : 'all';
   const seesFiles = (user, w) => scopeOf(w) === 'all' || !!user && (w.by === user.id || isAdmin(user) || (scopeOf(w) === 'org' ? !!w.org && w.org === orgKeyOf(user) : !!communities && communities.sameCommunity(w.org, orgKeyOf(user))));
+  const adaptedOf = w => { if (!w.adaptedFrom) return null; const o = db.works.find(x => x.id === w.adaptedFrom.workId); return { id: w.adaptedFrom.workId, title: o ? o.title : w.adaptedFrom.title || '（已删）', byName: o ? o.byName : w.adaptedFrom.byName || '', orgName: o ? o.orgName : null, available: !!o && o.status === 'approved' }; };
+  const chainOf = w => { const out = []; let cur = w; const seen = new Set([w.id]); while (cur?.adaptedFrom && out.length < 5) { const o = db.works.find(x => x.id === cur.adaptedFrom.workId); if (!o || seen.has(o.id)) break; seen.add(o.id); out.push({ id: o.id, title: o.title, byName: o.byName, orgName: o.orgName, available: o.status === 'approved' }); cur = o; } return out; };
+  const adaptationsOf = w => db.works.filter(x => x.status === 'approved' && x.adaptedFrom?.workId === w.id).map(x => ({ id: x.id, title: x.title, byName: x.byName, orgName: x.orgName, changes: x.changes.slice(0, 3) }));
+  // 改编来源：body.adaptedFrom 是 workId（null 清掉，不带不动）。只能改自已入库、允许改编的，不能改自自己这条
+  const adaptedFromOf = (body, w) => {
+    if (body.adaptedFrom === undefined) return { ok: true, value: w ? w.adaptedFrom || null : null };
+    const fid = str(body.adaptedFrom, 40);
+    if (!fid) return { ok: true, value: null };
+    const o = db.works.find(x => x.id === fid);
+    if (!o || o.status !== 'approved') return { ok: false, code: 'adapt', error: 'adapt from a work that is in the library' };
+    if (o.allowAdapt === false) return { ok: false, code: 'adapt', error: 'the sharer did not allow adapting this one' };
+    if (w && o.id === w.id) return { ok: false, code: 'adapt', error: 'cannot adapt from itself' };
+    return { ok: true, value: { workId: o.id, title: o.title, byName: o.byName, at: Date.now() } };
+  };
   const pub = (w, user) => ({
     id: w.id, title: w.title, pipeline: w.pipeline, pipelineName: PIPELINES[w.pipeline], age: w.age, weeks: w.weeks, domains: w.domains, domainNames: w.domains.map(d => FIVE[d]),
     summary: w.summary, changes: w.changes, files: seesFiles(user, w) ? w.files : [], filesScope: scopeOf(w), filesScopeName: FILES_SCOPES[scopeOf(w)], filesHidden: !seesFiles(user, w) && w.files.length > 0,
@@ -43,6 +59,7 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     byName: w.byName, orgName: w.orgName, status: w.status, note: w.note || null, at: w.at,
     consent: w.consent ? { byName: w.consent.byName, at: w.consent.at } : null, curated: w.curated ? { byName: w.curated.byName, at: w.curated.at } : null,
     mine: !!user && w.by === user.id, byTitles: titlesOf(db, w.by).map(t => t.label),
+    adaptedFrom: adaptedOf(w), chain: chainOf(w), adaptations: adaptationsOf(w), canAdapt: w.status === 'approved' && w.allowAdapt !== false && !!user && w.by !== user.id,
     ...(seesUses(user, w) ? { uses: usesOf(w.id).map(u => ({ name: u.name, orgName: u.orgName, note: u.note, at: u.at })) } : {}),
     usedByMe: !!user && usesOf(w.id).some(u => u.uid === user.id)
   });
@@ -107,14 +124,16 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     const message = body.message === undefined && w ? (w.message || '') : str(body.message, 80);
     const allowAdapt = body.allowAdapt === undefined ? (w ? w.allowAdapt !== false : true) : body.allowAdapt !== false;
     const filesScope = FILES_SCOPES[body.filesScope] ? body.filesScope : (w && body.filesScope === undefined ? scopeOf(w) : 'all');
+    const af = adaptedFromOf(body, w); if (!af.ok) return json(res, 400, { error: af.error, code: af.code });
+    const adaptedFrom = af.value;
     const now = Date.now();
     if (w) {
-      Object.assign(w, { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, message, allowAdapt, filesScope, updatedAt: now });
+      Object.assign(w, { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, message, allowAdapt, filesScope, adaptedFrom, updatedAt: now });
       if (courseId || url) w.source = source;
       if (w.status === 'rejected' || w.status === 'draft') { w.status = isDirector(user, isAdmin) ? 'pending' : 'consent'; w.note = null; if (w.status === 'pending') w.consent = w.consent || { by: user.id, byName: user.name, at: now }; }
     } else {
       const directorSelf = isDirector(user, isAdmin);
-      w = { id: crypto.randomBytes(9).toString('base64url'), title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, source, message, allowAdapt, filesScope,
+      w = { id: crypto.randomBytes(9).toString('base64url'), title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files, source, message, allowAdapt, filesScope, adaptedFrom,
         by: user.id, byName: user.name, org: orgKeyOf(user), orgName: user.academy?.org?.name || null, status: directorSelf ? 'pending' : 'consent', note: null, at: now,
         consent: directorSelf ? { by: user.id, byName: user.name, at: now } : null, curated: null };
       db.works.push(w);
@@ -144,7 +163,8 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     const courseId = str(src.courseId, 80), url = /^https:\/\//.test(str(src.url, 500)) ? str(src.url, 500) : '';
     const source = req.apiToken ? { kind: 'token', via: req.apiToken.label, tokenId: req.apiToken.id, ...(courseId ? { courseId } : {}), ...(url ? { url } : {}) }
       : courseId || url ? { kind: 'workshop', ...(courseId ? { courseId } : {}), ...(url ? { url } : {}) } : { kind: 'own' };
-    const fields = { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files: filesOf(body), source, message: str(body.message, 80), allowAdapt: body.allowAdapt !== false, filesScope: FILES_SCOPES[body.filesScope] ? body.filesScope : 'all' };
+    const af = adaptedFromOf(body, w); if (!af.ok) return json(res, 400, { error: af.error, code: af.code });
+    const fields = { title, pipeline: body.pipeline, age, weeks, domains, summary, changes, files: filesOf(body), source, message: str(body.message, 80), allowAdapt: body.allowAdapt !== false, filesScope: FILES_SCOPES[body.filesScope] ? body.filesScope : 'all', adaptedFrom: af.value };
     const now = Date.now();
     if (w) Object.assign(w, fields, { updatedAt: now });
     else { w = { id: crypto.randomBytes(9).toString('base64url'), ...fields, by: user.id, byName: user.name, org: orgKeyOf(user), orgName: user.academy?.org?.name || null, status: 'draft', note: null, at: now, updatedAt: now, consent: null, curated: null }; db.works.push(w); }
@@ -168,7 +188,14 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
       if (!isCurator(user, isAdmin)) return json(res, 403, { error: 'curator only', code: 'curator' });
       if (w.status !== 'pending' && !(w.status === 'consent' && isAdmin(user))) return json(res, 400, { error: 'not waiting for review', code: 'state' });
       if (body.action === 'reject' && !note) return json(res, 400, { error: 'say why', code: 'note' });
-      if (body.action === 'approve') { if (w.status === 'consent') w.consent = w.consent || { by: user.id, byName: user.name, at: now }; w.status = 'approved'; w.curated = { by: user.id, byName: user.name, at: now }; w.note = note || null; if (ledger) ledger.grant(w.by, 'work', w.id, 3, '课程成果入库：' + w.title); }
+      if (body.action === 'approve') { if (w.status === 'consent') w.consent = w.consent || { by: user.id, byName: user.name, at: now }; w.status = 'approved'; w.curated = { by: user.id, byName: user.name, at: now }; w.note = note || null; if (ledger) ledger.grant(w.by, 'work', w.id, 3, '课程成果入库：' + w.title);
+        // 改编入库：给原成果记一次「用过，有效」，原作者记一次 adapted（改编者不是原作者、没记过才记）
+        if (w.adaptedFrom) {
+          const o = db.works.find(x => x.id === w.adaptedFrom.workId);
+          if (o && o.by !== w.by && !usesOf(o.id).some(u => u.uid === w.by)) db.workUses.push({ workId: o.id, uid: w.by, name: w.byName, orgName: w.orgName, note: `改编为《${w.title}》`, at: now });
+          if (o && o.by !== w.by && ledger) ledger.grant(o.by, 'adapted', 'work:' + w.id, 1, `「${o.title.slice(0, 24)}」被 ${w.byName} 改编入库`);
+        }
+      }
       else { w.status = 'rejected'; w.note = note; }
     } else return json(res, 400, { error: 'action: consent | approve | reject', code: 'action' });
     saveDb();

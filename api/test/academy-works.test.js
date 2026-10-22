@@ -112,3 +112,34 @@ test('draft: a token lands a draft without changes (and any changes it sends are
   assert.equal((await call('GET', '/api/works/queue', null, zhao.auth)).json.consent.length, 1);
   assert.equal((await call('POST', '/api/works/draft', { id, title: 'x', pipeline: 'theme' }, teacher.auth)).status, 403, 'no longer a draft');
 });
+
+test('adapt chain: adapt only from an approved work that allows it; the adaptation is signed by both, the original gets a use and its author adapted points', async t => {
+  const { call, login } = await startServer(t);
+  const admin = await login('管理员', 'director', '园A');
+  const wang = await login('王老师', 'teacher', '园B'), li = await login('李老师', 'teacher', '园C');
+  const approve = async id => { await call('POST', '/api/works/decide', { id, action: 'approve' }, admin.auth); };
+  let r = await call('POST', '/api/works', WORK, wang.auth); const a = r.json.work.id;
+  assert.equal((await call('POST', '/api/works', { ...WORK, title: '改编：下肢', adaptedFrom: a }, li.auth)).status, 400, 'not in the library yet');
+  await approve(a);
+  r = await call('POST', '/api/works', { ...WORK, title: '只看', allowAdapt: false }, wang.auth); const locked = r.json.work.id; await approve(locked);
+  assert.equal((await call('POST', '/api/works', { ...WORK, title: 'x', adaptedFrom: locked }, li.auth)).json.code, 'adapt', 'sharer did not allow');
+  r = await call('GET', '/api/works', null, li.auth);
+  assert.equal(r.json.works.find(w => w.id === a).canAdapt, true); assert.equal(r.json.works.find(w => w.id === locked).canAdapt, false);
+  assert.equal((await call('GET', '/api/works', null, wang.auth)).json.works.find(w => w.id === a).canAdapt, false, 'not your own');
+  const wangBefore = (await call('GET', '/api/me/points', null, wang.auth)).json.points;
+  r = await call('POST', '/api/works', { ...WORK, title: '改编：下肢力量（中班）', age: '中班', changes: ['跨跳垫换成跳绳，中班跳得动'], adaptedFrom: a }, li.auth);
+  assert.equal(r.status, 200, JSON.stringify(r.json)); const b = r.json.work.id;
+  assert.equal(r.json.work.adaptedFrom.id, a); assert.equal(r.json.work.adaptedFrom.byName, '王老师');
+  assert.equal((await call('GET', '/api/works', null, li.auth)).json.works.find(w => w.id === a).adaptations.length, 0, 'not until approved');
+  await call('POST', '/api/works/decide', { id: b, action: 'consent' }, (await login('赵园长', 'director', '园C')).auth);
+  await approve(b);
+  r = await call('GET', '/api/works', null, wang.auth); const orig = r.json.works.find(w => w.id === a), adap = r.json.works.find(w => w.id === b);
+  assert.equal(orig.adaptations.length, 1); assert.equal(orig.adaptations[0].byName, '李老师'); assert.deepEqual(orig.adaptations[0].changes, ['跨跳垫换成跳绳，中班跳得动']);
+  assert.equal(orig.uses.length, 1); assert.ok(orig.uses[0].note.includes('改编为'));
+  assert.equal(adap.chain.length, 1); assert.equal(adap.chain[0].id, a);
+  r = await call('GET', '/api/me/points', null, wang.auth);
+  assert.ok(r.json.history.some(h => h.sub === 'adapted'), 'original author got adapted points'); assert.ok(r.json.points > wangBefore);
+  // 自己改自己的：没有 use、没有 adapted
+  r = await call('POST', '/api/works', { ...WORK, title: '自己再改一版', adaptedFrom: a }, wang.auth); const c = r.json.work.id; await approve(c);
+  assert.equal((await call('GET', '/api/works', null, wang.auth)).json.works.find(w => w.id === a).uses.length, 1);
+});

@@ -4500,7 +4500,7 @@ paths:
       tags: [academy]
       operationId: academyPostWork
       summary: 交一门课程成果（投稿令牌可用，见 docs/WORKSHOP-SHARE.md）
-      description: '`{ id?, title, pipeline, age?, weeks?, domains:[…], summary(≥50 字), changes:[≥1 条], files?:[{ name, url(https) }], source?:{ courseId?, url? }, message?(≤80 字), allowAdapt?(默认 true), filesScope?(all|community|org，默认 all) }`。教师交→园长同意→审核人入库；园长自己交直接待审核。changes 为空不收：工坊起草不算成果，用过并改过才算。'
+      description: '`{ id?, title, pipeline, age?, weeks?, domains:[…], summary(≥50 字), changes:[≥1 条], files?:[{ name, url(https) }], source?:{ courseId?, url? }, message?(≤80 字), allowAdapt?(默认 true), filesScope?(all|community|org，默认 all), adaptedFrom?(改自的 work.id，只能是已入库且允许改编的；null 清掉) }`。教师交→园长同意→审核人入库；园长自己交直接待审核。changes 为空不收：工坊起草不算成果，用过并改过才算。应答里每条带 adaptedFrom / chain / adaptations / canAdapt；改编版入库给原成果记「用过，有效」、原作者记 adapted 积分。'
       responses:
         '200': { description: '`{ work }`' }
         '400': { description: 'title / pipeline / summary / changes / domains 不合' }

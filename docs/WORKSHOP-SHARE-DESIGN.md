@@ -72,7 +72,7 @@
 | ~~`message` 一句话、`allowAdapt`、`filesScope` 三个字段，卡片与详情显示~~ 已做（夜 55） | `api/academy/works.js`、`views/Works.jsx`、`views/Community.jsx` 卡片 | 小 |
 | ~~`draft` 状态与 `POST /api/works/draft`，「我交的」草稿卡，七天清理~~ 已做（夜 64）：草稿灰底虚框、「补齐并交给园长」、`?id=` 直达打开表、令牌投的 changes 丢弃、令牌不能推草稿进流程 | — | — |
 | ~~`GET /skill/share-work.md` 与「用 Agent 整理」页（指令可复制）~~ 已做（夜 65）：`api/academy/skill.js` 由 brand 与 ORIGIN 拼出 markdown，同挂 `/api/skill/share-work.md`；`/works/agent` 页给三步、投稿令牌（可就地新建）、带 Skill 地址与令牌的指令一键复制 | — | — |
-| 课程成果的 `adaptedFrom` 来源链与「改编这门课」 | `works.js`、`Works.jsx` | 中 |
+| ~~课程成果的 `adaptedFrom` 来源链与「改编这门课」~~ 已做（夜 66）：只能改自入库且允许改编的；详情显示「改自 / 再往上 / 被改编」；按钮开预填表；改编版入库给原成果记「用过，有效」、原作者记 adapted；工坊 `?from=` 跳转留给工坊仓库 | — | — |
 | ~~契约文档同步：WORKSHOP-SHARE.md 加 draft、message、两个开关~~ 已做（夜 55、64） | — | — |
 
 工坊仓库那边：交付页按钮、四栏表、两个开关、令牌设置、署名一屏、`?from=` 复制课程。
