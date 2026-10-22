@@ -22,7 +22,7 @@ export default function Level() {
   const nav = useNavigate(), S = useS()
   const { id } = useParams()
   const lv = levelOf(id)
-  if (!lv) return <div className="narrow"><div className="empty">没有这一关。</div></div>
+  if (!lv) return <div className="narrow mid"><div className="empty">没有这一关。</div></div>
   const st = statusOf(S.progress, id)
   const d = useDraft(id)
   const user = useStore(s => s.user), config = useStore(s => s.config)
@@ -62,7 +62,7 @@ export default function Level() {
     nav('/paths/' + lv.path, { replace: true })
   }
 
-  return <div className="narrow">
+  return <div className="narrow mid">
     <div className="hdr">
       <div><div className="small muted">第 {lv.i + 1} 关 · {lv.scene} · {lv.dur}</div><h1 style={{ fontSize: 26 }}>{lv.title}</h1></div>
       <button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button>
