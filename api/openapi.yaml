@@ -773,18 +773,33 @@ paths:
       tags: [academy]
       operationId: academyMyPoints
       summary: 本人的学分与积分
-      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。'
+      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, auto, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。学分到账时自动按 rate 记积分（台账即时、关卡学分读余额时对账补记），所以 creditsAvailable 总是 0。'
       responses:
         '200': { description: 余额与流水 }
   /api/me/points/exchange:
     post:
       tags: [academy]
       operationId: academyPointsExchange
-      summary: 学分兑积分（一次性、不可逆）
-      description: '`{ credits }`。按 `POINTS_PER_CREDIT`（默认 10）兑。'
+      summary: 学分兑积分（过渡期保留；自动到账后可兑的总是 0）
+      description: '`{ credits }`。按 `db.pointsRules.rate`（管理员可改，默认 `POINTS_PER_CREDIT` 或 10）兑。'
       responses:
         '200': { description: 兑换后的余额 }
         '400': { description: 不是正整数，或超过可兑的 }
+  /api/admin/points/rules:
+    get:
+      tags: [admin]
+      operationId: adminPointsRules
+      summary: 积分比例（管理员）
+      responses:
+        '200': { description: '`{ rules: { rate, envRate, at, byName }, tools }`' }
+    post:
+      tags: [admin]
+      operationId: adminSetPointsRules
+      summary: 改积分比例，只影响之后到账的
+      description: '`{ rate }` 1–100 的整数。已记的积分不重算。'
+      responses:
+        '200': { description: '`{ rules }`' }
+        '400': { description: rate 不是 1–100 的整数 }
   /api/points/balance:
     get:
       tags: [academy]
@@ -807,7 +822,8 @@ paths:
     get:
       tags: [academy]
       operationId: academyPointsOf
-      summary: 管理员看一个人的积分流水
+      summary: 一个人的积分流水（管理员会话，或工坊钱包页带 TOOLS_API_KEY）
+      description: '`?uid=`。钱包页与教研工坊统一，学坊不单独做：工坊的钱包页用这条取明细。'
       responses:
         '200': { description: 余额与流水 }
   /api/org/titles:

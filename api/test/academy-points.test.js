@@ -26,7 +26,7 @@ async function startServer(t) {
 }
 const TEXT = '小班入园第二周，我们把早晨签到改成「找自己的照片贴到心情墙」。孩子进门先找照片，再选一个表情贴纸。两周后大部分孩子愿意自己走进活动室。注意：照片只给本班用。';
 
-test('points: credits from the ledger exchange at the rate; tools spend idempotently with the key', async t => {
+test('points: ledger credits land as points automatically at the rate; tools spend idempotently with the key; admins change the rate for later events only', async t => {
   const { call, login } = await startServer(t);
   const admin = await login('运营方', 'director', '本地运营'), t1 = await login('王老师', 'nurse', '柳北区示例幼儿园');
   let r = await call('GET', '/api/me/points', null, t1.auth); assert.equal(r.json.creditsAvailable, 0); assert.equal(r.json.rate, 10);
@@ -34,9 +34,10 @@ test('points: credits from the ledger exchange at the rate; tools spend idempote
   // 园长（管理员）直接交一条案例并入库 → 王老师没有；用管理员自己的：入库 +2
   r = await call('POST', '/api/cases', { title: '心情墙', domain: 'env', use: 'adapt', text: TEXT }, t1.auth); const cid = r.json.case.id;
   await call('POST', '/api/cases/decide', { id: cid, action: 'approve' }, admin.auth);
-  r = await call('GET', '/api/me/points', null, t1.auth); assert.equal(r.json.creditsAvailable, 2);
-  assert.equal((await call('POST', '/api/me/points/exchange', { credits: 3 }, t1.auth)).status, 400);
-  r = await call('POST', '/api/me/points/exchange', { credits: 2 }, t1.auth); assert.equal(r.status, 200); assert.equal(r.json.points, 20); assert.equal(r.json.creditsAvailable, 0);
+  r = await call('GET', '/api/me/points', null, t1.auth);
+  assert.equal(r.json.creditsEarned, 2); assert.equal(r.json.creditsAvailable, 0); assert.equal(r.json.points, 20); assert.equal(r.json.auto, true);
+  assert.equal(r.json.history[0].kind, 'earn'); assert.equal(r.json.history[0].credits, 2); assert.ok(r.json.history[0].note.includes('心情墙'));
+  assert.equal((await call('POST', '/api/me/points/exchange', { credits: 1 }, t1.auth)).status, 400);
   // 工具端：没密钥不行；扣减幂等；不够答 409
   const key = { Authorization: 'Bearer tools-secret' };
   assert.equal((await call('GET', '/api/points/balance?uid=' + t1.id)).status, 403);
@@ -48,4 +49,13 @@ test('points: credits from the ledger exchange at the rate; tools spend idempote
   r = await call('GET', '/api/me/points', null, t1.auth); assert.equal(r.json.points, 5); assert.equal(r.json.history.length, 2); assert.equal(r.json.history[0].tool, '教研工坊');
   r = await call('GET', '/api/points/of?uid=' + t1.id, null, admin.auth); assert.equal(r.json.points, 5);
   assert.equal((await call('GET', '/api/points/of?uid=' + t1.id, null, t1.auth)).status, 403);
+  r = await call('GET', '/api/points/of?uid=' + t1.id, null, key); assert.equal(r.status, 200); assert.equal(r.json.history.length, 2);
+  // 比例：管理员改成 5，之前记的 20 不动，之后入库的一条按 5
+  assert.equal((await call('POST', '/api/admin/points/rules', { rate: 5 }, t1.auth)).status, 403);
+  assert.equal((await call('POST', '/api/admin/points/rules', { rate: 0 }, admin.auth)).status, 400);
+  r = await call('POST', '/api/admin/points/rules', { rate: 5 }, admin.auth); assert.equal(r.status, 200); assert.equal(r.json.rules.rate, 5);
+  r = await call('POST', '/api/cases', { title: '签到墙', domain: 'env', use: 'adapt', text: TEXT }, t1.auth);
+  await call('POST', '/api/cases/decide', { id: r.json.case.id, action: 'approve' }, admin.auth);
+  r = await call('GET', '/api/me/points', null, t1.auth); assert.equal(r.json.points, 15); assert.equal(r.json.creditsEarned, 4); assert.equal(r.json.rate, 5);
+  assert.equal((await call('GET', '/api/admin/points/rules', null, admin.auth)).json.rules.envRate, 10);
 });

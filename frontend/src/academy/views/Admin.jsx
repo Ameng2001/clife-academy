@@ -13,6 +13,28 @@ import { useBrand } from '../brand.js'
 const fmtWhen = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getMonth() + 1}-${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}` }
 const toLocal = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` }
 
+// 积分比例：学分到账时按它记积分；改了只影响之后到账的。钱包页与教研工坊统一，这里只管比例。
+function PointsRules() {
+  const toast = useUI.getState().toast
+  const [r, setR] = useState(null), [rate, setRate] = useState(''), [busy, setBusy] = useState(false)
+  const load = () => api('/api/admin/points/rules').then(x => { setR(x.rules); setRate(String(x.rules.rate)) }).catch(() => setR(null))
+  useEffect(() => { load() }, [])
+  const save = async () => {
+    const n = Math.floor(Number(rate)); if (!(n >= 1 && n <= 100)) return toast('填 1 到 100 的整数')
+    if (n !== r.rate && !confirm(`把比例改成 1 学分 ${n} 积分？已记的积分不重算，只影响之后到账的。`)) return
+    setBusy(true)
+    try { await api('/api/admin/points/rules', { method: 'POST', body: JSON.stringify({ rate: n }) }); toast('已改'); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+  }
+  if (!r) return <div className="small muted" style={{ padding: '4px 0' }}>没取到积分比例。</div>
+  return <div style={{ padding: '4px 0' }}>
+    <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+      <span className="small">1 学分 =</span><TextField type="number" min="1" max="100" value={rate} onChange={e => setRate(e.target.value)} style={{ width: 80 }} /><span className="small">积分</span>
+      <Button size="sm" variant="primary" disabled={busy || String(r.rate) === rate} onClick={save}>改</Button>
+    </div>
+    <div className="small muted" style={{ marginTop: 6 }}>学分到账时自动按这个比例记积分，改了只影响之后到账的。{r.byName ? `${r.byName} 改于 ${fmtDay(r.at)}` : `没改过，用的是部署默认 ${r.envRate}`}。钱包页与教研工坊统一，学坊不单独做；工具端扣减见 docs/POINTS-DESIGN.md。</div>
+  </div>
+}
+
 function Group({ title, icon, children }) { return <div className="sect"><div className="sect-t"><Icon name={icon} /> {title}</div><div className="sect-b">{children}</div></div> }
 function Row({ to, title, sub, n, onClick }) {
   const nav = useNavigate()
@@ -166,6 +188,10 @@ export default function Admin() {
         <Row to="/ops" title="点评时效与运营周报" sub="全平台与各园一行；周一推一次" />
         <Row to="/questions" title="答疑" sub="两个工作日没人答自动升级到园长与管理员" n={`${o.review.questionsOpen} 开着`} />
         <Row title="答疑与 Coach 的模型" sub={o.review.coach ? '已接（ASSISTANT_* 环境变量）；模型只改措辞、不做结论' : '没接；答疑与 Coach 走规则草稿。接法见 .env.example 的 ASSISTANT_*'} />
+      </Group>
+
+      <Group title="积分" icon="star">
+        <PointsRules />
       </Group>
 
       <Group title="公告" icon="speaker">
