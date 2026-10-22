@@ -24,7 +24,7 @@ export default function Honors() {
         <div className="tile"><div className="l">积分</div><div className="v">{p.points}</div><div className="small muted">过关、入库、互动都自动记</div></div>
         <div className="tile"><div className="l">通过的关</div><div className="v">{p.levelsPassed}</div><div className="small muted">每关 {p.rules?.earn?.level ?? 10} 积分</div></div>
       </div>
-      <div className="small muted" style={{ marginTop: 10 }}>积分是工具的使用额度：{Object.values(p.tools).join('、')}里换特定资源时扣。只有你自己看得到，不排行、不可转赠。明细与花销在教研工坊的钱包页看，两边是同一个账。</div>
+      <div className="small muted" style={{ marginTop: 10 }}>积分是工具的使用额度：{Object.values(p.tools).join('、')}里换特定资源时扣。只有你自己看得到，不排行、不可转赠。明细与花销在教研工坊的钱包页看，两边是同一个账。 <span className="tap" style={{ color: 'var(--acc)' }} onClick={() => nav('/mall')}>教学物料商城 ›</span></div>
       {p.history?.length > 0 && <div style={{ marginTop: 10 }}>{p.history.slice(0, 8).map((x, i) => <div key={i} className="ac-row small" style={{ marginTop: 4 }}><span className="muted">{fmtDay(x.at)} · {x.tool ? x.tool + ' · ' : ''}{x.note}</span><span style={{ color: x.n > 0 ? 'var(--green)' : 'var(--label-2)' }}>{x.n > 0 ? '+' : ''}{x.n}</span></div>)}</div>}
     </div>}
 

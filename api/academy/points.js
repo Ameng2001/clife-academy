@@ -9,11 +9,14 @@
  * 钱包页与教研工坊统一（账号统一登录，同一 uid），学坊不单独做钱包页：工坊带 TOOLS_API_KEY 调 balance / of。
  * 不是货币：不能充值、提现、转赠；不排行、不公开、不与考核挂钩。
  *
- * db.points: { uid, kind:'earn'|'interact'|'spend'|'exchange'(旧), n(正为入、负为出), sub?, ref?, about?, levels?, tool?, note, at } */
+ * 商城（mall.js）经 ledger.points.spend / refund 扣与退，流水 tool 'mall'。
+ *
+ * db.points: { uid, kind:'earn'|'interact'|'spend'|'refund'|'exchange'(旧), n(正为入、负为出), sub?, ref?, about?, levels?, tool?, note, at } */
 import { orgKeyOf } from './org.js';
 
 const TOOLS_KEY = (process.env.TOOLS_API_KEY || '').trim();
 export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察评价工具', bagel: '贝果实验室' });
+const TOOL_LABEL = { ...TOOLS, mall: '教学物料商城' };
 // 学与贡献：事件 → 默认积分。键就是 ledger.grant 的 kind；level 是客户端的过关
 export const EARN = Object.freeze({
   level:    { name: '关卡过关', n: 10 },
@@ -75,6 +78,12 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     saveDb(); return true;
   };
   if (ledger) ledger.interact = interact;
+  // 商城等平台内的花与退：同一 ref 只扣一次、只退一次
+  if (ledger) ledger.points = {
+    balance: uid => { settle(uid); return balance(uid); },
+    spend: (uid, n, ref, note) => { settle(uid); if (!(n >= 1) || db.points.some(p => p.uid === uid && p.kind === 'spend' && p.tool === 'mall' && p.ref === ref)) return false; if (balance(uid) < n) return false; push({ uid, kind: 'spend', n: -n, tool: 'mall', ref, note: str(note, 120) }); saveDb(); return true; },
+    refund: (uid, n, ref, note) => { if (!(n >= 1) || db.points.some(p => p.uid === uid && p.kind === 'refund' && p.ref === ref)) return false; push({ uid, kind: 'refund', n, tool: 'mall', ref, note: str(note, 120) }); saveDb(); return true; }
+  };
 
   // 过关在客户端状态里：progress 每关一条；读余额时对账补记没记过的关
   const levelsPassed = uid => { const S = readStateCached(uid) || {}; const c = S.credits && typeof S.credits === 'object' ? S.credits : {}; return Object.values(c).reduce((s, n) => s + (Number(n) || 0), 0); };
@@ -87,7 +96,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (changed) saveDb();
   };
   const summary = uid => { settle(uid); return { points: balance(uid), levelsPassed: levelsPassed(uid), rules: rules(), tools: TOOLS }; };
-  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, n: p.n, tool: p.tool ? (TOOLS[p.tool] || p.tool) : null, note: p.note, at: p.at });
+  const pubRow = p => ({ kind: p.kind, sub: p.sub || null, n: p.n, tool: p.tool ? (TOOL_LABEL[p.tool] || p.tool) : null, note: p.note, at: p.at });
   const toolAuth = req => TOOLS_KEY && (req.headers.authorization || '') === 'Bearer ' + TOOLS_KEY;
   const adminOnly = (req, res) => { const user = readSession(req); if (!user) { json(res, 401, { error: 'not signed in' }); return null; } if (!isAdmin(user)) { json(res, 403, { error: 'admins only', code: 'admin' }); return null; } return user; };
 

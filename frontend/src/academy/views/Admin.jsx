@@ -200,6 +200,7 @@ export default function Admin() {
       </Group>
 
       <Group title="积分" icon="star">
+        <Row to="/mall" title="教学物料商城" sub="上架教具、绘本、耗材、名额；看订单、标发货与签收；库存数只有运营方看得到" />
         <PointsRules />
       </Group>
 

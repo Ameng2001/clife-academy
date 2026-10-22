@@ -31,6 +31,7 @@ import Lectures from './views/Lectures.jsx'
 import Forms from './views/Forms.jsx'
 import Policy from './views/Policy.jsx'
 import Collections from './views/Collections.jsx'
+import Mall from './views/Mall.jsx'
 import Drills from './views/Drills.jsx'
 import Honors from './views/Honors.jsx'
 import Contests from './views/Contests.jsx'
@@ -118,6 +119,7 @@ function Shell() {
           <Route path="/forms/:caseId" element={<Forms />} />
           <Route path="/policy" element={<Policy />} />
           <Route path="/collections" element={<Collections />} />
+          <Route path="/mall" element={<Mall />} />
           <Route path="/drills" element={<Drills />} />
           <Route path="/honors" element={<Honors />} />
           <Route path="/contests" element={<Contests />} />

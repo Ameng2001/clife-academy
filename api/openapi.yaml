@@ -776,6 +776,40 @@ paths:
       description: '`{ points, levelsPassed, rules: { earn, interact }, tools, history }`。学（过关、走完路径、证书、实践关作品通过点评、结营）、贡献（案例 / 课程成果 / 赛作品入库、作答精选）、互动（被标用过有效、标别人并写一句、答疑采纳、点评、营帖）都自动记；过关在客户端进度里，读余额时对账补记。history 的 kind earn / interact / spend，sub 是事件名。不奖签到、时长、浏览、点赞。只本人可见、不排行、不可转赠。钱包页与教研工坊统一，学坊不单独做。'
       responses:
         '200': { description: 余额与流水 }
+  /api/mall:
+    get:
+      tags: [academy]
+      operationId: academyMall
+      summary: 教学物料商城：我能看到的物料、我换的、运营方看全部订单
+      description: '`{ items, orders, all?, points, manage, orgName, scopes, deliver, statuses, canScopes }`。物料按范围 all / district / community 可见；教师看不到库存数与已兑件数，只有 available。'
+      responses:
+        '200': { description: 商城 }
+  /api/mall/items:
+    post:
+      tags: [academy]
+      operationId: academyMallItem
+      summary: 上架 / 改 / 下架（管理员或区县管理员）
+      description: '`{ id?, title, desc?, points(1–100000), stock?(空为不限), scope, communityId?, deliver: org | pickup, pickupNote?, off? }`。全平台的只有管理员能上；区县管理员上本区县与本区共同体的。'
+      responses:
+        '200': { description: '`{ item }`' }
+        '403': { description: 不是运营方 / 范围不够 }
+  /api/mall/redeem:
+    post:
+      tags: [academy]
+      operationId: academyMallRedeem
+      summary: 用积分换一件
+      description: '`{ id, note? }`。扣积分、生成待发货订单；余额不够或换完了答 409。寄到园用账号的园所，不填个人地址。'
+      responses:
+        '200': { description: '`{ order, points }`' }
+        '409': { description: insufficient / stock }
+  /api/mall/orders:
+    post:
+      tags: [academy]
+      operationId: academyMallOrder
+      summary: 订单：教师取消待发货的；运营方发货、签收、取消（退回积分）
+      description: '`{ id, action: cancel | ship | done, note? }`。'
+      responses:
+        '200': { description: '`{ order }`' }
   /api/admin/points/rules:
     get:
       tags: [admin]

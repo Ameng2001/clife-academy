@@ -33,6 +33,7 @@ import { lectureRoutes } from './academy/lectures.js';
 import { drillRoutes } from './academy/drills.js';
 import { honorRoutes, createLedger } from './academy/honors.js';
 import { pointsRoutes } from './academy/points.js';
+import { mallRoutes } from './academy/mall.js';
 import { contestRoutes } from './academy/contests.js';
 import { checkupRoutes } from './academy/checkup.js';
 import { districtRoutes } from './academy/district.js';
@@ -2659,6 +2660,7 @@ const routes = {
   ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),
   ...pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger: LEDGER }),
+  ...mallRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES, ledger: LEDGER }),
   ...contestRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   ...checkupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
   ...districtRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached }),
