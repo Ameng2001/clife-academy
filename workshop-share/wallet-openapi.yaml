@@ -1,0 +1,74 @@
+# 幼师学坊给教研工坊钱包页与扣积分用的六条接口，从 api/openapi.yaml 抽出（2026-10-22）。改了 openapi 这里要跟着改。
+openapi: 3.0.3
+info:
+  title: 幼师学坊 · 工具接口（钱包增量）
+  version: "2026-10-22"
+components:
+  securitySchemes:
+    toolsKey: { type: http, scheme: bearer, description: TOOLS_API_KEY，工具服务端持有 }
+security: [{ toolsKey: [] }]
+paths:
+  /api/tools/ping:
+    get:
+      tags: [academy]
+      operationId: academyToolsPing
+      summary: 工具服务端接密钥后的握手（TOOLS_API_KEY）
+      description: |
+        不带 uid、不动账。密钥对了答 `{ ok, academy {name, short, origin}, tools, groups, uid {accepts, note}, routes, rules, quota }`；
+        `uid.accepts` 含 `platform` 时，工具传平台账号的 uid 即可（统一登录，按 `user.platform.uid` 找人），也认学坊自己的 `user.id`。没配密钥 404 `off`，密钥不对 403 `tools-key`。
+      responses:
+        '200': { description: 握手信息 }
+  /api/points/balance:
+    get:
+      tags: [academy]
+      operationId: academyPointsBalance
+      summary: 工具服务端查余额（TOOLS_API_KEY）
+      description: '`?uid=` 学坊 user.id 或平台账号 uid 都认（应答带 `uid` 与 `platformUid`）。教研工坊、观察评价工具、贝果实验室的服务端带 `Authorization: Bearer <TOOLS_API_KEY>`。'
+      responses:
+        '200': { description: '`{ uid, name, orgName, points }`' }
+        '403': { description: 没带工具密钥 }
+  /api/points/quote:
+    get:
+      tags: [academy]
+      operationId: academyPointsQuote
+      summary: 工具服务端报价（TOOLS_API_KEY）
+      description: |
+        `?pipeline=theme|pbl|activity&weeks=&adaptedFrom=<学坊成果 id>&uid=`。不动账。主题式 30 / 周、项目式 40 / 周、单节活动 10；
+        `adaptedFrom` 是学坊里入库且允许改编的成果就按 5 折（向上取整），答 `{ pipeline, weeks, full, n, adapted {id,title,byName}, note, prices }`，给了 uid 再带 `points / quota / enough`。
+        成果没入库或不许改编 400 `adapt`；pipeline 不认识 400 `pipeline`。
+      responses:
+        '200': { description: 报价 }
+  /api/points/spend:
+    post:
+      tags: [academy]
+      operationId: academyPointsSpend
+      summary: 工具服务端扣积分（TOOLS_API_KEY，幂等）
+      description: '可传 `pipeline / weeks`（与 `n` 二选一）让学坊算价；`adaptedFrom`（学坊成果 id）改编 5 折，流水 note 写「改编自《…》 5 折」，成果没入库或不许改编 400 `adapt`。`{ uid, tool: workshop|observe|bagel, n, ref, note? }`。同一 (tool, ref) 只扣一次。'
+      responses:
+        '200': { description: '`{ ok, duplicate, points }`' }
+        '409': { description: 余额不够 }
+  /api/points/of:
+    get:
+      tags: [academy]
+      operationId: academyPointsOf
+      summary: 一个人的积分流水（管理员会话，或工坊钱包页带 TOOLS_API_KEY）
+      description: |
+        `?uid=`。钱包页与教研工坊统一，学坊不单独做：工坊的钱包页用这条取明细（docs/WORKSHOP-TODO.md 第 15 条）。
+        应答：`points` 个人积分、`quota { left, used, orgName }` 园所额度、`sections` 四栏小计（learn 学与贡献 / interact 互动 / tool 工具扣减 / mall 教学物料商城，各带 label、n、count）、
+        `history[]` 每笔带 `group`（四栏之一）、`tool`（显示名）、`sub`（从园所额度扣的是 quota）、改编半价那几笔带 `adaptedFrom {id, title, url}`；`links { mall, honors, paths }` 入口地址、`mallHint`。
+        `quotaLog[]` 教师视角的园所额度来龙去脉（kind alloc / recall / spend，n 正进负出，byName、tool、text 一句话），不进 history、不算积分。
+        翻页 `?before=<at>&limit=<n>`（limit ≤ 500）：`sections` 与 `total` 按全量，`history` 只给这一页，`nextBefore` 给下一页用；不传 limit 全给。
+        余额与 `GET /api/me/points` 同一份算法。不给充值、转赠、排行。
+      responses:
+        '200': { description: 余额、四栏小计、流水与入口链接 }
+  /api/tools/work:
+    get:
+      tags: [academy]
+      operationId: academyToolsWork
+      summary: 工坊开改编课时核对来源（TOOLS_API_KEY）
+      description: |
+        `?id=<学坊成果 id>&from=<工坊课程 id>&uid=`。不要登录、不动账、不给文件。答这门成果的基本信息、`source.courseId`、
+        `canAdapt`（入库且允许改编且 from 对得上）与 `why`（not-approved / not-allowed / course-mismatch）、`match`、`own`（uid 就是分享者）、
+        新课要标的 `label`「改编自《…》· 谁（园）」、`share.adaptedFrom`（分享与扣积分时都带这个 id）。成果不存在 404 `work`，uid 没登过学坊 404 `uid`。
+      responses:
+        '200': { description: 来源核对结果 }

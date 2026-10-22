@@ -4,7 +4,7 @@
 
 数据全部来自学坊 `GET /api/points/of?uid=`（工坊服务端带 `TOOLS_API_KEY`，应答结构见 api/openapi.yaml 与 docs/POINTS-DESIGN.md 第三节）。工坊钱包页只渲染，不自己算余额、不自己分类。
 
-这十四条同步抄在 docs/WORKSHOP-TODO.md 第 15 条下（15.1–15.14，编号一一对应）；这里是总账，改了两边一起改。
+这十四条同步抄在 docs/WORKSHOP-TODO.md 第 15 条下（15.1–15.14，编号一一对应）；按接口整理给工坊同学的版本在 workshop-share/教研工坊-钱包接口增量.md（含 wallet-openapi.yaml）。这里是总账，改了三处一起改。
 
 状态列：**接口已齐** 学坊这边不用再动；**待学坊** 学坊还要加字段或接口；**待工坊** 纯界面。
 
