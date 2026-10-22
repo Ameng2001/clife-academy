@@ -27,7 +27,10 @@ Content-Type: application/json
     { "name": "主题网络图.docx", "url": "https://jiaoyan.clife.cn/…/主题网络图.docx" },
     { "name": "3周周计划.zip", "url": "https://jiaoyan.clife.cn/…/3周周计划.zip" }
   ],
-  "source": { "courseId": "1522", "url": "https://jiaoyan.clife.cn/teaching-workshop/<uuid>?id=1522" }
+  "source": { "courseId": "1522", "url": "https://jiaoyan.clife.cn/teaching-workshop/<uuid>?id=1522" },
+  "message": "第二周换成本班儿歌以后，幼儿自己会唱着做了",
+  "allowAdapt": true,
+  "filesScope": "all"
 }
 ```
 
@@ -41,6 +44,9 @@ Content-Type: application/json
 | `changes` | **必填，至少一条**：教师在起草稿上改了什么。工坊应在分享前让教师填这一栏，不要自动生成。空的学坊不收（`400 { code: 'changes' }`） |
 | `files` | 最多 20 条，只收 `https://` 外链；学坊不存文件，链接失效由工坊负责 |
 | `source` | 工坊课程 id 与地址；学坊会显示「在教研工坊里打开这门课」 |
+| `message` | 可空，≤ 80 字：分享者给同行的一句话，显示在卡片上。工坊在提交成功那一屏问一句「给同行留一句话？」，可跳过；不是评价、不是总结 |
+| `allowAdapt` | 可空，默认 `true`：允许别的教师改编这门课 |
+| `filesScope` | 可空，默认 `all`：文件外链对谁可见，`all` 全平台 / `community` 本共同体 / `org` 本园。简介与「改了什么」始终全平台可见 |
 
 ## 应答
 

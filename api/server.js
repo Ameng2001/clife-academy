@@ -2647,7 +2647,7 @@ const routes = {
   // 案例库（academy/cases.js）
   ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
   // 课程成果：教研工坊做出来、班里用过的课（academy/works.js）
-  ...workRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger: LEDGER }),
+  ...workRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger: LEDGER, communities: COMMUNITIES }),
   // 合集（academy/collections.js）：按主题攒案例、关卡、切片、场次、资源
   ...collectionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
   // 口径库（academy/policy.js）：红线一份，不登录也给

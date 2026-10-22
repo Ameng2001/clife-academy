@@ -14,7 +14,8 @@ const STATUS = { consent: ['待园长同意', 'var(--orange)'], pending: ['待�
 const PIPES = [['theme', '主题式课程'], ['pbl', '项目式课程'], ['activity', '单节活动']]
 const FIVE = [['lang', '语言'], ['social', '社会'], ['health', '健康'], ['art', '艺术'], ['sci', '科学']]
 const AGES = ['小班', '中班', '大班', '混龄']
-const EMPTY = { id: null, title: '', pipeline: 'theme', age: '', weeks: '', domains: [], summary: '', changes: [''], files: [], source: { courseId: '', url: '' } }
+const SCOPES = [['all', '全平台'], ['community', '本共同体'], ['org', '本园']]
+const EMPTY = { id: null, title: '', pipeline: 'theme', age: '', weeks: '', domains: [], summary: '', changes: [''], files: [], source: { courseId: '', url: '' }, message: '', allowAdapt: true, filesScope: 'all' }
 
 function WorkCard({ w, open, onOpen, actions, onUsed }) {
   const [note, setNote] = useState('')
@@ -24,7 +25,8 @@ function WorkCard({ w, open, onOpen, actions, onUsed }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 600, lineHeight: 1.4 }}>{w.title}</div>
         <div className="small muted" style={{ marginTop: 4 }}><span style={{ color: 'var(--acc)' }}>{w.pipelineName}</span>{w.age ? ' · ' + w.age : ''}{w.weeks ? ` · ${w.weeks} 周` : ''} · {w.domainNames.join('、')} · {w.byName}{w.byTitles?.length ? ' · ' + w.byTitles.join('、') : ''}{w.orgName ? ' · ' + w.orgName : ''}</div>
-        <div className="small muted" style={{ marginTop: 2 }}>{w.source.via ? `经「${w.source.via}」投稿` : w.source.kind === 'workshop' ? '来自教研工坊' : '自己交的'} · {fmtDay(w.at)}{w.status !== 'approved' ? <> · <span style={{ color: col }}>{t}</span></> : null}</div>
+        <div className="small muted" style={{ marginTop: 2 }}>{w.source.via ? `经「${w.source.via}」投稿` : w.source.kind === 'workshop' ? '来自教研工坊' : '自己交的'} · {fmtDay(w.at)}{w.allowAdapt === false ? ' · 只看不改编' : ''}{w.status !== 'approved' ? <> · <span style={{ color: col }}>{t}</span></> : null}</div>
+        {w.message && <div className="small" style={{ marginTop: 6, paddingInlineStart: 10, borderInlineStart: '3px solid var(--acc)', lineHeight: 1.5 }}>{w.byName}：{w.message}</div>}
       </div>
       <Icon name={open ? 'chevronUp' : 'chevronDown'} />
     </div>
@@ -34,7 +36,8 @@ function WorkCard({ w, open, onOpen, actions, onUsed }) {
         <div className="small" style={{ fontWeight: 600 }}><Icon name="pencil" /> 在起草稿上改了什么</div>
         <ul className="small" style={{ margin: '4px 0 0', paddingInlineStart: 18 }}>{w.changes.map((c, i) => <li key={i}>{c}</li>)}</ul>
       </div>
-      {w.files.length > 0 && <div className="chips" style={{ marginTop: 8 }}>{w.files.map((f, i) => <a key={i} className="chip" href={f.url} target="_blank" rel="noreferrer"><Icon name="download" /> {f.name}</a>)}</div>}
+      {w.filesHidden && <div className="small muted" style={{ marginTop: 8 }}><Icon name="lock" /> 文件只给{w.filesScopeName}看，简介与改动说明全平台可见。</div>}
+      {w.files.length > 0 && <div className="chips" style={{ marginTop: 8 }}>{w.filesScope !== 'all' && <span className="small muted" style={{ alignSelf: 'center' }}>文件 · {w.filesScopeName}可见</span>}{w.files.map((f, i) => <a key={i} className="chip" href={f.url} target="_blank" rel="noreferrer"><Icon name="download" /> {f.name}</a>)}</div>}
       {w.source.url && <div className="small" style={{ marginTop: 6 }}><a href={w.source.url} target="_blank" rel="noreferrer" style={{ color: 'var(--acc)' }}><Icon name="link" /> 在教研工坊里打开这门课</a></div>}
       {w.note && w.status === 'rejected' && <div className="small" style={{ marginTop: 8, color: 'var(--red)' }}>退回原因：{w.note}</div>}
       {w.uses && <div className="small muted" style={{ marginTop: 8 }}>{w.uses.length ? `用过，有效：${w.uses.map(u => u.name + (u.orgName ? '（' + u.orgName + '）' : '') + (u.note ? '：' + u.note : '')).join('；')}` : '还没有人标「用过，有效」。'}</div>}
@@ -75,7 +78,7 @@ export default function Works() {
     if (!form.domains.length) return toast('选至少一个领域')
     setBusy(true)
     try {
-      const body = { id: form.id || undefined, title: form.title, pipeline: form.pipeline, age: form.age || undefined, weeks: form.weeks ? +form.weeks : undefined, domains: form.domains, summary: form.summary, changes, files: form.files.filter(f => f.name && f.url), source: { courseId: form.source.courseId || undefined, url: form.source.url || undefined } }
+      const body = { id: form.id || undefined, title: form.title, pipeline: form.pipeline, age: form.age || undefined, weeks: form.weeks ? +form.weeks : undefined, domains: form.domains, summary: form.summary, changes, files: form.files.filter(f => f.name && f.url), source: { courseId: form.source.courseId || undefined, url: form.source.url || undefined }, message: form.message.trim(), allowAdapt: form.allowAdapt, filesScope: form.filesScope }
       const r = await api('/api/works', { method: 'POST', body: JSON.stringify(body) })
       toast(r.work.status === 'consent' ? '已交，等园长同意' : r.work.status === 'pending' ? '已交，等审核' : '已保存'); setForm(null); await load()
     } catch (e) { toast('没交成' + (e.message ? '：' + e.message : '')) }
@@ -91,7 +94,7 @@ export default function Works() {
   }
   const used = async (w, note) => { try { await api('/api/works/used', { method: 'POST', body: JSON.stringify({ id: w.id, note }) }); toast('已记，分享者看得到'); await load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } }
   const del = async w => { if (!confirm(`删掉「${w.title}」？`)) return; try { await api('/api/works/delete', { method: 'POST', body: JSON.stringify({ id: w.id }) }); await load() } catch (e) { toast('没删成') } }
-  const edit = w => setForm({ id: w.id, title: w.title, pipeline: w.pipeline, age: w.age || '', weeks: w.weeks || '', domains: w.domains, summary: w.summary, changes: w.changes.length ? w.changes : [''], files: w.files, source: { courseId: '', url: w.source.url || '' } })
+  const edit = w => setForm({ id: w.id, title: w.title, pipeline: w.pipeline, age: w.age || '', weeks: w.weeks || '', domains: w.domains, summary: w.summary, changes: w.changes.length ? w.changes : [''], files: w.files, source: { courseId: '', url: w.source.url || '' }, message: w.message || '', allowAdapt: w.allowAdapt !== false, filesScope: w.filesScope || 'all' })
   const queueCount = (queue?.consent?.length || 0) + (queue?.pending?.length || 0)
   const card = (w, extra) => <WorkCard key={w.id} w={w} open={openId === w.id} onOpen={() => setOpenId(openId === w.id ? null : w.id)} onUsed={used} actions={extra} />
 
@@ -121,6 +124,14 @@ export default function Works() {
       {form.files.map((f, i) => <div key={i} className="row" style={{ gap: 6, marginTop: 6 }}><TextField placeholder="文件名" value={f.name} onChange={e => setForm({ ...form, files: form.files.map((x, j) => j === i ? { ...x, name: e.target.value } : x) })} style={{ flex: 1 }} /><TextField placeholder="https://…" value={f.url} onChange={e => setForm({ ...form, files: form.files.map((x, j) => j === i ? { ...x, url: e.target.value } : x) })} style={{ flex: 2 }} /><button className="iconbtn" onClick={() => setForm({ ...form, files: form.files.filter((_, j) => j !== i) })}><Icon name="xmark" /></button></div>)}
       {form.files.length < 20 && <div style={{ marginTop: 6 }}><Button size="sm" icon="link" onClick={() => setForm({ ...form, files: [...form.files, { name: '', url: '' }] })}>加一个文件链接</Button></div>}
       <TextField style={{ marginTop: 10 }} placeholder="教研工坊里这门课的地址（可不填）" value={form.source.url} onChange={e => setForm({ ...form, source: { ...form.source, url: e.target.value } })} />
+      <div className="small" style={{ marginTop: 10, fontWeight: 600 }}>给同行留一句话（可不填，80 字内）</div>
+      <TextField style={{ marginTop: 6 }} maxLength={80} placeholder="如：第二周换成本班儿歌以后，幼儿自己会唱着做了" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} />
+      <div className="row" style={{ gap: 14, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <label className="small row" style={{ gap: 6, alignItems: 'center', cursor: 'pointer' }}><input type="checkbox" checked={form.allowAdapt} onChange={e => setForm({ ...form, allowAdapt: e.target.checked })} /> 允许别的老师改编这门课</label>
+        <span className="small muted">文件对谁可见</span>
+        <div className="chips">{SCOPES.map(([k, t]) => <button key={k} className={'chip' + (form.filesScope === k ? ' on' : '')} onClick={() => setForm({ ...form, filesScope: k })}>{t}</button>)}</div>
+      </div>
+      {form.filesScope !== 'all' && <div className="small muted" style={{ marginTop: 4 }}>简介与「改了什么」仍是全平台可见，只有文件链接收到{SCOPES.find(([k]) => k === form.filesScope)[1]}。</div>}
       <div className="ac-row" style={{ marginTop: 10 }}><span className="small muted">{form.summary.trim().length} 字</span><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button size="sm" variant="primary" disabled={busy} onClick={save}>交</Button></div></div>
     </div>}
 

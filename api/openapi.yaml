@@ -4451,7 +4451,7 @@ paths:
       tags: [academy]
       operationId: academyListWorks
       summary: 课程成果（已入库）
-      description: '教师在教研工坊做出来、班里用过的课，分享到幼师学坊。`?pipeline=theme|pbl|activity&age=&domain=lang|social|health|art|sci&q=`。每条带 pipeline、age、weeks、domains（五大领域）、summary、changes（在起草稿上改了什么）、files（外链）、source（workshop/token/own）、署名；「用过，有效」的名单只给分享者本人、本园园长与管理员。不给人数、不排名。'
+      description: '教师在教研工坊做出来、班里用过的课，分享到幼师学坊。`?pipeline=theme|pbl|activity&age=&domain=lang|social|health|art|sci&q=`。每条带 pipeline、age、weeks、domains（五大领域）、summary、changes（在起草稿上改了什么）、files（外链）、source（workshop/token/own）、message（分享者给同行的一句话）、allowAdapt、filesScope（文件外链对谁可见：all/community/org，看不到的 files 为空且 filesHidden 为 true）、署名；「用过，有效」的名单只给分享者本人、本园园长与管理员。不给人数、不排名。'
       responses:
         '200': { description: '`{ works, total, pipelines, domains, ages }`' }
         '401': { description: 未登录 }
@@ -4459,7 +4459,7 @@ paths:
       tags: [academy]
       operationId: academyPostWork
       summary: 交一门课程成果（投稿令牌可用，见 docs/WORKSHOP-SHARE.md）
-      description: '`{ id?, title, pipeline, age?, weeks?, domains:[…], summary(≥50 字), changes:[≥1 条], files?:[{ name, url(https) }], source?:{ courseId?, url? } }`。教师交→园长同意→审核人入库；园长自己交直接待审核。changes 为空不收：工坊起草不算成果，用过并改过才算。'
+      description: '`{ id?, title, pipeline, age?, weeks?, domains:[…], summary(≥50 字), changes:[≥1 条], files?:[{ name, url(https) }], source?:{ courseId?, url? }, message?(≤80 字), allowAdapt?(默认 true), filesScope?(all|community|org，默认 all) }`。教师交→园长同意→审核人入库；园长自己交直接待审核。changes 为空不收：工坊起草不算成果，用过并改过才算。'
       responses:
         '200': { description: '`{ work }`' }
         '400': { description: 'title / pipeline / summary / changes / domains 不合' }

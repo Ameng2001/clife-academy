@@ -27,6 +27,7 @@ function Card({ it, nav }) {
       : <div className={'course-cover ' + TYPE_KIND[it.type]}><span className="ic"><Icon name={TYPE_ICON[it.type]} /></span><span className="lb">{it.label}</span></div>}
     <div className="course-m" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}><span className="tag" style={{ marginInlineEnd: 6 }}>{TYPE_NAME[it.type]}</span>{it.sub}</div>
     <div className="course-t">{it.title}</div>
+    {it.message && <div className="small" style={{ margin: '4px 0 0', paddingInlineStart: 8, borderInlineStart: '3px solid var(--acc)', lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{it.message}</div>}
     <div className="course-f"><span className="muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.by}{it.org ? ' · ' + it.org : ''}</span><span className="muted" style={{ flex: 'none', marginInlineStart: 6 }}>{it.at ? fmtDay(it.at) : ''}</span></div>
   </div>
 }
@@ -59,7 +60,7 @@ export default function Community() {
     const img = c => { const f = c.files?.find(f => /^image\//.test(f.type || '')); return f ? `api/cases/file?id=${c.id}&hash=${f.hash}` : null }
     return [
       ...(cases || []).map(c => ({ type: 'case', id: c.id, title: c.title, by: c.byName, org: c.orgName, at: when(c), img: img(c), label: dname(c.domain) + (c.age ? ' · ' + c.age : ''), sub: c.useName || '', domains: [c.domain], showcase: !!c.showcase, text: c.text, to: '/cases?q=' + encodeURIComponent(c.title) })),
-      ...(works || []).map(w => ({ type: 'work', id: w.id, title: w.title, by: w.byName, org: w.orgName, at: when(w), img: null, label: w.pipelineName + (w.age ? ' · ' + w.age : '') + (w.weeks ? ' · ' + w.weeks + ' 周' : ''), sub: (w.domainNames || []).join('、'), domains: (w.domains || []).map(d => FIVE_TO_SEVEN[d]).filter(Boolean), text: w.summary, to: '/works?q=' + encodeURIComponent(w.title) })),
+      ...(works || []).map(w => ({ type: 'work', id: w.id, title: w.title, by: w.byName, org: w.orgName, at: when(w), img: null, label: w.pipelineName + (w.age ? ' · ' + w.age : '') + (w.weeks ? ' · ' + w.weeks + ' 周' : ''), sub: (w.domainNames || []).join('、'), domains: (w.domains || []).map(d => FIVE_TO_SEVEN[d]).filter(Boolean), text: w.summary, message: w.message ? `${w.byName}：${w.message}` : '', to: '/works?q=' + encodeURIComponent(w.title) })),
       ...clips.map(c => ({ type: 'clip', id: c.id, title: c.title, by: c.speaker, org: null, at: c.at, img: null, label: c.lecture, sub: c.desc || '', domains: [], text: c.desc, to: '/library?type=clip' }))
     ].sort((a, b) => b.at - a.at)
   }, [cases, works, clips])

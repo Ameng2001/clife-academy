@@ -68,3 +68,25 @@ test('a submit token can post a work and nothing else; it is tagged with the tok
   assert.equal(r.json.work.source.kind, 'token'); assert.equal(r.json.work.source.via, '教研工坊'); assert.equal(r.json.work.byName, '王老师');
   assert.equal((await call('POST', '/api/works/used', { id: r.json.work.id }, auth)).status, 403);
 });
+
+test('message / allowAdapt / filesScope: message ≤ 80 chars, files hidden outside the scope, summary and changes still public', async t => {
+  const { call, login } = await startServer(t);
+  const admin = await login('管理员', 'director', '园A');
+  const teacher = await login('王老师', 'teacher', '园B');
+  const mate = await login('刘老师', 'teacher', '园B');
+  const other = await login('赵老师', 'teacher', '园C');
+  const r = await call('POST', '/api/works', { ...WORK, message: '第二周换成本班儿歌以后，幼儿自己会唱着做了。'.repeat(5), allowAdapt: false, filesScope: 'org' }, teacher.auth);
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  const w = r.json.work;
+  assert.equal(w.message.length, 80); assert.equal(w.allowAdapt, false); assert.equal(w.filesScope, 'org'); assert.equal(w.filesScopeName, '本园');
+  assert.equal(w.files.length, 1); assert.equal(w.filesHidden, false);
+  assert.equal((await call('POST', '/api/works/decide', { id: w.id, action: 'approve' }, admin.auth)).json.work.status, 'approved');
+  const seenByMate = (await call('GET', '/api/works', null, mate.auth)).json.works[0];
+  assert.equal(seenByMate.files.length, 1); assert.equal(seenByMate.filesHidden, false);
+  const seenByOther = (await call('GET', '/api/works', null, other.auth)).json.works[0];
+  assert.equal(seenByOther.files.length, 0); assert.equal(seenByOther.filesHidden, true);
+  assert.equal(seenByOther.summary, SUMMARY); assert.deepEqual(seenByOther.changes, WORK.changes); assert.equal(seenByOther.allowAdapt, false);
+  const plain = await call('POST', '/api/works', { ...WORK, title: '第二门' }, teacher.auth);
+  assert.equal(plain.json.work.message, null); assert.equal(plain.json.work.allowAdapt, true); assert.equal(plain.json.work.filesScope, 'all');
+  assert.equal((await call('POST', '/api/works', { ...WORK, title: '第二门', id: plain.json.work.id, filesScope: 'nowhere' }, teacher.auth)).json.work.filesScope, 'all');
+});
