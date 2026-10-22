@@ -1806,7 +1806,7 @@ const PAIRS = createPairs(db);
 // 关卡以外的学分台账（案例入库、作答精选）；勋章按记录算，称号人授。
 const LEDGER = createLedger(db);
 const COMMUNITIES = createCommunities(db);
-const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER });
+const QUESTIONS = questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS, communities: COMMUNITIES, notifier: NOTIFIER, ledger: LEDGER });
 setInterval(() => { try { QUESTIONS.escalateDue(); } catch { /* 下一轮再试 */ } }, 10 * 60000).unref?.();
 // 园长大讲堂：排场、预约、回放与讲义；每分钟看一眼有没有要提醒的预约（没配模板就不发）。
 const LECTURES = lectureRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER });
@@ -2639,7 +2639,7 @@ const routes = {
   // 园长看板（academy/org.js）。
   ...orgRoutes({ json, readBody, saveDb, audit, readSession, db, readStateCached, isAdmin }),
   // 实践关证据提交与点评（academy/submissions.js）。
-  ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER, pairs: PAIRS }),
+  ...submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER }),
   // 带教配对（academy/pairs.js）
   ...pairRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS }),
   // 资源库（academy/resources.js）
@@ -2669,7 +2669,7 @@ const routes = {
   ...portfolioRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...reviewStatRoutes({ json, db, readSession, isAdmin, pairs: PAIRS }),
   ...selfReviewRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs: PAIRS }),
-  ...campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
+  ...campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger: LEDGER }),
   ...studyGroupRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...programRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...shareDayRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),

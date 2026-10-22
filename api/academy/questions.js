@@ -33,7 +33,7 @@ export function similarity(a, b) {
 export function workdaysLater(ts, n = ESCALATE_WORKDAYS) { const d = new Date(ts); let left = n; while (left > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) left--; } return d.getTime(); }
 const ROLE_LABEL = { admin: '本地讲师', director: '园长', reviewer: '种子教师', mentor: '带教教师', curator: '案例审核人' };
 
-export function questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs = null, communities = null, notifier = null }) {
+export function questionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, pairs = null, communities = null, notifier = null, ledger = null }) {
   db.questions = db.questions || [];
   const now = () => Date.now();
   const newId = () => crypto.randomBytes(9).toString('base64url');
@@ -175,6 +175,8 @@ ${systemRules(['child-data', 'no-ranking', 'plain']).replace(/\n/g, '\n   ')}
     if (!a) return json(res, 404, { error: 'no such answer' });
     for (const x of q.answers) { x.accepted = x.id === a.id; x.acceptedAt = x.id === a.id ? now() : null; }
     q.status = 'answered'; saveDb();
+    // 互动给分：答的人（助手草稿经种子教师确认的也算确认人的）；一题换着采纳也只记第一次
+    if (ledger?.interact && a.by !== user.id) ledger.interact(a.by, 'adopted', `question:${q.id}`, `答疑被采纳：${q.text.slice(0, 30)}`);
     audit(req, 'question.accept', { user, msg: `${q.id} ${a.id}` });
     json(res, 200, { question: pub(q, user) });
   },

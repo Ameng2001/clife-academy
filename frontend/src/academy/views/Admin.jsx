@@ -16,22 +16,33 @@ const toLocal = ts => { const d = new Date(ts); const p = n => String(n).padStar
 // 积分比例：学分到账时按它记积分；改了只影响之后到账的。钱包页与教研工坊统一，这里只管比例。
 function PointsRules() {
   const toast = useUI.getState().toast
-  const [r, setR] = useState(null), [rate, setRate] = useState(''), [busy, setBusy] = useState(false)
-  const load = () => api('/api/admin/points/rules').then(x => { setR(x.rules); setRate(String(x.rules.rate)) }).catch(() => setR(null))
+  const [r, setR] = useState(null), [defs, setDefs] = useState({}), [rate, setRate] = useState(''), [inter, setInter] = useState({}), [busy, setBusy] = useState(false)
+  const load = () => api('/api/admin/points/rules').then(x => { setR(x.rules); setDefs(x.interactDefaults || {}); setRate(String(x.rules.rate)); setInter(Object.fromEntries(Object.entries(x.rules.interact || {}).map(([k, v]) => [k, String(v)]))) }).catch(() => setR(null))
   useEffect(() => { load() }, [])
+  const dirty = r && (String(r.rate) !== rate || Object.keys(inter).some(k => String(r.interact?.[k]) !== inter[k]))
   const save = async () => {
-    const n = Math.floor(Number(rate)); if (!(n >= 1 && n <= 100)) return toast('填 1 到 100 的整数')
-    if (n !== r.rate && !confirm(`把比例改成 1 学分 ${n} 积分？已记的积分不重算，只影响之后到账的。`)) return
+    const n = Math.floor(Number(rate)); if (!(n >= 1 && n <= 100)) return toast('比例填 1 到 100 的整数')
+    const interact = {}
+    for (const [k, v] of Object.entries(inter)) { const m = Math.floor(Number(v)); if (!(m >= 0 && m <= 100)) return toast('互动给分填 0 到 100 的整数，0 是不给'); interact[k] = m }
+    if (!confirm('改积分规则？已记的积分不重算，只影响之后的。')) return
     setBusy(true)
-    try { await api('/api/admin/points/rules', { method: 'POST', body: JSON.stringify({ rate: n }) }); toast('已改'); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
+    try { await api('/api/admin/points/rules', { method: 'POST', body: JSON.stringify({ rate: n, interact }) }); toast('已改'); load() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) }
   }
-  if (!r) return <div className="small muted" style={{ padding: '4px 0' }}>没取到积分比例。</div>
+  if (!r) return <div className="small muted" style={{ padding: '4px 0' }}>没取到积分规则。</div>
+  const cap = k => { const d = defs[k] || {}; return [d.perAboutDay ? `同一作品每天 ${d.perAboutDay} 次` : '', d.day ? `每天 ${d.day} 次` : '', d.month ? `每月 ${d.month} 次` : ''].filter(Boolean).join(' · ') }
   return <div style={{ padding: '4px 0' }}>
     <div className="row" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-      <span className="small">1 学分 =</span><TextField type="number" min="1" max="100" value={rate} onChange={e => setRate(e.target.value)} style={{ width: 80 }} /><span className="small">积分</span>
-      <Button size="sm" variant="primary" disabled={busy || String(r.rate) === rate} onClick={save}>改</Button>
+      <span className="small" style={{ fontWeight: 600 }}>学分到账</span><span className="small">1 学分 =</span><TextField type="number" min="1" max="100" value={rate} onChange={e => setRate(e.target.value)} style={{ width: 80 }} /><span className="small">积分</span>
     </div>
-    <div className="small muted" style={{ marginTop: 6 }}>学分到账时自动按这个比例记积分，改了只影响之后到账的。{r.byName ? `${r.byName} 改于 ${fmtDay(r.at)}` : `没改过，用的是部署默认 ${r.envRate}`}。钱包页与教研工坊统一，学坊不单独做；工具端扣减见 docs/POINTS-DESIGN.md。</div>
+    <div className="small" style={{ fontWeight: 600, marginTop: 10 }}>互动给分（只记积分，不记学分；0 是不给）</div>
+    {Object.keys(inter).map(k => <div key={k} className="ac-row small" style={{ marginTop: 6, gap: 8 }}>
+      <span style={{ flex: 1, minWidth: 0 }}>{defs[k]?.name || k}{cap(k) ? <span className="muted"> · {cap(k)}</span> : null}</span>
+      <TextField type="number" min="0" max="100" value={inter[k]} onChange={e => setInter({ ...inter, [k]: e.target.value })} style={{ width: 72 }} />
+    </div>)}
+    <div className="ac-row" style={{ marginTop: 10 }}>
+      <span className="small muted">{r.byName ? `${r.byName} 改于 ${fmtDay(r.at)}` : `没改过，比例用的是部署默认 ${r.envRate}`}。改了只影响之后的，已记的不重算。钱包页与教研工坊统一，学坊不单独做。</span>
+      <Button size="sm" variant="primary" disabled={busy || !dirty} onClick={save}>改</Button>
+    </div>
   </div>
 }
 

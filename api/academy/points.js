@@ -6,7 +6,11 @@
  * 改了只影响之后到账的，已记的不重算。积分只能在接入的工具里花——教研工坊、观察评价工具、创新课平台（贝果实验室）换特定资源，
  * 之后加教学物料商城。不排行、不公开、不与考核挂钩、不可转赠；这是使用额度，不是货币。
  *
- * db.points: { uid, kind:'earn'|'exchange'|'spend', n(正为入、负为出), credits?, tool?, ref?, note, at }
+ * 互动类只记积分不记学分（设计第二节第 3 条）：被标「用过，有效」的分享者、标别人并写了一句的、答疑被采纳的、点评人、营帖。
+ * 每项有日 / 月上限，同一 (sub, ref) 只记一次；被标「用过」同一作品一天只记一次。数字在 db.pointsRules.interact，管理员可改。
+ * 其他模块经 ledger.interact(uid, sub, ref, note, about) 调（pointsRoutes 挂上去的，和 grant 的包法一样）。
+ *
+ * db.points: { uid, kind:'earn'|'exchange'|'spend'|'interact', n(正为入、负为出), credits?, tool?, ref?, sub?, about?, note, at }
  * 手动兑换 POST /api/me/points/exchange 保留作过渡：自动到账以后可兑的学分总是 0，答 400。
  * 扣减：接入的工具服务端带 TOOLS_API_KEY 调 POST /api/points/spend { uid, tool, n, ref, note }；同一 (tool, ref) 只扣一次（幂等）。
  * 工具服务端拿 uid 的方式：教师在工具里用大课堂账号登录（/api/me 给 id），或 GET /api/points/balance?uid= 查。 */
@@ -15,11 +19,23 @@ import { orgKeyOf } from './org.js';
 const ENV_RATE = Math.max(1, Math.floor(Number(process.env.POINTS_PER_CREDIT)) || 10);
 const TOOLS_KEY = (process.env.TOOLS_API_KEY || '').trim();
 export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察评价工具', bagel: '贝果实验室' });
+// 互动类：n 积分；day / month 本人每日 / 每月最多记几次；perAboutDay 同一作品每天最多记几次
+export const INTERACT = Object.freeze({
+  used:     { name: '作品被标「用过，有效」', n: 5, month: 20, perAboutDay: 1 },
+  usedBy:   { name: '标别人「用过，有效」并写了一句', n: 2, day: 3 },
+  adopted:  { name: '答疑被采纳', n: 5 },
+  review:   { name: '点评别人的作品', n: 3, day: 5 },
+  campPost: { name: '练习营帖子', n: 1 }
+});
+const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+const sameMonth = (a, b) => { const x = new Date(a), y = new Date(b); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth(); };
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 
 export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, ledger }) {
   db.points = db.points || [];
   db.pointsRules = db.pointsRules && Number.isInteger(db.pointsRules.rate) ? db.pointsRules : { rate: ENV_RATE, at: 0, byName: null };
+  const interactN = sub => { const v = db.pointsRules.interact?.[sub]; return Number.isInteger(v) && v >= 0 ? v : INTERACT[sub].n; };
+  const interactRules = () => Object.fromEntries(Object.keys(INTERACT).map(k => [k, interactN(k)]));
   const RATE = () => Math.min(100, Math.max(1, db.pointsRules.rate || ENV_RATE));
   const rows = uid => db.points.filter(p => p.uid === uid);
   const balance = uid => rows(uid).reduce((s, p) => s + p.n, 0);
@@ -32,6 +48,19 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     ledger.grant = (uid, kind, ref, n, note) => { const ok = orig(uid, kind, ref, n, note); if (ok) { earn(uid, n, note); saveDb(); } return ok; };
     ledger._points = true;
   }
+  // 互动给分：同一 (sub, ref) 只记一次；日 / 月上限；同一作品每天最多记 perAboutDay 次；n 配成 0 就不记。答 true 表示记了。
+  const interact = (uid, sub, ref, note, about = null) => {
+    const rule = INTERACT[sub]; if (!rule || !uid || !ref) return false;
+    const n = interactN(sub); if (n < 1) return false;
+    const t = Date.now(), mine = rows(uid).filter(p => p.kind === 'interact' && p.sub === sub);
+    if (mine.some(p => p.ref === ref)) return false;
+    if (rule.day && mine.filter(p => sameDay(p.at, t)).length >= rule.day) return false;
+    if (rule.month && mine.filter(p => sameMonth(p.at, t)).length >= rule.month) return false;
+    if (rule.perAboutDay && about && mine.filter(p => p.about === about && sameDay(p.at, t)).length >= rule.perAboutDay) return false;
+    db.points.push({ uid, kind: 'interact', n, sub, ref, about, note: str(note, 120) || rule.name, at: t });
+    saveDb(); return true;
+  };
+  if (ledger) ledger.interact = interact;
   // 关卡学分在客户端状态里，读余额时对账补记；比例按补记当时的
   const settle = uid => { const delta = levelCredits(uid) + (ledger ? ledger.total(uid) : 0) - exchanged(uid); if (delta >= 1) { earn(uid, delta, `${delta} 学分到账（关卡过关，或改版前攒下的）`); saveDb(); } };
   const levelCredits = uid => { const S = readStateCached(uid) || {}; const c = S.credits && typeof S.credits === 'object' ? S.credits : {}; return Object.values(c).reduce((s, n) => s + (Number(n) || 0), 0); };
@@ -42,7 +71,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   'GET /api/me/points': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
-    json(res, 200, { ...summary(user.id), history: rows(user.id).sort((a, b) => b.at - a.at).slice(0, 100).map(p => ({ kind: p.kind, n: p.n, credits: p.credits || null, tool: p.tool ? (TOOLS[p.tool] || p.tool) : null, note: p.note, at: p.at })) });
+    json(res, 200, { ...summary(user.id), history: rows(user.id).sort((a, b) => b.at - a.at).slice(0, 100).map(p => ({ kind: p.kind, sub: p.sub || null, n: p.n, credits: p.credits || null, tool: p.tool ? (TOOLS[p.tool] || p.tool) : null, note: p.note, at: p.at })) });
   },
   // 兑换：{ credits } 整数，不超过可兑的
   'POST /api/me/points/exchange': async (req, res) => {
@@ -102,19 +131,22 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
     if (!isAdmin(user)) return json(res, 403, { error: 'admins only', code: 'admin' });
-    json(res, 200, { rules: { ...db.pointsRules, rate: RATE(), envRate: ENV_RATE }, tools: TOOLS });
+    json(res, 200, { rules: { ...db.pointsRules, rate: RATE(), envRate: ENV_RATE, interact: interactRules() }, interactDefaults: INTERACT, tools: TOOLS });
   },
   'POST /api/admin/points/rules': async (req, res) => {
     const user = readSession(req);
     if (!user) return json(res, 401, { error: 'not signed in' });
     if (!isAdmin(user)) return json(res, 403, { error: 'admins only', code: 'admin' });
     const body = await readBody(req);
-    const rate = Math.floor(Number(body.rate));
+    const rate = body.rate === undefined ? RATE() : Math.floor(Number(body.rate));
     if (!(rate >= 1 && rate <= 100)) return json(res, 400, { error: 'rate must be an integer 1–100', code: 'rate' });
-    const before = RATE();
-    db.pointsRules = { rate, at: Date.now(), by: user.id, byName: user.name };
+    const interactIn = body.interact && typeof body.interact === 'object' ? body.interact : {};
+    const interactOut = { ...interactRules() };
+    for (const k of Object.keys(INTERACT)) if (interactIn[k] !== undefined) { const v = Math.floor(Number(interactIn[k])); if (!(v >= 0 && v <= 100)) return json(res, 400, { error: `interact.${k} must be an integer 0–100`, code: 'interact' }); interactOut[k] = v; }
+    const before = `${RATE()} ${JSON.stringify(interactRules())}`;
+    db.pointsRules = { rate, interact: interactOut, at: Date.now(), by: user.id, byName: user.name };
     saveDb();
-    audit(req, 'points.rules', { user, msg: `rate ${before}→${rate}` });
+    audit(req, 'points.rules', { user, msg: `${before} → ${rate} ${JSON.stringify(interactOut)}` });
     json(res, 200, { rules: { ...db.pointsRules, envRate: ENV_RATE } });
   }
   };

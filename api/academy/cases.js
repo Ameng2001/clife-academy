@@ -212,6 +212,8 @@ export function caseRoutes({ communities = null, json, readBody, db, saveDb, rea
     if (u) { u.note = note; u.at = Date.now(); }
     else { u = { caseId: c.id, uid: user.id, name: user.name, orgName: user.academy?.org?.name || null, note, at: Date.now() }; db.caseUses.push(u); }
     saveDb();
+    // 互动给分（只记积分）：分享者 +used；标的人写了一句才 +usedBy
+    if (ledger?.interact) { ledger.interact(c.by, 'used', `case:${c.id}:${user.id}`, `「${c.title.slice(0, 24)}」被 ${user.name} 标「用过，有效」`, 'case:' + c.id); if (note) ledger.interact(user.id, 'usedBy', `case:${c.id}`, `标「${c.title.slice(0, 24)}」用过并写了怎么改`); }
     audit(req, 'case.used', { user, msg: c.id });
     json(res, 200, { case: pub(c, user) });
   },

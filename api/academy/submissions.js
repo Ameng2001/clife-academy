@@ -20,7 +20,7 @@ const HASH = /^[0-9a-f]{64}$/;
 
 export const canReview = (u, isAdmin) => !!u && (u.academy?.role === 'director' || u.academy?.reviewer === true || isAdmin(u));
 
-export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null, pairs = null }) {
+export function submissionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, notifier = null, pairs = null, ledger = null }) {
   db.submissions = db.submissions || [];
   const newId = () => crypto.randomBytes(9).toString('base64url');
   const pub = (s, { withUser = false } = {}) => ({
@@ -107,9 +107,12 @@ export function submissionRoutes({ json, readBody, db, saveDb, readSession, audi
     const scores = (Array.isArray(body.scores) ? body.scores : []).slice(0, rubric.length).map(n => { const k = Math.round(Number(n)); return k >= 1 && k <= 5 ? k : null; });
     const comment = str(body.comment, 2000);
     if (verdict === 'revise' && !comment) return json(res, 400, { error: 'say what to change', code: 'comment' });
+    const firstReview = !s.review;
     s.status = verdict;
     s.review = { by: user.id, byName: user.name, at: Date.now(), scores, comment };
     saveDb();
+    // 互动给分：点评人，一份提交只记一次
+    if (firstReview && ledger?.interact && s.uid !== user.id) ledger.interact(user.id, 'review', `submission:${s.id}`, `点评了「${LEVELS[s.levelId] || s.levelId}」的一份作品`);
     audit(req, 'submission.review', { user, msg: `${s.levelId} ${verdict}` });
     json(res, 200, { submission: pub(s, { withUser: true }) });
     if (notifier) { const [p, i] = s.levelId.split(/-(?=\d+$)/); notifier.send(s.uid, 'review', { title: LEVELS[s.levelId] || s.levelId, verdict: verdict === 'pass' ? '通过' : '需修改', at: s.review.at, comment, by: user.name }, `pages/level/level?p=${p}&i=${i}`); }

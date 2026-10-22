@@ -12,7 +12,7 @@ const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const DAY = 86400000;
 export const MAX_DAYS = 30;
 
-export function campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }) {
+export function campRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, ledger = null }) {
   db.camps = db.camps || [];
   const now = () => Date.now();
   const newId = () => crypto.randomBytes(9).toString('base64url');
@@ -98,7 +98,7 @@ export function campRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     if (text.length < 20) return json(res, 400, { error: 'at least 20 characters', code: 'text' });
     let p = c.posts.find(x => x.uid === user.id && x.day === day);
     if (p) Object.assign(p, { text, updatedAt: now() });
-    else { p = { id: newId(), uid: user.id, name: user.name, day, text, at: now(), updatedAt: now() }; c.posts.push(p); }
+    else { p = { id: newId(), uid: user.id, name: user.name, day, text, at: now(), updatedAt: now() }; c.posts.push(p); if (ledger?.interact) ledger.interact(user.id, 'campPost', `camp:${c.id}:${day}`, `练习营「${c.title.slice(0, 20)}」第 ${day + 1} 天的帖子`); }
     saveDb();
     json(res, 200, { camp: pub(c, user) });
   },

@@ -158,7 +158,11 @@ export function workRoutes({ json, readBody, db, saveDb, readSession, audit, isA
     const w = db.works.find(x => x.id === str(body.id, 40) && x.status === 'approved');
     if (!w) return json(res, 404, { error: 'no such work' });
     if (w.by === user.id) return json(res, 400, { error: 'your own', code: 'own' });
-    if (!usesOf(w.id).some(u => u.uid === user.id)) { db.workUses.push({ workId: w.id, uid: user.id, name: user.name, orgName: user.academy?.org?.name || null, note: str(body.note, 300), at: Date.now() }); saveDb(); }
+    if (!usesOf(w.id).some(u => u.uid === user.id)) {
+      const note = str(body.note, 300);
+      db.workUses.push({ workId: w.id, uid: user.id, name: user.name, orgName: user.academy?.org?.name || null, note, at: Date.now() }); saveDb();
+      if (ledger?.interact) { ledger.interact(w.by, 'used', `work:${w.id}:${user.id}`, `「${w.title.slice(0, 24)}」被 ${user.name} 标「用过，有效」`, 'work:' + w.id); if (note) ledger.interact(user.id, 'usedBy', `work:${w.id}`, `标「${w.title.slice(0, 24)}」用过并写了怎么改`); }
+    }
     json(res, 200, { work: pub(w, user) });
   }
   };

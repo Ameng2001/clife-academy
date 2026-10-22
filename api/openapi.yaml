@@ -773,7 +773,7 @@ paths:
       tags: [academy]
       operationId: academyMyPoints
       summary: 本人的学分与积分
-      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, auto, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。学分到账时自动按 rate 记积分（台账即时、关卡学分读余额时对账补记），所以 creditsAvailable 总是 0。'
+      description: '`{ creditsEarned, creditsExchanged, creditsAvailable, points, rate, auto, tools, history }`。学分 = 关卡学分 + 台账（案例入库、作答精选）；积分是接入工具的使用额度。学分到账时自动按 rate 记积分（台账即时、关卡学分读余额时对账补记），所以 creditsAvailable 总是 0。互动类只记积分（history 里 kind interact，sub used / usedBy / adopted / review / campPost）：作品被标「用过，有效」+5（同一作品每天 1 次、每月 20 次）、标别人并写了一句 +2（每天 3 次）、答疑被采纳 +5、点评别人的作品 +3（每天 5 次）、营帖 +1；同一 (sub, ref) 只记一次；不奖签到、时长、浏览、点赞。'
       responses:
         '200': { description: 余额与流水 }
   /api/me/points/exchange:
@@ -791,12 +791,12 @@ paths:
       operationId: adminPointsRules
       summary: 积分比例（管理员）
       responses:
-        '200': { description: '`{ rules: { rate, envRate, at, byName }, tools }`' }
+        '200': { description: '`{ rules: { rate, envRate, interact: { used, usedBy, adopted, review, campPost }, at, byName }, interactDefaults, tools }`' }
     post:
       tags: [admin]
       operationId: adminSetPointsRules
-      summary: 改积分比例，只影响之后到账的
-      description: '`{ rate }` 1–100 的整数。已记的积分不重算。'
+      summary: 改积分规则，只影响之后的
+      description: '`{ rate?, interact?: { used?, usedBy?, adopted?, review?, campPost? } }`。rate 1–100；互动给分 0–100，0 是不给。已记的积分不重算。'
       responses:
         '200': { description: '`{ rules }`' }
         '400': { description: rate 不是 1–100 的整数 }
