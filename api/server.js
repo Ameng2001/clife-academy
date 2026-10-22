@@ -27,6 +27,7 @@ import { caseRoutes } from './academy/cases.js';
 import { formRoutes } from './academy/forms.js';
 import { policyRoutes } from './academy/policy.js';
 import { collectionRoutes } from './academy/collections.js';
+import { brandRoutes, brandOf } from './academy/brand.js';
 import { lectureRoutes } from './academy/lectures.js';
 import { drillRoutes } from './academy/drills.js';
 import { honorRoutes, createLedger } from './academy/honors.js';
@@ -1986,6 +1987,8 @@ const routes = {
     // that has no Coach. The key's absence is that answer.
     json(res, 200, {
       invite_only: INVITE_ONLY, allow_guest: ALLOW_GUEST,
+      // 平台名称（运营方可改，见 academy/brand.js）：登录前就要显示，所以公开。
+      brand: brandOf(db),
       ...authConfig(),
       ...eventsConfig(DEV_LOGIN),
       // Only when on, so an instance without passwords answers exactly as it did before (#118).
@@ -2646,6 +2649,7 @@ const routes = {
   ...collectionRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, communities: COMMUNITIES }),
   // 口径库（academy/policy.js）：红线一份，不登录也给
   ...policyRoutes({ json }),
+  ...brandRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   // 轻形态（academy/forms.js）：案例的家长会课件、改前改后对比卡、条文记忆卡
   ...formRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...LECTURES.routes,

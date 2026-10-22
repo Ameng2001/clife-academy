@@ -8,6 +8,7 @@ import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { api } from '../../lib/api.js'
 import { fmtDay } from './common.jsx'
+import { useBrand } from '../brand.js'
 
 const fmtWhen = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getMonth() + 1}-${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}` }
 const toLocal = ts => { const d = new Date(ts); const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` }
@@ -89,9 +90,35 @@ function Audit({ n }) {
   </>
 }
 
+// 平台名称：全称、短名、地区、一句话、技术支持署名。改了网页、小程序、证书、答疑提示词一起换；存完刷新 /api/config。
+function BrandEditor({ onDone }) {
+  const toast = useUI.getState().toast
+  const refreshConfig = useStore(s => s.refreshConfig)
+  const [d, setD] = useState(null), [f, setF] = useState(null), [busy, setBusy] = useState(false)
+  useEffect(() => { api('/api/brand').then(r => { setD(r); setF({ ...r.brand }) }).catch(() => setD(null)) }, [])
+  const save = async (body) => { setBusy(true); try { await api('/api/brand', { method: 'PUT', body: JSON.stringify(body) }); await refreshConfig(); toast('已改'); onDone() } catch (e) { toast('没成' + (e.message ? '：' + e.message : '')) } finally { setBusy(false) } }
+  if (!f) return <div className="small muted" style={{ padding: '6px 0' }}>正在取…</div>
+  const L = d.limits, set = k => e => setF({ ...f, [k]: e.target.value })
+  return <div className="card" style={{ marginTop: 8 }}>
+    <div className="small muted">全称（≤ {L.name} 字）· 登录页、证书、设置「关于」</div>
+    <TextField value={f.name} maxLength={L.name} placeholder="如：龙城幼师学堂" onChange={set('name')} />
+    <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+      <div style={{ flex: 1, minWidth: 160 }}><div className="small muted">短名（≤ {L.short} 字）· 顶部导航、首页、小程序标题</div><TextField value={f.short} maxLength={L.short} placeholder="如：幼师学堂" onChange={set('short')} /></div>
+      <div style={{ flex: 1, minWidth: 160 }}><div className="small muted">地区（可空）· 证书与小程序顶栏副题</div><TextField value={f.region} maxLength={L.region} placeholder="如：柳州市" onChange={set('region')} /></div>
+    </div>
+    <div className="small muted" style={{ marginTop: 8 }}>一句话 · 登录页副题</div>
+    <TextField value={f.tagline} maxLength={L.tagline} onChange={set('tagline')} />
+    <div className="small muted" style={{ marginTop: 8 }}>技术支持署名（可空）· 证书页脚</div>
+    <TextField value={f.credit} maxLength={L.credit} placeholder="如：技术支持：C-Life" onChange={set('credit')} />
+    <div className="ac-row" style={{ marginTop: 10 }}><Button size="sm" disabled={busy} onClick={() => confirm('回到默认「' + d.defaults.name + '」？') && save({ reset: true })}>回到默认</Button><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={onDone}>取消</Button><Button size="sm" variant="primary" disabled={busy || !f.name.trim()} onClick={() => save(f)}>存</Button></div></div>
+  </div>
+}
+
 export default function Admin() {
   const nav = useNavigate()
   const user = useStore(s => s.user)
+  const brand = useBrand()
+  const [brandOpen, setBrandOpen] = useState(false)
   const [d, setD] = useState(null), [err, setErr] = useState('')
   const load = () => { if (user) api('/api/admin/overview').then(r => { setD(r); setErr('') }).catch(e => setErr(e.status === 403 ? '只有管理员能看这页。' : '没取到。')) }
   useEffect(load, [user?.id])
@@ -146,6 +173,8 @@ export default function Admin() {
       </Group>
 
       <Group title="审计" icon="shield">
+        <Row onClick={() => setBrandOpen(!brandOpen)} title="平台名称" sub={`${brand.name}${brand.region ? ' · ' + brand.region : ''} · 改了网页、小程序、证书、答疑提示词一起换`} />
+        {brandOpen && <BrandEditor onDone={() => setBrandOpen(false)} />}
         <Row to="/policy" title="平台口径" sub="十条红线：不碰幼儿数据、不排名、评作品不评人、AI 只起草……各模块与模型提示同一份" />
         <div className="small muted" style={{ padding: '4px 0' }}>24 小时 {o.audit.day} 条，其中失败 {o.audit.dayFail}；留存 {o.audit.total} 条</div>
         <Audit n={o.audit.total} />

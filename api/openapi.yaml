@@ -4422,7 +4422,20 @@ paths:
       summary: 删一份合集：`{ id }`（本人、管理员、园所范围的本园园长）
       responses:
         '200': { description: '`{ ok }`' }
-
+  /api/brand:
+    get:
+      tags: [academy]
+      operationId: academyBrand
+      summary: 平台名称（全称、短名、地区、一句话、技术支持署名；公开，也随 /api/config 下发）
+      responses:
+        '200': { description: '`{ brand, defaults, limits, canEdit }`' }
+    put:
+      tags: [academy]
+      operationId: academyBrandSet
+      summary: 改平台名称（管理员）；`reset:true` 回到默认
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { name: { type: string }, short: { type: string }, region: { type: string }, tagline: { type: string }, credit: { type: string }, reset: { type: boolean } } } } } }
+      responses:
+        '200': { description: '`{ brand }`' }
 components:
   securitySchemes:
     cookieAuth:

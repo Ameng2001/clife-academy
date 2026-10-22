@@ -10,6 +10,7 @@ import { confirmSheet } from '../sheets.jsx'
 import { connectionView, syncNowWithToast, showsConnection, useOnline } from '../components/SyncBanner.jsx'
 import { useS, update } from './common.jsx'
 import { api } from '../../lib/api.js'
+import { useBrand } from '../brand.js'
 
 const THEMES = [{ value: 'auto', label: '跟随系统' }, { value: 'light', label: '浅色' }, { value: 'dark', label: '深色' }]
 
@@ -35,6 +36,7 @@ function Tokens() {
 }
 
 export default function Settings() {
+  const brand = useBrand()
   const nav = useNavigate(), S = useS()
   const user = useStore(s => s.user)
   const sync = useStore(s => s.sync)
@@ -85,7 +87,7 @@ export default function Settings() {
     </Section>}
 
     <Section title="关于" footer="基于 openGym（AGPL-3.0）改造，见仓库 NOTICE.md。">
-      <Row icon="info" title="C-Life 学前大课堂" subtitle={'版本 ' + (typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev')} />
+      <Row icon="info" title={brand.name} subtitle={'版本 ' + (typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev')} />
     </Section>
     <div style={{ height: 24 }} />
     {user && <Button variant="ghost" className="dim" onClick={() => nav('/home')}>返回首页</Button>}

@@ -48,6 +48,7 @@ import ShareDays from './views/ShareDays.jsx'
 import Coach from './views/Coach.jsx'
 import Admin from './views/Admin.jsx'
 import './academy.css'
+import './brand.js'
 
 bindUI(useUI)
 

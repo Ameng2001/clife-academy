@@ -1,3 +1,4 @@
+  const brand = useBrand()
 // 发展档案与学时证明（GET /api/me/portfolio、/api/me/hours）。档案是本人全部学习与作品记录，随人走：这页可打印成 PDF，也可下载 JSON。
 // 学时证明按本地运营方与市教育局谈定的规则与格式出具（管理员在这里改规则），有编号可核验；出具时规则快照随证明保存。
 import { useEffect, useRef, useState } from 'react'
@@ -8,6 +9,7 @@ import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { api } from '../../lib/api.js'
 import { fmtDay } from './common.jsx'
+import { useBrand } from '../brand.js'
 
 const toast = m => useUI.getState().toast(m)
 const TYPE = { tool: '工具关', practice: '实践关', seminar: '研讨关' }
@@ -17,18 +19,20 @@ const toLocal = at => { const d = new Date(at); return `${d.getFullYear()}-${pad
 
 /** 学时证明（打印用）。 */
 export function HoursSheet({ c }) {
+  const brand = useBrand()
   const nav = useNavigate()
   const r = c.rule
   return <div className="narrow">
     <div className="hdr no-print"><div><h1>学时证明</h1><div className="sub">编号 {c.no}</div></div><div className="hdr-actions"><Button size="sm" icon="clipboard" onClick={() => window.print()}>打印 / 存 PDF</Button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     <div className="card" style={{ padding: 28, border: '2px solid var(--acc)' }}>
-      <div className="small muted" style={{ textAlign: 'center' }}>C-Life 学前大课堂</div>
+      <div className="small muted" style={{ textAlign: 'center' }}>{brand.region ? brand.region + ' · ' : ''}{brand.name}</div>
       <div style={{ fontSize: 24, fontWeight: 700, textAlign: 'center', margin: '12px 0 18px' }}>{r.title}</div>
-      <div style={{ fontSize: 15, lineHeight: 1.9 }}>兹证明 <b>{c.name}</b>{c.orgName ? `（${c.orgName}）` : ''} 于 {fmtDay(c.from)} 至 {fmtDay(c.to)} 期间，在 C-Life 学前大课堂完成以下学习，合计 <b>{c.minutes}</b> 分钟，按每 {r.minutesPerHour} 分钟折 1 学时、{r.roundTo} 学时向下取整，计 <b style={{ fontSize: 20 }}>{c.hours}</b> 学时。</div>
+      <div style={{ fontSize: 15, lineHeight: 1.9 }}>兹证明 <b>{c.name}</b>{c.orgName ? `（${c.orgName}）` : ''} 于 {fmtDay(c.from)} 至 {fmtDay(c.to)} 期间，在{brand.name}完成以下学习，合计 <b>{c.minutes}</b> 分钟，按每 {r.minutesPerHour} 分钟折 1 学时、{r.roundTo} 学时向下取整，计 <b style={{ fontSize: 20 }}>{c.hours}</b> 学时。</div>
       <table style={{ width: '100%', marginTop: 14, borderCollapse: 'collapse', fontSize: 14 }}><thead><tr style={{ borderBottom: '1px solid var(--sep)' }}><th style={{ textAlign: 'left', padding: '6px 0' }}>项目</th><th style={{ textAlign: 'right' }}>次</th><th style={{ textAlign: 'right' }}>分钟</th></tr></thead>
         <tbody>{c.lines.map(l => <tr key={l.kind} style={{ borderBottom: '1px solid var(--sep)' }}><td style={{ padding: '6px 0' }}>{l.label}</td><td style={{ textAlign: 'right' }}>{l.count}</td><td style={{ textAlign: 'right' }}>{l.minutes}</td></tr>)}</tbody></table>
       {r.note && <div className="small" style={{ marginTop: 14, lineHeight: 1.7 }}>{r.note}</div>}
       <div style={{ marginTop: 26, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}><div className="small muted">编号 {c.no}<br />核验：大课堂「学时证明」页输入编号，或 api/hours/verify?no={c.no}</div><div style={{ textAlign: 'right' }}><div>{r.issuer}</div>{r.signer && <div className="small muted">{r.signer}</div>}<div className="small muted">{fmtDay(c.at)}</div></div></div>
+      {brand.credit && <div className="small muted" style={{ marginTop: 10, textAlign: 'center' }}>{brand.credit}</div>}
     </div>
     <div className="small muted no-print" style={{ marginTop: 12 }}>出具后规则快照随证明保存；以后规则改了，这份不变。继续教育学时认定以市里的口径为准。</div>
   </div>

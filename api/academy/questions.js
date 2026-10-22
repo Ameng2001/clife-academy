@@ -15,6 +15,7 @@ import { canReview } from './submissions.js';
 import { LEVELS, LEVEL_INFO, PATH_NAMES, LEVEL_DOMAIN, DOMAINS } from './events-data.js';
 import { complete, configured, parseJson } from './assistant.js';
 import { systemRules } from './policy.js';
+import { brandOf } from './brand.js';
 
 const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
 const norm = s => String(s || '').toLowerCase().replace(/[\s，。、？！：；“”「」（）()、,.?!:;]/g, '');
@@ -55,7 +56,7 @@ export function questionRoutes({ json, readBody, db, saveDb, readSession, audit,
     for (const x of cases) sources.push({ kind: 'case', id: x.c.id, title: `案例：${x.c.title}`, text: (x.c.text || '').slice(0, 300) });
     return sources;
   };
-  const SYSTEM = `你是「C-Life 学前大课堂」的答疑助手，服务对象是幼儿园教职工。你只做整理与起草，不聊天。
+  const SYSTEM = () => `你是「${brandOf(db).name}」的答疑助手，服务对象是幼儿园教职工。你只做整理与起草，不聊天。
 规则：
 1. 只依据下面给的材料回答；材料里没有的，不要编，把 confidence 设为 low，并在 answer 里说明建议请种子教师或本地讲师回答。
 2. 回答对象是教师本人的操作、口径、课程内容。遇到涉及幼儿评价或幼儿个人数据的请求，answer 写明这不在助手范围，交人工。
@@ -69,7 +70,7 @@ ${systemRules(['child-data', 'no-ranking', 'plain']).replace(/\n/g, '\n   ')}
     if (!configured()) return { ...base, note: '助手只做了整理（没有接模型）：相似问题、本关要点与相关案例在下面；问题已转给本园种子教师。' };
     const material = sources.map((s, i) => `[${i + 1}] ${s.title}\n${s.text || ''}`).join('\n\n');
     const prompt = `关卡：${PATH_NAMES[q.path] || q.path} · ${q.levelTitle}${LEVEL_DOMAIN[q.levelId] ? ' · 领域：' + (DOMAINS.find(d => d.key === LEVEL_DOMAIN[q.levelId])?.name || '') : ''}\n提问人岗位：${user.academy?.role || ''}\n问题：${q.text}\n\n材料：\n${material || '（没有找到相关材料）'}`;
-    const r = await complete({ system: SYSTEM, prompt });
+    const r = await complete({ system: SYSTEM(), prompt });
     const j = r && parseJson(r.text);
     if (!j) return { ...base, note: r ? '助手没整理出可用的草稿，问题已转给本园种子教师。' : '助手暂时没连上模型，问题已转给本园种子教师。' };
     const cites = (Array.isArray(j.cites) ? j.cites : []).map(n => Number(n)).filter(n => n >= 1 && n <= sources.length);

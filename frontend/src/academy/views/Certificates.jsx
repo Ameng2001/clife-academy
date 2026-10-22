@@ -1,3 +1,4 @@
+  const brand = useBrand()
 // 证书与认证期次（GET /api/me/certificates、/api/cohorts）：三级——岗位数智应用认证（自动）、领域研修证书（自动＋点评记录）、骨干教师认证（按学期开班，线下答辩）。
 // 只有本人看自己的；证书有编号可核验；没有分数；可打印进发展档案。管理员在这里开班、记答辩结果。
 import { useEffect, useState } from 'react'
@@ -8,6 +9,7 @@ import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { api } from '../../lib/api.js'
 import { fmtDay } from './common.jsx'
+import { useBrand } from '../brand.js'
 
 const toast = m => useUI.getState().toast(m)
 const PHASE = { upcoming: '未开始报名', open: '报名中', defense: '报名截止 · 待答辩', closed: '已结班' }
@@ -18,16 +20,18 @@ function Progress({ done, total }) { return <div className="ac-bar" style={{ mar
 
 /** 单张证书（打印用）。 */
 export function CertificateSheet({ c }) {
+  const brand = useBrand()
   const nav = useNavigate()
   return <div className="narrow">
     <div className="hdr no-print"><div><h1>证书</h1><div className="sub">编号 {c.no}</div></div><div className="hdr-actions"><Button size="sm" icon="clipboard" onClick={() => window.print()}>打印 / 存 PDF</Button><button className="iconbtn" onClick={() => nav(-1)}><Icon name="xmark" /></button></div></div>
     <div className="card" style={{ padding: 28, textAlign: 'center', border: '2px solid var(--acc)' }}>
-      <div className="small muted">C-Life 学前大课堂</div>
+      <div className="small muted">{brand.region ? brand.region + ' · ' : ''}{brand.name}</div>
       <div style={{ fontSize: 26, fontWeight: 700, margin: '14px 0 6px' }}>{c.label}</div>
       <div style={{ fontSize: 18, marginTop: 18 }}>{c.name}{c.orgName ? <span className="small muted">（{c.orgName}）</span> : null}</div>
       <div className="small" style={{ marginTop: 14, lineHeight: 1.7 }}>{c.kind === 'tool' ? '完成本岗位工具路径全部关卡，测验正确率不低于 80%。' : c.kind === 'domain' ? '完成本领域研修路径全部关卡，实践关作品全部通过点评。' : '三条领域研修证书、一份园本案例，并通过线下答辩。'}</div>
       <div className="small muted" style={{ marginTop: 18 }}>{fmtDay(c.at)}{c.byName ? ' · ' + c.byName + ' 签发' : ''} · 编号 {c.no}</div>
       <div className="small muted" style={{ marginTop: 4 }}>核验：大课堂「证书核验」输入编号，或 api/certificates/verify?no={c.no}</div>
+      {brand.credit && <div className="small muted" style={{ marginTop: 4 }}>{brand.credit}</div>}
     </div>
     <div className="small muted no-print" style={{ marginTop: 12 }}>证书只记级别与日期，不含分数；可随发展档案导出。继续教育学时认定按本地运营方与教育局的约定另出证明。</div>
   </div>

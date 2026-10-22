@@ -10,9 +10,11 @@ import { guestAllowed } from '../../lib/guest.js'
 import Icon from '../../components/Icon.jsx'
 import { Button, TextField } from '../../components/ui.jsx'
 import { ROLES } from '../../lib/lessons.js'
+import { useBrand } from '../brand.js'
 
 // relogin：服务端结束了会话，从 SyncBanner 回来重新登录；此时不给「先看看」，本地改动仍在。
 export default function Login({ relogin = false } = {}) {
+  const brand = useBrand()
   const nav = useNavigate(), loc = useLocation()
   const { setUser, adoptProfile, setGuest } = useStore()
   const config = useStore(s => s.config)
@@ -73,8 +75,8 @@ export default function Login({ relogin = false } = {}) {
   const wrap = { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '78vh', textAlign: 'center' }
   return <div className="narrow" style={wrap}>
     <div style={{ fontSize: 54, display: 'flex', justifyContent: 'center', color: 'var(--acc)' }}><Icon name="clipboard" /></div>
-    <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-.028em', margin: '10px 0 4px' }}>学前大课堂</h1>
-    <div className="muted" style={{ marginBottom: 30 }}>按岗位走关，在平台上做一次就算一次。</div>
+    <h1 style={{ fontSize: 34, fontWeight: 700, letterSpacing: '-.028em', margin: '10px 0 4px' }}>{brand.name}</h1>
+    <div className="muted" style={{ marginBottom: 30 }}>{brand.region ? brand.region + ' · ' : ''}{brand.tagline}</div>
     {relogin && <div className="card small" style={{ textAlign: 'start', marginBottom: 10 }}>登录已过期，请重新登录。这台设备上的进度还在，登上去会一并记到账号里。</div>}
 
     {auth.platform && <><Button variant="primary" icon="key" disabled={busy} onClick={toPlatform}>平台账号登录</Button><div style={{ height: 10 }} /></>}

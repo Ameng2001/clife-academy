@@ -10,8 +10,10 @@ import { useS, myPath, RoleSelect, fmtDay } from './common.jsx'
 import { useStore } from '../../store/useStore.js'
 import { useUI } from '../../store/useUI.js'
 import { fmtWhen } from './Lectures.jsx'
+import { useBrand } from '../brand.js'
 
 export default function Home() {
+  const brand = useBrand()
   const nav = useNavigate(), S = useS()
   const path = myPath(S)
   const sum = pathSummary(S.progress, path)
@@ -49,7 +51,7 @@ export default function Home() {
   useEffect(() => { if (user) api('/api/me/coach').then(r => setPlan(r.plan)).catch(() => setPlan(null)); else setPlan(null) }, [user?.id])
   return <div className="narrow wide">
     <div className="hdr">
-      <div><h1>学前大课堂</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
+      <div><h1>{brand.short}</h1><div className="sub">{orgName} · {d.getMonth() + 1} 月 {d.getDate()} 日</div></div>
       <div className="hdr-actions"><RoleSelect S={S} /><button className="iconbtn" onClick={() => nav('/settings')}><Icon name="gear" /></button></div>
     </div>
     <div className="home-grid"><div className="home-main">
