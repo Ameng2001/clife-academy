@@ -67,7 +67,7 @@ export default function Programs() {
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>建</Button></div></div>
     </div>}
     {data && !data.programs.length && <div className="card small muted">还没有期次。{data.canHost ? '点右上角「建期次」。' : ''}</div>}
-    {data?.programs.map(p => <Program key={p.id} p={p} onChange={load} />)}
+    <div className="grid2">{data?.programs.map(p => <Program key={p.id} p={p} onChange={load} />)}</div>
     <div className="small muted" style={{ marginTop: 10 }}>完成的期次按学时记进发展档案与学时证明。名单只给运营方与本人看，不公布谁没录取。</div>
   </div>
 }

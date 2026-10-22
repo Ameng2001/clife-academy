@@ -63,6 +63,6 @@ export default function ShareDays() {
       <div className="ac-row" style={{ marginTop: 10 }}><span /><div className="row" style={{ gap: 8 }}><Button size="sm" onClick={() => setForm(null)}>取消</Button><Button variant="primary" disabled={busy} onClick={save}>办</Button></div></div>
     </div>}
     {data && !data.sharedays.length && <div className="card small muted">还没有分享日。{data.communities.length ? '点右上角「办一场」。' : '区县管理员为共同体办了会在这里出现。'}</div>}
-    {data?.sharedays.map(s => <Day key={s.id} s={s} max={data.maxCases} onChange={load} />)}
+    <div className="grid2">{data?.sharedays.map(s => <Day key={s.id} s={s} max={data.maxCases} onChange={load} />)}</div>
   </div>
 }
