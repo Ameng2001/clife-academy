@@ -25,6 +25,7 @@ header#title-block-header p{font-family:var(--fs);font-size:16pt;line-height:28p
 #TOC a{color:#000;text-decoration:none}
 h1{font-family:var(--ht);font-size:16pt;font-weight:400;line-height:28pt;margin:14pt 0 0;color:#000;page-break-after:avoid;border:none;padding:0}
 h2{font-family:var(--kt);font-size:16pt;font-weight:400;line-height:28pt;margin:8pt 0 0;color:#000;page-break-after:avoid}
+h3{font-family:var(--ht);font-size:15pt;font-weight:400;line-height:28pt;margin:8pt 0 0;color:#000;page-break-after:avoid}
 p{margin:0;text-indent:2em;text-align:justify}
 strong{font-weight:700}
 ol,ul{margin:0;padding-left:2em}
@@ -38,8 +39,8 @@ td:first-child{white-space:nowrap}
 td p,th p{text-indent:0;text-align:left}
 pre{font-family:var(--fs);font-size:14pt;line-height:24pt;white-space:pre-wrap;margin:6pt 0 6pt 2em;background:none;border:none;padding:0}
 code{font-family:inherit}
-img{max-width:100%;display:block;margin:8pt auto}
-figure{margin:8pt 0}
+img{max-width:100%;max-height:150mm;display:block;margin:8pt auto;border:0.5pt solid #bbb}
+figure{margin:8pt 0;page-break-inside:avoid}
 figcaption{text-align:center;text-indent:0;font-family:var(--ht);font-size:14pt;line-height:24pt}
 hr{display:none}
 blockquote{margin:0;padding-left:1em;border-left:2px solid #000}
