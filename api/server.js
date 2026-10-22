@@ -24,6 +24,7 @@ import { createNotifier, notifyRoutes, notifyConfigured } from './academy/notify
 import { createPairs, pairRoutes } from './academy/pairs.js';
 import { resourceRoutes } from './academy/resources.js';
 import { caseRoutes } from './academy/cases.js';
+import { formRoutes } from './academy/forms.js';
 import { lectureRoutes } from './academy/lectures.js';
 import { drillRoutes } from './academy/drills.js';
 import { honorRoutes, createLedger } from './academy/honors.js';
@@ -2639,6 +2640,8 @@ const routes = {
   ...resourceRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile }),
   // 案例库（academy/cases.js）
   ...caseRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, MEDIA, sendMediaFile, ledger: LEDGER, communities: COMMUNITIES }),
+  // 轻形态（academy/forms.js）：案例的家长会课件、改前改后对比卡、条文记忆卡
+  ...formRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin }),
   ...LECTURES.routes,
   ...drillRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, notifier: NOTIFIER, pairs: PAIRS, ledger: LEDGER, communities: COMMUNITIES }),
   ...honorRoutes({ json, readBody, db, saveDb, readSession, audit, isAdmin, readStateCached, pairs: PAIRS, ledger: LEDGER }),

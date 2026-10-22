@@ -19,6 +19,7 @@ const EMPTY = { id: null, title: '', domain: 'obs', age: '', use: 'adapt', text:
 const dname = k => DOMAINS.find(d => d.key === k)?.name || k
 
 function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
+  const nav = useNavigate()
   const [useNote, setUseNote] = useState('')
   const [t, col] = STATUS[c.status] || [c.status, 'var(--label-2)']
   return <div className="card" style={{ marginTop: 10 }}>
@@ -32,6 +33,7 @@ function CaseCard({ c, uses, onOpen, open, actions, onUsed }) {
     {open && <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{c.text}</div>}
     {open && c.files?.length > 0 && <div className="ac-row" style={{ justifyContent: 'flex-start', marginTop: 10, flexWrap: 'wrap' }}>{c.files.map(f => <a key={f.hash} href={`api/cases/file?id=${c.id}&hash=${f.hash}`} target="_blank" rel="noreferrer"><img alt={f.name} src={`api/cases/file?id=${c.id}&hash=${f.hash}`} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} /></a>)}</div>}
     {c.note && (c.status === 'rejected' || c.mine) && <div className="small" style={{ marginTop: 8, color: 'var(--label-2)' }}>审核意见：{c.note}</div>}
+    {open && c.status === 'approved' && <div className="small tap" style={{ marginTop: 8, color: 'var(--acc)' }} onClick={e => { e.stopPropagation(); nav('/forms/' + c.id) }}><Icon name="sparkles" /> 拿来就用：家长会课件 · 改前改后对比卡 · 条文记忆卡 ›</div>}
     {open && c.curated && <div className="small muted" style={{ marginTop: 6 }}>{c.curated.byName} 于 {fmtDay(c.curated.at)} 入库{c.consent ? ` · ${c.consent.byName} 同意` : ''}</div>}
     {open && c.status === 'approved' && !c.mine && onUsed && <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
       {c.usedByMe ? <span className="small" style={{ color: 'var(--green)' }}><Icon name="checkCircle" /> 你标过「用过，有效」</span> : <><TextField placeholder="怎么改的，一句话（可不填）" value={useNote} onChange={e => setUseNote(e.target.value)} style={{ flex: 1, minWidth: 160 }} /><Button size="sm" icon="check" onClick={() => onUsed(c, useNote)}>用过，有效</Button></>}

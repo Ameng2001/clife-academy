@@ -24,6 +24,7 @@ import CapabilityMap from './views/CapabilityMap.jsx'
 import Resources from './views/Resources.jsx'
 import Cases from './views/Cases.jsx'
 import Lectures from './views/Lectures.jsx'
+import Forms from './views/Forms.jsx'
 import Drills from './views/Drills.jsx'
 import Honors from './views/Honors.jsx'
 import Contests from './views/Contests.jsx'
@@ -103,6 +104,7 @@ function Shell() {
           <Route path="/resources" element={<Resources />} />
           <Route path="/cases" element={<Cases />} />
           <Route path="/lectures" element={<Lectures />} />
+          <Route path="/forms/:caseId" element={<Forms />} />
           <Route path="/drills" element={<Drills />} />
           <Route path="/honors" element={<Honors />} />
           <Route path="/contests" element={<Contests />} />

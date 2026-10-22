@@ -4358,6 +4358,38 @@ paths:
       responses:
         '200': { description: '`{ clips:[{ id, lectureId, lecture, speaker, at, title, desc, start, replayUrl }] }`' }
 
+  /api/cases/forms:
+    get:
+      tags: [academy]
+      operationId: academyCaseForms
+      summary: 一条入库案例的轻形态（家长会课件、改前改后对比卡、条文记忆卡）
+      description: "`?caseId=`。登录可见；`canMake` 作者、审核人、管理员为真。"
+      responses:
+        '200': { description: '`{ forms:[{ id, caseId, kind, kindName, content, byName, at, updatedAt, model, canEdit, case }], kinds, canMake }`' }
+    post:
+      tags: [academy]
+      operationId: academyCaseFormSave
+      summary: 改定轻形态：`{ id, content }`；`{ id, remove:true }` 删
+      responses:
+        '200': { description: '`{ form }` 或 `{ ok }`' }
+        '400': { description: '`code: content` 结构不合这种形态' }
+  /api/cases/forms/draft:
+    post:
+      tags: [academy]
+      operationId: academyCaseFormDraft
+      summary: 从案例正文生成轻形态草稿并存：`{ caseId, kind: parents|transition|memo }`
+      description: 规则只搬案例里的句子，接了模型只改措辞不改结构。作者、审核人、管理员可做，只对已入库案例。
+      responses:
+        '200': { description: '`{ form }`' }
+        '403': { description: '`code: who`' }
+  /api/cases/forms/all:
+    get:
+      tags: [academy]
+      operationId: academyCaseFormsAll
+      summary: 全库轻形态清单：`?kind=` 可筛；案例库「拿来就用」用
+      responses:
+        '200': { description: '`{ forms, kinds }`' }
+
 components:
   securitySchemes:
     cookieAuth:
