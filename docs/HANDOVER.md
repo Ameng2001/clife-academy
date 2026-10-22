@@ -36,7 +36,7 @@ workshop-share/ 教研工坊「分享到幼师学坊」的参考实现，只放�
 mcp/            只读 MCP 桥，园长与教育局用自己的 LLM 客户端查看板
 web/            nginx，托前端、反代 /api
 scripts/        dev.sh / local.sh 本地启停；lessons-source.html 课程数据源，import-lessons.py 与 gen-mp-data.py 从它生成网页与小程序两份课程数据；mp-render.mjs 小程序页渲 html；两个工坊联调脚本
-docs/           见第十节文档索引；docs/proposal/ 方案正文、对客契约、继续教育学时说明、本移交文档的 Word 与 PDF、导出脚本
+docs/           见第十节文档索引；docs/proposal/ 三份对客契约、继续教育学时说明、微课样片、本移交文档的 Word 与 PDF、导出脚本
 data/           本地开发数据（db.json、state-<uid>.json、uploads/、audit.log、secret），不进 git
 ```
 
@@ -157,7 +157,7 @@ npm run check:workshop
 | `docs/KNOWLEDGE-TREE-DESIGN.md` | 教师发展树设计稿（未做，待定四件事） |
 | `docs/upstream/` | openGym 原文档 |
 | `mcp/README.md` | MCP 桥怎么接 |
-| `docs/proposal/` | 方案正文、三份契约的对客版、继续教育学时回填说明、微课样片、本文的 Word 与 PDF |
+| `docs/proposal/` | 三份契约的对客版、继续教育学时回填说明、微课样片、本文的 Word 与 PDF |
 | `workshop-share/` | 工坊分享到学坊的设计与参考实现 |
 
 ## 十一、现状与待办
