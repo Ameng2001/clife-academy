@@ -55,6 +55,7 @@ select.ac-sel,input.ac-sel{color-scheme:light dark;font:inherit;font-size:14px;b
   body #app{max-width:1200px;padding-top:calc(var(--conn) + 80px);padding-bottom:60px}
   #app .narrow{max-width:860px}
   #app .narrow.wide{max-width:1100px}
+  #app .tiles:has(> :nth-child(2):last-child){grid-template-columns:1fr 1fr}
   .home-grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
   .home-side>.card:first-child,.home-side>.sect:first-child{margin-top:0}
   .wide .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start;margin-top:10px}
