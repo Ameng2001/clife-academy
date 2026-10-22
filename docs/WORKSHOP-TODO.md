@@ -29,7 +29,7 @@
 
 | # | 待办 | 要点 | 验收 |
 |---|---|---|---|
-| 12 | 服务端接 `TOOLS_API_KEY` | 工坊服务端配学坊地址与密钥；账号统一登录，用同一个 `uid` | `GET /api/points/balance?uid=` 返回余额、园所额度与合计 |
+| 12 | 服务端接 `TOOLS_API_KEY` | 工坊服务端配学坊地址与密钥（只放服务端，不进前端、不进日志）；接上先调 `GET /api/tools/ping` 握手，拿到学坊名、认的 tool、`uid.accepts`。**uid 传平台账号的 uid 就行**（统一登录，学坊按 `user.platform.uid` 找人），也认学坊自己的 `user.id`；应答里 `uid` 是学坊 id、`platformUid` 是平台 uid。找不到人答 `404 uid`：这位教师还没登过学坊，工坊提示「先用平台账号登一次幼师学坊」 | `ping` 答 `ok:true`；`GET /api/points/balance?uid=<平台 uid>` 返回余额、园所额度与合计。学坊联调脚本第 0 步验握手：`node scripts/workshop-spend-check.mjs --uid <平台 uid>` |
 | 13 | 按管线扣减 | 起草确认那一步调 `POST /api/points/spend { uid, tool: 'workshop', n, ref, note }`。建议价：主题式 30 / 周、项目式 40 / 周、单节活动 10；`ref` 用课程 id 加阶段（如 `course:1522:draft`），同一 `ref` 重复调用不再扣。学坊先扣园所额度再扣个人积分，应答 `fromQuota / fromPoints`。余额不够答 `409 insufficient`，工坊提示「积分不够：去幼师学坊学几关，或请园长分配园所额度」 | 学坊流水里出现 tool 为教研工坊的扣减。学坊给了联调脚本：`ACADEMY_URL=<学坊测试环境> TOOLS_API_KEY=<密钥> node scripts/workshop-spend-check.mjs --uid <测试教师 uid>`，查余额、扣减、重复 ref、超额 409、字段校验、流水一遍跑完打 PASS；`--price pbl 4 --adapted` 只算价，`priceOf()` 是算价的参考实现 |
 | 14 | 改编半价 | `?from=` 开的课按原价 5 折扣 | 流水 note 写「改编自《…》 5 折」 |
 | 15 | 钱包页两行 | 工坊个人页的钱包：`GET /api/points/of?uid=`（带密钥）一次取齐：`points` 与 `quota.left` 两行余额（「积分 N」「园所额度 N · 来自 quota.orgName」）；`sections` 四栏小计按顺序渲染（学与贡献 / 互动 / 工具扣减 / 教学物料商城，各带 label、n、count）；`history[]` 每笔带 `group`（归哪一栏）、`tool`（显示名）、`note`、`n`（正入负出）、`at`，`sub === 'quota'` 的是从园所额度扣的，前面标「园所额度」；`links.mall` 就是「换教学物料」入口地址（`mallHint` 是按钮文案）。**不做**充值、转赠、排行，也不自己算余额 | 教师在工坊看到的余额与学坊「我的」一致（同一份算法）。学坊联调脚本第 9 步把这几项都验了：`node scripts/workshop-spend-check.mjs --uid <uid>` |
@@ -42,6 +42,6 @@
 
 ## 五、联调要的东西
 
-- 学坊测试环境地址与一枚投稿令牌（学坊侧出）；`TOOLS_API_KEY`（学坊运维出，只给工坊服务端）。
+- 学坊测试环境地址与一枚投稿令牌（学坊侧出）；`TOOLS_API_KEY`（学坊运维出，只给工坊服务端）。学坊运维发密钥的做法：`openssl rand -hex 32` 生成，写进学坊服务端环境变量 `TOOLS_API_KEY` 重启，用安全渠道交给工坊服务端一个人；换密钥就换环境变量重启，工坊同步换，旧的即刻失效；测试环境与正式环境各一枚。
 - 工坊给学坊：课程工作台地址格式、下载地址有效期、`courseId` 规则。
 - 测试账号：同一个 `uid` 在两边都能登录的教师账号一个、园长账号一个。

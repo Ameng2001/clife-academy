@@ -825,12 +825,22 @@ paths:
       responses:
         '200': { description: '`{ rules }`' }
         '400': { description: rate 不是 1–100 的整数 }
+  /api/tools/ping:
+    get:
+      tags: [academy]
+      operationId: academyToolsPing
+      summary: 工具服务端接密钥后的握手（TOOLS_API_KEY）
+      description: |
+        不带 uid、不动账。密钥对了答 `{ ok, academy {name, short, origin}, tools, groups, uid {accepts, note}, routes, rules, quota }`；
+        `uid.accepts` 含 `platform` 时，工具传平台账号的 uid 即可（统一登录，按 `user.platform.uid` 找人），也认学坊自己的 `user.id`。没配密钥 404 `off`，密钥不对 403 `tools-key`。
+      responses:
+        '200': { description: 握手信息 }
   /api/points/balance:
     get:
       tags: [academy]
       operationId: academyPointsBalance
       summary: 工具服务端查余额（TOOLS_API_KEY）
-      description: '`?uid=`。教研工坊、观察评价工具、贝果实验室的服务端带 `Authorization: Bearer <TOOLS_API_KEY>`。'
+      description: '`?uid=` 学坊 user.id 或平台账号 uid 都认（应答带 `uid` 与 `platformUid`）。教研工坊、观察评价工具、贝果实验室的服务端带 `Authorization: Bearer <TOOLS_API_KEY>`。'
       responses:
         '200': { description: '`{ uid, name, orgName, points }`' }
         '403': { description: 没带工具密钥 }

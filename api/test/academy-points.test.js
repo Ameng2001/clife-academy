@@ -7,6 +7,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { boundPort } from './helpers.mjs';
+import { toolUserOf } from '../academy/points.js';
 
 const API = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 async function startServer(t) {
@@ -38,6 +39,11 @@ test('points: library events land as points at the rules; tools spend idempotent
   // 工具端：没密钥不行；扣减幂等；不够答 409
   const key = { Authorization: 'Bearer tools-secret' };
   assert.equal((await call('GET', '/api/points/balance?uid=' + t1.id)).status, 403);
+  // 握手：密钥对了才答；说清认哪些 tool、uid 怎么传、三条路由
+  assert.equal((await call('GET', '/api/tools/ping')).status, 403);
+  r = await call('GET', '/api/tools/ping', null, key); assert.equal(r.status, 200); assert.equal(r.json.ok, true); assert.deepEqual(Object.keys(r.json.tools), ['workshop', 'observe', 'bagel']);
+  assert.deepEqual(r.json.uid.accepts, ['academy'], 'no platform login in tests'); assert.ok(r.json.routes.spend); assert.equal(r.json.rules.level, 10); assert.ok(r.json.academy.short);
+  assert.equal((await call('GET', '/api/points/balance?uid=nobody', null, key)).json.code, 'uid');
   r = await call('GET', '/api/points/balance?uid=' + t1.id, null, key); assert.equal(r.json.points, 20);
   r = await call('POST', '/api/points/spend', { uid: t1.id, tool: 'workshop', n: 15, ref: 'ws-lesson-42', note: '生成一份活动设计' }, key); assert.equal(r.status, 200); assert.equal(r.json.points, 5);
   r = await call('POST', '/api/points/spend', { uid: t1.id, tool: 'workshop', n: 15, ref: 'ws-lesson-42' }, key); assert.equal(r.json.duplicate, true); assert.equal(r.json.points, 5);
@@ -215,4 +221,14 @@ test('quota: admin tops up a kindergarten, the director allocates and recalls, t
   r = await call('POST', '/api/mall/items', { title: '绘本', desc: '一本', points: 25, scope: 'all', deliver: 'org' }, admin.auth); assert.equal(r.status, 200);
   r = await call('POST', '/api/mall/redeem', { id: r.json.item.id }, wang.auth); assert.equal(r.status, 409, 'mall ignores org quota');
   r = await call('GET', '/api/me/points', null, wang.auth); assert.equal(r.json.points, 10); assert.equal(r.json.quota.left, 20);
+});
+
+test('toolUserOf: a tool may pass the academy user.id or the platform uid; disabled accounts and unknown ids give null', () => {
+  const db = { users: [{ id: 'a1', name: '甲', platform: { uid: 'P-100' } }, { id: 'a2', name: '乙', platform: { uid: 'P-200' }, disabled: true }, { id: 'a3', name: '丙' }] };
+  assert.equal(toolUserOf(db, 'a1').name, '甲');
+  assert.equal(toolUserOf(db, 'P-100').id, 'a1');
+  assert.equal(toolUserOf(db, 'a3').name, '丙');
+  assert.equal(toolUserOf(db, 'P-200'), null, 'disabled');
+  assert.equal(toolUserOf(db, 'a2'), null, 'disabled by academy id too');
+  assert.equal(toolUserOf(db, 'P-999'), null); assert.equal(toolUserOf(db, ''), null); assert.equal(toolUserOf(db, undefined), null);
 });

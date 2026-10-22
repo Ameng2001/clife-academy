@@ -4,7 +4,7 @@
  * 给工坊服务端的同学用：对着学坊测试环境把「查余额 → 按管线扣减 → 重复调用不再扣 → 不够答 409 → 园所额度先扣 → 改编半价」跑一遍，
  * 每步打印请求、应答与判定，最后一行 PASS / FAIL。扣掉的积分只在测试账号上。
  *
- *   ACADEMY_URL=https://xueshe.example.cn TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --uid <教师 uid>
+ *   ACADEMY_URL=https://xueshe.example.cn TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --uid <教师 uid>   # uid 传平台账号的 uid（统一登录）或学坊的 user.id 都行
  *   ACADEMY_URL=http://127.0.0.1:3000 TOOLS_API_KEY=… node scripts/workshop-spend-check.mjs --dev 联调老师 [--admin 赵园长]   # 本机开发桩：建账号、推 3 关攒 30 分；--admin 是本机 db 里的管理员，用来充园所额度
  *   node scripts/workshop-spend-check.mjs --price theme 3            # 只算价：主题式 3 周
  *
@@ -68,8 +68,14 @@ if (!uid) { console.error('给 --uid <教师 uid>，或本机开发桩用 --dev 
 
 console.log(`\n学坊 ${BASE} · 教师 ${uid}\n`);
 
+// 0. 握手（待办第 12 条）：密钥对不对、学坊叫什么、uid 怎么传
+let r = await call('GET', '/api/tools/ping', null, tools);
+check('0 握手 /api/tools/ping 200，ok:true，认 workshop', r.status === 200 && r.json?.ok === true && r.json.tools?.workshop === '教研工坊', r.json ? `${r.json.academy?.short} · uid 认 ${r.json.uid?.accepts?.join(' / ')}` : '');
+if (r.status === 404) console.log('  学坊没配 TOOLS_API_KEY，工具接口关着；先让学坊运维配上再联调');
+if (r.status === 403) console.log('  密钥不对：核对 TOOLS_API_KEY 是不是学坊运维给的那一枚');
+
 // 1. 没密钥不行
-let r = await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`);
+r = await call('GET', `/api/points/balance?uid=${encodeURIComponent(uid)}`);
 check('1 没带 TOOLS_API_KEY 答 403', r.status === 403);
 
 // 2. 查余额：points 个人积分、quota 园所额度、total 合计

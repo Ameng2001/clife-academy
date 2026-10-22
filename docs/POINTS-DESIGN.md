@@ -62,7 +62,7 @@
 
 ## 三、花：两个去处
 
-**1. 工具额度（已有）**：接入的工具服务端带 `TOOLS_API_KEY` 调 `POST /api/points/spend`，按 (tool, ref) 幂等扣减。工坊按课程起草扣，建议价：
+**1. 工具额度（已有）**：接入的工具服务端带 `TOOLS_API_KEY` 调 `POST /api/points/spend`，按 (tool, ref) 幂等扣减。接上先 `GET /api/tools/ping` 握手（夜 71）；`uid` 传平台账号的 uid 或学坊 `user.id` 都认（统一登录，`toolUserOf`）。工坊按课程起草扣，建议价：
 
 | 工具 | 事 | 积分 |
 |---|---|---|

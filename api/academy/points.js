@@ -14,12 +14,19 @@
  *
  * db.points: { uid, kind:'earn'|'interact'|'spend'|'refund'|'exchange'(旧), n(正为入、负为出), sub?, ref?, about?, levels?, tool?, note, at } */
 import { orgKeyOf } from './org.js';
+import { brandOf } from './brand.js';
+import { platformConfigured } from '../auth/platform.js';
 
 const TOOLS_KEY = (process.env.TOOLS_API_KEY || '').trim();
 export const TOOLS = Object.freeze({ workshop: '教研工坊', observe: '观察评价工具', bagel: '贝果实验室' });
 const TOOL_LABEL = { ...TOOLS, mall: '教学物料商城' };
 // 钱包页的四栏（工坊钱包页按这个分组显示，docs/WORKSHOP-TODO.md 第 15 条）：学与贡献、互动、工具扣减、商城
 export const GROUPS = Object.freeze({ learn: '学与贡献', interact: '互动', tool: '工具扣减', mall: '教学物料商城' });
+/** 工具服务端传来的 uid：先当学坊自己的 user.id 找；找不到再当平台账号的 uid（统一登录，user.platform.uid）找。停用的账号不认。 */
+export const toolUserOf = (db, uid) => {
+  const id = String(uid || ''); if (!id) return null;
+  return db.users.find(x => x.id === id && !x.disabled) || db.users.find(x => x.platform?.uid === id && !x.disabled) || null;
+};
 export const groupOf = p => p.kind === 'interact' ? 'interact' : p.tool === 'mall' ? 'mall' : (p.kind === 'spend' && p.tool) ? 'tool' : 'learn';
 // 学与贡献：事件 → 默认积分。键就是 ledger.grant 的 kind；level 是客户端的过关
 export const EARN = Object.freeze({
@@ -107,7 +114,7 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   const wallet = uid => {
     const u = db.users.find(x => x.id === uid), hist = history(uid).map(pubRow);
     const sections = Object.entries(GROUPS).map(([key, label]) => ({ key, label, n: hist.filter(h => h.group === key).reduce((s, h) => s + h.n, 0), count: hist.filter(h => h.group === key).length }));
-    return { uid, name: u?.name || null, ...summary(uid), sections, history: hist, links: { mall: base + '/#/mall', honors: base + '/#/honors', rules: base + '/#/honors' }, mallHint: '换教学物料' };
+    return { uid, platformUid: u?.platform?.uid || null, name: u?.name || null, ...summary(uid), sections, history: hist, links: { mall: base + '/#/mall', honors: base + '/#/honors', rules: base + '/#/honors' }, mallHint: '换教学物料' };
   };
   // 流水：个人积分的每一笔，加上从园所额度扣的（在 orgQuotaLog 里，sub 标 quota），按时间倒序
   const history = uid => [...rows(uid), ...(quota ? quota.ofUser(uid).filter(r => r.kind === 'spend').map(r => ({ kind: 'spend', sub: 'quota', n: -r.n, tool: r.tool, note: r.note, at: r.at })) : [])].sort((a, b) => b.at - a.at);
@@ -120,23 +127,36 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
     if (!user) return json(res, 401, { error: 'not signed in' });
     json(res, 200, { ...summary(user.id), history: history(user.id).slice(0, 100).map(pubRow) });
   },
+  // 工具服务端接密钥后的握手（docs/WORKSHOP-TODO.md 第 12 条）：密钥对不对、学坊叫什么、认哪几个 tool、uid 怎么传。不带 uid、不动账。
+  'GET /api/tools/ping': async (req, res) => {
+    if (!TOOLS_KEY) return json(res, 404, { error: 'tools api is off (TOOLS_API_KEY not set)', code: 'off' });
+    if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
+    const b = brandOf(db);
+    json(res, 200, {
+      ok: true, academy: { name: b.name, short: b.short, origin: base },
+      tools: TOOLS, groups: GROUPS,
+      uid: { accepts: platformConfigured() ? ['academy', 'platform'] : ['academy'], note: platformConfigured() ? '统一登录：uid 传平台账号的 uid 即可，学坊按 user.platform.uid 找人；也认学坊自己的 user.id' : '这套学坊没接平台登录，uid 只认学坊自己的 user.id' },
+      routes: { balance: 'GET /api/points/balance?uid=', spend: 'POST /api/points/spend', wallet: 'GET /api/points/of?uid=' },
+      rules: rules().earn, quota: !!quota
+    });
+  },
   // 工具服务端查余额：?uid=   （TOOLS_API_KEY）
   'GET /api/points/balance': async (req, res) => {
     if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
-    const uid = new URL(req.url, 'http://x').searchParams.get('uid') || '';
-    const u = db.users.find(x => x.id === uid);
-    if (!u) return json(res, 404, { error: 'no such user' });
-    settle(uid);
+    const u = toolUserOf(db, new URL(req.url, 'http://x').searchParams.get('uid'));
+    if (!u) return json(res, 404, { error: 'no such user', code: 'uid' });
+    const uid = u.id; settle(uid);
     const q = quotaOf(uid);
-    json(res, 200, { uid, name: u.name, orgName: q.orgName, points: balance(uid), quota: q.left, total: balance(uid) + q.left });
+    json(res, 200, { uid, platformUid: u.platform?.uid || null, name: u.name, orgName: q.orgName, points: balance(uid), quota: q.left, total: balance(uid) + q.left });
   },
   // 工具服务端扣减：{ uid, tool, n(正整数), ref, note }。余额不够答 409；同一 (tool, ref) 重复调用答已扣过、不再扣。
   'POST /api/points/spend': async (req, res) => {
     if (!toolAuth(req)) return json(res, 403, { error: 'tools key required', code: 'tools-key' });
     const body = await readBody(req);
-    const uid = String(body.uid || ''), tool = TOOLS[body.tool] ? body.tool : null, n = Math.floor(Number(body.n)), ref = str(body.ref, 120);
-    const u = db.users.find(x => x.id === uid);
-    if (!u) return json(res, 404, { error: 'no such user' });
+    const tool = TOOLS[body.tool] ? body.tool : null, n = Math.floor(Number(body.n)), ref = str(body.ref, 120);
+    const u = toolUserOf(db, body.uid);
+    if (!u) return json(res, 404, { error: 'no such user', code: 'uid' });
+    const uid = u.id;
     if (!tool) return json(res, 400, { error: 'tool must be one of ' + Object.keys(TOOLS).join(', '), code: 'tool' });
     if (!(n >= 1)) return json(res, 400, { error: 'n must be a positive integer', code: 'n' });
     if (!ref) return json(res, 400, { error: 'ref required (idempotency key)', code: 'ref' });
@@ -156,9 +176,9 @@ export function pointsRoutes({ json, readBody, db, saveDb, readSession, audit, i
   // 一个人的流水：管理员对账用；工坊的钱包页（钱包页与工坊统一，学坊不单独做）带 TOOLS_API_KEY 取。?uid=
   'GET /api/points/of': async (req, res) => {
     if (!toolAuth(req)) { if (!adminOnly(req, res)) return; }
-    const uid = new URL(req.url, 'http://x').searchParams.get('uid') || '';
-    if (!db.users.some(x => x.id === uid)) return json(res, 404, { error: 'no such user' });
-    json(res, 200, wallet(uid));
+    const u = toolUserOf(db, new URL(req.url, 'http://x').searchParams.get('uid'));
+    if (!u) return json(res, 404, { error: 'no such user', code: 'uid' });
+    json(res, 200, wallet(u.id));
   },
   // 规则（管理员）：GET 看；POST { earn?: {…}, interact?: {…} } 改，学与贡献 0–1000、互动 0–100，0 是不给；只影响之后的
   'GET /api/admin/points/rules': async (req, res) => {
